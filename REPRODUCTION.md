@@ -42,7 +42,7 @@ of them from that cache and refuses to invent one it does not have.
 ```bash
 make repos      # clone the target repositories        (~5 min, ~400 MB)
 make validate   # build sandbox images, re-verify cases (~25 min first time)
-make replay     # re-run all six variants from cache    (see timings below)
+make replay     # re-run every variant from cache        (see timings below)
 ```
 
 `make replay` writes `results/eval_*.json` and regenerates `results/REPORT.md`.
@@ -80,7 +80,7 @@ What each step does, and what you should see:
   to confirm your Docker environment matches the one the results were produced
   in: if the harness cannot validate the maintainers' own tests, nothing
   downstream is meaningful.
-- **`make replay`** runs the six variants over the evaluation split, scoring each
+- **`make replay`** runs every variant over the evaluation split, scoring each
   generated test against the real fix commit.
 
 If replay stops with `OfflineCacheMiss`, the cache does not contain that exact
@@ -100,8 +100,8 @@ chmod 600 ~/.config/openrouter/key
 
 ```bash
 make baseline    # b0 and b1
-make solution    # the full solver, s4
-make eval        # all six variants, then rebuild the report
+make solution    # the final systems, s5 and s6
+make eval        # every variant, then rebuild the report
 ```
 
 Override the model with `MODEL=`, and the split with `SPLIT=dev` or `SPLIT=all`:
@@ -128,8 +128,8 @@ The run recorded in the solution video:
 
 ```bash
 make demo                                   # first case of the eval split
-python3 -m reprobot.demo --case-id tomlkit__562
-python3 -m reprobot.demo --case-id tomlkit__562 --approve
+python3 -m reprobot.demo --case-id click__2817
+python3 -m reprobot.demo --case-id click__2817 --approve
 ```
 
 It prints the bug report, each repair round with the verifier's verdict, the
@@ -165,8 +165,8 @@ Measured on an 8-core Linux host, Docker 29.7.2, from a cold start.
 | `make repos` | 4–6 min | free |
 | `make validate` (first run, includes image builds) | 25–40 min | free |
 | `make validate` (images already built) | 10–20 min | free |
-| `make replay` (all six variants) | 20–35 min | **$0** |
-| `make eval` live (all six variants) | 30–50 min | see `results/REPORT.md` |
+| `make replay` (every variant) | 25–40 min | **$0** |
+| `make eval` live (every variant) | 60–90 min | see `results/REPORT.md` |
 | `make demo` (one case) | 30–90 s | fractions of a cent |
 
 Almost all of the wall clock is Docker, not the model: every attempt and every
@@ -186,6 +186,7 @@ reprobot/
   repo.py               read-only repository view, pinned at the buggy commit
   agents/cartographer.py  deterministic repo map (no model)
   agents/verifier.py    typed verdicts and the repair instruction for each
+  agents/memory.py      per-repository lessons carried across cases
   agents/solver.py      the full pipeline
   agents/baselines.py   B0 and B1
   agents/memory.py      per-repository lessons carried across cases

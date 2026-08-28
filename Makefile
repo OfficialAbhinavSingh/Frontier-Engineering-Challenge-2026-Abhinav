@@ -14,7 +14,7 @@ help:
 	@echo "  make validate    build sandbox images and keep only provable cases"
 	@echo "  make replay      reproduce every reported number from the shipped cache (no API key)"
 	@echo "  make baseline    run both baselines live          (needs OPENROUTER_API_KEY)"
-	@echo "  make solution    run the full solver live         (needs OPENROUTER_API_KEY)"
+	@echo "  make solution    run the final systems live       (needs OPENROUTER_API_KEY)"
 	@echo "  make eval        run every variant live           (needs OPENROUTER_API_KEY)"
 	@echo "  make report      rebuild results/REPORT.md from results/"
 	@echo "  make demo        run one case end to end, printing the trajectory"
@@ -48,7 +48,8 @@ validate:
 # is served from the committed cache, so this reproduces them exactly, offline.
 replay:
 	REPROBOT_OFFLINE=1 $(PY) -m reprobot.eval.run \
-		--variant b0 --variant b1 --variant s1 --variant s2 --variant s3 --variant s4 \
+		--variant b0 --variant b1 --variant s1 --variant s2 --variant s3 \
+		--variant s4 --variant s5 --variant s6 --variant x1 \
 		--split $(SPLIT) --model $(MODEL) --out-dir results
 	$(MAKE) report
 
@@ -57,12 +58,13 @@ baseline:
 		--split $(SPLIT) --model $(MODEL) --out-dir results
 
 solution:
-	$(PY) -m reprobot.eval.run --variant s4 \
+	$(PY) -m reprobot.eval.run --variant s5 --variant s6 \
 		--split $(SPLIT) --model $(MODEL) --out-dir results
 
 eval:
 	$(PY) -m reprobot.eval.run \
-		--variant b0 --variant b1 --variant s1 --variant s2 --variant s3 --variant s4 \
+		--variant b0 --variant b1 --variant s1 --variant s2 --variant s3 \
+		--variant s4 --variant s5 --variant s6 --variant x1 \
 		--split $(SPLIT) --model $(MODEL) --out-dir results
 	$(MAKE) report
 
