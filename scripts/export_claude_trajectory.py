@@ -135,11 +135,11 @@ def render(turns: list[dict], max_chars: int) -> str:
                 step += 1
                 if event["type"] == "tool_use":
                     out.append(f"\n**Tool call {step} — `{event['name']}`**\n")
-                    out.append("```json\n" + clip(event["input"]) + "\n```\n")
+                    out.append("````json\n" + clip(event["input"]) + "\n````\n")
                 else:
                     flag = " (error)" if event.get("is_error") else ""
                     out.append(f"\n**Tool result {step}{flag}**\n")
-                    out.append("```\n" + clip(event.get("content") or "") + "\n```\n")
+                    out.append("````\n" + clip(event.get("content") or "") + "\n````\n")
     return "\n".join(out)
 
 

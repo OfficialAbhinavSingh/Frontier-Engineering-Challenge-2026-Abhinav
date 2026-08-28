@@ -91,30 +91,30 @@ def render_markdown(jsonl_path: Path | str, max_chars: int = 1600) -> str:
         kind, t = ev["kind"], ev["t"]
         if kind == "agent_prompt":
             lines.append(f"\n## [{t}s] agent `{ev['agent']}` — instructions\n")
-            lines.append("**System**\n\n```\n" + clip(ev["system"]) + "\n```\n")
-            lines.append("**User**\n\n```\n" + clip(ev["user"]) + "\n```")
+            lines.append("**System**\n\n````\n" + clip(ev["system"]) + "\n````\n")
+            lines.append("**User**\n\n````\n" + clip(ev["user"]) + "\n````")
         elif kind == "llm_response":
             src = "cache replay" if ev.get("from_cache") else "live"
             lines.append(f"\n### [{t}s] model reply to `{ev['agent']}` ({src})\n")
-            lines.append("```\n" + clip(ev["text"]) + "\n```")
+            lines.append("````\n" + clip(ev["text"]) + "\n````")
         elif kind == "tool_call":
             lines.append(f"\n### [{t}s] tool call `{ev['tool']}`\n")
-            lines.append("```json\n" + clip(ev["args"]) + "\n```")
+            lines.append("````json\n" + clip(ev["args"]) + "\n````")
         elif kind == "tool_result":
             lines.append(f"\n### [{t}s] tool result `{ev['tool']}`\n")
-            lines.append("```\n" + clip(ev["result"]) + "\n```")
+            lines.append("````\n" + clip(ev["result"]) + "\n````")
         elif kind == "verdict":
             lines.append(
                 f"\n### [{t}s] verifier verdict — round {ev['round']}: "
                 f"**{ev['outcome']}**\n"
             )
-            lines.append("```json\n" + clip(ev["detail"]) + "\n```")
+            lines.append("````json\n" + clip(ev["detail"]) + "\n````")
         elif kind == "human_checkpoint":
             lines.append(f"\n### [{t}s] human checkpoint — `{ev['name']}`\n")
-            lines.append("```json\n" + clip(ev["detail"]) + "\n```")
+            lines.append("````json\n" + clip(ev["detail"]) + "\n````")
         elif kind == "run_end":
             lines.append(f"\n## [{t}s] run finished ({ev['wall_clock_s']}s)\n")
-            lines.append("```json\n" + clip(ev["result"]) + "\n```")
+            lines.append("````json\n" + clip(ev["result"]) + "\n````")
     return "\n".join(lines) + "\n"
 
 
