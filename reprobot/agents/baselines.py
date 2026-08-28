@@ -39,12 +39,16 @@ bug described in the issue, and that would PASS once the bug is fixed.
 You have these tools:
 {tools}
 
+Work before you answer. Read the source you are testing so you use its real API,
+and run your test with run_test to see what it actually does. You must run your
+test at least once before you finish.
+
 Reply with a single JSON object and nothing else. Either call a tool:
   {{"thought": "...", "tool": "<name>", "args": {{...}}}}
 or finish:
   {{"thought": "...", "final_test": "<complete python file source>"}}
 
-You have at most {max_steps} steps. Use them as you see fit."""
+You have at most {max_steps} steps and {max_test_runs} test runs."""
 
 
 def run_b0(case: dict, view: RepoView, client: LLMClient, trace: Trace) -> dict:
@@ -87,7 +91,8 @@ def run_b1(case: dict, view: RepoView, client: LLMClient, trace: Trace,
         trace=trace,
         budget=budget,
     )
-    system = B1_SYSTEM.format(tools=tools.spec(), max_steps=budget.max_steps)
+    system = B1_SYSTEM.format(tools=tools.spec(), max_steps=budget.max_steps,
+                              max_test_runs=budget.max_test_runs)
     user = (
         f"{issue_block(case)}\n\n"
         f"The test file will be saved as {test_rel_path}.\n"
@@ -101,12 +106,15 @@ def run_b1(case: dict, view: RepoView, client: LLMClient, trace: Trace,
     ]
     last_test = ""
     steps = 0
+    pushed_back = False
+    last_reply = ""
 
     for step in range(budget.max_steps):
         steps = step + 1
         reply = client.chat(messages)
         trace.llm_reply("b1", reply.text, reply.usage.to_dict(), reply.from_cache)
         messages.append({"role": "assistant", "content": reply.text})
+        last_reply = reply.text
 
         action = parse_json_object(reply.text)
         if action is None:
@@ -120,7 +128,22 @@ def run_b1(case: dict, view: RepoView, client: LLMClient, trace: Trace,
             continue
 
         if "final_test" in action:
-            last_test = extract_code(action["final_test"])
+            candidate = extract_code(action["final_test"])
+            # Left to itself the agent answers on step one and never touches a
+            # tool, which quietly turns this baseline into the no-tools one and
+            # makes any comparison against it meaningless. It is pushed back
+            # exactly once; after that its answer stands, so it can still finish.
+            if tools.test_runs == 0 and not pushed_back:
+                pushed_back = True
+                last_test = candidate
+                messages.append({
+                    "role": "user",
+                    "content": "You have not run your test yet. Call run_test with "
+                               "this source and look at what pytest actually says "
+                               "before you finish.",
+                })
+                continue
+            last_test = candidate
             break
 
         tool_name = action.get("tool")
@@ -136,6 +159,12 @@ def run_b1(case: dict, view: RepoView, client: LLMClient, trace: Trace,
             last_test = extract_code(args["source"])
         result = tools.call(tool_name, args)
         messages.append({"role": "user", "content": f"Tool result:\n{result}"})
+
+    # An agent that spent its whole budget without ever emitting final_test still
+    # usually wrote a test somewhere. Scoring it as an empty submission would
+    # understate the baseline rather than measure it.
+    if not last_test.strip() and last_reply:
+        last_test = extract_code(last_reply)
 
     return {
         "test_source": last_test,
