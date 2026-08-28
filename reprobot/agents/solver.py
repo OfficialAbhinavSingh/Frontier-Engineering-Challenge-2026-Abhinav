@@ -37,7 +37,13 @@ from reprobot.agents.common import (
     test_path_for,
 )
 from reprobot.agents.memory import RepoMemory
-from reprobot.agents.verifier import repair_instruction, verify, verify_with_model
+from reprobot.agents.verifier import (
+    Verdict,
+    overspecification,
+    repair_instruction,
+    verify,
+    verify_with_model,
+)
 from reprobot.llm.client import LLMClient
 from reprobot.repo import RepoView
 from reprobot.trace import Trace
@@ -70,6 +76,22 @@ Rules that decide whether your test is any good:
 
 Reply with one Python code block containing the complete file, and nothing else."""
 
+# The minimal-claim rules, added after measuring why generated tests failed at the
+# fix commit. They did not miss the bug -- they caught it and a great deal else.
+MINIMAL_CLAIM_RULES = """
+Assert as little as possible:
+- Write ONE assertion. If you genuinely need two, you probably need one.
+- Assert only what the reporter actually claims. Never assert exact help text,
+  error wording, formatting or whitespace unless the report quotes it verbatim.
+- If the report says something raises, assert that it stops raising. Do not also
+  assert what it returns.
+- Do not assert a round-trip or a pretty-printed form unless the report shows
+  that exact output.
+
+A test that checks the one reported symptom passes once the bug is fixed. A test
+that also checks five details you invented keeps failing forever, and is worth
+nothing to the maintainer."""
+
 
 @dataclass
 class SolverConfig:
@@ -82,6 +104,9 @@ class SolverConfig:
     # The removed experiment: judge the run with a model instead of reading the
     # traceback. Kept switchable so the claim that it lost stays checkable.
     use_llm_verdict: bool = False
+    # Authored under the minimal-claim rules, and over-specified tests are sent
+    # back for repair instead of being accepted as reproductions.
+    use_minimal_claim: bool = False
     max_rounds: int = 3
     budget: Budget = field(default_factory=Budget)
 
@@ -193,9 +218,10 @@ def solve(case: dict, view: RepoView, client: LLMClient, trace: Trace,
     for round_no in range(1, cfg.max_rounds + 1):
         user = _author_prompt(case, view, located, repo_map, memory, cfg,
                               test_rel_path, feedback, previous)
-        trace.agent_start(f"author.round{round_no}", AUTHOR_SYSTEM, user)
+        system = AUTHOR_SYSTEM + (MINIMAL_CLAIM_RULES if cfg.use_minimal_claim else "")
+        trace.agent_start(f"author.round{round_no}", system, user)
         reply = client.chat(
-            [{"role": "system", "content": AUTHOR_SYSTEM},
+            [{"role": "system", "content": system},
              {"role": "user", "content": user}],
         )
         trace.llm_reply(f"author.round{round_no}", reply.text,
@@ -219,6 +245,24 @@ def solve(case: dict, view: RepoView, client: LLMClient, trace: Trace,
             )
         else:
             verdict = verify(run, test_rel_path)
+
+        # A reproduction that asserts things the report never claimed will fail
+        # at the fix commit as well, which scores zero. That is visible here,
+        # without looking at the fix.
+        if cfg.use_minimal_claim and verdict.reproduces:
+            evidence = overspecification(source, issue_text)
+            if evidence:
+                verdict = Verdict(
+                    "overspecified", verdict.exception_type,
+                    verdict.source_frames, verdict.test_frames,
+                    f"the test failed, but it makes {evidence['assertions']} "
+                    f"assertions and {len(evidence['ungrounded_literals'])} of them "
+                    f"rest on text the report never contains, so it will keep "
+                    f"failing after the bug is fixed",
+                    verdict.run,
+                )
+                trace.event("overspecification", **evidence)
+
         final_verdict = verdict
         trace.verdict(round_no, verdict.verdict, verdict.to_dict())
 

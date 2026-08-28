@@ -21,6 +21,7 @@ from reprobot.agents.common import (
     extract_code,
     issue_block,
     parse_json_object,
+    recover_final_test,
     test_path_for,
 )
 from reprobot.llm.client import LLMClient
@@ -118,14 +119,21 @@ def run_b1(case: dict, view: RepoView, client: LLMClient, trace: Trace,
 
         action = parse_json_object(reply.text)
         if action is None:
-            # A cheap model will occasionally answer in prose. Treat that as a
-            # malformed action and say so, rather than silently ending the run.
-            messages.append({
-                "role": "user",
-                "content": "That was not a JSON object. Reply with exactly one JSON "
-                           "object: either a tool call or final_test.",
-            })
-            continue
+            # Before treating this as a protocol violation, try to recover a test
+            # from it. A reply that contains a complete test but breaks JSON on a
+            # newline is a formatting failure, not a failure to do the task, and
+            # scoring it as the latter would understate the baseline.
+            recovered = recover_final_test(reply.text)
+            if recovered:
+                action = {"final_test": recovered}
+            else:
+                messages.append({
+                    "role": "user",
+                    "content": "That was not a JSON object. Reply with exactly one "
+                               "JSON object: either a tool call or final_test. If "
+                               "your test contains newlines, escape them as \\n.",
+                })
+                continue
 
         if "final_test" in action:
             candidate = extract_code(action["final_test"])
@@ -164,7 +172,7 @@ def run_b1(case: dict, view: RepoView, client: LLMClient, trace: Trace,
     # usually wrote a test somewhere. Scoring it as an empty submission would
     # understate the baseline rather than measure it.
     if not last_test.strip() and last_reply:
-        last_test = extract_code(last_reply)
+        last_test = recover_final_test(last_reply) or extract_code(last_reply)
 
     return {
         "test_source": last_test,

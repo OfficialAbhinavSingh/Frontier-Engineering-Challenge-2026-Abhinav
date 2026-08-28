@@ -8,6 +8,7 @@ constant on purpose, and it lives here.
 
 from __future__ import annotations
 
+import ast
 import json
 import re
 from collections import Counter
@@ -21,17 +22,37 @@ from reprobot.trace import Trace
 CODE_FENCE = re.compile(r"```(?:python|py)?\s*\n(.*?)```", re.S)
 
 
-def extract_code(text: str) -> str:
-    """Pull a test file out of a model reply.
+def looks_like_python_test(block: str) -> bool:
+    """Whether a fenced block is plausibly the test file rather than something else."""
+    if "def test" not in block and "import " not in block:
+        return False
+    try:
+        ast.parse(block)
+    except SyntaxError:
+        return False
+    return True
 
-    Models wrap code in fences most of the time and prose around it some of the
-    time. Taking the longest fenced block is more reliable than taking the first,
-    because explanatory snippets tend to be short and the real file tends to be
-    long.
+
+def pick_code_block(blocks: list[str]) -> str | None:
+    """Choose the block that is actually a test file.
+
+    Taking the longest block outright is wrong: agents quote the pytest output
+    back inside a fence, and that transcript is often longer than the test. One
+    baseline run submitted a pytest failure report as its test file because of
+    exactly that. Prefer blocks that parse as Python and look like a test, and
+    only fall back to raw length when none do.
     """
-    blocks = CODE_FENCE.findall(text or "")
-    if blocks:
-        return max(blocks, key=len).strip() + "\n"
+    if not blocks:
+        return None
+    plausible = [b for b in blocks if looks_like_python_test(b)]
+    return max(plausible or blocks, key=len).strip() + "\n"
+
+
+def extract_code(text: str) -> str:
+    """Pull a test file out of a model reply."""
+    picked = pick_code_block(CODE_FENCE.findall(text or ""))
+    if picked is not None:
+        return picked
     return (text or "").strip() + "\n"
 
 
@@ -142,6 +163,36 @@ def format_run_result(result: RunResult) -> str:
         },
         indent=2,
     )
+
+
+FINAL_TEST_FIELD = re.compile(r'"final_test"\s*:\s*"(.*)"\s*[,}]', re.S)
+
+
+def recover_final_test(text: str) -> str | None:
+    """Recover a submitted test from a reply that is not valid JSON.
+
+    Models routinely emit {"final_test": "..."} with real newlines inside the
+    string, which is not valid JSON. Rejecting those replies does not measure the
+    agent, it measures the parser -- and it penalised the baseline for a protocol
+    the solver never has to use, since the solver's author agent answers with a
+    plain code block.
+    """
+    if not text:
+        return None
+
+    picked = pick_code_block(CODE_FENCE.findall(text))
+    if picked is not None:
+        return picked
+
+    match = FINAL_TEST_FIELD.search(text)
+    if match:
+        raw = match.group(1)
+        # Undo JSON string escaping by hand; the value itself is not parseable.
+        for escaped, plain in (("\\n", "\n"), ("\\t", "\t"),
+                               ('\\"', '"'), ("\\\\", "\\")):
+            raw = raw.replace(escaped, plain)
+        return raw.strip() + "\n"
+    return None
 
 
 def issue_block(case: dict) -> str:

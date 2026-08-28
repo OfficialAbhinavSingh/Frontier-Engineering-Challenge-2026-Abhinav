@@ -7,7 +7,7 @@ runs.
 
 from __future__ import annotations
 
-from reprobot.agents.common import extract_code, parse_json_object
+from reprobot.agents.common import extract_code, parse_json_object, recover_final_test
 from reprobot.dataset.mine import body_is_usable, is_python_source, is_test_file
 from reprobot.dataset.validate import added_test_names
 from reprobot.eval.run import split_cases
@@ -114,3 +114,38 @@ def test_json_is_recovered_from_a_reply_wrapped_in_prose():
     assert parse_json_object('Sure!\n```json\n{"a": 1}\n```') == {"a": 1}
     assert parse_json_object('{"a": [1, 2]}') == {"a": [1, 2]}
     assert parse_json_object("no json here") is None
+
+
+def test_a_quoted_pytest_transcript_is_not_mistaken_for_the_test():
+    """A baseline run submitted pytest output as its test file.
+
+    The transcript was quoted in a fence and was longer than the test, so
+    "longest block wins" picked it. That is a harness bug that shows up as an
+    agent failure, which is the worst kind.
+    """
+    reply = (
+        "Here is the test:\n"
+        "```python\nimport pytest\n\n\ndef test_thing():\n    assert 1 == 2\n```\n"
+        "And here is what it printed:\n"
+        "```\n============ test session starts ============\n"
+        "collected 1 item\n\ntest_x.py F     [100%]\n"
+        "=================== FAILURES ===================\n"
+        "_______________ test_thing _______________\n"
+        "    def test_thing():\n>       assert 1 == 2\nE   assert 1 == 2\n"
+        "============ 1 failed in 0.01s ============\n```\n"
+    )
+    code = extract_code(reply)
+    assert code.startswith("import pytest")
+    assert "test session starts" not in code
+
+
+def test_a_test_is_recovered_from_json_broken_by_real_newlines():
+    """Models emit final_test with literal newlines, which is invalid JSON.
+
+    Scoring that as a failure measures the parser, not the agent.
+    """
+    reply = '{"thought": "done", "final_test": "import pytest\ndef test_a():\n    assert False\n"}'
+    recovered = recover_final_test(reply)
+    assert recovered is not None
+    assert recovered.startswith("import pytest")
+    assert "def test_a" in recovered

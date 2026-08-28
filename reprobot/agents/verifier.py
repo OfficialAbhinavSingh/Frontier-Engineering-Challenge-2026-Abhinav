@@ -219,3 +219,105 @@ def verify_with_model(run: RunResult, test_rel_path: str, issue_text: str,
         run.exception_type, source_frames, test_frames,
         f"model verdict: {why}", run,
     )
+
+
+# --- Over-specification -----------------------------------------------------
+#
+# Measured on the development split: every case self-verified as reproduced on
+# the first attempt, and half of them still failed the Fail-to-Pass check. The
+# reason was not that they missed the bug. They caught the bug *and* a pile of
+# incidental detail -- invented help text, exact whitespace, a round-trip
+# equality the report never mentions -- so they failed at the fix commit too.
+#
+# That is detectable without ever seeing the fix. A test whose assertions rest
+# on strings the reporter never wrote is asserting the agent's imagination, and
+# a test with a dozen assertions is no longer a reproduction of one bug.
+
+MAX_REASONABLE_ASSERTIONS = 3
+MIN_INTERESTING_LITERAL = 12
+ASSERTION_HELPERS = ("validate_", "assert_", "check_")
+
+
+def _normalise(text: str) -> str:
+    return re.sub(r"\s+", " ", (text or "")).strip().lower()
+
+
+def assertion_profile(test_source: str) -> tuple[int, list[str]]:
+    """Count assertions and collect the string literals they depend on."""
+    import ast
+
+    try:
+        tree = ast.parse(test_source)
+    except SyntaxError:
+        return 0, []
+
+    count = 0
+    literals: list[str] = []
+
+    def collect(node) -> None:
+        for sub in ast.walk(node):
+            if isinstance(sub, ast.Constant) and isinstance(sub.value, str):
+                literals.append(sub.value)
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Assert):
+            count += 1
+            # Only the condition constrains behaviour. The message after the
+            # comma is documentation, and counting it would flag every
+            # well-written test that explains itself.
+            collect(node.test)
+        elif isinstance(node, ast.Call):
+            # Projects with table-driven suites assert through helpers rather
+            # than the assert statement, so those count too.
+            name = ""
+            if isinstance(node.func, ast.Attribute):
+                name = node.func.attr
+            elif isinstance(node.func, ast.Name):
+                name = node.func.id
+            if name.startswith(ASSERTION_HELPERS):
+                count += 1
+                collect(node)
+    return count, literals
+
+
+def ungrounded_literals(test_source: str, issue_text: str) -> list[str]:
+    """Asserted strings of real length that the reporter never wrote."""
+    _, literals = assertion_profile(test_source)
+    haystack = _normalise(issue_text)
+    out = []
+    for literal in literals:
+        norm = _normalise(literal)
+        if len(norm) < MIN_INTERESTING_LITERAL:
+            continue
+        if norm in haystack:
+            continue
+        if norm in out:
+            continue
+        out.append(norm)
+    return out
+
+
+def overspecification(test_source: str, issue_text: str) -> dict | None:
+    """Evidence that a test claims more than the report supports, or None."""
+    count, _ = assertion_profile(test_source)
+    ungrounded = ungrounded_literals(test_source, issue_text)
+    too_many = count > MAX_REASONABLE_ASSERTIONS
+    invented = len(ungrounded) >= 2
+    if not (too_many or invented):
+        return None
+    return {
+        "assertions": count,
+        "ungrounded_literals": ungrounded[:5],
+        "too_many": too_many,
+        "invented": invented,
+    }
+
+
+REPAIR_INSTRUCTIONS["overspecified"] = (
+    "Your test does fail, but it asserts more than the report actually claims, so "
+    "it will keep failing even after the bug is fixed. Cut it down to the single "
+    "smallest assertion that demonstrates the reported symptom. Do not assert exact "
+    "wording, help text, formatting or whitespace unless the report quotes that text "
+    "verbatim. If the report says something raises, assert that it no longer raises; "
+    "if it says a value is wrong, assert only that one value."
+)
