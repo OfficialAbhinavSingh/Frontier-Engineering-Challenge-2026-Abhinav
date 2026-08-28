@@ -1,118 +1,184 @@
 """Turn result files into the tables the report is built from.
 
-Two numbers matter beyond the headline rate.
+Three things are reported beyond the headline rate, because without them the
+headline is not interpretable.
 
-The first is cost: an improvement that triples spend is a trade, not a win, so
-every variant is reported with what it cost to run.
+**Range across repetitions.** Fourteen cases means one case is seven percentage
+points. A single run is one sample, and a variant has been observed moving by a
+full case from a harness change alone, so every repeated variant is reported as
+a mean with the range it actually spanned.
 
-The second is the self-verification error rate -- how often the agent believed it
-had reproduced the bug when the Fail-to-Pass check disagreed. That is the gap
-between "my test failed" and "my test reproduces the bug", and it is the number
-this project exists to shrink.
+**Cost.** An improvement that costs three times as much is a trade, not a win.
+
+**The self-verification gap.** How often the agent believed it had reproduced the
+bug when the Fail-to-Pass check disagreed. That is the distance between "my test
+failed" and "my test reproduces the bug", and it is the number this project
+exists to shrink.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
-from collections import Counter
+import re
+from collections import Counter, defaultdict
 from pathlib import Path
 
+ORDER = {"b0": 0, "b1": 1, "s1": 2, "s2": 3, "s3": 4, "s4": 5, "s5": 6,
+         "s6": 7, "x1": 8}
 
-def load(results_dir: Path, split: str) -> list[dict]:
-    out = []
+TAG = re.compile(r"_r\d+$")
+
+# Anything a reader must be told rather than left to infer from a table.
+FOOTNOTES = {
+    "s6": "Post-hoc. The blind spot this fixes was found on the evaluation "
+          "split, so this row is not a clean held-out result and is reported "
+          "separately from the pre-registered comparison.",
+    "x1": "Removed. Kept switchable so the claim can be re-run.",
+}
+
+
+def load(results_dir: Path, split: str) -> dict[str, list[dict]]:
+    """Group result files by variant, collecting repeated runs together."""
+    runs: dict[str, list[dict]] = defaultdict(list)
     for path in sorted(results_dir.glob(f"{split}_*.json")):
-        out.append(json.loads(path.read_text()))
-    # Report in pipeline order rather than alphabetically.
-    order = {"b0": 0, "b1": 1, "s1": 2, "s2": 3, "s3": 4, "s4": 5, "s5": 6, "s6": 7, "x1": 8}
-    return sorted(out, key=lambda s: order.get(s["variant"], 99))
+        data = json.loads(path.read_text())
+        base = TAG.sub("", data["variant"])
+        runs[base].append(data)
+    return dict(sorted(runs.items(), key=lambda kv: ORDER.get(kv[0], 99)))
 
 
-def headline_table(summaries: list[dict]) -> str:
+def _stats(entries: list[dict]) -> dict:
+    solved = [e["f2p_solved"] for e in entries]
+    n = entries[0]["n_cases"]
+    costs = [e["total_cost_usd"] for e in entries]
+    rounds = [r.get("rounds", 1) for e in entries for r in e["results"]]
+    return {
+        "runs": len(entries),
+        "n": n,
+        "mean": sum(solved) / len(solved),
+        "lo": min(solved),
+        "hi": max(solved),
+        "rate": (sum(solved) / len(solved)) / n if n else 0.0,
+        "cost": sum(costs) / len(costs),
+        "mean_rounds": sum(rounds) / len(rounds) if rounds else 0,
+        "desc": entries[0]["description"],
+    }
+
+
+def headline_table(runs: dict[str, list[dict]]) -> str:
     rows = [
-        "| Variant | What it is | F2P solved | F2P rate | Cost (USD) | Mean rounds | Mean wall clock |",
+        "| Variant | What it is | Runs | Fail-to-Pass | Rate | Cost/run | Mean rounds |",
         "| --- | --- | ---: | ---: | ---: | ---: | ---: |",
     ]
-    for s in summaries:
-        mean_rounds = (
-            sum(r.get("rounds", 1) for r in s["results"]) / len(s["results"])
-            if s["results"] else 0
-        )
+    for variant, entries in runs.items():
+        s = _stats(entries)
+        if s["runs"] > 1:
+            score = f"{s['mean']:.1f}/{s['n']} (range {s['lo']}-{s['hi']})"
+        else:
+            score = f"{s['mean']:.0f}/{s['n']}"
+        mark = " +" if variant in FOOTNOTES else ""
         rows.append(
-            f"| `{s['variant']}` | {s['description']} | "
-            f"{s['f2p_solved']}/{s['n_cases']} | {s['f2p_rate']:.0%} | "
-            f"${s['total_cost_usd']:.4f} | {mean_rounds:.1f} | "
-            f"{s['mean_wall_clock_s']:.0f}s |"
+            f"| `{variant}`{mark} | {s['desc']} | {s['runs']} | {score} | "
+            f"{s['rate']:.0%} | ${s['cost']:.4f} | {s['mean_rounds']:.1f} |"
         )
-    return "\n".join(rows)
+    notes = [f"\n**+ `{v}`** — {FOOTNOTES[v]}" for v in runs if v in FOOTNOTES]
+    return "\n".join(rows) + "\n" + "\n".join(notes)
 
 
-def per_case_matrix(summaries: list[dict]) -> str:
-    case_ids = sorted({r["case_id"] for s in summaries for r in s["results"]})
-    header = "| Case | " + " | ".join(f"`{s['variant']}`" for s in summaries) + " |"
-    sep = "| --- | " + " | ".join("---" for _ in summaries) + " |"
+def per_case_matrix(runs: dict[str, list[dict]]) -> str:
+    """First run of each variant, so the columns are directly comparable."""
+    firsts = {v: entries[0] for v, entries in runs.items()}
+    case_ids = sorted({r["case_id"] for e in firsts.values() for r in e["results"]})
+    header = "| Case | " + " | ".join(f"`{v}`" for v in firsts) + " |"
+    sep = "| --- | " + " | ".join("---" for _ in firsts) + " |"
     rows = [header, sep]
     for case_id in case_ids:
         cells = []
-        for s in summaries:
-            hit = next((r for r in s["results"] if r["case_id"] == case_id), None)
-            cells.append("—" if hit is None else ("**pass**" if hit["f2p"] else "fail"))
+        for entry in firsts.values():
+            hit = next((r for r in entry["results"] if r["case_id"] == case_id), None)
+            cells.append("—" if hit is None else ("**pass**" if hit["f2p"] else "·"))
         rows.append(f"| `{case_id}` | " + " | ".join(cells) + " |")
     return "\n".join(rows)
 
 
-def failure_breakdown(summary: dict) -> str:
-    reasons = Counter(
-        r["score_reason"].split(":")[0] if not r["f2p"] else "solved"
-        for r in summary["results"]
-    )
-    lines = [f"| Outcome | Cases |", "| --- | ---: |"]
+def failure_breakdown(entries: list[dict]) -> str:
+    reasons: Counter = Counter()
+    for entry in entries:
+        for r in entry["results"]:
+            reasons["solved" if r["f2p"] else r["score_reason"].split(":")[0]] += 1
+    total = sum(reasons.values())
+    lines = ["| Outcome | Cases | Share |", "| --- | ---: | ---: |"]
     for reason, count in reasons.most_common():
-        lines.append(f"| `{reason}` | {count} |")
+        lines.append(f"| `{reason}` | {count} | {count / total:.0%} |")
     return "\n".join(lines)
 
 
-def self_verification_gap(summaries: list[dict]) -> str:
-    """How often the agent's own verdict disagreed with the ground truth."""
+def self_verification_gap(runs: dict[str, list[dict]]) -> str:
     rows = [
-        "| Variant | Claimed reproduced | Of those, actually F2P | False-confidence rate |",
+        "| Variant | Claimed reproduced | Actually Fail-to-Pass | False-confidence rate |",
         "| --- | ---: | ---: | ---: |",
     ]
-    for s in summaries:
-        claimed = [r for r in s["results"] if r.get("self_reproduces")]
+    any_row = False
+    for variant, entries in runs.items():
+        claimed = [r for e in entries for r in e["results"] if r.get("self_reproduces")]
         if not claimed:
             continue
         correct = sum(1 for r in claimed if r["f2p"])
-        rate = 1 - (correct / len(claimed))
         rows.append(
-            f"| `{s['variant']}` | {len(claimed)} | {correct} | {rate:.0%} |"
+            f"| `{variant}` | {len(claimed)} | {correct} | "
+            f"{1 - correct / len(claimed):.0%} |"
         )
-    return "\n".join(rows) if len(rows) > 2 else "_No variant reported a self-verdict._"
+        any_row = True
+    return "\n".join(rows) if any_row else "_No variant reported a self-verdict._"
+
+
+def verdict_distribution(entries: list[dict]) -> str:
+    verdicts: Counter = Counter()
+    for entry in entries:
+        for r in entry["results"]:
+            for attempt in r.get("attempts") or []:
+                verdicts[attempt["verdict"]] += 1
+    if not verdicts:
+        return "_No verdicts recorded._"
+    total = sum(verdicts.values())
+    lines = ["| Verdict at the buggy commit | Attempts | Share |",
+             "| --- | ---: | ---: |"]
+    for verdict, count in verdicts.most_common():
+        lines.append(f"| `{verdict}` | {count} | {count / total:.0%} |")
+    return "\n".join(lines)
 
 
 def build(results_dir: Path, split: str) -> str:
-    summaries = load(results_dir, split)
-    if not summaries:
+    runs = load(results_dir, split)
+    if not runs:
         return f"No results found in {results_dir} for split '{split}'."
 
-    parts = [
+    first = next(iter(runs.values()))[0]
+    final = runs.get("s6") or runs.get("s5") or list(runs.values())[-1]
+
+    return "\n".join([
         f"# Results — `{split}` split\n",
-        f"Model: `{summaries[0]['model']}`. "
-        f"Cases: {summaries[0]['n_cases']}. "
+        f"Model: `{first['model']}`. Cases: {first['n_cases']}. "
         "Primary metric: Fail-to-Pass, measured in a sandbox against the real fix "
         "commit, with no model involved in scoring.\n",
         "## Headline comparison\n",
-        headline_table(summaries),
+        headline_table(runs),
         "\n## Per-case outcomes\n",
-        per_case_matrix(summaries),
+        "First run of each variant.\n",
+        per_case_matrix(runs),
+        "\n## What the verifier saw\n",
+        "Every attempt the final system made, classified at the buggy commit "
+        "with no access to the fix.\n",
+        verdict_distribution(final),
         "\n## Where the final system still fails\n",
-        failure_breakdown(summaries[-1]),
+        failure_breakdown(final),
         "\n## Self-verification gap\n",
         "The agent decides for itself whether it reproduced the bug. This is how "
         "often that judgement was wrong.\n",
-        self_verification_gap(summaries),
-    ]
-    return "\n".join(parts) + "\n"
+        self_verification_gap(runs),
+        "",
+    ])
 
 
 def main() -> None:
@@ -123,6 +189,7 @@ def main() -> None:
     args = ap.parse_args()
     text = build(Path(args.results_dir), args.split)
     if args.out:
+        Path(args.out).parent.mkdir(parents=True, exist_ok=True)
         Path(args.out).write_text(text)
         print(f"wrote {args.out}")
     else:
