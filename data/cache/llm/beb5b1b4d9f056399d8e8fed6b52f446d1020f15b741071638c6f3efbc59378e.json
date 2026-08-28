@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nfrom sqlglot import parse_one, exp\nfrom sqlglot.errors import ParseError\n\ndef test_mysql_create_table_auto_increment():\n    sql = \"\"\"CREATE TABLE t1(id INT KEY AUTO_INCREMENT);\"\"\"\n    expression = parse_one(sql, read=\"mysql\")\n    assert isinstance(expression, exp.Create)\n    assert expression.this.name == \"t1\"\n    column = expression.this.expressions[0]\n    assert column.name == \"id\"\n    assert isinstance(column.this, exp.DataType)\n    assert column.this.this == exp.DataType.Type.INT\n    assert any(isinstance(c, exp.PrimaryKey) for c in column.constraints)\n    assert any(isinstance(c, exp.AutoIncrement) for c in column.constraints)\n\n    sql_with_primary_key = \"\"\"CREATE TABLE t1(id INT PRIMARY KEY AUTO_INCREMENT);\"\"\"\n    expression_pk = parse_one(sql_with_primary_key, read=\"mysql\")\n    assert isinstance(expression_pk, exp.Create)\n    column_pk = expression_pk.this.expressions[0]\n    assert any(isinstance(c, exp.PrimaryKey) for c in column_pk.constraints)\n    assert any(isinstance(c, exp.AutoIncrement) for c in column_pk.constraints)\n\n```",
+  "usage": {
+    "prompt_tokens": 2569,
+    "completion_tokens": 315,
+    "cost_usd": 0.001558,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947674.8668144
+}

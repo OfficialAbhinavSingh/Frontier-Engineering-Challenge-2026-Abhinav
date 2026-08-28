@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The test run failed as expected, indicating that the `ParseError` is indeed raised. This means the test correctly identifies the bug. The goal is to create a test that *fails* at the current commit and *passes* once the bug is fixed. My current test does exactly that: it asserts that a `ParseError` is raised. When the bug is fixed, `parse_one` will succeed, and `pytest.raises(ParseError)` will fail, which is the desired behavior for a test that *passes* when the bug is fixed.\n\nTherefore, the current test is correct for the problem statement.\", \"final_test\": \"\\nimport pytest\\nimport sqlglot\\nfrom sqlglot.errors import ParseError\\n\\ndef test_mysql_create_table_auto_increment():\\n    sql = \\\"\\\"\\\"CREATE TABLE t1(id INT KEY AUTO_INCREMENT);\\\"\\\"\\\"\\n    # This test expects a ParseError to be raised at the buggy commit.\\n    # Once the bug is fixed, this test should pass without raising a ParseError.\\n    with pytest.raises(ParseError):\\n        sqlglot.parse_one(sql, read=\\\"mysql\\\")\\n\\n\"}",
+  "usage": {
+    "prompt_tokens": 2594,
+    "completion_tokens": 263,
+    "cost_usd": 0.00089,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947405.3313348
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\n\nimport tomlkit\n\n\ndef test_array_of_floats_to_list_conversion() -> None:\n    arr = tomlkit.loads(\n        \"\"\"\na = [1.0, 2.0, 3.0]\n\"\"\"\n    )\n\n    # The bug causes `arr['a']` to not behave like a list of floats,\n    # specifically when an external library like torch tries to iterate over it\n    # or determine its length.\n    # We assert that it can be converted to a standard Python list of floats.\n    # This conversion implicitly checks if the Array item can be iterated over\n    # and if its Float items can be unwrapped to native floats.\n    assert list(arr[\"a\"]) == [1.0, 2.0, 3.0]\n```",
+  "usage": {
+    "prompt_tokens": 3344,
+    "completion_tokens": 186,
+    "cost_usd": 0.001468,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787948154.1475444
+}

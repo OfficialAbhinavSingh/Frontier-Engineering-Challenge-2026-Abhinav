@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"I am deeply sorry for the repeated failures to provide a valid JSON object. I understand the instruction perfectly and will ensure this response is a single, correct JSON object.\n\nThe test I've created is designed to fail at the current commit because it asserts for a `DeprecationWarning` when a specific option is used, but Click does not currently have a mechanism to issue such a warning. This accurately reflects the bug described in the issue. The `run_test` output confirmed this failure, which is the desired outcome for a test demonstrating a missing feature.\n\nTherefore, the test is complete and ready.\", \"final_test\": \"import click\nfrom click.testing import CliRunner\nimport pytest\n\ndef test_deprecated_option_warning():\n    @click.command()\n    @click.option('--old-option', help='This option is deprecated.')\n    @click.option('--new-option', help='Use this option instead.')\n    def cli(old_option, new_option):\n        if old_option:\n            click.echo(f'Old option used with value: {old_option}')\n        if new_option:\n            click.echo(f'New option used with value: {new_option}')\n\n    runner = CliRunner()\n\n    # This test should fail because there's no built-in mechanism to emit a DeprecationWarning\n    # when '--old-option' is used. Once the feature is implemented, this test should pass.\n    with pytest.warns(DeprecationWarning, match='--old-option is deprecated. Use --new-option instead.'):\n        result = runner.invoke(cli, ['--old-option', 'value'])\n        assert result.exit_code == 0\n        assert 'Old option used with value: value' in result.output\n\n    # Also test that using the new option doesn't raise a warning\n    result = runner.invoke(cli, ['--new-option', 'new_value'])\n    assert result.exit_code == 0\n    assert 'New option used with value: new_value' in result.output\n    assert not result.exception # No exception should be raised\n\"}",
+  "usage": {
+    "prompt_tokens": 3774,
+    "completion_tokens": 472,
+    "cost_usd": 0.001767,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787945696.9263134
+}

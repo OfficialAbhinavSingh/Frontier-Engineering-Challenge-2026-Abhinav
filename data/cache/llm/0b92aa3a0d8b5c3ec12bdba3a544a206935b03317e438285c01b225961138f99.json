@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nfrom typing import Any\nfrom tomlkit import parse\nimport tomlkit\n\n\ndef test_rewrite_toml_data_adds_whitespace_line(tmp_path) -> None:\n    content = \"\"\"# xxx test\n\n\n[env.pro1.rst]\n    name = \"x7\"\n\n[env2]\n    name = 2\n\n[env3]\n    name = 3\n\"\"\"\n    file_path = tmp_path / \"test.toml\"\n    file_path.write_text(content)\n\n    def merge_dicts(a: dict, b: dict):\n        ret = a\n\n        for k, v in b.items():\n            if k in a and isinstance(a[k], (dict, tomlkit.toml_document.TOMLDocument, tomlkit.container.Container)):\n                ret[k] = merge_dicts(a[k], v)\n            else:\n                ret[k] = v\n        return ret\n\n    with open(file_path, \"r\") as f:\n        t = tomlkit.load(f)\n\n    t = merge_dicts(\n        t,\n        {'env': {'pro1': {'rst': {'name': \"x7\"}}}}\n    )\n\n    with open(file_path, \"w\") as f:\n        tomlkit.dump(t, f)\n\n    expected_content = \"\"\"# xxx test\n\n\n[env.pro1.rst]\n    name = \"x7\"\n\n[env2]\n    name = 2\n\n[env3]\n    name = 3\n\"\"\"\n    assert file_path.read_text() == expected_content\n\n```",
+  "usage": {
+    "prompt_tokens": 2833,
+    "completion_tokens": 377,
+    "cost_usd": 0.001792,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946448.5790474
+}

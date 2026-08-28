@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport os\nimport pytest\nimport click\nfrom click.testing import CliRunner\nimport warnings\n\n@pytest.fixture\ndef runner():\n    return CliRunner()\n\ndef test_file_option_resource_warning_on_completion(runner):\n    config_file_path = \"test_config.txt\"\n\n    @click.group()\n    @click.option(\n        \"--config_file\",\n        default=config_file_path,\n        type=click.File(mode=\"r\"),\n        help=\"help\",\n    )\n    def cli(config_file):\n        pass\n\n    # Create a dummy config file\n    with open(config_file_path, \"w\") as f:\n        f.write(\"test content\")\n\n    try:\n        # Simulate shell completion\n        env = {\n            \"SHELL_COMPLETION_VAR\": \"bash_complete\",\n            \"_CLICK_CLI_COMPLETE\": \"bash_complete\",\n            \"COMP_WORDS\": \"cli --config_file\",\n            \"COMP_CWORD\": \"1\",\n        }\n\n        with warnings.catch_warnings(record=True) as w:\n            warnings.simplefilter(\"always\")\n            result = runner.invoke(cli, [\"--config_file\"], env=env, complete_var=\"SHELL_COMPLETION_VAR\")\n\n            # Assert that no ResourceWarning related to unclosed files is issued\n            for warning_message in w:\n                if issubclass(warning_message.category, ResourceWarning) and \"unclosed file\" in str(warning_message.message):\n                    pytest.fail(f\"ResourceWarning: {warning_message.message}\")\n\n            # Ensure the completion command itself didn't fail unexpectedly\n            assert result.exit_code == 0\n\n    finally:\n        # Clean up the dummy config file\n        if os.path.exists(config_file_path):\n            os.remove(config_file_path)\n```",
+  "usage": {
+    "prompt_tokens": 5400,
+    "completion_tokens": 439,
+    "cost_usd": 0.002717,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946430.2728374
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"My apologies. I will ensure to output valid JSON.\n\nI need to create a test that verifies the zsh completion behavior for `CompletionItem` values containing colons. The test should:\n1. Create a temporary Python script (`foo.py`) that uses `click` and defines a custom `ParamType` with `shell_complete` returning `CompletionItem`s like `baz:quux`.\n2. Generate the zsh completion script for this `foo.py`.\n3. Simulate running `foo <TAB>` in a zsh environment and capture the output.\n4. Assert that the output is *not* `baz:quux -- adsf` but rather `baz -- quux:adsf` (the buggy behavior).\n\nLet's start by looking at how `click` handles shell completion generation and execution, specifically for zsh. I'll check `click/shell_completion.py` to understand the `CompletionItem` and how it's rendered.\", \"tool\": \"read_file\", \"args\": {\"path\": \"click/shell_completion.py\"}}",
+  "usage": {
+    "prompt_tokens": 1237,
+    "completion_tokens": 234,
+    "cost_usd": 0.000956,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947230.4963894
+}

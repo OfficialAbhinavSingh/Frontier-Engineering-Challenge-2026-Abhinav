@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nimport click\nfrom click.testing import CliRunner\n\ndef test_runner_catch_exceptions_default():\n    @click.command()\n    def cli_error():\n        raise ValueError(\"This is an error\")\n\n    runner = CliRunner()\n    # The default for catch_exceptions is True, so the exception should be caught\n    result = runner.invoke(cli_error)\n    assert result.exception is not None\n    assert isinstance(result.exception, ValueError)\n    assert result.exit_code == 1\n\n    # Now, if we set catch_exceptions to False on the runner, it should propagate\n    # This is the behavior the user expects to be able to configure globally\n    runner.catch_exceptions = False\n    with pytest.raises(ValueError, match=\"This is an error\"):\n        runner.invoke(cli_error)\n\n    # Test that passing it directly to invoke still overrides the runner's setting\n    runner.catch_exceptions = False\n    result = runner.invoke(cli_error, catch_exceptions=True)\n    assert result.exception is not None\n    assert isinstance(result.exception, ValueError)\n    assert result.exit_code == 1\n\n```",
+  "usage": {
+    "prompt_tokens": 2074,
+    "completion_tokens": 268,
+    "cost_usd": 0.001292,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947581.7638402
+}

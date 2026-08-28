@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"My apologies. I forgot to wrap the response in a JSON object. I will re-run the test with the correct JSON format.\", \"tool\": \"run_test\", \"args\": {\"source\": \"import pytest\\nimport tomlkit\\n\\ndef test_nesting_table_in_inlinetable_raises_error():\\n    t = tomlkit.table()\\n    t.append(\\\"a\\\", 1)\\n\\n    it = tomlkit.inline_table()\\n\\n    with pytest.raises(ValueError):  # Expecting an error to be raised\\n        it.append(\\\"table\\\", t)\\n\"}}",
+  "usage": {
+    "prompt_tokens": 1842,
+    "completion_tokens": 146,
+    "cost_usd": 0.000918,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947489.490636
+}

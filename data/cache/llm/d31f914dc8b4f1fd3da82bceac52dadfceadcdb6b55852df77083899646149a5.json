@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport unittest\n\nfrom tests.dialects.test_dialect import Validator\n\n\nclass TestDatabricks(Validator):\n    def test_insert_replace_using(self):\n        self.validate_identity(\n            \"\"\"INSERT INTO TABLE students REPLACE USING (country) SELECT * FROM new_students;\"\"\"\n        )\n\n```",
+  "usage": {
+    "prompt_tokens": 4126,
+    "completion_tokens": 72,
+    "cost_usd": 0.001418,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787948102.202622
+}

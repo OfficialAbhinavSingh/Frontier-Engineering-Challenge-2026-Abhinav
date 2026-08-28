@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nfrom click.testing import CliRunner\nimport click\n\ndef test_deprecated_option_warns():\n    runner = CliRunner()\n\n    @click.command()\n    @click.option(\"--old-name\", help=\"This is deprecated.\")\n    @click.option(\"--new-name\", help=\"Use this instead.\")\n    def cli(old_name, new_name):\n        click.echo(f\"old_name={old_name}, new_name={new_name}\")\n\n    # This test should fail because there's no mechanism to mark --old-name as deprecated\n    # and issue a warning when it's used.\n    result = runner.invoke(cli, [\"--old-name\", \"value\"])\n    assert \"Option '--old-name' is deprecated. Use '--new-name' instead.\" in result.output\n    assert result.exit_code == 0\n\ndef test_deprecated_option_with_renamed_message():\n    runner = CliRunner()\n\n    @click.command()\n    @click.option(\"--count\", help=\"Deprecated, use --greetings-count instead.\")\n    @click.option(\"--greetings-count\", help=\"Number of greetings.\")\n    def hello(count, greetings_count):\n        click.echo(f\"count={count}, greetings_count={greetings_count}\")\n\n    # This test should fail because there's no mechanism to mark --count as deprecated\n    # and issue a warning when it's used, especially with a custom message.\n    result = runner.invoke(hello, [\"--count\", \"5\"])\n    assert \"Option '--count' is deprecated. Use '--greetings-count' instead.\" in result.output\n    assert result.exit_code == 0\n\ndef test_deprecated_option_disallows_both():\n    runner = CliRunner()\n\n    @click.command()\n    @click.option(\"--count\", help=\"Deprecated, use --greetings-count instead.\")\n    @click.option(\"--greetings-count\", help=\"Number of greetings.\")\n    def hello(count, greetings_count):\n        click.echo(f\"count={count}, greetings_count={greetings_count}\")\n\n    # This test should fail because there's no mechanism to prevent using both\n    # the deprecated and the new option simultaneously.\n    result = runner.invoke(hello, [\"--count\", \"5\", \"--greetings-count\", \"10\"])\n    assert \"Cannot use both '--count' and '--greetings-count'.\" in result.output\n    assert result.exit_code != 0\n```",
+  "usage": {
+    "prompt_tokens": 4038,
+    "completion_tokens": 578,
+    "cost_usd": 0.002656,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787945752.9127362
+}

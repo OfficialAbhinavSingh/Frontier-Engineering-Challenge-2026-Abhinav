@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport tomlkit\n\n\ndef test_issue_543():\n    doc = tomlkit.loads(\"a.b = 1\\n\")\n    doc[\"a\"][\"c\"] = {}\n    doc[\"z\"] = 2\n\n    expected_dump = \"\"\"a.b = 1\n\n[a.c]\nz = 2\n\"\"\"\n    # The bug causes 'z = 2' to be nested under '[a.c]'\n    # The expected behavior is for 'z = 2' to remain a top-level key.\n    assert tomlkit.dumps(doc) == \"\"\"a.b = 1\n\n[a.c]\nz = 2\n\"\"\"\n```",
+  "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 158,
+    "cost_usd": 0.000665,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947734.0902727
+}

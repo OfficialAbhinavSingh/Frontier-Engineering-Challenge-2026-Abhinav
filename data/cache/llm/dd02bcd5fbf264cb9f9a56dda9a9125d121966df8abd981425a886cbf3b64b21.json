@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "[\n  \"When importing Click objects, be mindful of the `click` package's `__init__.py` which uses `__getattr__` to provide a flat namespace. This means that `click.FuncParamType` is not directly available, but `click.ParamType` is. Always check the source or existing tests for the correct import path of less common objects.\",\n  \"When asserting on CLI output, remember that Click's error messages often include the command's usage string and a generic 'Error: Invalid value for...' prefix before the specific message. The exact formatting and inclusion of the usage string can vary, so focus assertions on the unique part of the error message.\"\n]",
+  "usage": {
+    "prompt_tokens": 711,
+    "completion_tokens": 145,
+    "cost_usd": 0.000576,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787948095.9881458
+}

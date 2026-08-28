@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nfrom tomlkit import dumps\nfrom tomlkit import parse\n\n\ndef test_issue_291_whitespace_in_dot_notation_disappears():\n    content = \"\"\"\n[keys.a]\n#    \u2193 this whitespace disappears\n[keys .'a'.'c']\n  'd'\t= 'e'\n\"\"\"\n    doc = parse(content)\n    # The bug occurs when reassigning a table to itself,\n    # which causes the whitespace trivia to be \"normalized\"\n    # based on the first encountered table header.\n    for mode in doc[\"keys\"]:\n        doc[\"keys\"][mode] = doc[\"keys\"][mode]\n\n    # The expected output should preserve the original whitespace\n    # for each table header, even after reassigning.\n    expected_content = \"\"\"\n[keys.a]\n[keys .'a'.'c']\n  'd'\t= 'e'\n\"\"\"\n    assert dumps(doc) == expected_content\n\n```",
+  "usage": {
+    "prompt_tokens": 2521,
+    "completion_tokens": 217,
+    "cost_usd": 0.001299,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787945851.00883
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The test passed, which means it correctly identified that `sqlglot.parse_one` raises a `ParseError` for the given SQL with the `databricks` dialect. This is exactly what the issue describes as the current buggy behavior. Therefore, this test will fail once the bug is fixed (i.e., the SQL parses successfully) and pass now. This is the desired outcome for the test file.\", \"final_test\": \"\\nimport pytest\\nimport sqlglot\\n\\ndef test_databricks_insert_replace_using():\\n    sql = \\\"\\\"\\\"\\nINSERT INTO TABLE students\\n    REPLACE USING (country)\\n    SELECT * FROM new_students;\\n\\\"\\\"\\\"\\n    with pytest.raises(sqlglot.errors.ParseError):\\n        sqlglot.parse_one(sql, dialect=\\\"databricks\\\")\\n\"}",
+  "usage": {
+    "prompt_tokens": 3584,
+    "completion_tokens": 193,
+    "cost_usd": 0.000741,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947398.0295875
+}

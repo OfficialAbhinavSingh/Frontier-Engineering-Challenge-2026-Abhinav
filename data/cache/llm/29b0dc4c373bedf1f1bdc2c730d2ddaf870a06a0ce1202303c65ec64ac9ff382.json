@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nimport click\n\n\nclass MyClass:\n    def __init__(self, myvalue: str) -> None:\n        self.myvalue = myvalue\n\n    @staticmethod\n    def from_str(input_str: str) -> \"MyClass\":\n        if input_str != \"works\":\n            raise ValueError(f\"input was {input_str!r}, should be 'works'\")\n        return MyClass(input_str)\n\n\n@click.command()\n@click.argument(\"mydata\", type=click.FuncParamType(MyClass.from_str))\ndef cli(mydata: MyClass) -> None:\n    click.echo(f\"MyClass value: {mydata.myvalue}\")\n\n\ndef test_func_param_type_value_error_message(runner):\n    \"\"\"\n    Test that FuncParamType uses the ValueError message when conversion fails.\n    \"\"\"\n    result = runner.invoke(cli, [\"fails\"])\n    assert result.exit_code == 2\n    assert \"Error: Invalid value for 'MYDATA': input was 'fails', should be 'works'\" in result.output\n```",
+  "usage": {
+    "prompt_tokens": 3179,
+    "completion_tokens": 255,
+    "cost_usd": 0.001591,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787948212.2772174
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"sqlglot/parsers/mysql.py\",\n    \"sqlglot/dialects/mysql.py\"\n  ],\n  \"test_file\": \"tests/dialects/test_mysql.py\",\n  \"why\": \"The error occurs during parsing a MySQL-specific SQL statement, indicating an issue in the MySQL parser, and the regression test should be added to the existing MySQL dialect tests.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 3143,
+    "completion_tokens": 105,
+    "cost_usd": 0.001205,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947672.1361222
+}

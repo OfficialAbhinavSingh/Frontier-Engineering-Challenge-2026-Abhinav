@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The user wants to add a feature to deprecate a parameter in Click. The current issue is that there's no built-in way to do this. The test should demonstrate this lack of functionality. I need to write a test that tries to use a deprecated parameter and expects a warning or an error, but currently, it will just work without any warning.\n\nI'll create a simple Click command with an option that we *want* to be deprecated. The test will then invoke this command with the 'deprecated' option. Since there's no deprecation mechanism, the command will execute successfully without any warnings or errors related to deprecation. The test should then assert that a warning *should* have been issued, which will cause it to fail.\n\nFirst, I need to see how Click handles warnings or errors in general, to know what to assert against. I'll start by looking at the `click` module itself to see if there are any existing warning mechanisms.\", \"tool\": \"list_files\", \"args\": {\"subdir\": \"click\"}}",
+  "usage": {
+    "prompt_tokens": 618,
+    "completion_tokens": 221,
+    "cost_usd": 0.000738,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787945675.1099179
+}

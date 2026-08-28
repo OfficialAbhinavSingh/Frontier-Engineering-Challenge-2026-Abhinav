@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\"reproduced\": false, \"why\": \"The test failed because the exit code was 1, not because a ResourceWarning was raised, which is the reported bug.\"}\n```",
+  "usage": {
+    "prompt_tokens": 1975,
+    "completion_tokens": 41,
+    "cost_usd": 0.000695,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946473.3403363
+}

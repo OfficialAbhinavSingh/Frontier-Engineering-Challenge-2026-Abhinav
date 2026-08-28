@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport os\nimport pytest\nimport click\nfrom click.testing import CliRunner\nfrom click.shell_completion import BashComplete\nfrom click.shell_completion import ZshComplete\nfrom click.shell_completion import FishComplete\n\n\n@pytest.fixture\ndef runner():\n    return CliRunner()\n\n\n@pytest.mark.parametrize(\"shell\", [\"bash\", \"zsh\", \"fish\"])\ndef test_file_option_completion_closes_file(runner, shell, tmp_path):\n    test_file = tmp_path / \"test.txt\"\n    test_file.write_text(\"hello\")\n\n    @click.group()\n    @click.option(\n        \"--config-file\",\n        default=str(test_file),\n        type=click.File(mode=\"r\"),\n        help=\"A config file.\",\n    )\n    def cli(config_file):\n        pass\n\n    # Simulate shell completion environment variables\n    env = {\n        f\"_{cli.name.upper()}_COMPLETE\": f\"{shell}_complete\",\n        \"COMP_WORDS\": \"cli --config-file\",\n        \"COMP_CWORD\": \"2\",\n        \"COMP_POINT\": \"18\",\n    }\n    if shell == \"zsh\":\n        env[\"_CLI_COMPLETE_LINE\"] = \"cli --config-file \"\n        env[\"_CLI_COMPLETE_POINT\"] = \"18\"\n    elif shell == \"fish\":\n        env[\"_CLI_COMPLETE_LINE\"] = \"cli --config-file \"\n        env[\"_CLI_COMPLETE_POINT\"] = \"18\"\n\n    # Run completion and check for ResourceWarning\n    with pytest.warns(ResourceWarning) as record:\n        result = runner.invoke(cli, [\"--completion\", f\"{shell}_complete\"], env=env)\n\n    # The bug is that the file is not closed, leading to a ResourceWarning.\n    # If the bug is fixed, there should be no ResourceWarning.\n    assert not record.list, \"ResourceWarning was raised, file was not closed.\"\n    assert result.exit_code == 0\n```",
+  "usage": {
+    "prompt_tokens": 5157,
+    "completion_tokens": 474,
+    "cost_usd": 0.002732,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787945890.9303138
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nimport tomlkit\nfrom tomlkit.items import Array\nfrom tomlkit.items import Float\n\n\ndef test_array_of_floats_can_be_converted_to_list():\n    \"\"\"\n    Test that an Array of Floats can be converted to a Python list of floats\n    without raising a TypeError.\n\n    The original bug manifested when `torch.tensor` tried to iterate over\n    the `tomlkit.items.Array` which contained `tomlkit.items.Float` objects.\n    The `torch.tensor` constructor internally calls `list()` on its input,\n    which then attempts to iterate over the `tomlkit.items.Float` objects.\n    The `TypeError: object of type 'Float' has no len()` indicates that\n    `tomlkit.items.Float` objects were not correctly unwrapped or did not\n    behave like standard Python floats when iterated over in a list context.\n\n    This test asserts that converting the `tomlkit.items.Array` to a standard\n    Python list of floats works as expected, which implies that the\n    `tomlkit.items.Float` objects are correctly handled during iteration\n    and conversion.\n    \"\"\"\n    arr = tomlkit.loads(\n        \"\"\"\na = [1.0, 2.0, 3.0]\n\"\"\"\n    )\n\n    assert isinstance(arr[\"a\"], Array)\n    assert isinstance(arr[\"a\"][0], Float)\n\n    # The bug occurred when trying to convert arr['a'] (which contains Float items)\n    # to a structure that expects standard Python floats, like what torch.tensor\n    # does internally by calling list() on the input.\n    # We simulate this by explicitly calling list() on the tomlkit Array.\n    # If the bug is present, this will raise TypeError because the Float items\n    # within the Array do not correctly implement iteration/conversion.\n    converted_list = list(arr[\"a\"])\n\n    assert converted_list == [1.0, 2.0, 3.0]\n    assert all(isinstance(x, float) for x in converted_list)\n\n```",
+  "usage": {
+    "prompt_tokens": 3298,
+    "completion_tokens": 477,
+    "cost_usd": 0.002182,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787948024.3467932
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nfrom collections.abc import Callable\nimport pytest\nfrom tomlkit import parse\nfrom tomlkit import dumps\nfrom tomlkit import loads\nfrom datetime import datetime\nfrom typing import Any\nfrom tomlkit.toml_document import TOMLDocument\n\n\ndef test_missing_newline_after_inline_table() -> None:\n    v = loads(\"\"\"[x]\\na.b = {}\"\"\")\n    v[\"x\"][\"c\"] = 3\n    expected_output = \"\"\"[x]\na.b = {}\nc = 3\n\"\"\"\n    assert dumps(v) == expected_output\n```",
+  "usage": {
+    "prompt_tokens": 3406,
+    "completion_tokens": 135,
+    "cost_usd": 0.001359,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947838.0701387
+}

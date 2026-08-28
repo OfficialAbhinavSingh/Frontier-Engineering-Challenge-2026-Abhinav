@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nimport tomlkit\nfrom tomlkit.exceptions import TOMLKitError\n\n\ndef test_nesting_table_in_inlinetable_raises_error():\n    \"\"\"\n    Test that nesting a Table inside an InlineTable raises a TOMLKitError.\n    \"\"\"\n    t = tomlkit.table()\n    t.append(\"a\", 1)\n\n    it = tomlkit.inline_table()\n\n    with pytest.raises(TOMLKitError, match=\"Inline tables cannot contain other tables\"):\n        it.append(\"table\", t)\n\n```",
+  "usage": {
+    "prompt_tokens": 3001,
+    "completion_tokens": 131,
+    "cost_usd": 0.001228,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947850.2426527
+}

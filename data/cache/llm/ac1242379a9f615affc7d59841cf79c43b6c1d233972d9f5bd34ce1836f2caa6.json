@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"src/click/shell_completion.py\"\n  ],\n  \"test_file\": \"tests/test_shell_completion.py\",\n  \"why\": \"The issue describes incorrect zsh shell completion behavior when a colon is present in a CompletionItem's value, directly implicating the shell completion logic and its corresponding test file.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 1477,
+    "completion_tokens": 91,
+    "cost_usd": 0.000671,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947560.0328088
+}

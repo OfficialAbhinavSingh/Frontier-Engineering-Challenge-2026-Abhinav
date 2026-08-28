@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\"reproduced\": false, \"why\": \"The test failed because it could not find the expected completion string, not because of the multi-line help text issue described in the bug report.\"}\n```",
+  "usage": {
+    "prompt_tokens": 2684,
+    "completion_tokens": 45,
+    "cost_usd": 0.000918,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787948199.3627748
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\"reproduced\": true, \"why\": \"The test failed with an AssertionError because the repr of 'value' was missing the key 'c', which directly matches the behavior described in the bug report.\"}\n```",
+  "usage": {
+    "prompt_tokens": 821,
+    "completion_tokens": 47,
+    "cost_usd": 0.000364,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946507.1855564
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"My apologies, I made a mistake in assuming the file path. I should first locate where `parse_one` is defined or where the core parsing logic resides. I'll list the files in the `sqlglot` directory to get a better understanding of the project structure.\", \"tool\": \"list_files\", \"args\": {\"subdir\": \"sqlglot\"}}",
+  "usage": {
+    "prompt_tokens": 596,
+    "completion_tokens": 80,
+    "cost_usd": 0.000379,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946305.457847
+}

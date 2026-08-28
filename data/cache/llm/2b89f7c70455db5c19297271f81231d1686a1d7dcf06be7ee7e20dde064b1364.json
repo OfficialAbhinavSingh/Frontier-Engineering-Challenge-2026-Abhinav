@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"You are absolutely correct! I got ahead of myself. I need to run the test to confirm its behavior at the current commit. I will use `run_test` with the generated test code.\", \"tool\": \"run_test\", \"args\": {\"source\": \"import click\\nfrom click.testing import CliRunner\\nimport pytest\\n\\n\\n@click.command()\\n@click.option(\\n    \\\"--old-option\\\",\\n    help=\\\"This is an old option that should be deprecated.\\\",\\n)\\n@click.option(\\n    \\\"--new-option\\\",\\n    help=\\\"This is the new option.\\\",\\n)\\ndef cli(old_option, new_option):\\n    \\\"\\\"\\\"A simple CLI for testing deprecation.\\\"\\\"\\\"\\n    if old_option:\\n        click.echo(f\\\"Old option used with value: {old_option}\\\")\\n    if new_option:\\n        click.echo(f\\\"New option used with value: {new_option}\\\")\\n\\n\\ndef test_deprecated_option_warning_missing():\\n    runner = CliRunner()\\n    result = runner.invoke(cli, [\\\"--old-option\\\", \\\"test_value\\\"])\\n\\n    assert result.exit_code == 0\\n    # This assertion will FAIL at the current commit because Click does not\\n    # emit a deprecation warning for --old-option. Once a deprecation\\n    # mechanism is implemented, this test should be updated to assert\\n    # the PRESENCE of a warning, and thus pass.\\n    assert \\\"deprecated\\\" not in result.output.lower()\\n    assert \\\"deprecated\\\" not in result.stderr.lower()\\n\\n    # Also check that the command still functions\\n    assert \\\"Old option used with value: test_value\\\" in result.output\\n\"}}",
+  "usage": {
+    "prompt_tokens": 2000,
+    "completion_tokens": 415,
+    "cost_usd": 0.001638,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946619.4085834
+}

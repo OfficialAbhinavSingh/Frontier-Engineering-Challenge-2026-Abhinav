@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"When writing a regression test, ensure it fails on the buggy commit before attempting to fix the bug. This confirms the test accurately captures the reported behavior.\",\n  \"Tests in this repository often involve `tomlkit.toml_file.TOMLFile` objects. When interacting with these objects, be mindful of their internal structure and how they handle different data types, as direct Python operations (like `len()`) might not be supported on all wrapped types.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 349,
+    "completion_tokens": 103,
+    "cost_usd": 0.000362,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787948038.3757198
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"sqlglot/parsers/databricks.py\",\n    \"sqlglot/expressions/dml.py\"\n  ],\n  \"test_file\": \"tests/dialects/test_databricks.py\",\n  \"why\": \"The feature request specifically mentions Databricks SQL and the `REPLACE USING` clause for `INSERT`, which would require modifications to the Databricks parser and potentially the core DML expressions.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 3399,
+    "completion_tokens": 113,
+    "cost_usd": 0.001302,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947644.9454472
+}

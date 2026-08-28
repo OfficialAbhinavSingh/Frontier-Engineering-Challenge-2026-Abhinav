@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"sqlglot/parser.py\",\n    \"sqlglot/dialects/databricks.py\"\n  ],\n  \"test_file\": \"tests/dialects/test_databricks.py\",\n  \"why\": \"The issue describes a parsing problem specific to Databricks SQL's `REPLACE USING` clause within an `INSERT` statement, indicating that the core parser needs modification and the Databricks dialect needs to be updated to handle this syntax, with a regression test belonging in the Databricks dialect test file.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 1093,
+    "completion_tokens": 136,
+    "cost_usd": 0.000668,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947806.682025
+}

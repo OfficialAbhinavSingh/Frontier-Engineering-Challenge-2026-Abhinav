@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"sqlglot/optimizer/qualify_columns.py\",\n    \"sqlglot/dialects/starrocks.py\"\n  ],\n  \"test_file\": \"tests/test_lineage.py\",\n  \"why\": \"The issue describes a failure in `qualify_columns` when processing StarRocks table-valued functions, indicating that `qualify_columns.py` is the primary source of the error, and a regression test should be added to `test_lineage.py` as the problem occurs during lineage analysis.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 3629,
+    "completion_tokens": 136,
+    "cost_usd": 0.001429,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947689.1374855
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"My apologies again for the formatting error. I have corrected the test logic. The test should now fail at the current buggy commit because `sqlglot.parse_one` will raise a `ParseError`, which is not caught. Once the bug is fixed, `sqlglot.parse_one` will succeed, and the test will pass. I will run this corrected test.\", \"tool\": \"run_test\", \"args\": {\"source\": \"import pytest\\nimport sqlglot\\nfrom sqlglot.errors import ParseError\\n\\ndef test_trino_cte_udf_parse_error():\\n    sql = \\\"\\\"\\\"\\n    WITH FUNCTION f(num int)\\n        RETURNS int\\n        RETURN num\\n    SELECT f(1);\\n    \\\"\\\"\\\"\\n    # This test should FAIL at the buggy commit because a ParseError is expected.\\n    # It should PASS once the bug is fixed and the SQL parses successfully.\\n    expression = sqlglot.parse_one(sql, dialect=\\\"trino\\\")\\n    # Optionally, assert something about the parsed expression if it parses successfully\\n    # For now, just successfully parsing is enough to indicate the bug is fixed.\\n    assert expression is not None\\n\"}}",
+  "usage": {
+    "prompt_tokens": 3812,
+    "completion_tokens": 272,
+    "cost_usd": 0.001008,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946881.5132217
+}

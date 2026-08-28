@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"My apologies again. I will be more careful.\n\nI have read `click/shell_completion.py`. I see `CompletionItem` and how it's used. The issue describes a problem with how zsh *interprets* the completion items when they contain colons, not necessarily how `CompletionItem` itself is constructed. The problem is in the zsh completion script generation or how zsh processes the output.\n\nTo reproduce the bug, I need to:\n1. Create a temporary `foo.py` file with the provided content.\n2. Generate the zsh completion script for `foo.py`.\n3. Simulate the zsh completion call and capture its output.\n4. Assert that the output matches the *buggy* behavior described in the issue.\n\nI will need to use `subprocess` to run the `foo.py` script to generate the completion and then simulate the zsh environment.\n\nHere's the plan for the test:\n- Create a temporary directory.\n- Write `foo.py` into it.\n- Set up environment variables for zsh completion (`_FOO_COMPLETE=zsh_source`).\n- Run `foo.py` to get the zsh completion script.\n- Source the completion script in a simulated zsh environment (this is the tricky part, as directly sourcing in Python is hard).\n- A simpler approach might be to inspect the generated completion script directly, or to use `click.testing.CliRunner` if it supports completion testing.\n\nLooking at `click`'s own tests for completion might be helpful. I'll check `tests/test_completion.py` to see how they test completion.\", \"tool\": \"list_files\", \"args\": {\"subdir\": \"tests\"}}",
+  "usage": {
+    "prompt_tokens": 1507,
+    "completion_tokens": 374,
+    "cost_usd": 0.001387,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947233.7365067
+}

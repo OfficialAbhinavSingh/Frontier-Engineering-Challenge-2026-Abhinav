@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"Okay, I see `sqlglot/parser.py` and `sqlglot/parsers/trino.py`. The `sqlglot.parse_one` function is likely exposed directly from the `sqlglot` package's `__init__.py` or a similar top-level file, which then uses the parser defined in `sqlglot/parser.py` and the dialect-specific parsers in `sqlglot/parsers/`.\n\nI will now construct the test file. It should import `sqlglot` and `ParseError`, define the problematic SQL query, and then use `pytest.raises` to assert that `ParseError` is raised when parsing the query with the Trino dialect.\", \"tool\": \"run_test\", \"args\": {\"source\": \"import pytest\\nimport sqlglot\\nfrom sqlglot.errors import ParseError\\n\\ndef test_trino_cte_udf_parse_error():\\n    sql = \\\"\\\"\\\"\\n    WITH FUNCTION f(num int)\\n        RETURNS int\\n        RETURN num\\n    SELECT f(1);\\n    \\\"\\\"\\\"\\n    with pytest.raises(ParseError) as excinfo:\\n        sqlglot.parse_one(sql, dialect=\\\"trino\\\")\\n    assert \\\"Expecting (\\\" in str(excinfo.value)\\n\"}}",
+  "usage": {
+    "prompt_tokens": 2622,
+    "completion_tokens": 295,
+    "cost_usd": 0.001524,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946307.7417815
+}

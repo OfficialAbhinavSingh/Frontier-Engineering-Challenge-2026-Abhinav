@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport os\nimport sys\n\nimport click\nfrom click.testing import CliRunner\n\n\ndef test_fish_completion_multiline_help_text(monkeypatch):\n    @click.command()\n    @click.option(\n        \"--at\",\n        help=\"\\b\\nAttachment with explicit mimetype,\\n--at image.jpg image/jpeg\",\n    )\n    def cli(at):\n        pass\n\n    runner = CliRunner()\n\n    # Simulate fish completion environment\n    monkeypatch.setitem(os.environ, \"_CLICK_COMPLETE\", \"fish_source\")\n    monkeypatch.setitem(os.environ, \"_AT_COMPLETE\", \"fish_complete\")\n    monkeypatch.setitem(os.environ, \"COMP_WORDS\", \"cli --\")\n    monkeypatch.setitem(os.environ, \"COMP_CWORD\", \"1\")\n\n    result = runner.invoke(cli, [\"--completion\", \"fish\"])\n\n    assert not result.exception\n    assert result.exit_code == 0\n\n    # The expected output for the problematic option should be:\n    # plain,--at\\tAttachment with explicit mimetype, --at image.jpg image/jpeg\n    # The key is that the multiline help text is flattened into a single line\n    # with tabs and spaces, and the newline characters are removed or replaced.\n    # The original bug caused the raw newlines to be present, leading to\n    # parsing errors in fish.\n    expected_line_part = \"plain,--at\\tAttachment with explicit mimetype, --at image.jpg image/jpeg\"\n    assert expected_line_part in result.output.replace(\"\\n\", \" \") # Replace newlines for easier checking\n```",
+  "usage": {
+    "prompt_tokens": 2270,
+    "completion_tokens": 376,
+    "cost_usd": 0.001621,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947192.2496915
+}

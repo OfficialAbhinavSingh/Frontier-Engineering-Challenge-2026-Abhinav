@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nimport click\n\n\ndef test_func_param_type_value_error_message():\n    class MyClass:\n        def __init__(self, value):\n            self.value = value\n\n        @staticmethod\n        def from_str(input_value):\n            if input_value != \"works\":\n                raise ValueError(f\"input was {input_value!r}, should be 'works'\")\n            return MyClass(input_value)\n\n    my_class_type = click.types.FuncParamType(MyClass.from_str)\n\n    with pytest.raises(click.BadParameter) as exc_info:\n        my_class_type.convert(\"fails\", None, None)\n\n    assert \"input was 'fails', should be 'works'\" in str(exc_info.value)\n```",
+  "usage": {
+    "prompt_tokens": 2951,
+    "completion_tokens": 184,
+    "cost_usd": 0.001345,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947606.783287
+}

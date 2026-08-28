@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"My apologies for the repeated error. I will ensure all responses are valid JSON.\n\nOkay, I need to look at `tests/test_completion.py` to understand how Click tests its shell completion. This will guide me on how to write the failing test case.\", \"tool\": \"read_file\", \"args\": {\"path\": \"tests/test_completion.py\"}}",
+  "usage": {
+    "prompt_tokens": 1917,
+    "completion_tokens": 82,
+    "cost_usd": 0.00078,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947235.1317945
+}

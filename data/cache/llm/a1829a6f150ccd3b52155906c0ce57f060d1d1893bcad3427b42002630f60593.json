@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nimport tomlkit\n\ndef test_nesting_table_in_inline_table_raises_error():\n    t = tomlkit.table()\n    t.append(\"a\", 1)\n\n    it = tomlkit.inline_table()\n\n    with pytest.raises(tomlkit.exceptions.TOMLKitError, match=\"Inline tables cannot contain other tables\"):\n        it.append(\"table\", t)\n```",
+  "usage": {
+    "prompt_tokens": 2813,
+    "completion_tokens": 100,
+    "cost_usd": 0.001094,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947719.0117464
+}

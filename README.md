@@ -145,14 +145,24 @@ verdict**, never a boolean:
 | --- | --- |
 | `reproduced_exception` | the project's own code raised — traceback frames enter project source |
 | `reproduced_assertion` | an assertion about a value failed inside the test — what a wrong-output bug looks like |
-| `shallow_fail` | it blew up in the test body without ever reaching project code — almost always a misused API |
+| `reproduced_signature` | it failed on a name the report itself asks about — the missing API *is* the bug |
+| `shallow_fail` | it blew up in the test body without reaching project code, on a name the report never mentions — a misused API |
+| `overspecified` | it failed, but on more claims than the report makes, so it will fail after the fix too |
 | `broken_test` | import, syntax or fixture problem; the test never ran |
 | `no_fail` | it passed, so it reproduces nothing |
 | `timeout` | it hung |
 
-The distinction that carries the weight is `shallow_fail` versus the two
-`reproduced_*` verdicts. All three are "the test failed". Only two of them are
-evidence.
+The distinction that carries the weight is `shallow_fail` against the three
+`reproduced_*` verdicts. Every one of them is "the test failed" with the same
+exit code. Only three are evidence.
+
+`reproduced_signature` and `shallow_fail` are the sharpest version of that: both
+are an exception raised at the call site with no project frame at all. What
+separates them is whether the identifier the interpreter complained about is one
+the reporter asked for. If the report says `CliRunner` should accept
+`catch_exceptions`, then `TypeError: unexpected keyword argument
+'catch_exceptions'` is the bug. If the report is about whitespace in dotted keys,
+the same shape of error is the agent inventing a parameter.
 
 ### 5. Repair — model, instruction chosen by the verdict
 
@@ -196,19 +206,90 @@ the cache ships.
 
 ## Results
 
-See [results/REPORT.md](results/REPORT.md) for the generated tables, and
-[CHANGELOG_IMPROVEMENT.md](CHANGELOG_IMPROVEMENT.md) for what each change bought
-and what it cost.
+Evaluation split, 14 cases never used to choose anything, `google/gemini-2.5-flash`.
+Repeated variants are the mean of three independent runs with the range they spanned.
+
+| Variant | Fail-to-Pass | Rate | Model calls/case |
+| --- | --- | ---: | ---: |
+| `b0` — one prompt, no tools | 2/14 | 14% | 1.0 |
+| `b1` — general-purpose agent with the same tools | 2.7/14 (2–3) | 19% | 7.2 |
+| `s1`–`s4` — structured pipeline | 3/14 | 21% | 2.4–2.7 |
+| **`s5` — pre-registered final system** | **4.3/14 (4–5)** | **31%** | 2.9 |
+| `s6` — plus signature grounding (post-hoc) | 5.0/14 (4–6) | 36% | 2.8 |
+| `x1` — removed: model-judged verification | 5.0/14 (4–6) | 36% | 4.2 |
+
+**The headline claim is `s5` against `b1`: 4.3 versus 2.7 cases, a 59% relative
+improvement, using 2.9 model calls per case instead of 7.2.**
+
+`s6` is reported separately and deliberately. The blind spot it fixes was found
+on the evaluation split, so it is a post-hoc result and is not offered as a clean
+held-out number. It is included because it settles what `x1` meant: the
+model-judged verifier's entire advantage came from one blind spot in the
+deterministic rule, and once that was fixed deterministically, `s6` matched `x1`
+exactly — same mean, same range — using a third fewer model calls. `x1` is not
+better; it was paying a model to notice one thing a rule can notice for free.
+
+Model calls per case is the efficiency measure to read. The dollar figures in
+[results/REPORT.md](results/REPORT.md) are deflated for variants whose prompts
+were already cached, whereas call counts are not affected by caching.
+
+Full tables, per-case outcomes and the verdict distribution:
+[results/REPORT.md](results/REPORT.md). What each change bought:
+[CHANGELOG_IMPROVEMENT.md](CHANGELOG_IMPROVEMENT.md).
+
+### The number this project is really about
+
+The agent decides for itself whether it reproduced the bug. How often that
+judgement is wrong is the quantity worth reducing:
+
+| | `s4` | `s5` | `s6` |
+| --- | ---: | ---: | ---: |
+| False-confidence rate | 77% | 63% | 61% |
+
+Every one of those runs reported success. Between a third and a quarter of them
+were right.
 
 ---
 
 ## Main failure mode
 
-<!-- filled from measured results -->
+**The test asserts the wrong expected value.** Across the final system's runs,
+55% of case-runs failed as `did_not_pass_at_fix` — the test failed at the buggy
+commit *and* at the fixed one. Only 7% failed the other way, by not failing at
+the buggy commit at all.
+
+These tests are not missing the bug. They reach it, and then assert something the
+fixed code does not produce either: invented help text, an exact whitespace
+round-trip, an error message the reporter never quoted. The verifier's most
+common verdict on them is `reproduced_assertion` — the one verdict whose
+correctness cannot be checked structurally, because an assertion that fails at
+the buggy commit looks identical whether the expected value is right or wrong.
 
 ## Hot take
 
-<!-- filled from measured results -->
+**A test that fails is not a test that reproduces — and the difference splits
+cleanly into a part you can verify without the answer and a part you cannot.**
+
+Most of what makes a generated test wrong is structural, and structure is
+readable from evidence already in hand. Did a traceback frame enter the project's
+code, or did it blow up at the call site? Do the asserted strings appear anywhere
+in the report, or did the agent invent them? Is the missing parameter one the
+reporter asked for? Each of those is a fact sitting in output that most pipelines
+throw away, and each converts a boolean "it failed" into an instruction for what
+to do next. Typing those verdicts moved false confidence from 77% to 61% and beat
+a model-judged verifier at a third fewer calls.
+
+The residue does not yield to that treatment. Whether the asserted expected value
+is the one the fixed code will produce cannot be checked without the fix — that
+is an oracle question, and the only oracle available is a paragraph of prose
+written by a stranger. It is 55% of the remaining failures and it is not a
+prompting problem.
+
+So: build verification that returns a typed signal rather than a boolean, and
+push everything you can into the part that evidence can settle. Then be honest
+that what is left needs an oracle, and design the human checkpoint around exactly
+that. Repro-Bot proposes and stops for review precisely because the last question
+is the one it cannot answer for itself.
 
 ---
 

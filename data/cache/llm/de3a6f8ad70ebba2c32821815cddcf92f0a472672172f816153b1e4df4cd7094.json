@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"tomlkit/items.py\"\n  ],\n  \"test_file\": \"tests/test_items.py\",\n  \"why\": \"The TypeError 'object of type 'Float' has no len()' indicates that the tomlkit.items.Float object is not behaving like a standard Python float, which is handled in tomlkit/items.py, and a regression test would fit well within tests/test_items.py.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 1017,
+    "completion_tokens": 112,
+    "cost_usd": 0.000585,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947871.0591369
+}

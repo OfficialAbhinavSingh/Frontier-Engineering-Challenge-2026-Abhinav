@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"I sincerely apologize for the repeated mistakes. I will provide a valid JSON object this time.\n\nI need to create a pytest test file that demonstrates the bug where `tomlkit.dumps` adds an extra newline.\n\nHere's the test strategy:\n1.  **Initial TOML**: Define the input TOML string as provided in the issue.\n2.  **Expected TOML**: Define the TOML string that *should* be produced after loading, modifying, and dumping, assuming the bug is fixed. This means no extra newline after `name = \"x7\"`.\n3.  **Test Function**:\n    *   Import `tomlkit`.\n    *   Load the initial TOML string using `tomlkit.parse()`.\n    *   Modify a value in the loaded document (e.g., `t[\"env\"][\"pro1\"][\"rst\"][\"name\"] = \"x8\"`).\n    *   Dump the modified document back to a string using `tomlkit.dumps()`.\n    *   Assert that the dumped string is equal to the `expected_toml` string.\n\nThis test should fail because the buggy `tomlkit.dumps` will insert an extra newline, making the actual output different from the expected output.\", \"tool\": \"run_test\", \"args\": {\"source\": \"\\nimport tomlkit\\n\\ndef test_rewrite_adds_extra_whitespace_line():\\n    initial_toml = '''# xxx test\\n\\n\\n[env.pro1.rst]\\n    name = \\\"x7\\\"\\n\\n[env2]\\n    name = 2\\n\\n[env3]\\n    name = 3\\n'''\\n\\n    # Expected TOML after modification, without the bug's extra newline\\n    expected_toml = '''# xxx test\\n\\n\\n[env.pro1.rst]\\n    name = \\\"x8\\\"\\n\\n[env2]\\n    name = 2\\n\\n[env3]\\n    name = 3\\n'''\\n\\n    doc = tomlkit.parse(initial_toml)\\n\\n    # Modify a value to trigger the rewrite logic\\n    doc[\\\"env\\\"][\\\"pro1\\\"][\\\"rst\\\"][\\\"name\\\"] = \\\"x8\\\"\\n\\n    actual_toml = tomlkit.dumps(doc)\\n\\n    assert actual_toml == expected_toml\\n\"}}",
+  "usage": {
+    "prompt_tokens": 2592,
+    "completion_tokens": 531,
+    "cost_usd": 0.002105,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946383.3625078
+}

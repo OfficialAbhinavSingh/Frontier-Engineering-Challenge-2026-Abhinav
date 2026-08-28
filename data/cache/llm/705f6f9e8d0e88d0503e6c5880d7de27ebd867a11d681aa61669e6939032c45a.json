@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nimport torch\n\nimport tomlkit\n\n\ndef test_array_of_floats_torch_tensor_conversion() -> None:\n    arr = tomlkit.loads(\n        \"\"\"\na = [1.0, 2.0, 3.0]\n\"\"\"\n    )\n\n    # The bug manifests when trying to convert the tomlkit.Array directly to a torch.tensor.\n    # The underlying tomlkit.Float objects within the Array do not correctly expose\n    # their float value in a way that torch.tensor can consume, leading to\n    # \"TypeError: object of type 'Float' has no len()\".\n    # The fix should allow direct conversion.\n    # We assert that this operation completes without error.\n    # The specific assertion is that the resulting tensor has the expected values.\n    t = torch.tensor(arr[\"a\"], dtype=torch.float32)\n    assert t.tolist() == [1.0, 2.0, 3.0]\n```",
+  "usage": {
+    "prompt_tokens": 3212,
+    "completion_tokens": 228,
+    "cost_usd": 0.001534,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787948157.1891618
+}

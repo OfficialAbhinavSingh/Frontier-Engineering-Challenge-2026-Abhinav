@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nimport tomlkit\nfrom tomlkit.items import Array\nfrom tomlkit.items import Float\n\n\ndef test_array_of_floats_passed_to_torch_tensor_fails_with_type_error():\n    \"\"\"\n    Test that passing a tomlkit.items.Array containing tomlkit.items.Float\n    objects directly to torch.tensor raises a TypeError, specifically\n    \"object of type 'Float' has no len()\", as reported in issue #562.\n\n    This test should fail with the bug present and pass once the Array\n    or Float items are correctly unwrapped or handled by tomlkit\n    to behave like a standard Python list of floats.\n    \"\"\"\n    toml_str = \"\"\"\n    a = [1.0, 2.0, 3.0]\n    \"\"\"\n    arr = tomlkit.loads(toml_str)\n\n    # Ensure that arr['a'] is an Array item\n    assert isinstance(arr[\"a\"], Array)\n\n    # Ensure that elements within the Array are Float items\n    assert all(isinstance(item, Float) for item in arr[\"a\"])\n\n    try:\n        import torch\n    except ImportError:\n        pytest.skip(\"PyTorch not installed, skipping torch.tensor specific test.\")\n\n    # This is the core of the bug: torch.tensor expects an iterable of numbers,\n    # but when it tries to iterate over the tomlkit.items.Float objects\n    # within the tomlkit.items.Array, it encounters a TypeError because\n    # tomlkit.items.Float does not have a __len__ method, which torch.tensor\n    # might implicitly call during its internal processing of the input.\n    # The bug report specifically mentions \"TypeError: object of type 'Float' has no len()\".\n    with pytest.raises(TypeError, match=\"object of type 'Float' has no len()\"):\n        torch.tensor(arr[\"a\"], dtype=torch.float32)\n\n```",
+  "usage": {
+    "prompt_tokens": 3366,
+    "completion_tokens": 447,
+    "cost_usd": 0.002127,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947879.4153779
+}

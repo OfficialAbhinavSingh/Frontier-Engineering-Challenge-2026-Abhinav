@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The user is reporting a bug where `click.prompt` behaves incorrectly on Linux, specifically with backspace and line-wrapping. This is due to a workaround for Windows in `termui` that interferes with `readline` on Linux. The fix involves letting `readline` handle the prompt on Linux.\n\nTo create a failing test, I need to simulate user input with backspaces and assert that the output or the returned value from `click.prompt` is incorrect.\n\nI'll start by looking at the `click.prompt` implementation to understand how it interacts with `readline` and `termui`.\", \"tool\": \"grep\", \"args\": {\"pattern\": \"prompt\", \"glob\": \"click/*.py\"}}",
+  "usage": {
+    "prompt_tokens": 542,
+    "completion_tokens": 152,
+    "cost_usd": 0.000543,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947291.5911968
+}

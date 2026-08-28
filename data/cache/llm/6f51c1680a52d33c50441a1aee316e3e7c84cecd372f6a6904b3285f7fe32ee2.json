@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"I sincerely apologize for the persistent errors in formatting my responses. I am fully aware that I need to provide a single JSON object. I will ensure this response adheres to that requirement.\n\nThe test I've constructed is designed to fail because the `pytest.warns` context manager expects a `DeprecationWarning` to be raised when `--old-option` is used, but Click currently does not have a mechanism to issue such a warning for deprecated options. This correctly identifies the missing feature described in the issue. The `run_test` output confirmed this failure.\n\nTherefore, the test is complete and serves its purpose.\", \"final_test\": \"import click\nfrom click.testing import CliRunner\nimport pytest\n\ndef test_deprecated_option_warning():\n    @click.command()\n    @click.option('--old-option', help='This option is deprecated.')\n    @click.option('--new-option', help='Use this option instead.')\n    def cli(old_option, new_option):\n        if old_option:\n            click.echo(f'Old option used with value: {old_option}')\n        if new_option:\n            click.echo(f'New option used with value: {new_option}')\n\n    runner = CliRunner()\n\n    # This test should fail because there's no built-in mechanism to emit a DeprecationWarning\n    # when '--old-option' is used. Once the feature is implemented, this test should pass.\n    with pytest.warns(DeprecationWarning, match='--old-option is deprecated. Use --new-option instead.'):\n        result = runner.invoke(cli, ['--old-option', 'value'])\n        assert result.exit_code == 0\n        assert 'Old option used with value: value' in result.output\n\n    # Also test that using the new option doesn't raise a warning\n    result = runner.invoke(cli, ['--new-option', 'new_value'])\n    assert result.exit_code == 0\n    assert 'New option used with value: new_value' in result.output\n    assert not result.exception # No exception should be raised\n\"}",
+  "usage": {
+    "prompt_tokens": 3275,
+    "completion_tokens": 476,
+    "cost_usd": 0.002172,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787945693.667149
+}

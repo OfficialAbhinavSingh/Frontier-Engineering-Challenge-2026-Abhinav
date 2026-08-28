@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nfrom sqlglot import parse_one, exp\n\ndef test_databricks_insert_replace_using():\n    sql = \"\"\"\n    INSERT INTO TABLE students\n        REPLACE USING (country)\n        SELECT * FROM new_students;\n    \"\"\"\n    # This test expects a parsing error because REPLACE USING is not yet supported.\n    # The bug is that sqlglot.parse_one fails to parse this valid Databricks SQL.\n    with pytest.raises(Exception) as excinfo:\n        parse_one(sql, dialect=\"databricks\")\n    \n    # We can be more specific about the expected error if sqlglot provides a specific error type\n    # for unsupported syntax. For now, a general Exception is sufficient to indicate failure.\n    assert \"Expected\" in str(excinfo.value) or \"Invalid expression\" in str(excinfo.value)\n\n    # If the feature were implemented, the test would look something like this:\n    # expression = parse_one(sql, dialect=\"databricks\")\n    # assert isinstance(expression, exp.Insert)\n    # assert expression.this.name == \"students\"\n    # # Assuming 'replace_using' would be a new attribute on the Insert expression\n    # assert expression.args.get(\"replace_using\").expressions[0].name == \"country\"\n    # assert isinstance(expression.expression, exp.Select)\n```",
+  "usage": {
+    "prompt_tokens": 3098,
+    "completion_tokens": 315,
+    "cost_usd": 0.001717,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947200.4242797
+}

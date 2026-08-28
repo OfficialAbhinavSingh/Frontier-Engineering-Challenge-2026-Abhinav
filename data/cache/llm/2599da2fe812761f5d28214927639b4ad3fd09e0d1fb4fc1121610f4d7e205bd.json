@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\n\nfrom sqlglot import parse_one\nfrom sqlglot.errors import ParseError\n\n\ndef test_trino_cte_udf_parse_error():\n    sql = \"\"\"\n    WITH FUNCTION f(num int)\n        RETURNS int\n        RETURN num\n    SELECT f(1);\n    \"\"\"\n    # This test should pass without raising a ParseError\n    # The expected behavior is that the SQL is parsed successfully.\n    try:\n        parse_one(sql, dialect=\"trino\")\n    except ParseError as e:\n        pytest.fail(f\"Parsing CTE UDF in Trino raised an unexpected ParseError: {e}\")\n\n```",
+  "usage": {
+    "prompt_tokens": 1167,
+    "completion_tokens": 149,
+    "cost_usd": 0.000723,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787945842.0091383
+}

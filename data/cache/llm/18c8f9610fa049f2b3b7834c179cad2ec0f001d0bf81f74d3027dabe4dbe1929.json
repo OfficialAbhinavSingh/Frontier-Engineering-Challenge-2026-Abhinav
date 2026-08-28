@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport tomlkit\n\n\ndef test_aot_captures_too_many_keys():\n    doc = tomlkit.parse(\"a.b = 1\\nc.d = 2\\n\")\n    aot = tomlkit.aot()\n    t = tomlkit.table()\n    t[\"x\"] = 9\n    aot.append(t)\n    doc[\"a\"] = aot\n    \n    expected_output = \"\"\"[[a]]\nx = 9\n\nc.d = 2\n\"\"\"\n    assert tomlkit.dumps(doc) == expected_output\n```",
+  "usage": {
+    "prompt_tokens": 446,
+    "completion_tokens": 141,
+    "cost_usd": 0.000486,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947219.7223449
+}

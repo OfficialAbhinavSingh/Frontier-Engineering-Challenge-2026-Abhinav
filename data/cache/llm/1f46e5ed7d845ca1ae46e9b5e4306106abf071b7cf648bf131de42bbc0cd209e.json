@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The user is reporting an issue where whitespace in TOML keys is not preserved when parsing and then dumping the TOML content, specifically when using dot notation with quotes. The provided example shows that `[keys .'a'.'c']` loses its leading whitespace after a parse-modify-dump cycle. The core of the problem seems to be related to how `tomlkit` handles and reassigns TOML documents, potentially losing formatting information during the process.\n\nI need to create a pytest file that demonstrates this behavior. The test should parse the provided TOML content, perform the re-assignment that triggers the bug, and then assert that the dumped content is not equal to the original content, specifically focusing on the whitespace difference.\n\nLet's start by creating a test that directly uses the provided `content` and `testtoml` function logic.\", \"final_test\": \"from tomlkit import dumps\nfrom tomlkit import parse\n\ndef test_whitespace_preservation_in_dot_notation():\n    content = \\\"\\\"\\\"\n[keys.a]\n#    \\u2193 this whitespace disappears\n[keys .'a'.'c']\n  'd'\\t= 'e'\n\\\"\\\"\\\"\n    doc = parse(content)\n    # The original issue description mentions this loop as the trigger for the bug.\n    # It seems to be related to how `tomlkit` handles reassigning sub-documents.\n    for mode in doc[\\\"keys\\\"]:\n        doc[\\\"keys\\\"][mode] = doc[\\\"keys\\\"][mode]\n\n    # The bug is that the whitespace in `[keys .'a'.'c']` is not preserved.\n    # Specifically, the leading space before `'a'` in `.'a'` is lost.\n    # The expected behavior is that `dumps(doc)` should be identical to `content`.\n    # However, due to the bug, it will not be.\n    # The test should FAIL if the whitespace is lost (i.e., dumps(doc) != content).\n    # It should PASS if the whitespace is preserved (i.e., dumps(doc) == content).\n    assert dumps(doc) == content\"}",
+  "usage": {
+    "prompt_tokens": 599,
+    "completion_tokens": 469,
+    "cost_usd": 0.001352,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787945724.8258371
+}

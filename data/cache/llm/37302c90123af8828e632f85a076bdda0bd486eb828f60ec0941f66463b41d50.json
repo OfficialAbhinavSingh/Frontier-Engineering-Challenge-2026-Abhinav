@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nimport tomlkit\nfrom tomlkit.items import Array\nfrom tomlkit.items import Float\n\n\ndef test_array_of_floats_passed_to_torch_tensor_fails_with_type_error():\n    \"\"\"\n    Test that passing a tomlkit.items.Array containing tomlkit.items.Float\n    objects directly to torch.tensor raises a TypeError, specifically\n    \"object of type 'Float' has no len()\", as reported in issue #562.\n\n    This test should fail with the bug present and pass once the Array\n    or Float items are correctly unwrapped or handled by tomlkit\n    to behave like a standard Python list of floats.\n    \"\"\"\n    toml_str = \"\"\"\n    a = [1.0, 2.0, 3.0]\n    \"\"\"\n    arr = tomlkit.loads(toml_str)\n\n    # Ensure that arr['a'] is an Array item\n    assert isinstance(arr[\"a\"], Array)\n\n    # Ensure that elements within the Array are Float items\n    assert all(isinstance(item, Float) for item in arr[\"a\"])\n\n    try:\n        import torch\n    except ImportError:\n        pytest.skip(\"PyTorch not installed, skipping torch.tensor specific test.\")\n\n    # The bug occurs because torch.tensor tries to iterate over the elements\n    # of the tomlkit.items.Array, and when it encounters a tomlkit.items.Float\n    # object, it attempts to call len() on it, which is not defined for Float.\n    # The expected behavior is that tomlkit.items.Array should behave like\n    # a standard Python list, allowing its elements (which should ideally\n    # be unwrapped to native Python floats) to be processed by torch.tensor.\n    # The specific error is \"TypeError: object of type 'Float' has no len()\".\n    with pytest.raises(TypeError, match=\"object of type 'Float' has no len()\"):\n        # The original bug report shows the direct call to torch.tensor(arr['a'])\n        # causing the TypeError.\n        torch.tensor(arr[\"a\"], dtype=torch.float32)\n\n    # To pass, the fix should allow this line to execute without error,\n    # producing a torch tensor equivalent to torch.tensor([1.0, 2.0, 3.0]).\n    # We don't assert the final tensor here, as the goal is to catch the\n    # TypeError when the bug is present.\n```",
+  "usage": {
+    "prompt_tokens": 3159,
+    "completion_tokens": 567,
+    "cost_usd": 0.002365,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947883.3716464
+}

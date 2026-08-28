@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"I am truly sorry for the repeated errors. I will ensure this response is a valid JSON object.\n\nI need to read the `click/termui.py` file to understand how `prompt` is implemented and how it interacts with `readline`. This will help me craft a test case that exposes the backspace issue.\", \"tool\": \"read_file\", \"args\": {\"path\": \"click/termui.py\"}}",
+  "usage": {
+    "prompt_tokens": 954,
+    "completion_tokens": 92,
+    "cost_usd": 0.000516,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947295.4206185
+}

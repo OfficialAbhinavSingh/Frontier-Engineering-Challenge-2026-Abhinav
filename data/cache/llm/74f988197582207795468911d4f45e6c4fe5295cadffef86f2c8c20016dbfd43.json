@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport os\nimport sys\n\nimport pytest\n\nimport click\nfrom click.shell_completion import CompletionItem\n\n\nclass Foo(click.ParamType):\n    def convert(self, value, param, ctx):\n        return value\n\n    def shell_complete(self, ctx, param, incomplete):\n        return [\n            CompletionItem(value=value, help=\"adsf\")\n            for value in [\"baz:quux\", \"spam:eggs\"]\n        ]\n\n\n@click.command()\n@click.argument(\"foo\", type=Foo())\ndef main(foo):\n    click.echo(foo)\n\n\ndef _get_zsh_completions(cli, args, incomplete, prog_name=\"foo\"):\n    \"\"\"\n    Helper function to get Zsh completions for a given CLI, arguments, and incomplete value.\n    This simulates the environment variables set by the Zsh completion script.\n    \"\"\"\n    complete_var = f\"_{prog_name.upper()}_COMPLETE\"\n    os.environ[complete_var] = \"zsh_complete\"\n    os.environ[\"COMP_WORDS\"] = \" \".join([prog_name] + args)\n    os.environ[\"COMP_CWORD\"] = str(len(args) + 1)  # Index of the incomplete word\n    os.environ[\"_CLICK_COMPLETE_INCOMPLETE\"] = incomplete\n\n    comp_cls = click.shell_completion.get_completion_class(\"zsh\")\n    comp = comp_cls(cli, {}, prog_name, complete_var)\n    result = comp.complete()\n\n    del os.environ[complete_var]\n    del os.environ[\"COMP_WORDS\"]\n    del os.environ[\"COMP_CWORD\"]\n    del os.environ[\"_CLICK_COMPLETE_INCOMPLETE\"]\n\n    return result.splitlines()\n\n\ndef test_zsh_completion_colon_in_value_regression():\n    \"\"\"\n    Test that zsh completion correctly handles values containing colons,\n    displaying them as a single item rather than splitting them.\n    This reproduces the regression described in issue #2703.\n    \"\"\"\n    # The bug report shows the output when completing an empty string after 'foo '\n    # The expected output is 'baz:quux   -- adsf' and 'spam:eggs -- adsf'\n    # The buggy output is 'baz   -- quux:adsf' and 'spam  -- eggs:adsf'\n    expected_completions = [\"baz:quux -- adsf\", \"spam:eggs -- adsf\"]\n    actual_completions = _get_zsh_completions(main, [], \"\")\n\n    assert actual_completions == expected_completions\n```",
+  "usage": {
+    "prompt_tokens": 5641,
+    "completion_tokens": 606,
+    "cost_usd": 0.003207,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787948166.0662925
+}

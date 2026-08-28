@@ -1,0 +1,209 @@
+{
+  "variant": "s1",
+  "description": "structured pipeline with sandbox verification and a repair loop",
+  "model": "google/gemini-2.5-flash",
+  "n_cases": 6,
+  "f2p_solved": 3,
+  "f2p_rate": 0.5,
+  "total_cost_usd": 0.0022,
+  "total_llm_calls": 14,
+  "cached_llm_calls": 13,
+  "mean_wall_clock_s": 4.1,
+  "wall_clock_total_s": 24.8,
+  "results": [
+    {
+      "case_id": "click__2263",
+      "repo": "pallets/click",
+      "variant": "s1",
+      "f2p": false,
+      "score_reason": "did_not_pass_at_fix:failed",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": true,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 5180,
+        "completion_tokens": 711,
+        "cost_usd": 0.0,
+        "calls": 2,
+        "cached_calls": 2
+      },
+      "wall_clock_s": 2.8,
+      "error": null,
+      "test_source": "import pytest\nfrom click.testing import CliRunner\nimport click\n\ndef test_deprecated_option_warns():\n    runner = CliRunner()\n\n    @click.command()\n    @click.option(\"--old-name\", help=\"This is deprecated.\")\n    @click.option(\"--new-name\", help=\"Use this instead.\")\n    def cli(old_name, new_name):\n        click.echo(f\"old_name={old_name}, new_name={new_name}\")\n\n    # This test should fail because there's no mechanism to mark --old-name as deprecated\n    # and issue a warning when it's used.\n    result = runner.invoke(cli, [\"--old-name\", \"value\"])\n    assert \"Option '--old-name' is deprecated. Use '--new-name' instead.\" in result.output\n    assert result.exit_code == 0\n\ndef test_deprecated_option_with_renamed_message():\n    runner = CliRunner()\n\n    @click.command()\n    @click.option(\"--count\", help=\"Deprecated, use --greetings-count instead.\")\n    @click.option(\"--greetings-count\", help=\"Number of greetings.\")\n    def hello(count, greetings_count):\n        click.echo(f\"count={count}, greetings_count={greetings_count}\")\n\n    # This test should fail because there's no mechanism to mark --count as deprecated\n    # and issue a warning when it's used, especially with a custom message.\n    result = runner.invoke(hello, [\"--count\", \"5\"])\n    assert \"Option '--count' is deprecated. Use '--greetings-count' instead.\" in result.output\n    assert result.exit_code == 0\n\ndef test_deprecated_option_disallows_both():\n    runner = CliRunner()\n\n    @click.command()\n    @click.option(\"--count\", help=\"Deprecated, use --greetings-count instead.\")\n    @click.option(\"--greetings-count\", help=\"Number of greetings.\")\n    def hello(count, greetings_count):\n        click.echo(f\"count={count}, greetings_count={greetings_count}\")\n\n    # This test should fail because there's no mechanism to prevent using both\n    # the deprecated and the new option simultaneously.\n    result = runner.invoke(hello, [\"--count\", \"5\", \"--greetings-count\", \"10\"])\n    assert \"Cannot use both '--count' and '--greetings-count'.\" in result.output\n    assert result.exit_code != 0\n",
+      "test_rel_path": "tests/test_reprobot_click__2263.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "reproduced_assertion",
+          "exception_type": null,
+          "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
+          "output": "___________ test_deprecated_option_with_renamed_message __________________\ntests/test_reprobot_click__2263.py:32: in test_deprecated_option_with_renamed_message\n    assert \"Option '--count' is deprecated. Use '--greetings-count' instead.\" in result.output\nE   assert \"Option '--count' is deprecated. Use '--greetings-count' instead.\" in 'count=5, greetings_count=None\\n'\nE    +  where 'count=5, greetings_count=None\\n' = <Result okay>.output\n____________________ test_deprecated_option_disallows_both _____________________\ntests/test_reprobot_click__2263.py:47: in test_deprecated_option_disallows_both\n    assert \"Cannot use both '--count' and '--greetings-count'.\" in result.output\nE   assert \"Cannot use both '--count' and '--greetings-count'.\" in 'count=5, greetings_count=10\\n'\nE    +  where 'count=5, greetings_count=10\\n' = <Result okay>.output\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_click__2263.py::test_deprecated_option_warns - ass...\nFAILED tests/test_reprobot_click__2263.py::test_deprecated_option_with_renamed_message\nFAILED tests/test_reprobot_click__2263.py::test_deprecated_option_disallows_both\n3 failed in 0.03s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "click__2644",
+      "repo": "pallets/click",
+      "variant": "s1",
+      "f2p": false,
+      "score_reason": "did_not_pass_at_fix:failed",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": true,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 6906,
+        "completion_tokens": 486,
+        "cost_usd": 0.0,
+        "calls": 2,
+        "cached_calls": 2
+      },
+      "wall_clock_s": 2.6,
+      "error": null,
+      "test_source": "import os\nimport pytest\nimport sys\nimport warnings\n\nfrom click.testing import CliRunner\nfrom click import File, group, option\n\n\n@group()\n@option(\"--config-file\", type=File(\"r\"))\ndef cli(config_file):\n    pass\n\n\n@cli.command()\ndef sub():\n    pass\n\n\n@pytest.mark.skipif(sys.platform == \"win32\", reason=\"ResourceWarning not reliably triggered on Windows\")\ndef test_file_option_completion_closes_file(tmp_path):\n    config_path = tmp_path / \"config.txt\"\n    config_path.write_text(\"test_content\")\n\n    runner = CliRunner()\n\n    # Simulate shell completion for bash\n    env = {\n        \"_CLI_COMPLETE\": \"complete\",\n        \"COMP_WORDS\": f\"cli --config-file {config_path} s\",\n        \"COMP_CWORD\": \"2\",\n    }\n\n    with warnings.catch_warnings(record=True) as w:\n        warnings.simplefilter(\"always\")\n        result = runner.invoke(cli, [\"--completion\", \"bash\"], env=env, catch_exceptions=False)\n\n        assert not result.exception\n        assert \"sub\" in result.output\n\n        # Check that no ResourceWarning was issued for unclosed files\n        for warning_message in w:\n            assert issubclass(warning_message.category, ResourceWarning)\n            assert \"unclosed file\" not in str(warning_message.message)\n",
+      "test_rel_path": "tests/test_reprobot_click__2644.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "reproduced_assertion",
+          "exception_type": null,
+          "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n___________________ test_file_option_completion_closes_file ____________________\ntests/test_reprobot_click__2644.py:39: in test_file_option_completion_closes_file\n    assert not result.exception\nE   assert not SystemExit(1)\nE    +  where SystemExit(1) = <Result SystemExit(1)>.exception\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_click__2644.py::test_file_option_completion_closes_file\n1 failed in 0.03s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "sqlglot__5178",
+      "repo": "tobymao/sqlglot",
+      "variant": "s1",
+      "f2p": true,
+      "score_reason": "ok",
+      "verdict_at_parent": "reproduced_exception",
+      "self_reproduces": true,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 4356,
+        "completion_tokens": 270,
+        "cost_usd": 0.0,
+        "calls": 2,
+        "cached_calls": 2
+      },
+      "wall_clock_s": 7.3,
+      "error": null,
+      "test_source": "import pytest\n\nfrom sqlglot import parse_one\nfrom sqlglot.errors import ParseError\n\n\ndef test_trino_cte_udf_parse_error():\n    sql = \"\"\"\n    WITH FUNCTION f(num int)\n        RETURNS int\n        RETURN num\n    SELECT f(1);\n    \"\"\"\n    # This test should pass without raising a ParseError\n    # The expected behavior is that the SQL is parsed successfully.\n    try:\n        parse_one(sql, dialect=\"trino\")\n    except ParseError as e:\n        pytest.fail(f\"Parsing CTE UDF in Trino raised an unexpected ParseError: {e}\")\n",
+      "test_rel_path": "tests/dialects/test_reprobot_sqlglot__5178.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "reproduced_exception",
+          "exception_type": "ParseError",
+          "reason": "ParseError was raised from inside the project's own code (sqlglot/__init__.py:160 in parse_one)",
+          "output": "^^^^^^^^^^^^^^^^\nsqlglot/parser.py:4099: in _parse_with\n    cte = self._parse_cte()\n          ^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:4147: in _parse_cte\n    this=self._parse_wrapped(self._parse_statement),\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:8742: in _parse_wrapped\n    self.raise_error(\"Expecting (\")\nsqlglot/parser.py:2038: in raise_error\n    raise error\nE   sqlglot.errors.ParseError: Expecting (. Line 2, Col: 19.\nE     \nE       WITH FUNCTION \u001b[4mf\u001b[0m(num int)\nE           RETURNS int\nE           RETURN num\nE       SELECT f(1);\n\nDuring handling of the above exception, another exception occurred:\ntests/dialects/test_reprobot_sqlglot__5178.py:19: in test_trino_cte_udf_parse_error\n    pytest.fail(f\"Parsing CTE UDF in Trino raised an unexpected ParseError: {e}\")\nE   Failed: Parsing CTE UDF in Trino raised an unexpected ParseError: Expecting (. Line 2, Col: 19.\nE     \nE       WITH FUNCTION \u001b[4mf\u001b[0m(num int)\nE           RETURNS int\nE           RETURN num\nE       SELECT f(1);\n=========================== short test summary info ============================\nFAILED tests/dialects/test_reprobot_sqlglot__5178.py::test_trino_cte_udf_parse_error\n1 failed in 0.99s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "tomlkit__291",
+      "repo": "python-poetry/tomlkit",
+      "variant": "s1",
+      "f2p": false,
+      "score_reason": "did_not_pass_at_fix:failed",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": true,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 3236,
+        "completion_tokens": 333,
+        "cost_usd": 0.0,
+        "calls": 2,
+        "cached_calls": 2
+      },
+      "wall_clock_s": 2.4,
+      "error": null,
+      "test_source": "from tomlkit import dumps\nfrom tomlkit import parse\n\n\ndef test_issue_291_whitespace_in_dot_notation_disappears():\n    content = \"\"\"\n[keys.a]\n#    \u2193 this whitespace disappears\n[keys .'a'.'c']\n  'd'\t= 'e'\n\"\"\"\n    doc = parse(content)\n    # The bug occurs when reassigning a table to itself,\n    # which causes the whitespace trivia to be \"normalized\"\n    # based on the first encountered table header.\n    for mode in doc[\"keys\"]:\n        doc[\"keys\"][mode] = doc[\"keys\"][mode]\n\n    # The expected output should preserve the original whitespace\n    # for each table header, even after reassigning.\n    expected_content = \"\"\"\n[keys.a]\n[keys .'a'.'c']\n  'd'\t= 'e'\n\"\"\"\n    assert dumps(doc) == expected_content\n",
+      "test_rel_path": "tests/test_reprobot_tomlkit__291.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "reproduced_assertion",
+          "exception_type": null,
+          "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n_____________ test_issue_291_whitespace_in_dot_notation_disappears _____________\ntests/test_reprobot_tomlkit__291.py:26: in test_issue_291_whitespace_in_dot_notation_disappears\n    assert dumps(doc) == expected_content\nE   assert \"\\n[keys.a]\\n... 'd'\\t= 'e'\\n\" == \"\\n[keys.a]\\n... 'd'\\t= 'e'\\n\"\nE     \nE       \nE       [keys.a]\nE     + #    \u2193 this whitespace disappears\nE     - [keys .'a'.'c']\nE     ?      - - -\nE     + [keys.a.'c']\nE         'd'\t= 'e'\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_tomlkit__291.py::test_issue_291_whitespace_in_dot_notation_disappears\n1 failed in 0.05s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "tomlkit__352",
+      "repo": "python-poetry/tomlkit",
+      "variant": "s1",
+      "f2p": true,
+      "score_reason": "ok",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": true,
+      "rounds": 3,
+      "usage": {
+        "prompt_tokens": 7476,
+        "completion_tokens": 1794,
+        "cost_usd": 0.002167,
+        "calls": 4,
+        "cached_calls": 3
+      },
+      "wall_clock_s": 7.4,
+      "error": null,
+      "test_source": "import tomlkit\nfrom collections import OrderedDict\nfrom tomlkit.container import Container\n\n\ndef test_rewrite_toml_data_no_extra_whitespace(tmp_path):\n    # Original TOML content with comments and structure\n    original_toml_content = \"\"\"# xxx test\n\n\n[env.pro1.rst]\n    name = \"x7\"\n\n[env2]\n    name = 2\n\n[env3]\n    name = 3\n\"\"\"\n    # Expected TOML content after rewrite, without extra whitespace\n    # This is what the TOML should look like if the bug is fixed.\n    expected_toml_content = \"\"\"# xxx test\n\n\n[env.pro1.rst]\n    name = \"x7\"\n\n[env2]\n    name = 2\n\n[env3]\n    name = 3\n\"\"\"\n\n    file_path = tmp_path / \"test.toml\"\n    file_path.write_text(original_toml_content)\n\n    def merge_dicts(a: dict, b: dict):\n        # This is the merge_dicts function from the bug report that triggers the issue\n        ret = a\n\n        for k, v in b.items():\n            if k in a and isinstance(a[k], (dict, OrderedDict, Container)):\n                ret[k] = merge_dicts(a[k], v)\n            else:\n                ret[k] = v\n\n        return ret\n\n    # Load the TOML document\n    with open(file_path, \"r\") as f:\n        t = tomlkit.load(f)\n\n    # Apply a \"modification\" using the buggy merge_dicts.\n    # The modification here is effectively a no-op in terms of data,\n    # as the value for 'name' is already 'x7'.\n    # However, the act of merging and then dumping triggers the whitespace bug\n    # due to how tomlkit re-evaluates the structure and inserts newlines.\n    t = merge_dicts(\n        t,\n        {'env': {'pro1': {'rst': {'name': \"x7\"}}}}\n    )\n\n    # Dump the modified TOML back to the file\n    with open(file_path, \"w\") as f:\n        tomlkit.dump(t, f)\n\n    # Read the content back and assert it matches the expected (bug-free) output\n    actual_toml_content = file_path.read_text()\n\n    assert actual_toml_content == expected_toml_content\n",
+      "test_rel_path": "tests/test_reprobot_tomlkit__352.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "no_fail",
+          "exception_type": null,
+          "reason": "the test passed at the buggy commit, so it does not demonstrate the reported behaviour",
+          "output": "__REPROBOT_SANDBOX_READY__\n.                                                                        [100%]\n1 passed in 0.04s\n"
+        },
+        {
+          "round": 2,
+          "verdict": "broken_test",
+          "exception_type": "AttributeError",
+          "reason": "the test could not be collected or ran into an import, syntax or fixture problem before exercising the reported behaviour",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n__________________ test_rewrite_toml_data_no_extra_whitespace __________________\ntests/test_reprobot_tomlkit__352.py:61: in test_rewrite_toml_data_no_extra_whitespace\n    t = merge_dicts(\ntests/test_reprobot_tomlkit__352.py:41: in merge_dicts\n    if k in a and isinstance(a[k], (dict, OrderedDict, tomlkit.Container)):\n                                                       ^^^^^^^^^^^^^^^^^\nE   AttributeError: module 'tomlkit' has no attribute 'Container'. Did you mean: 'container'?\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_tomlkit__352.py::test_rewrite_toml_data_no_extra_whitespace\n1 failed in 0.06s\n"
+        },
+        {
+          "round": 3,
+          "verdict": "reproduced_assertion",
+          "exception_type": null,
+          "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n__________________ test_rewrite_toml_data_no_extra_whitespace __________________\ntests/test_reprobot_tomlkit__352.py:71: in test_rewrite_toml_data_no_extra_whitespace\n    assert actual_toml_content == expected_toml_content\nE   assert '# xxx test\\n...   name = 3\\n' == '# xxx test\\n...   name = 3\\n'\nE     \nE     Skipping 35 identical leading characters in diff, use -v to show\nE       e = \"x7\"\nE     + \nE       \nE       [env2]\nE           name = 2...\nE     \nE     ...Full output truncated (3 lines hidden), use '-vv' to show\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_tomlkit__352.py::test_rewrite_toml_data_no_extra_whitespace\n1 failed in 0.05s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "tomlkit__439",
+      "repo": "python-poetry/tomlkit",
+      "variant": "s1",
+      "f2p": true,
+      "score_reason": "ok",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": true,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 1844,
+        "completion_tokens": 320,
+        "cost_usd": 0.0,
+        "calls": 2,
+        "cached_calls": 2
+      },
+      "wall_clock_s": 2.3,
+      "error": null,
+      "test_source": "import tomlkit\n\n\ndef test_issue_439_missing_keys_in_repr_of_outofordertableproxy():\n    \"\"\"\n    Reproduces the bug where OutOfOrderTableProxy's repr is missing keys.\n    \"\"\"\n    a = tomlkit.parse(\n        \"\"\"\na.b.c = \"d\"\na.b.e = \"f\"\n\"\"\"\n    )\n    value = a[\"a\"]\n    expected = {\"b\": {\"c\": \"d\", \"e\": \"f\"}}\n\n    # The bug manifests as `repr(value)` not matching `repr(expected)`\n    # because `value` (an OutOfOrderTableProxy) is missing the 'c' key in its\n    # internal representation used for repr.\n    assert repr(value) == repr(expected)\n",
+      "test_rel_path": "tests/test_reprobot_tomlkit__439.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "reproduced_assertion",
+          "exception_type": null,
+          "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n_________ test_issue_439_missing_keys_in_repr_of_outofordertableproxy __________\ntests/test_reprobot_tomlkit__439.py:20: in test_issue_439_missing_keys_in_repr_of_outofordertableproxy\n    assert repr(value) == repr(expected)\nE   assert \"{'b': {'e': 'f'}}\" == \"{'b': {'c': 'd', 'e': 'f'}}\"\nE     \nE     - {'b': {'c': 'd', 'e': 'f'}}\nE     ?        ----------\nE     + {'b': {'e': 'f'}}\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_tomlkit__439.py::test_issue_439_missing_keys_in_repr_of_outofordertableproxy\n1 failed in 0.05s\n"
+        }
+      ]
+    }
+  ]
+}

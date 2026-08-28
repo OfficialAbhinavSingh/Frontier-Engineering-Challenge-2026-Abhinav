@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nimport click\nfrom click.testing import CliRunner\n\n\n@pytest.fixture\ndef runner():\n    return CliRunner()\n\n\ndef test_fish_completion_multiline_help(runner):\n    @click.group()\n    def cli():\n        pass\n\n    @cli.command()\n    @click.option(\n        \"attachment_types\",\n        \"--at\",\n        \"--attachment-type\",\n        type=(str, str),\n        multiple=True,\n        help=\"\\b\\nAttachment with explicit mimetype,\\n--at image.jpg image/jpeg\",\n    )\n    def foo(attachment_types):\n        pass\n\n    # Simulate the environment variables set by fish for completion\n    # This is based on the analysis in the bug report\n    env = {\n        \"_CLICK_CLI_COMPLETE\": \"fish_complete\",\n        \"COMP_WORDS\": \"cli foo --\",\n        \"COMP_CWORD\": \"--\",\n    }\n\n    result = runner.invoke(cli, [\"--fish-completion\"], env=env)\n\n    # The bug report shows that the raw completion output contains unescaped newlines\n    # for the help text of the problematic option, which causes errors in fish.\n    # The fix should ensure that multiline help text is properly escaped or handled.\n    # We assert that the specific problematic unescaped newline sequence is no longer present.\n    assert \"plain,--at\\nAttachment with explicit mimetype,\" not in result.output\n```",
+  "usage": {
+    "prompt_tokens": 6563,
+    "completion_tokens": 328,
+    "cost_usd": 0.002789,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787948081.3912785
+}

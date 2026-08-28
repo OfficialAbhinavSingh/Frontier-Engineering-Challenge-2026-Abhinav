@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"When testing shell completion, ensure the `_shell_completion` helper is used correctly, as it handles environment setup and invocation.\",\n  \"Pay close attention to the `result.exit_code` when using `CliRunner`, as non-zero exit codes often indicate command-line parsing errors or unhandled exceptions rather than the specific bug being tested.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 815,
+    "completion_tokens": 83,
+    "cost_usd": 0.000452,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947032.6250484
+}

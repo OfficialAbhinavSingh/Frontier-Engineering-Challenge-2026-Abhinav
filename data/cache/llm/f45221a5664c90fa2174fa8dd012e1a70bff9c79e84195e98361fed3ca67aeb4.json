@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nfrom tomlkit import parse\nfrom tomlkit.exceptions import KeyAlreadyPresent, TOMLKitError\n\n\ndef test_value_then_table_split_redefinition_raises_at_parse() -> None:\n    \"\"\"\n    Test that an out-of-order value-vs-table redefinition\n    raises KeyAlreadyPresent at parse time.\n    \"\"\"\n    src = '[a]\\nb = true\\n[zz]\\n[a.b]\\nc = 1\\n'\n    with pytest.raises(KeyAlreadyPresent):\n        parse(src)\n\n\ndef test_dotted_key_then_table_split_redefinition_raises_at_parse() -> None:\n    \"\"\"\n    Test that an out-of-order dotted-key-vs-table redefinition\n    raises KeyAlreadyPresent at parse time.\n    \"\"\"\n    src = '[a]\\nb.c = 1\\n[zz]\\nq = 9\\n[a.b]\\nd = 2\\n'\n    with pytest.raises(KeyAlreadyPresent):\n        parse(src)\n```",
+  "usage": {
+    "prompt_tokens": 4407,
+    "completion_tokens": 246,
+    "cost_usd": 0.001937,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947843.860676
+}

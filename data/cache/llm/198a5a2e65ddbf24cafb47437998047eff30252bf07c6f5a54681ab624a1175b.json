@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"Okay, I've read `src/click/types.py`. I see `FuncParamType` and its `convert` method. The issue description provides the exact fix, so I know what the `convert` method *should* look like.\n\nNow I need to create a test case. I'll define a simple Click command that uses a `FuncParamType` with a custom function that raises a `ValueError`. Then I'll use `CliRunner` to invoke this command with an invalid input and check the output.\n\nThe current behavior should be that the error message contains the raw `ValueError` message. The desired behavior (after the fix) is that `self.fail` is called with `str(e)`, which typically prepends the parameter name to the error message.\n\nLet's try to create a test that expects the *buggy* output, so it fails when the fix is applied. Or, more simply, a test that expects the *fixed* output, so it fails *now*. The issue states: \\\"should give str(error) not str(input)\\\". This implies the current output is `str(input)` (or something similar to the raw value), and the desired output is the error message from the `ValueError`.\n\nLet's define a simple `from_str` function that raises a `ValueError` and a Click command that uses it. Then, I'll run it and capture the output.\", \"tool\": \"read_file\", \"args\": {\"path\": \"src/click/testing.py\"}}",
+  "usage": {
+    "prompt_tokens": 987,
+    "completion_tokens": 327,
+    "cost_usd": 0.001114,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947352.3949225
+}

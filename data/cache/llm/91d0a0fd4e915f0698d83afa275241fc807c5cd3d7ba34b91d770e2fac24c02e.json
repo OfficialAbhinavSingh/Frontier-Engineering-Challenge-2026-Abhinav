@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The user wants to add a test case that demonstrates the absence of a direct way to mark a `click.option` as deprecated. The test should fail at the current commit and pass once a deprecation mechanism is implemented.\n\nI need to:\n1. Create a Click command with an option that we want to treat as 'deprecated'.\n2. Attempt to use the 'deprecated' option.\n3. Assert that a warning or specific message is *not* present, which would be the failure condition.\n4. Once the feature is implemented, the test should pass because a warning *would* be present.\n\nLet's start by defining a simple Click command and try to simulate the scenario. I'll use `CliRunner` to invoke the command and capture its output. I'll check for the absence of a warning message when the 'deprecated' option is used.\", \"tool\": \"read_file\", \"args\": {\"path\": \"src/click/testing.py\"}}",
+  "usage": {
+    "prompt_tokens": 664,
+    "completion_tokens": 208,
+    "cost_usd": 0.000719,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946175.642185
+}

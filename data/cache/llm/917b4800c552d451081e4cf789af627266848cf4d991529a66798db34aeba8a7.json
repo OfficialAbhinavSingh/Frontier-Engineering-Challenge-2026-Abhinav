@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The user is reporting a bug where `tomlkit.dump` adds an extra whitespace line after a table when the TOML document is modified. The issue provides a clear example of the input TOML, the Python code to reproduce the issue, and the resulting TOML with the extra line. It also points to a potential cause in `tomlkit/container.py` related to `_replace_at` and `ends_with_whitespace`.\", \"final_test\": \"import tomlkit\\nimport os\\n\\ndef test_extra_whitespace_line():\\n    toml_content = \\\"\\\"\\\"\\n# xxx test\\n\\n\\n[env.pro1.rst]\\n    name = \\\"x7\\\"\\n\\n[env2]\\n    name = 2\\n\\n[env3]\\n    name = 3\\n\\\"\\\"\\\"\\n    expected_toml_content = \\\"\\\"\\\"\\n# xxx test\\n\\n\\n[env.pro1.rst]\\n    name = \\\"x7\\\"\\n\\n[env2]\\n    name = 2\\n\\n[env3]\\n    name = 3\\n\\\"\\\"\\\"\\n\\n    file_path = \\\"test.toml\\\"\\n\\n    with open(file_path, \\\"w\\\") as f:\\n        f.write(toml_content)\\n\\n    with open(file_path, \\\"r\\\") as f:\\n        t = tomlkit.load(f)\\n\\n    # The modification that triggers the bug\\n    # In this case, simply loading and dumping without actual modification\\n    # should preserve the original formatting, but the bug description implies\\n    # that even a merge operation (which might not change the value) can trigger it.\\n    # Let's simulate a no-op merge that touches the 'name' field.\\n    # The original issue description uses merge_dicts, but for a minimal failing test,\\n    # simply accessing and re-assigning a value should be enough to trigger the reformatting.\\n    t['env']['pro1']['rst']['name'] = \\\"x7\\\"\\n\\n    with open(file_path, \\\"w\\\") as f:\\n        tomlkit.dump(t, f)\\n\\n    with open(file_path, \\\"r\\\") as f:\\n        result_content = f.read()\\n\\n    os.remove(file_path)\\n\\n    # The bug adds an extra newline after [env.pro1.rst] name = \\\"x7\\\"\\n    # So the expected content should NOT have that extra newline.\\n    assert result_content == expected_toml_content\"}",
+  "usage": {
+    "prompt_tokens": 1095,
+    "completion_tokens": 588,
+    "cost_usd": 0.001798,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787945742.898733
+}

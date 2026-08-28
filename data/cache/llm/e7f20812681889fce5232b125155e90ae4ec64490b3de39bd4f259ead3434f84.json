@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "[\n  \"When adding new parameters to decorators like `click.option`, ensure the underlying `Param` class (or its relevant subclass) also accepts the new parameter in its `__init__` method.\",\n  \"New features or parameters should be added to the lowest-level class that represents them (e.g., `Param` for parameters, `Command` for commands) before being exposed through decorators or higher-level APIs.\"\n]",
+  "usage": {
+    "prompt_tokens": 734,
+    "completion_tokens": 92,
+    "cost_usd": 0.00045,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946425.1677644
+}

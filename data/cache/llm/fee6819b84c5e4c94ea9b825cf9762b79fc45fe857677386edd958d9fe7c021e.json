@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport tomlkit\n\n\ndef test_issue_439_missing_keys_in_repr_of_outofordertableproxy():\n    \"\"\"\n    Reproduces the bug where OutOfOrderTableProxy's repr is missing keys.\n    \"\"\"\n    a = tomlkit.parse(\n        \"\"\"\na.b.c = \"d\"\na.b.e = \"f\"\n\"\"\"\n    )\n    value = a[\"a\"]\n    expected = {\"b\": {\"c\": \"d\", \"e\": \"f\"}}\n\n    # The bug manifests as `repr(value)` not matching `repr(expected)`\n    # because `value` (an OutOfOrderTableProxy) is missing the 'c' key in its\n    # internal representation used for repr.\n    assert repr(value) == repr(expected)\n```",
+  "usage": {
+    "prompt_tokens": 1127,
+    "completion_tokens": 189,
+    "cost_usd": 0.000811,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787945874.797778
+}

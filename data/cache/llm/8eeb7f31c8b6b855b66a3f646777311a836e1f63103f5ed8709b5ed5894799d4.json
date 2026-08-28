@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"Avoid importing external libraries like `torch` in tests; the project's tests primarily rely on standard library modules and `tomlkit`'s own components.\",\n  \"Tests should be self-contained and not depend on external data or complex setup beyond what's provided by `tomlkit`'s internal testing utilities.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 785,
+    "completion_tokens": 77,
+    "cost_usd": 0.000428,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787949363.513891
+}

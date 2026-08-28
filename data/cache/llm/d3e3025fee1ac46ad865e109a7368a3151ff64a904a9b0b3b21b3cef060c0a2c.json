@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"reproduced\": false,\n  \"why\": \"The test failed with an exit code of 1, but the bug report describes a ResourceWarning, not a SystemExit, indicating the test did not reproduce the reported bug.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 1975,
+    "completion_tokens": 57,
+    "cost_usd": 0.000735,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947018.5372005
+}

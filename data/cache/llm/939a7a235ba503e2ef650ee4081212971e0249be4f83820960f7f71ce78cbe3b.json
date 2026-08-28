@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The test run failed, but not with a `ParseError`. It seems `sqlglot.parse_one` returns `None` instead of raising an error when it can't parse. I need to adjust the test to assert that the result is `None`.\", \"tool\": \"run_test\", \"args\": {\"source\": \"\\nimport pytest\\nimport sqlglot\\n\\ndef test_databricks_insert_replace_using():\\n    sql = \\\"\\\"\\\"\\nINSERT INTO TABLE students\\n    REPLACE USING (country)\\n    SELECT * FROM new_students;\\n\\\"\\\"\\\"\\n    parsed = sqlglot.parse_one(sql, dialect=\\\"databricks\\\")\\n    assert parsed is None\\n\"}}",
+  "usage": {
+    "prompt_tokens": 2579,
+    "completion_tokens": 165,
+    "cost_usd": 0.000641,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947391.3994365
+}

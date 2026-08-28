@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport os\nimport sys\nfrom io import BytesIO\nfrom io import StringIO\n\nimport pytest\n\nimport click\n\n\n@pytest.mark.skipif(sys.platform.startswith(\"win\"), reason=\"Linux-specific bug\")\ndef test_prompt_backspace_linux(runner, monkeypatch):\n    # Simulate a user typing \"hello\" then backspacing once to get \"hell\"\n    # The bug causes backspace to remove two characters or the entire line.\n    # We expect only one character to be removed.\n    user_input = b\"hello\\x7f\\n\"  # \\x7f is ASCII for backspace\n\n    # Patch sys.stdin to provide our simulated input\n    monkeypatch.setattr(sys, \"stdin\", BytesIO(user_input))\n\n    # Patch sys.stdout to capture the output\n    output_capture = StringIO()\n    monkeypatch.setattr(sys, \"stdout\", output_capture)\n    monkeypatch.setattr(sys, \"stderr\", output_capture)\n\n    # Ensure isatty returns True for interactive behavior\n    monkeypatch.setattr(sys.stdin, \"isatty\", lambda: True)\n    monkeypatch.setattr(sys.stdout, \"isatty\", lambda: True)\n\n    @click.command()\n    def cli():\n        name = click.prompt(\"Enter something\")\n        click.echo(f\"You entered: {name}\")\n\n    result = runner.invoke(cli, [], catch_exceptions=False)\n\n    # The bug causes the returned input to be different from what's expected\n    # after backspace. If the bug is fixed, \"hell\" should be returned.\n    assert \"You entered: hell\" in result.output\n```",
+  "usage": {
+    "prompt_tokens": 4465,
+    "completion_tokens": 385,
+    "cost_usd": 0.002302,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787948181.5999086
+}

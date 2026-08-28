@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nfrom tomlkit import dumps\nfrom tomlkit import parse\n\ndef test_whitespace_preservation_in_dotted_keys() -> None:\n    content = \"\"\"\n[keys.a]\n#    \u2193 this whitespace disappears\n[keys .'a'.'c']\n  'd'\t= 'e'\n\"\"\"\n    doc = parse(content)\n    # The bug report states that \"self to self shouldn't change anything?\"\n    # and that the whitespace disappears after this operation.\n    # We simulate this by reassigning the item to itself.\n    doc[\"keys\"][\"a\"] = doc[\"keys\"][\"a\"]\n    doc[\"keys\"][\"a\"][\"c\"] = doc[\"keys\"][\"a\"][\"c\"] # This line is not in the original bug report, but it is necessary to trigger the bug.\n    assert dumps(doc) == content.strip()\n```",
+  "usage": {
+    "prompt_tokens": 3317,
+    "completion_tokens": 193,
+    "cost_usd": 0.001478,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946443.700952
+}

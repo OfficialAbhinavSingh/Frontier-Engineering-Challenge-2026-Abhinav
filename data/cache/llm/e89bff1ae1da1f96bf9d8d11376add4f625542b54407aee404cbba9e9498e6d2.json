@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The user wants a pytest test file that fails due to the `OptimizeError: Column 'generate_series' could not be resolved` when using `lineage` with `validate_qualify_columns=True` on a StarRocks query involving `TABLE(generate_series(...))`. The test should pass once the bug is fixed.\", \"tool\": \"read_file\", \"args\": {\"path\": \"sqlglot/lineage.py\"}}",
+  "usage": {
+    "prompt_tokens": 884,
+    "completion_tokens": 97,
+    "cost_usd": 0.000508,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947416.0059552
+}

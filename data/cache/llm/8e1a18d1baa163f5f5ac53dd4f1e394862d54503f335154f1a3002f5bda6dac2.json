@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nfrom collections.abc import Callable\nfrom tomlkit import dumps\nfrom tomlkit import loads\n\n\ndef test_missing_newline_after_inline_table() -> None:\n    v = loads(\"\"\"[x]\\na.b = {}\"\"\")\n    v[\"x\"][\"c\"] = 3\n    expected_output = \"\"\"[x]\na.b = {}\nc = 3\n\"\"\"\n    assert dumps(v) == expected_output\n\n```",
+  "usage": {
+    "prompt_tokens": 3551,
+    "completion_tokens": 102,
+    "cost_usd": 0.00132,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787948127.636103
+}

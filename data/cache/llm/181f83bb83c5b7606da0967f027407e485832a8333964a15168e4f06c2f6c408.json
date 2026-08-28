@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"sqlglot/parsers/mysql.py\",\n    \"sqlglot/parser.py\"\n  ],\n  \"test_file\": \"tests/dialects/test_mysql.py\",\n  \"why\": \"The issue is a parse error specific to MySQL when encountering AUTO_INCREMENT in a CREATE TABLE statement, making the MySQL parser the most likely source of the bug and the MySQL dialect test file the appropriate place for a regression test.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 796,
+    "completion_tokens": 113,
+    "cost_usd": 0.000521,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947817.1166203
+}

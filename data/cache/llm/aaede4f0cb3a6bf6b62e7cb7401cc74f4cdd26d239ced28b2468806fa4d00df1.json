@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nfrom collections.abc import Callable\nfrom typing import Any\n\nimport pytest\n\nfrom tomlkit import parse\nfrom tomlkit.toml_document import TOMLDocument\n\n\ndef test_repr_of_nested_table_proxy_includes_all_keys() -> None:\n    content = \"\"\"\na.b.c = \"d\"\na.b.e = \"f\"\n\"\"\"\n    doc = parse(content)\n    value = doc[\"a\"]\n    expected = {\"b\": {\"c\": \"d\", \"e\": \"f\"}}\n\n    assert repr(value) == repr(expected)\n```",
+  "usage": {
+    "prompt_tokens": 2224,
+    "completion_tokens": 136,
+    "cost_usd": 0.001007,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787945916.536983
+}

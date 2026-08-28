@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\"tomlkit/toml_document.py\", \"tomlkit/items.py\"],\n  \"test_file\": \"tests/test_toml_document.py\",\n  \"why\": \"The issue describes incorrect formatting when dumping a TOML document after modification, specifically a missing newline after an inline table, which points to the TOML document's serialization logic and how items are handled within it.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 781,
+    "completion_tokens": 99,
+    "cost_usd": 0.000482,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947836.5964575
+}

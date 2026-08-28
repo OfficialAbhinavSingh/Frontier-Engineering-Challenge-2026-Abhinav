@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport tomlkit\n\n\ndef test_missing_keys_in_repr_of_outofordertableproxy():\n    \"\"\"\n    Reproduces the bug where OutOfOrderTableProxy's repr is missing keys.\n    \"\"\"\n    toml_content = \"\"\"\na.b.c = \"d\"\na.b.e = \"f\"\n\"\"\"\n    a = tomlkit.parse(toml_content)\n\n    # The issue specifically occurs when accessing a nested table\n    value = a[\"a\"]\n    expected = {\"b\": {\"c\": \"d\", \"e\": \"f\"}}\n\n    # The assertion that fails in the original report\n    # This checks if the string representation of 'value' matches 'expected'\n    # The bug is that 'value' (an OutOfOrderTableProxy) is missing 'c' in its repr\n    assert repr(value) == repr(expected)\n\n```",
+  "usage": {
+    "prompt_tokens": 635,
+    "completion_tokens": 202,
+    "cost_usd": 0.000696,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787945671.5796149
+}

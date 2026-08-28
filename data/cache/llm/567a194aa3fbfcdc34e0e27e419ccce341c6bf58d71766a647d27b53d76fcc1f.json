@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport os\nimport pytest\nimport click\nfrom click import Command, Group, Option\nfrom click.shell_completion import _resolve_context, _resolve_incomplete\nfrom click.testing import CliRunner\n\n\n@pytest.fixture\ndef runner():\n    return CliRunner()\n\n\ndef test_file_option_resource_warning(runner, tmp_path):\n    config_file_path = tmp_path / \"config.txt\"\n    config_file_path.write_text(\"test_config\")\n\n    @click.group()\n    @click.option(\n        \"--config_file\",\n        default=str(config_file_path),\n        type=click.File(mode=\"r\"),\n        help=\"help\",\n    )\n    @click.pass_context\n    def cli(ctx, config_file):\n        pass\n\n    # Simulate shell completion environment variables\n    env = {\n        \"_CLI_COMPLETE\": \"complete-bash\",\n        \"COMP_WORDS\": \"cli --config_file\",\n        \"COMP_CWORD\": \"2\",\n    }\n\n    # Run the command with shell completion enabled\n    # We expect no ResourceWarning to be raised.\n    # The warning is typically printed to stderr, but we can't directly\n    # assert its absence without capturing stderr.\n    # Instead, we rely on pytest's default behavior to fail if a\n    # ResourceWarning is unhandled.\n    # The fix should ensure the file is closed, thus preventing the warning.\n    result = runner.invoke(cli, [\"--config_file\", str(config_file_path)], env=env)\n\n    # If the bug is present, a ResourceWarning will be emitted.\n    # Pytest by default treats ResourceWarnings as errors, so the test will fail.\n    # If the bug is fixed, no warning will be emitted, and the test will pass.\n    assert result.exit_code == 0\n    assert not result.exception\n```",
+  "usage": {
+    "prompt_tokens": 5392,
+    "completion_tokens": 436,
+    "cost_usd": 0.002708,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946471.6161482
+}

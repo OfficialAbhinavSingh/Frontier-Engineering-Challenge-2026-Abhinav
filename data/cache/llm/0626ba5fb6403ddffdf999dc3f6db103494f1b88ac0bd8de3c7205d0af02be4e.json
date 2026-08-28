@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"My apologies again. I will be more careful.\n\nI'm looking at `src/click/testing.py` to see how to invoke a Click application programmatically and capture its output, which will be useful for testing the completion output. The `CliRunner` class seems appropriate for this.\n\nHere's my plan:\n1. Define a simple Click app with a multi-line help string.\n2. Use `CliRunner` to invoke this app with the environment variable `_CLICK_COMPLETE=fish_source`.\n3. Assert that the output contains the problematic multi-line help string, which indicates the bug. The fish completion script expects a single line for the help text, and newlines break its parsing.\n\nLet's try to construct the test.\", \"final_test\": \"import click\\nfrom click.testing import CliRunner\\n\\ndef test_fish_completion_multiline_help_bug():\\n    @click.group()\\n    def cli():\\n        pass\\n\\n    @cli.command()\\n    @click.option(\\n        \\\"--test-option\\\",\\n        help=\\\"This is the first line.\\\\nThis is the second line of help.\\\",\\n    )\\n    def hello(test_option):\\n        click.echo(f\\\"Hello {test_option}\\\")\\n\\n    runner = CliRunner()\\n    result = runner.invoke(\\n        cli,\\n        [],\\n        env={\\n            \\\"_CLICK_COMPLETE\\\": \\\"fish_source\\\",\\n            \\\"_CLICK_CLI_NAME\\\": \\\"cli\\\",\\n            \\\"COMP_WORDS\\\": \\\"cli --\\\",\\n            \\\"COMP_CWORD\\\": \\\"1\\\",\\n        },\\n    )\\n\\n    assert result.exit_code == 0\\n    # The bug is that the multi-line help text is not escaped/handled correctly\\n    # and appears directly in the completion output, which would break fish.\\n    # We expect to see the raw multi-line help text in the output.\\n    expected_output_part = \\\"plain,--test-option\\\\nThis is the first line.\\\\nThis is the second line of help.\\\"\\n    assert expected_output_part in result.output\\n\"}",
+  "usage": {
+    "prompt_tokens": 2396,
+    "completion_tokens": 493,
+    "cost_usd": 0.001406,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947314.506664
+}

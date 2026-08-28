@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nimport tomlkit\n\ndef test_nesting_table_in_inline_table_raises_error():\n    t = tomlkit.table()\n    t.append(\"a\", 1)\n\n    it = tomlkit.inline_table()\n\n    with pytest.raises(tomlkit.exceptions.TOMLKitError, match=\"Cannot nest a Table inside an InlineTable\"):\n        it.append(\"table\", t)\n\n    d = tomlkit.document()\n    d.append(\"inline_table\", it)\n\n    # Also test the dump method directly to ensure it doesn't silently write invalid TOML\n    with pytest.raises(tomlkit.exceptions.TOMLKitError, match=\"Cannot dump a document containing a Table nested in an InlineTable\"):\n        tomlkit.dumps(d)\n```",
+  "usage": {
+    "prompt_tokens": 476,
+    "completion_tokens": 185,
+    "cost_usd": 0.000605,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947216.836518
+}

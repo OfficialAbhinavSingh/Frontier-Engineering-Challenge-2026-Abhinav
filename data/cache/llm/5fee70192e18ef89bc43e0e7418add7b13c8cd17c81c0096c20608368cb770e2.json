@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nimport sqlglot\n\n\n@pytest.mark.xfail(reason=\"Issue #7949: Support `REPLACE USING` for INSERT\")\ndef test_insert_replace_using():\n    sql = \"\"\"\nINSERT INTO TABLE students\n    REPLACE USING (country)\n    SELECT * FROM new_students;\n\"\"\"\n    # This should parse without error and produce a valid expression tree.\n    # The exact structure of the expression tree might evolve, but the key is that\n    # `REPLACE USING (country)` is recognized and associated with the INSERT statement.\n    expression = sqlglot.parse_one(sql, dialect=\"databricks\")\n\n    # For now, we can assert that it parses without raising an exception.\n    # Once implemented, more specific assertions about the expression structure\n    # (e.g., checking for a 'replace' argument on the Insert expression) can be added.\n    assert expression is not None\n    assert expression.sql(dialect=\"databricks\") == sql.strip()\n\n```",
+  "usage": {
+    "prompt_tokens": 3079,
+    "completion_tokens": 229,
+    "cost_usd": 0.001496,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947647.6209147
+}

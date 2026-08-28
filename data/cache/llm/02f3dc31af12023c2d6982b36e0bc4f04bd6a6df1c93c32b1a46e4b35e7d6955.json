@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"My apologies again for the JSON formatting. I will be more careful.\n\nThe previous test run failed because the `exit_code` was 2 instead of 0. I've corrected the `_CLICK_COMPLETE` environment variable to `fish_complete` to match the issue's replication steps for obtaining raw completion output. This should make Click generate the completion suggestions for the given input, rather than the full completion script.\n\nLet's run this updated test and see the outcome.\", \"tool\": \"run_test\", \"args\": {\"source\": \"import click\\nfrom click.testing import CliRunner\\n\\ndef test_fish_completion_multiline_help_bug():\\n    @click.group()\\n    def cli():\\n        pass\\n\\n    @cli.command()\\n    @click.option(\\n        \\\"--test-option\\\",\\n        help=\\\"This is the first line.\\\\nThis is the second line of help.\\\",\\n    )\\n    def hello(test_option):\\n        click.echo(f\\\"Hello {test_option}\\\")\\n\\n    runner = CliRunner()\\n    result = runner.invoke(\\n        cli,\\n        [],\\n        env={\\n            \\\"_CLICK_COMPLETE\\\": \\\"fish_complete\\\",  # Changed from fish_source\\n            \\\"_CLICK_CLI_NAME\\\": \\\"cli\\\",\\n            \\\"COMP_WORDS\\\": \\\"cli --\\\",\\n            \\\"COMP_CWORD\\\": \\\"1\\\",  # Index of '--'\\n        },\\n    )\\n\\n    # When generating completions, Click should exit with 0 if successful.\\n    assert result.exit_code == 0, f\\\"Expected exit code 0, got {result.exit_code}. Output: {result.output}\\\"\\n\\n    # The bug is that the multi-line help text is not escaped/handled correctly\\n    # and appears directly in the completion output, which would break fish.\\n    # We expect to see the raw multi-line help text in the output.\\n    expected_output_part = \\\"plain,--test-option\\\\nThis is the first line.\\\\nThis is the second line of help.\\\"\\n    assert expected_output_part in result.output\\n\"}}",
+  "usage": {
+    "prompt_tokens": 4289,
+    "completion_tokens": 496,
+    "cost_usd": 0.00171,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947324.9156482
+}

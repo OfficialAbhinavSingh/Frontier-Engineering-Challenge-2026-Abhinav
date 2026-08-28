@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"Shell completion tests require specific environment variables to be set up correctly; `_get_completions` is the helper function to use for this, and it needs to be provided with the correct `shell` argument.\",\n  \"When testing shell completion output, be aware that the `_get_completions` helper function returns a list of individual completion strings, not a single string that needs to be parsed. The expected output should reflect this list structure.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 793,
+    "completion_tokens": 105,
+    "cost_usd": 0.0005,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787948170.2697582
+}

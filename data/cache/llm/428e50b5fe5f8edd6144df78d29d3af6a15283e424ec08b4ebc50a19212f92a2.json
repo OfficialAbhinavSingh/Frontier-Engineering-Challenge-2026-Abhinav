@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport tomlkit\nimport pytest\n\ndef test_array_of_floats_to_list():\n    \"\"\"\n    Test that an Array of Floats can be converted to a Python list of floats\n    without raising a TypeError.\n    \"\"\"\n    arr = tomlkit.loads(\"\"\"\n    a = [1.0, 2.0, 3.0]\n    \"\"\")\n\n    # Accessing arr['a'] should return a tomlkit.items.Array\n    assert isinstance(arr['a'], tomlkit.items.Array)\n\n    # The elements within the Array are tomlkit.items.Float\n    assert isinstance(arr['a'][0], tomlkit.items.Float)\n\n    # The bug causes a TypeError when trying to iterate over the tomlkit.items.Array\n    # as if it were a standard Python list, specifically when a library like torch\n    # tries to convert it.\n    # The expected behavior is that it should be convertible to a list of native Python floats.\n    expected_list = [1.0, 2.0, 3.0]\n    actual_list = list(arr['a']) # This line should not raise TypeError\n\n    assert actual_list == expected_list\n    assert all(isinstance(x, float) for x in actual_list)\n\n    # This part specifically targets the reported issue with torch.tensor\n    # We use a mock torch.tensor to avoid adding a dependency, but the\n    # core issue is the iteration over tomlkit.items.Array.\n    class MockTorchTensor:\n        def __init__(self, data, dtype):\n            if not isinstance(data, list):\n                # Simulate the error if the input is not iterable in the expected way\n                raise TypeError(f\"object of type '{type(data).__name__}' has no len()\")\n            self.data = data\n            self.dtype = dtype\n\n    # This call should pass without TypeError once the bug is fixed\n    try:\n        t = MockTorchTensor(arr['a'], dtype=\"torch.float32\")\n        assert t.data == expected_list\n    except TypeError as e:\n        pytest.fail(f\"TypeError: {e} was raised, but should not have been. \"\n                    \"tomlkit.items.Array should be iterable like a list of native types.\")\n\n```",
+  "usage": {
+    "prompt_tokens": 4291,
+    "completion_tokens": 524,
+    "cost_usd": 0.002597,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947743.9099662
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\"reproduced\": true, \"why\": \"The test failed because the actual completions did not match the expected completions, specifically showing 'plain' and splitting the colon-separated values, which is the exact behavior described in the bug report.\"}\n```",
+  "usage": {
+    "prompt_tokens": 1654,
+    "completion_tokens": 54,
+    "cost_usd": 0.000631,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787948168.5489595
+}

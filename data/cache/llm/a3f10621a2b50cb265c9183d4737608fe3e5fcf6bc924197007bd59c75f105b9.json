@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"When a test fails due to an `AttributeError` on a `click` object, it often indicates a typo or a misunderstanding of the public API. Consult `click/__init__.py` for available attributes.\",\n  \"When asserting on CLI output, be mindful of the full output string, including usage messages and newlines, as `result.output` captures everything printed to `stderr` and `stdout`.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 765,
+    "completion_tokens": 97,
+    "cost_usd": 0.000472,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787948220.0974119
+}

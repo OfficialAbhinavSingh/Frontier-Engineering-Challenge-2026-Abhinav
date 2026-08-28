@@ -1,0 +1,147 @@
+{
+  "variant": "b0",
+  "description": "one prompt, no tools, no execution",
+  "model": "google/gemini-2.5-flash",
+  "n_cases": 6,
+  "f2p_solved": 1,
+  "f2p_rate": 0.1667,
+  "total_cost_usd": 0.0,
+  "total_llm_calls": 6,
+  "cached_llm_calls": 6,
+  "mean_wall_clock_s": 1.2,
+  "wall_clock_total_s": 7.2,
+  "results": [
+    {
+      "case_id": "click__2263",
+      "repo": "pallets/click",
+      "variant": "b0",
+      "f2p": false,
+      "score_reason": "did_not_fail_at_parent:passed",
+      "verdict_at_parent": "no_fail",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 1024,
+        "completion_tokens": 688,
+        "cost_usd": 0.0,
+        "calls": 1,
+        "cached_calls": 1
+      },
+      "wall_clock_s": 0.8,
+      "error": null,
+      "test_source": "import click\nfrom click.testing import CliRunner\nimport pytest\n\ndef test_deprecated_option_warning():\n    @click.command()\n    @click.option('--greetings-count', default=1, help='Number of greetings.')\n    @click.option('--count', default=1, hidden=True,\n                  help='Deprecated: Use --greetings-count instead.')\n    def hello(greetings_count, count):\n        \"\"\"Simple program that greets NAME for a total of COUNT times.\"\"\"\n        if count != 1:  # Check if --count was actually used\n            click.echo(\"Warning: --count is deprecated. Use --greetings-count instead.\", err=True)\n            greetings_count = count\n        for x in range(greetings_count):\n            click.echo(f\"Hello!\")\n\n    runner = CliRunner()\n    result = runner.invoke(hello, ['--count', '5'])\n\n    assert \"Warning: --count is deprecated. Use --greetings-count instead.\" in result.stderr\n    assert \"Hello!\" in result.output\n    assert result.exit_code == 0\n\ndef test_deprecated_option_renamed_and_used_together_fails():\n    @click.command()\n    @click.option('--greetings-count', default=1, help='Number of greetings.')\n    @click.option('--count', default=1, hidden=True,\n                  help='Deprecated: Use --greetings-count instead.')\n    def hello(greetings_count, count):\n        \"\"\"Simple program that greets NAME for a total of COUNT times.\"\"\"\n        if count != 1 and greetings_count != 1:\n            # This is the bug: Click should ideally prevent both from being used\n            # or provide a mechanism to handle this gracefully.\n            # For this test, we'll make it fail if both are present.\n            click.echo(\"Error: Cannot use both --count and --greetings-count.\", err=True)\n            raise click.BadOptionUsage(\"--count\", \"Cannot use both --count and --greetings-count.\")\n        elif count != 1:\n            click.echo(\"Warning: --count is deprecated. Use --greetings-count instead.\", err=True)\n            greetings_count = count\n\n        for x in range(greetings_count):\n            click.echo(f\"Hello!\")\n\n    runner = CliRunner()\n    result = runner.invoke(hello, ['--count', '2', '--greetings-count', '3'])\n\n    # The bug is that Click doesn't inherently prevent using both a deprecated\n    # option and its replacement, nor does it provide a built-in way to mark\n    # an option as deprecated with automatic conflict handling.\n    # The current implementation requires manual checks in the command function.\n    # This test expects the manual check to trigger an error, demonstrating\n    # the lack of a built-in solution.\n    assert \"Error: Cannot use both --count and --greetings-count.\" in result.stderr\n    assert result.exit_code != 0\n",
+      "test_rel_path": "tests/test_reprobot_click__2263.py",
+      "attempts": []
+    },
+    {
+      "case_id": "click__2644",
+      "repo": "pallets/click",
+      "variant": "b0",
+      "f2p": false,
+      "score_reason": "did_not_pass_at_fix:failed",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 1913,
+        "completion_tokens": 390,
+        "cost_usd": 0.0,
+        "calls": 1,
+        "cached_calls": 1
+      },
+      "wall_clock_s": 1.5,
+      "error": null,
+      "test_source": "import os\nimport sys\nimport pytest\nimport click\nfrom click.testing import CliRunner\n\n@pytest.fixture\ndef config_file(tmp_path):\n    f = tmp_path / \"config.txt\"\n    f.write_text(\"test_config_data\")\n    return str(f)\n\ndef test_file_option_completion_resource_warning(config_file):\n    @click.group()\n    @click.option('--config_file',\n                  default=config_file,\n                  type=click.File(mode='r'),\n                  help='help')\n    @click.pass_context\n    def cli(ctx, config_file):\n        pass\n\n    runner = CliRunner()\n\n    # Simulate shell completion environment variables\n    os.environ[\"_CLI_COMPLETE\"] = \"bash_source\"\n    os.environ[\"_CLI_COMPLETION\"] = \"complete\"\n    os.environ[\"COMP_WORDS\"] = \"cli --config_file\"\n    os.environ[\"COMP_CWORD\"] = \"1\"\n\n    # Capture stderr to check for ResourceWarning\n    with pytest.warns(ResourceWarning) as record:\n        result = runner.invoke(cli, [\"--config_file\"], complete_var=\"COMP_WORDS\")\n\n    # Assert that a ResourceWarning related to an unclosed file was issued\n    assert len(record) >= 1\n    assert any(\"unclosed file\" in str(w.message) for w in record)\n\n    # Clean up environment variables\n    del os.environ[\"_CLI_COMPLETE\"]\n    del os.environ[\"_CLI_COMPLETION\"]\n    del os.environ[\"COMP_WORDS\"]\n    del os.environ[\"COMP_CWORD\"]\n",
+      "test_rel_path": "tests/test_reprobot_click__2644.py",
+      "attempts": []
+    },
+    {
+      "case_id": "sqlglot__5178",
+      "repo": "tobymao/sqlglot",
+      "variant": "b0",
+      "f2p": false,
+      "score_reason": "did_not_pass_at_fix:failed",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 2888,
+        "completion_tokens": 133,
+        "cost_usd": 0.0,
+        "calls": 1,
+        "cached_calls": 1
+      },
+      "wall_clock_s": 2.1,
+      "error": null,
+      "test_source": "import pytest\nfrom sqlglot import parse_one, ParseError\n\ndef test_trino_cte_udf_parse_error():\n    sql = \"\"\"\n    WITH FUNCTION f(num int)\n        RETURNS int\n        RETURN num\n    SELECT f(1);\n    \"\"\"\n    with pytest.raises(ParseError) as exc_info:\n        parse_one(sql, dialect=\"trino\")\n    assert \"Expecting\" in str(exc_info.value)\n    assert \"Line 1, Col: 15\" in str(exc_info.value)\n",
+      "test_rel_path": "tests/dialects/test_reprobot_sqlglot__5178.py",
+      "attempts": []
+    },
+    {
+      "case_id": "tomlkit__291",
+      "repo": "python-poetry/tomlkit",
+      "variant": "b0",
+      "f2p": false,
+      "score_reason": "did_not_fail_at_parent:passed",
+      "verdict_at_parent": "no_fail",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 633,
+        "completion_tokens": 931,
+        "cost_usd": 0.0,
+        "calls": 1,
+        "cached_calls": 1
+      },
+      "wall_clock_s": 0.7,
+      "error": null,
+      "test_source": "from tomlkit import dumps\nfrom tomlkit import parse\n\n\ndef test_whitespace_in_dot_notation_preservation():\n    content = \"\"\"\n[keys.a]\n#    \u2193 this whitespace disappears\n[keys .'a'.'c']\n  'd'\\t= 'e'\n\"\"\"\n    doc = parse(content)\n    \n    # The original issue description suggests that reassigning a section to itself\n    # might trigger the bug. Let's simulate that.\n    # However, the core of the bug is about the parsing and dumping of the key\n    # with specific whitespace, not necessarily the reassignment itself.\n    # The reassignment might just be a way to trigger a re-serialization.\n    \n    # Let's focus on the direct parsing and dumping to see if the whitespace is lost.\n    # The expected behavior is that the whitespace in the key '[keys .'a'.'c']'\n    # should be preserved exactly as it was parsed.\n\n    # The original content has a specific whitespace pattern in the key:\n    # '[keys .'a'.'c']' - there's a space after 'keys' and before '.'a'.'c'\n    # and also a space after the first dot and before 'a'.\n\n    # When parsed and then dumped, we expect this exact key representation to be maintained.\n    # The bug implies that the whitespace might be normalized or lost.\n\n    # Perform a round trip: parse and then dump\n    dumped_content = dumps(doc)\n\n    # The bug description mentions that the whitespace disappears.\n    # Let's check if the specific key string is present in the dumped content\n    # with its original whitespace.\n    \n    # The original key string with its specific whitespace\n    original_key_line = \"[keys .'a'.'c']\"\n    \n    # The bug implies that the dumped content might normalize this to something like:\n    # \"[keys.'a'.'c']\" or \"[keys. 'a'.'c']\" or \"[keys. 'a'.'c']\"\n    # The most likely normalization would be to remove the space after 'keys'\n    # and before the first dot-notation segment.\n\n    # We need to assert that the dumped content contains the key exactly as it was.\n    # Since the issue mentions \"whitespace disappears\", we'll check for the exact match.\n    assert original_key_line in dumped_content, \\\n        f\"Expected key '{original_key_line}' to be preserved in dumped content, but it was not. \" \\\n        f\"Dumped content:\\n{dumped_content}\"\n\n    # Additionally, let's check the full roundtrip as suggested by the original issue\n    # where `dumps(doc) == doc` was expected to fail.\n    # This implies that the `doc` object itself might lose information that `dumps` then reflects.\n    # However, `doc` is a Python object, not a string, so `dumps(doc) == doc` is not a valid comparison.\n    # The correct comparison for a roundtrip is `parse(dumps(doc)) == doc` or `dumps(parse(content)) == content`.\n\n    # Let's perform the full roundtrip and compare the string output.\n    # This is a more robust check for preservation.\n    roundtrip_content = dumps(parse(content))\n\n    # The bug states that the whitespace disappears.\n    # So, if the bug is present, `roundtrip_content` will not be equal to `content`.\n    # Specifically, the line `[keys .'a'.'c']` will be altered.\n    \n    # We need to be careful with line endings and trailing newlines that `dumps` might add.\n    # Let's normalize both for comparison.\n    normalized_original_content = content.strip()\n    normalized_roundtrip_content = roundtrip_content.strip()\n\n    assert normalized_roundtrip_content == normalized_original_content, \\\n        \"Roundtrip (parse -> dumps) did not preserve all whitespace in keys.\" \\\n        f\"\\n--- Original ---\\n{normalized_original_content}\" \\\n        f\"\\n--- Dumped ---\\n{normalized_roundtrip_content}\"\n",
+      "test_rel_path": "tests/test_reprobot_tomlkit__291.py",
+      "attempts": []
+    },
+    {
+      "case_id": "tomlkit__352",
+      "repo": "python-poetry/tomlkit",
+      "variant": "b0",
+      "f2p": false,
+      "score_reason": "did_not_fail_at_parent:passed",
+      "verdict_at_parent": "no_fail",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 1129,
+        "completion_tokens": 921,
+        "cost_usd": 0.0,
+        "calls": 1,
+        "cached_calls": 1
+      },
+      "wall_clock_s": 0.8,
+      "error": null,
+      "test_source": "import os\nfrom collections import OrderedDict\n\nimport pytest\n\nimport tomlkit\nfrom tomlkit.container import Container\nfrom tomlkit.items import AoT\nfrom tomlkit.items import Table\nfrom tomlkit.items import Whitespace\n\n\n@pytest.fixture\ndef toml_file(tmp_path):\n    content = \"\"\"# xxx test\n\n\n[env.pro1.rst]\n    name = \"x7\"\n\n[env2]\n    name = 2\n\n[env3]\n    name = 3\n\"\"\"\n    file_path = tmp_path / \"test.toml\"\n    file_path.write_text(content)\n    return file_path\n\n\ndef merge_dicts(a: dict, b: dict):\n    # This is the original merge_dicts from the issue description\n    # that causes the extra newline.\n    ret = a\n\n    for k, v in b.items():\n        if k in a and isinstance(a[k], (dict, OrderedDict, Container)):\n            ret[k] = merge_dicts(a[k], v)\n\n    return ret\n\n\ndef merge_dict_to_toml_local(a: tomlkit.TOMLDocument, b: dict):\n    # This is the alternative merge_dicts from the issue description\n    # that does NOT cause the extra newline.\n    for k, v in b.items():\n        if k in a and isinstance(a[k], (dict, OrderedDict, Container)):\n            merge_dict_to_toml_local(a[k], v)\n        else:\n            a[k] = v\n\n\ndef update_toml_with_buggy_merge(file_path):\n    with open(file_path, \"r\") as f:\n        t = tomlkit.load(f)\n\n    t = merge_dicts(\n        t,\n        {'env': {'pro1': {'rst': {'name': \"x7\"}}}}\n    )\n\n    with open(file_path, \"w\") as f:\n        tomlkit.dump(t, f)\n\n\ndef update_toml_with_fixed_merge(file_path):\n    with open(file_path, \"r\") as f:\n        t = tomlkit.load(f)\n\n    merge_dict_to_toml_local(\n        t,\n        {'env': {'pro1': {'rst': {'name': \"x7\"}}}}\n    )\n\n    with open(file_path, \"w\") as f:\n        tomlkit.dump(t, f)\n\n\ndef test_rewrite_toml_adds_whitespace_line(toml_file):\n    \"\"\"\n    Test that rewriting TOML data using the original merge_dicts\n    function adds an unexpected whitespace line.\n    \"\"\"\n    update_toml_with_buggy_merge(toml_file)\n\n    expected_content = \"\"\"# xxx test\n\n\n[env.pro1.rst]\n    name = \"x7\"\n\n\n[env2]\n    name = 2\n\n[env3]\n    name = 3\n\"\"\"\n    actual_content = toml_file.read_text()\n\n    assert actual_content == expected_content, \"The TOML file should have an extra whitespace line after [env.pro1.rst]\"\n\n\ndef test_rewrite_toml_without_extra_whitespace_line(toml_file):\n    \"\"\"\n    Test that rewriting TOML data using the alternative merge_dict_to_toml_local\n    function does NOT add an unexpected whitespace line.\n    This test serves as a control to show the desired behavior.\n    \"\"\"\n    update_toml_with_fixed_merge(toml_file)\n\n    expected_content = \"\"\"# xxx test\n\n\n[env.pro1.rst]\n    name = \"x7\"\n\n[env2]\n    name = 2\n\n[env3]\n    name = 3\n\"\"\"\n    actual_content = toml_file.read_text()\n\n    assert actual_content == expected_content, \"The TOML file should NOT have an extra whitespace line after [env.pro1.rst]\"\n",
+      "test_rel_path": "tests/test_reprobot_tomlkit__352.py",
+      "attempts": []
+    },
+    {
+      "case_id": "tomlkit__439",
+      "repo": "python-poetry/tomlkit",
+      "variant": "b0",
+      "f2p": true,
+      "score_reason": "ok",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 635,
+        "completion_tokens": 202,
+        "cost_usd": 0.0,
+        "calls": 1,
+        "cached_calls": 1
+      },
+      "wall_clock_s": 1.5,
+      "error": null,
+      "test_source": "import tomlkit\n\n\ndef test_missing_keys_in_repr_of_outofordertableproxy():\n    \"\"\"\n    Reproduces the bug where OutOfOrderTableProxy's repr is missing keys.\n    \"\"\"\n    toml_content = \"\"\"\na.b.c = \"d\"\na.b.e = \"f\"\n\"\"\"\n    a = tomlkit.parse(toml_content)\n\n    # The issue specifically occurs when accessing a nested table\n    value = a[\"a\"]\n    expected = {\"b\": {\"c\": \"d\", \"e\": \"f\"}}\n\n    # The assertion that fails in the original report\n    # This checks if the string representation of 'value' matches 'expected'\n    # The bug is that 'value' (an OutOfOrderTableProxy) is missing 'c' in its repr\n    assert repr(value) == repr(expected)\n",
+      "test_rel_path": "tests/test_reprobot_tomlkit__439.py",
+      "attempts": []
+    }
+  ]
+}

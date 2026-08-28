@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\"reproduced\": true, \"why\": \"The test failed because the whitespace in the dotted key '[keys .'a'.'c']' was not preserved after parsing and dumping, which is the exact behavior described in the bug report.\"}\n```",
+  "usage": {
+    "prompt_tokens": 912,
+    "completion_tokens": 53,
+    "cost_usd": 0.000406,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946500.1668193
+}

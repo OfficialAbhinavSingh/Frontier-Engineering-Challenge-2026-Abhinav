@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"My apologies. I made a mistake in my previous turn by stating I had run the test and then immediately providing the `final_test` without a `run_test` call in the JSON. I will correct this now.\n\nI will run the test again to ensure I follow the instructions precisely and capture the output from `run_test` before concluding.\", \"tool\": \"run_test\", \"args\": {\"source\": \"import pytest\\nimport tomlkit\\n\\ndef test_value_vs_table_redefinition_out_of_order_raises_at_parse():\\n    src = '[a]\\\\nb = true\\\\n[zz]\\\\n[a.b]\\\\nc = 1\\\\n'\\n    with pytest.raises(tomlkit.exceptions.KeyAlreadyPresent):\\n        tomlkit.parse(src)\\n\"}}",
+  "usage": {
+    "prompt_tokens": 3229,
+    "completion_tokens": 183,
+    "cost_usd": 0.000882,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947476.9824271
+}

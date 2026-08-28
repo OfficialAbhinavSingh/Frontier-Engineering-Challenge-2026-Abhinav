@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nimport click\nfrom click.shell_completion import FishComplete\nfrom click.shell_completion import CompletionItem\n\n\ndef test_fish_completion_multiline_help_text():\n    @click.command()\n    @click.option(\n        \"--at\",\n        help=\"\\b\\nAttachment with explicit mimetype,\\n--at image.jpg image/jpeg\",\n    )\n    def cli(at):\n        pass\n\n    comp = FishComplete(cli, {}, \"cli\", \"_CLI_COMPLETE\")\n    completions = comp.get_completions([], \"--at\")\n\n    # The expected behavior is that the multiline help text is escaped\n    # or otherwise handled so that it doesn't break the fish completion script.\n    # For now, we'll assert that the help text is present and correctly formatted\n    # as a single line with the description and the example.\n    # The actual fix will involve escaping the newlines in the shell_completion.py\n    # file, but this test will fail until that happens because the raw multiline\n    # text will be passed.\n    assert len(completions) == 1\n    assert completions[0].value == \"--at\"\n    # The description should be a single line, with newlines replaced by spaces\n    # or removed, and the example should be part of it.\n    # The current buggy behavior would include actual newlines, which this\n    # assertion implicitly checks against by expecting a single string.\n    assert (\n        completions[0].help\n        == \"Attachment with explicit mimetype, --at image.jpg image/jpeg\"\n    )\n\n```",
+  "usage": {
+    "prompt_tokens": 5437,
+    "completion_tokens": 363,
+    "cost_usd": 0.002539,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947790.3081567
+}

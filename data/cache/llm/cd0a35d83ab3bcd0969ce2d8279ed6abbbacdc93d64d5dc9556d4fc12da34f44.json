@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nfrom typing import Any\nfrom tomlkit import parse\nimport tomlkit\nfrom collections import OrderedDict\nfrom tomlkit.container import Container\n\n\ndef merge_dicts(a: dict, b: dict):\n    ret = a\n\n    for k, v in b.items():\n        if k in a and isinstance(a[k], (dict, OrderedDict, Container)):\n            ret[k] = merge_dicts(a[k], v)\n        else:\n            ret[k] = v\n    return ret\n\n\ndef test_rewrite_toml_data_no_extra_whitespace(tmp_path):\n    # Create a dummy TOML file with the reported structure\n    content = \"\"\"# xxx test\n\n\n[env.pro1.rst]\n    name = \"x7\"\n\n[env2]\n    name = 2\n\n[env3]\n    name = 3\n\"\"\"\n    file_ = tmp_path / \"test.toml\"\n    file_.write_text(content)\n\n    # Load, modify, and dump the TOML data\n    with open(file_, \"r\") as f:\n        t = tomlkit.load(f)\n\n    t = merge_dicts(\n        t,\n        {'env': {'pro1': {'rst': {'name': \"x7\"}}}}\n    )\n\n    with open(file_, \"w\") as f:\n        tomlkit.dump(t, f)\n\n    # Read the modified content and assert it matches the expected output\n    # (without the extra whitespace line)\n    expected_content = \"\"\"# xxx test\n\n\n[env.pro1.rst]\n    name = \"x7\"\n\n[env2]\n    name = 2\n\n[env3]\n    name = 3\n\"\"\"\n    assert file_.read_text() == expected_content\n\n```",
+  "usage": {
+    "prompt_tokens": 2688,
+    "completion_tokens": 412,
+    "cost_usd": 0.001836,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787945911.3117054
+}

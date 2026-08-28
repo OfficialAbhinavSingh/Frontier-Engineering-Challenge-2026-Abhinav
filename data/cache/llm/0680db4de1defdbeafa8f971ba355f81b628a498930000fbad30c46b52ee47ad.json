@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"My apologies. I will ensure to output only JSON.\n\nI need to create a test that uses `CliRunner` to invoke a Click command. The command will have an option that we want to consider 'deprecated'. The test should assert that no deprecation warning is issued when this 'deprecated' option is used, which will make the test fail at the current commit. Once the feature is implemented, the test should pass because a warning *will* be issued.\n\nFirst, I need to see how `CliRunner` is typically used and what its output looks like. I'll read `src/click/testing.py` to understand `CliRunner`.\", \"tool\": \"read_file\", \"args\": {\"path\": \"src/click/testing.py\"}}",
+  "usage": {
+    "prompt_tokens": 895,
+    "completion_tokens": 163,
+    "cost_usd": 0.000676,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946177.5155869
+}

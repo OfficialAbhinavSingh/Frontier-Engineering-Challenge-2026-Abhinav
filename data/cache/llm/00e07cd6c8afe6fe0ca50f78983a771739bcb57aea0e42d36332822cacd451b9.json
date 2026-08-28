@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"src/click/shell_completion.py\",\n    \"src/click/core.py\"\n  ],\n  \"test_file\": \"tests/test_shell_completion.py\",\n  \"why\": \"The issue describes incorrect handling of multi-line help text during shell completion in fish, and the analysis points directly to `shell_completion.py` as the source of the completion output, with `core.py` defining how options are registered, and `test_shell_completion.py` is the most relevant test file for this functionality.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 2232,
+    "completion_tokens": 137,
+    "cost_usd": 0.001012,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947787.1248026
+}

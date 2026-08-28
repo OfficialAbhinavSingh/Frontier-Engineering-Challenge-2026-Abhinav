@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"tomlkit/toml_document.py\",\n    \"tomlkit/items.py\"\n  ],\n  \"test_file\": \"tests/test_write.py\",\n  \"why\": \"The issue describes incorrect formatting when dumping a TOML document after modification, specifically a missing newline, which points to the serialization logic in toml_document.py and how items are handled in items.py, and a regression test would fit in test_write.py.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 513,
+    "completion_tokens": 118,
+    "cost_usd": 0.000449,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947703.146498
+}

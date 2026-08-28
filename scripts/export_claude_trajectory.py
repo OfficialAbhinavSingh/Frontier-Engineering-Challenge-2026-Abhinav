@@ -22,6 +22,12 @@ from pathlib import Path
 
 SESSIONS_DIR = Path.home() / ".claude" / "projects"
 
+# Extra terms to scrub, one per line, read from outside the repository.
+# The operator's other project names must not be hardcoded here: writing them
+# into this file would put them in the published repository, which is the thing
+# the redaction exists to prevent.
+DEFAULT_REDACT_FILE = Path.home() / ".config" / "reprobot" / "redact.txt"
+
 # Harness-injected content. None of it is part of the trajectory and some of it
 # is private, so it is removed rather than summarised.
 DROP_BLOCKS = [
@@ -40,11 +46,32 @@ REDACTIONS = [
 ]
 
 
+EXTRA_TERMS: list[re.Pattern] = []
+
+
+def load_extra_terms(path: Path) -> None:
+    """Load operator-supplied terms to scrub.
+
+    A session transcript picks up more than credentials. Commands run during the
+    session can quote unrelated project names -- a scan for leaked terms
+    necessarily contains the terms it scans for -- and those should not travel
+    into a published submission either.
+    """
+    if not path.exists():
+        return
+    for line in path.read_text().splitlines():
+        term = line.strip()
+        if term and not term.startswith("#"):
+            EXTRA_TERMS.append(re.compile(re.escape(term), re.I))
+
+
 def clean(text: str) -> str:
     for pattern in DROP_BLOCKS:
         text = pattern.sub("", text)
     for pattern, replacement in REDACTIONS:
         text = pattern.sub(replacement, text)
+    for pattern in EXTRA_TERMS:
+        text = pattern.sub("<redacted>", text)
     return text.strip()
 
 
@@ -153,7 +180,11 @@ def main() -> None:
     ap.add_argument("--max-chars", type=int, default=2000)
     ap.add_argument("--preview", action="store_true",
                     help="print a summary instead of writing the file")
+    ap.add_argument("--redact-file", default=str(DEFAULT_REDACT_FILE),
+                    help="newline-separated extra terms to scrub; kept outside the repo")
     args = ap.parse_args()
+
+    load_extra_terms(Path(args.redact_file))
 
     if args.session:
         paths = [Path(args.session)]

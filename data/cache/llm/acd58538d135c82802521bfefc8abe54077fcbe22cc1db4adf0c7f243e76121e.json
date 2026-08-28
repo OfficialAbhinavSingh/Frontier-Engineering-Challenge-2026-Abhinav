@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"When testing shell completion, use `CliRunner.run(..., env={'_CLICK_COMPLETE': '...'})` to simulate the completion environment.\",\n  \"To assert that a file is closed, check `file.closed` after the command execution.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 506,
+    "completion_tokens": 63,
+    "cost_usd": 0.000309,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787949532.5248797
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"My apologies. I will ensure to output valid JSON.\n\nThe previous test run with `_CLICK_COMPLETE='fish_complete'` still resulted in a failure, but the `pytest_output` was not provided in the last turn. I need to see the actual `pytest_output` to understand why it failed this time.\n\nLet's re-run the test with the corrected environment variable and carefully examine the output.\", \"tool\": \"run_test\", \"args\": {\"source\": \"import click\\nfrom click.testing import CliRunner\\n\\ndef test_fish_completion_multiline_help_bug():\\n    @click.group()\\n    def cli():\\n        pass\\n\\n    @cli.command()\\n    @click.option(\\n        \\\"--test-option\\\",\\n        help=\\\"This is the first line.\\\\nThis is the second line of help.\\\",\\n    )\\n    def hello(test_option):\\n        click.echo(f\\\"Hello {test_option}\\\")\\n\\n    runner = CliRunner()\\n    result = runner.invoke(\\n        cli,\\n        [],\\n        env={\\n            \\\"_CLICK_COMPLETE\\\": \\\"fish_complete\\\",\\n            \\\"_CLICK_CLI_NAME\\\": \\\"cli\\\",\\n            \\\"COMP_WORDS\\\": \\\"cli --\\\",\\n            \\\"COMP_CWORD\\\": \\\"1\\\",\\n        },\\n    )\\n\\n    assert result.exit_code == 0, f\\\"Expected exit code 0, got {result.exit_code}. Output: {result.output}\\\"\\n\\n    expected_output_part = \\\"plain,--test-option\\\\nThis is the first line.\\\\nThis is the second line of help.\\\"\\n    assert expected_output_part in result.output\\n\"}}",
+  "usage": {
+    "prompt_tokens": 4821,
+    "completion_tokens": 400,
+    "cost_usd": 0.001357,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947327.295412
+}

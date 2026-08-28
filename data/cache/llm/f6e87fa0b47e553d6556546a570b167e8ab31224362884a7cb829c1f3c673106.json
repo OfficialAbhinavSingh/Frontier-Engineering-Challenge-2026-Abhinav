@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"When importing Click internals, prefer `from click.types import FuncParamType` over `import click; click.FuncParamType` to avoid `AttributeError` due to `__getattr__`.\",\n  \"When testing CLI output, be aware that Click's default error messages for invalid parameter types might be more generic than expected, and the exact message might not contain the specific `self.fail(message)` content directly.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 703,
+    "completion_tokens": 99,
+    "cost_usd": 0.000458,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787949317.3332424
+}

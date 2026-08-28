@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"tomlkit/container.py\",\n    \"tomlkit/items.py\"\n  ],\n  \"test_file\": \"tests/test_api.py\",\n  \"why\": \"The issue describes a parsing problem related to out-of-order table redefinition, specifically mentioning `Container.append` and `OutOfOrderTableProxy` in `items.py` as the root cause, and the regression test should be added to `tests/test_api.py` as it already contains tests for parse-time rejections of out-of-order collisions.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 2196,
+    "completion_tokens": 139,
+    "cost_usd": 0.001006,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947842.003781
+}

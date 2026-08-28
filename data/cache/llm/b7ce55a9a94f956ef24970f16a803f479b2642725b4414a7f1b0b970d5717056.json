@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nimport click\nfrom click.testing import CliRunner\n\ndef test_runner_catch_exceptions_false_on_runner():\n    @click.command()\n    def cli_raises():\n        raise ValueError(\"This is an error\")\n\n    runner = CliRunner(catch_exceptions=False)\n    with pytest.raises(ValueError, match=\"This is an error\"):\n        runner.invoke(cli_raises)\n```",
+  "usage": {
+    "prompt_tokens": 5201,
+    "completion_tokens": 97,
+    "cost_usd": 0.001803,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787949290.167092
+}

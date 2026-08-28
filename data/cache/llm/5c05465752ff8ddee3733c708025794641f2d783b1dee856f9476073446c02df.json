@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"All `click` imports should be explicit, e.g. `from click.testing import CliRunner`.\",\n  \"Tests should use `runner.invoke` to execute CLI commands and capture their output.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 566,
+    "completion_tokens": 54,
+    "cost_usd": 0.000305,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787949302.618202
+}

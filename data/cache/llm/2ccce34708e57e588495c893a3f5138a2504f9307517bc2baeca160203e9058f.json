@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\"reproduced\": true, \"why\": \"The test failed because the actual output of `tomlkit.dumps(v)` was '[x]\\\\na.b = {}c = 3\\\\n', which is exactly the buggy output described in the bug report, while the expected output included a newline before 'c = 3'.\"}\n```",
+  "usage": {
+    "prompt_tokens": 580,
+    "completion_tokens": 74,
+    "cost_usd": 0.000359,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787948249.982332
+}

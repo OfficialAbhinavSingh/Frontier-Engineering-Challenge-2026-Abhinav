@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\"reproduced\": false, \"why\": \"The test failed due to a NameError, not because it caught the ResourceWarning described in the bug report.\"}\n```",
+  "usage": {
+    "prompt_tokens": 2149,
+    "completion_tokens": 38,
+    "cost_usd": 0.00074,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947025.0594134
+}

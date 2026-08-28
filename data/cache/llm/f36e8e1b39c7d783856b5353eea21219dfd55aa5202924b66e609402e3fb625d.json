@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"When a test fails with `AttributeError: <name>. Did you mean: '<other_name>'?`, it indicates that the imported object is not directly available under the expected name. Check the `src/click/__init__.py` file to see how objects are exposed and if they are aliased or nested.\",\n  \"The `click.testing.CliRunner`'s `result.output` often includes usage information and generic error prefixes before the specific error message. When asserting on error messages, focus on the unique part of the message rather than the entire output string.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 704,
+    "completion_tokens": 130,
+    "cost_usd": 0.000536,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947966.1107605
+}

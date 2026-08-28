@@ -1,0 +1,22 @@
+[
+  {
+    "text": "When adding new arguments to `CliRunner`, ensure they are passed to the `invoke` method, not the `CliRunner` constructor.",
+    "from_case": "click__2817",
+    "added_at": 1787949055.551865
+  },
+  {
+    "text": "Tests for `CliRunner` functionality should use the `runner` fixture provided by the test suite.",
+    "from_case": "click__2817",
+    "added_at": 1787949055.55187
+  },
+  {
+    "text": "When importing Click components, always use `click.foo` and not `click.Foo` unless it's a class name. The `__init__.py` uses `__getattr__` to provide helpful suggestions for common typos.",
+    "from_case": "click__3105",
+    "added_at": 1787949082.0293288
+  },
+  {
+    "text": "When testing CLI output, be aware that Click often wraps error messages with additional context like 'Error: Invalid value for 'MYDATA': ...'. The exact error message might be a substring of the full output.",
+    "from_case": "click__3105",
+    "added_at": 1787949082.029331
+  }
+]

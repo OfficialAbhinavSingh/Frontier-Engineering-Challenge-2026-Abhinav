@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The test *passed*, but it should have *failed* at the current buggy commit. This means `pytest.raises(ParseError)` successfully caught the `ParseError`, which is what we want. However, the issue states that the bug *causes* a `ParseError`. Therefore, for the test to fail *before* the fix and pass *after* the fix, I need to assert that the `ParseError` is *not* raised.\n\nMy current test asserts that `ParseError` *is* raised. I need to change the assertion to expect *no* exception, so it will fail when the `ParseError` is raised (before the fix) and pass when no `ParseError` is raised (after the fix).\", \"tool\": \"run_test\", \"args\": {\"source\": \"import pytest\\nimport sqlglot\\nfrom sqlglot.errors import ParseError\\n\\ndef test_trino_cte_udf_parse_error():\\n    sql = \\\"\\\"\\\"\\n    WITH FUNCTION f(num int)\\n        RETURNS int\\n        RETURN num\\n    SELECT f(1);\\n    \\\"\\\"\\\"\\n    # This test should fail with ParseError before the fix\\n    # and pass after the fix.\\n    try:\\n        sqlglot.parse_one(sql, dialect=\\\"trino\\\")\\n    except ParseError as e:\\n        pytest.fail(f\\\"Parsing failed with ParseError: {e}\\\")\\n\"}}",
+  "usage": {
+    "prompt_tokens": 3217,
+    "completion_tokens": 323,
+    "cost_usd": 0.001773,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946695.9007194
+}

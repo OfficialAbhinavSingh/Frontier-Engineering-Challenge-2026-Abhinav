@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The previous test run was not a valid JSON object. I need to ensure my response is always a JSON object.\n\nThe test I wrote aims to fail because `catch_exceptions` is `True` by default. I asserted `result.exception is None`, which will fail because `result.exception` will be a `ValueError`. This is exactly what the issue describes: the default behavior catches exceptions, and there's no global way to change it.\n\nLet's re-run the test with the correct JSON format and observe the failure.\", \"tool\": \"run_test\", \"args\": {\"source\": \"import pytest\\nfrom click.testing import CLIRunner\\nimport click\\n\\n@click.command()\\ndef cli():\\n    raise ValueError(\\\"This is an expected error\\\")\\n\\ndef test_global_catch_exceptions_setting():\\n    runner = CLIRunner()\\n    # The bug is that there's no way to set catch_exceptions=False globally on the runner.\\n    # So, by default, exceptions are caught.\\n    # This test expects the exception NOT to be caught, which will fail at the current commit.\\n    result = runner.invoke(cli)\\n\\n    # This assertion will fail because by default, catch_exceptions is True,\\n    # and thus result.exception will NOT be None.\\n    assert result.exception is None\\n    assert result.exit_code == 1\\n\"}}",
+  "usage": {
+    "prompt_tokens": 1224,
+    "completion_tokens": 319,
+    "cost_usd": 0.001165,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947271.7488184
+}

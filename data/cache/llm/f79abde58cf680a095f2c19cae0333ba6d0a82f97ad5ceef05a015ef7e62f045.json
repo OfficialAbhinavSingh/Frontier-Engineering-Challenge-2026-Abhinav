@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The user wants to set `catch_exceptions=False` globally for `CLIRunner`. The current `invoke` method in `CLIRunner` does not have a way to set this globally. I need to write a test that demonstrates this limitation.\n\nFirst, I'll inspect the `CLIRunner` class to understand its current behavior regarding `catch_exceptions`.\", \"tool\": \"read_file\", \"args\": {\"path\": \"src/click/testing.py\"}}",
+  "usage": {
+    "prompt_tokens": 432,
+    "completion_tokens": 108,
+    "cost_usd": 0.0004,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947264.967713
+}

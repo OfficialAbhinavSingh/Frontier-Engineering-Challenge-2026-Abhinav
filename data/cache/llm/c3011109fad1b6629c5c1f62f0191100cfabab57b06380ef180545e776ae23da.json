@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nfrom sqlglot import parse, Dialect, exp\nfrom sqlglot.dialects.dialect import NormalizationStrategy\nfrom sqlglot.lineage import lineage\nfrom sqlglot.schema import MappingSchema\nimport pytest\nfrom sqlglot.errors import OptimizeError\n\n\ndef test_starrocks_table_valued_function_qualify_columns():\n    sql = \"\"\"\n    WITH t AS (\n      SELECT p.user_id, gs.n AS to_deposit_days\n      FROM tbl1 p\n      CROSS JOIN (\n        SELECT generate_series AS n FROM TABLE(generate_series(0, 8000))\n      ) gs\n    ),\n    t2 AS (\n      SELECT t.* FROM t\n    )\n    SELECT user_id, to_deposit_days FROM t2\n    \"\"\"\n\n    dialect = Dialect.get_or_raise('starrocks')\n    dialect.normalization_strategy = NormalizationStrategy.CASE_INSENSITIVE\n    expression = parse(sql, read='starrocks')[0]\n\n    schema = MappingSchema(dialect=dialect)\n    schema.add_table(\"default.tbl1\", column_mapping={\"user_id\": \"BIGINT\"}, match_depth=False)\n\n    # This test should fail with OptimizeError: Column 'generate_series' could not be resolved\n    # when the bug is present, and pass once the bug is fixed.\n    with pytest.raises(OptimizeError) as excinfo:\n        lineage(column=None, sql=expression, schema=schema, dialect=dialect,\n                expand_stars=True, validate_qualify_columns=True)\n\n    assert \"Column 'generate_series' could not be resolved\" in str(excinfo.value)\n\n```",
+  "usage": {
+    "prompt_tokens": 2868,
+    "completion_tokens": 388,
+    "cost_usd": 0.00183,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947691.7074325
+}

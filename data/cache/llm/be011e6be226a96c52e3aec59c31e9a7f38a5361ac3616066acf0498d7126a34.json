@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"tomlkit/items.py\",\n    \"tomlkit/toml_document.py\"\n  ],\n  \"test_file\": \"tests/test_items.py\",\n  \"why\": \"The issue describes incorrect handling of keys when an Array of Tables (AoT) is inserted into a TOMLDocument, suggesting a problem in how items are managed or serialized, making tomlkit/items.py and tomlkit/toml_document.py the most likely source files, and tests/test_items.py the appropriate place for a regression test.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 790,
+    "completion_tokens": 138,
+    "cost_usd": 0.000582,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947854.7009645
+}

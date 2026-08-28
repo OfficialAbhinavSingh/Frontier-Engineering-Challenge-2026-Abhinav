@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"My apologies, I made a mistake in assuming the test run. I need to actually run the test to confirm its behavior. I will run the test I just wrote.\", \"tool\": \"run_test\", \"args\": {\"source\": \"\\nimport pytest\\nimport sqlglot\\nfrom sqlglot.errors import ParseError\\n\\ndef test_mysql_create_table_auto_increment():\\n    sql = \\\"\\\"\\\"CREATE TABLE t1(id INT KEY AUTO_INCREMENT);\\\"\\\"\\\"\\n    # This test expects a ParseError to be raised at the buggy commit.\\n    # Once the bug is fixed, this test should pass without raising a ParseError.\\n    with pytest.raises(ParseError):\\n        sqlglot.parse_one(sql, read=\\\"mysql\\\")\\n\\n\"}}",
+  "usage": {
+    "prompt_tokens": 2883,
+    "completion_tokens": 179,
+    "cost_usd": 0.000768,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947406.955152
+}

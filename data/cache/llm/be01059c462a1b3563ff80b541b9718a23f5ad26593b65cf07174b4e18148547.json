@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"When testing shell completion, ensure the test environment explicitly enables ResourceWarnings to catch unclosed file handles.\",\n  \"Tests for shell completion should use the `runner.invoke` method with `prog_name` and `args` to simulate shell interactions, and capture stderr for warnings.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 429,
+    "completion_tokens": 68,
+    "cost_usd": 0.000299,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946995.7437747
+}

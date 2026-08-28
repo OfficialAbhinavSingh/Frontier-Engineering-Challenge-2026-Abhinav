@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\"tomlkit/container.py\", \"tomlkit/toml_document.py\"],\n  \"test_file\": \"tests/test_toml_document.py\",\n  \"why\": \"The issue describes incorrect `repr` behavior for nested TOML objects, specifically `tomlkit.container.OutOfOrderTableProxy`, which is defined in `tomlkit/container.py` and is part of the TOML document structure handled by `tomlkit/toml_document.py`.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 983,
+    "completion_tokens": 117,
+    "cost_usd": 0.000587,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787945915.183345
+}

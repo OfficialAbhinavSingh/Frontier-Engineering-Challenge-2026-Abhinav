@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"tomlkit/container.py\",\n    \"tomlkit/toml_document.py\"\n  ],\n  \"test_file\": \"tests/test_toml_document.py\",\n  \"why\": \"The issue describes incorrect representation of a nested TOML container, specifically an OutOfOrderTableProxy, which is likely defined and handled in `tomlkit/container.py` and accessed via `tomlkit/toml_document.py`, so a regression test belongs in `tests/test_toml_document.py`.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 717,
+    "completion_tokens": 131,
+    "cost_usd": 0.000543,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787945872.7929347
+}

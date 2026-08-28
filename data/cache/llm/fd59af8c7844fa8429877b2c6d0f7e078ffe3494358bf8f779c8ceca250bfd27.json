@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"Great! The test now fails with a `ParseError` as expected, which means it correctly identifies the bug. When the bug is fixed, `sqlglot.parse_one` will no longer raise a `ParseError`, and the test will pass. This is exactly what the problem statement requested.\n\nI am now ready to provide the final test file.\", \"final_test\": \"import pytest\\nimport sqlglot\\nfrom sqlglot.errors import ParseError\\n\\ndef test_trino_cte_udf_parse_error():\\n    sql = \\\"\\\"\\\"\\n    WITH FUNCTION f(num int)\\n        RETURNS int\\n        RETURN num\\n    SELECT f(1);\\n    \\\"\\\"\\\"\\n    # This call should raise a ParseError at the buggy commit, causing the test to fail.\\n    # Once the bug is fixed, it should parse successfully, and the test will pass.\\n    sqlglot.parse_one(sql, dialect=\\\"trino\\\")\\n\"}",
+  "usage": {
+    "prompt_tokens": 4583,
+    "completion_tokens": 221,
+    "cost_usd": 0.001111,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946318.3579054
+}

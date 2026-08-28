@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The user is reporting a `ParseError` when parsing a `CREATE TABLE` statement with `AUTO_INCREMENT` in MySQL. I need to create a pytest file that reproduces this error. The test should attempt to parse the given SQL string and assert that no `ParseError` is raised if the bug were fixed. Since the bug is present, it should fail with a `ParseError`.\", \"tool\": \"read_file\", \"args\": {\"path\": \"sqlglot/dialects/mysql.py\"}}",
+  "usage": {
+    "prompt_tokens": 398,
+    "completion_tokens": 110,
+    "cost_usd": 0.000394,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947400.700925
+}

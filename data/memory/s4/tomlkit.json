@@ -1,0 +1,32 @@
+[
+  {
+    "text": "When testing `tomlkit.dumps`, be mindful of the order of key-value pairs and tables. `tomlkit` preserves insertion order, so the expected string must match the exact order of elements as they would be serialized.",
+    "from_case": "tomlkit__542",
+    "added_at": 1787948000.6463006
+  },
+  {
+    "text": "When constructing TOML documents for testing, prefer using `tomlkit.parse` on a string literal rather than direct manipulation of `tomlkit.toml_document.TOMLDocument` objects, as this more closely mirrors how users interact with the library and helps avoid subtle ordering issues.",
+    "from_case": "tomlkit__542",
+    "added_at": 1787948000.6463027
+  },
+  {
+    "text": "When testing `tomlkit.dumps`, be mindful of trailing newlines in the expected output. The `tomlkit` library often adds an extra newline at the end of the dumped string, which can lead to `AssertionError` if not accounted for.",
+    "from_case": "tomlkit__543",
+    "added_at": 1787948015.289498
+  },
+  {
+    "text": "Tests for `tomlkit` often involve comparing the output of `tomlkit.dumps` with a multi-line string. Use triple-quoted strings for `expected_correct_output` to improve readability and accurately represent the expected TOML structure, including newlines.",
+    "from_case": "tomlkit__543",
+    "added_at": 1787948015.2894998
+  },
+  {
+    "text": "When writing a regression test, ensure it fails on the buggy commit before attempting to fix the bug. This confirms the test accurately captures the reported behavior.",
+    "from_case": "tomlkit__562",
+    "added_at": 1787948038.3759077
+  },
+  {
+    "text": "Tests in this repository often involve `tomlkit.toml_file.TOMLFile` objects. When interacting with these objects, be mindful of their internal structure and how they handle different data types, as direct Python operations (like `len()`) might not be supported on all wrapped types.",
+    "from_case": "tomlkit__562",
+    "added_at": 1787948038.37591
+  }
+]

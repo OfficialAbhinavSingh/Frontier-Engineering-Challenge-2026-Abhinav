@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport os\nimport sys\nfrom click.testing import CliRunner\nimport click\n\ndef test_prompt_backspace_linux(monkeypatch):\n    if sys.platform.startswith(\"linux\"):\n        runner = CliRunner()\n\n        # Simulate user typing \"hello\" then backspacing twice to get \"hel\"\n        # and then pressing enter.\n        # The bug causes backspace to remove two characters, so \"hello\\b\\b\"\n        # would result in \"he\" instead of \"hel\".\n        # The bug also causes the prompt to be deleted when backspacing the entire line.\n        # We'll test a simple backspace scenario.\n        input_data = \"hello\\b\\b\\n\"\n\n        # Mock sys.stdin.isatty to ensure we hit the interactive prompt path\n        monkeypatch.setattr(sys.stdin, \"isatty\", lambda: True)\n\n        result = runner.invoke(click.prompt, [\"Enter text\"], input=input_data)\n\n        # The expected output should be \"hel\" if backspace works correctly\n        assert result.output.strip().endswith(\"hel\")\n        assert \"hel\" in result.output\n        assert result.exit_code == 0\n        assert result.exception is None\n\n        # Test another scenario: typing \"abc\" and then backspacing all of it\n        # and then typing \"def\"\n        input_data_full_backspace = \"abc\\b\\b\\bdef\\n\"\n        result_full_backspace = runner.invoke(click.prompt, [\"Enter text\"], input=input_data_full_backspace)\n\n        assert result_full_backspace.output.strip().endswith(\"def\")\n        assert \"def\" in result_full_backspace.output\n        assert result_full_backspace.exit_code == 0\n        assert result_full_backspace.exception is None\n```",
+  "usage": {
+    "prompt_tokens": 3833,
+    "completion_tokens": 425,
+    "cost_usd": 0.002212,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947588.6101232
+}

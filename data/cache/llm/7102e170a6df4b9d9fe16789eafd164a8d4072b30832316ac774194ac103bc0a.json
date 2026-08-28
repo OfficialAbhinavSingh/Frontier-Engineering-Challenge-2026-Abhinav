@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"When adding new functionality to `click.option` or `click.argument`, remember that `click.Parameter` is the underlying class and its `__init__` method must support any new keyword arguments.\",\n  \"Tests for `click` commands typically use `CliRunner` and assert against `result.output` for console messages, and `result.exception` for errors.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 767,
+    "completion_tokens": 89,
+    "cost_usd": 0.000453,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946466.7806063
+}

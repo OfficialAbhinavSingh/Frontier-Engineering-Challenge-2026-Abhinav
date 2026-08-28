@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\n\nfrom tomlkit.exceptions import KeyAlreadyPresent\nfrom tomlkit.toml_document import TOMLDocument\nfrom tomlkit import parse\n\n\ndef test_out_of_order_value_vs_table_redefinition_raises_on_parse():\n    \"\"\"\n    Test that an out-of-order value-vs-table redefinition\n    raises KeyAlreadyPresent at parse time.\n    \"\"\"\n    src = '[a]\\nb = true\\n[zz]\\n[a.b]\\nc = 1\\n'\n\n    with pytest.raises(KeyAlreadyPresent) as excinfo:\n        parse(src)\n\n    assert 'Key \"b\" already exists.' in str(excinfo.value)\n\n    # Verify that the in-order twin still raises at parse time\n    with pytest.raises(KeyAlreadyPresent) as excinfo:\n        parse('[a]\\nb = true\\n[a.b]\\nc = 1\\n')\n    assert 'Key \"b\" already exists.' in str(excinfo.value)\n\n\ndef test_dotted_key_then_table_split_raises_on_parse():\n    \"\"\"\n    Test that a dotted-key-then-table split redefinition\n    raises KeyAlreadyPresent at parse time.\n    \"\"\"\n    src = '[a]\\nb.c = 1\\n[zz]\\nq = 9\\n[a.b]\\nd = 2\\n'\n\n    with pytest.raises(KeyAlreadyPresent) as excinfo:\n        parse(src)\n\n    assert 'Key \"b\" already exists.' in str(excinfo.value)\n\n```",
+  "usage": {
+    "prompt_tokens": 1839,
+    "completion_tokens": 363,
+    "cost_usd": 0.001459,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947213.3340638
+}

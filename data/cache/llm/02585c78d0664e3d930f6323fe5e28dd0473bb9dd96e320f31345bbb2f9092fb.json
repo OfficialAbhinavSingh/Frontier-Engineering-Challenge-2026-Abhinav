@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport tomlkit\n\n\ndef test_scalar_not_captured_by_dictionary():\n    doc = tomlkit.loads(\"a.b = 1\\n\")\n    doc[\"a\"][\"c\"] = {}\n    doc[\"z\"] = 2\n\n    # The bug causes 'z = 2' to be nested under '[a.c]'\n    # The expected output should have 'z = 2' as a top-level key.\n    expected_output = \"\"\"a.b = 1\n\n[a.c]\n\nz = 2\n\"\"\"\n    assert tomlkit.dumps(doc) == expected_output\n```",
+  "usage": {
+    "prompt_tokens": 2245,
+    "completion_tokens": 144,
+    "cost_usd": 0.001033,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947867.1882224
+}

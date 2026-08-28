@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"Avoid importing private functions (those prefixed with an underscore) from `click` modules, as they are not part of the public API and may change or be removed without notice.\",\n  \"When testing shell completion, ensure the test correctly identifies and extracts the specific completion string or help text relevant to the bug, rather than broadly checking for its presence.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 976,
+    "completion_tokens": 81,
+    "cost_usd": 0.000495,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787948208.6114223
+}

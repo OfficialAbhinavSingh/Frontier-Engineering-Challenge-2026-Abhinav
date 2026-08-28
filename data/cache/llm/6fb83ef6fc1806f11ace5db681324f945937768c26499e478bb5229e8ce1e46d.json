@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"My apologies. I will ensure my response is a single JSON object. I have constructed the test file and will now run it to confirm it fails as expected.\", \"tool\": \"run_test\", \"args\": {\"source\": \"import pytest\\nimport sqlglot\\nfrom sqlglot.errors import ParseError\\n\\ndef test_trino_cte_udf_parse_error():\\n    sql = \\\"\\\"\\\"\\n    WITH FUNCTION f(num int)\\n        RETURNS int\\n        RETURN num\\n    SELECT f(1);\\n    \\\"\\\"\\\"\\n    with pytest.raises(ParseError) as excinfo:\\n        sqlglot.parse_one(sql, dialect=\\\"trino\\\")\\n    assert \\\"Expecting (\\\" in str(excinfo.value)\\n\"}}",
+  "usage": {
+    "prompt_tokens": 2953,
+    "completion_tokens": 175,
+    "cost_usd": 0.001323,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946691.9745047
+}

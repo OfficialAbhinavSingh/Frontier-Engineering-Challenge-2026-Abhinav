@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"My apologies again for the formatting error. I have corrected the test logic. Now, the test expects *no* `ParseError`. If a `ParseError` is raised, `pytest.fail` will be called, causing the test to fail. This is the desired behavior for a test that should fail at the buggy commit and pass once the bug is fixed. I will run this revised test.\", \"tool\": \"run_test\", \"args\": {\"source\": \"import pytest\\nimport sqlglot\\nfrom sqlglot.errors import ParseError\\n\\ndef test_trino_cte_udf_parse_error():\\n    sql = \\\"\\\"\\\"\\n    WITH FUNCTION f(num int)\\n        RETURNS int\\n        RETURN num\\n    SELECT f(1);\\n    \\\"\\\"\\\"\\n    # This test should fail with ParseError before the fix\\n    # and pass after the fix.\\n    try:\\n        sqlglot.parse_one(sql, dialect=\\\"trino\\\")\\n    except ParseError as e:\\n        pytest.fail(f\\\"Parsing failed with ParseError: {e}\\\")\\n\"}}",
+  "usage": {
+    "prompt_tokens": 3576,
+    "completion_tokens": 250,
+    "cost_usd": 0.001155,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946697.9679728
+}

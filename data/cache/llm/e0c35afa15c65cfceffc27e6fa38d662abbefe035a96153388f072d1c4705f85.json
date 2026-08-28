@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\"reproduced\": true, \"why\": \"The test failed because the program aborted, which is consistent with the bug report's description of strange behavior with backspace and the prompt being deleted.\"}\n```",
+  "usage": {
+    "prompt_tokens": 925,
+    "completion_tokens": 46,
+    "cost_usd": 0.000392,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787948183.5547388
+}

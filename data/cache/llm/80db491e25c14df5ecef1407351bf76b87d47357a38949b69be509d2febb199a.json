@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nimport sqlglot\nfrom sqlglot.errors import ParseError\n\ndef test_mysql_create_table_auto_increment_key_parse_error():\n    sql = \"\"\"CREATE TABLE t1(id INT KEY AUTO_INCREMENT);\"\"\"\n    with pytest.raises(ParseError) as excinfo:\n        sqlglot.parse_one(sql, read=\"mysql\")\n    assert \"Expecting\" in str(excinfo.value)\n    assert \"Line 1, Col: 42\" in str(excinfo.value)\n\n```",
+  "usage": {
+    "prompt_tokens": 2866,
+    "completion_tokens": 126,
+    "cost_usd": 0.001175,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947202.9769232
+}

@@ -1,0 +1,22 @@
+[
+  {
+    "text": "When testing `tomlkit.dumps`, be mindful of subtle newline differences; the `tomlkit` parser and dumper can be sensitive to these, and they might not always roundtrip exactly as written.",
+    "from_case": "tomlkit__542",
+    "added_at": 1787949261.0713143
+  },
+  {
+    "text": "Tests should directly import `tomlkit` rather than relying on relative imports or internal module structures, as the public API is what needs to be guaranteed stable.",
+    "from_case": "tomlkit__542",
+    "added_at": 1787949261.0713165
+  },
+  {
+    "text": "Avoid importing external libraries like 'torch' in tests; tomlkit is a standalone library and its tests should not depend on other packages.",
+    "from_case": "tomlkit__562",
+    "added_at": 1787949281.091152
+  },
+  {
+    "text": "Ensure tests explicitly assert the buggy behavior; a passing test at the buggy commit indicates the test does not capture the bug.",
+    "from_case": "tomlkit__562",
+    "added_at": 1787949281.0911536
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nfrom tests.dialects.test_dialect import Validator\nimport unittest\nfrom sqlglot import parse_one, exp\n\n\nclass TestMysql8225(Validator):\n    def test_create_table_auto_increment(self):\n        sql = \"\"\"CREATE TABLE t1(id INT KEY AUTO_INCREMENT);\"\"\"\n        # The bug causes a ParseError. We assert that it parses without error.\n        # The specific AST structure is less important than the fact it parses.\n        try:\n            parse_one(sql, read=\"mysql\")\n        except Exception as e:\n            self.fail(f\"Parsing CREATE TABLE with AUTO_INCREMENT failed: {e}\")\n\n```",
+  "usage": {
+    "prompt_tokens": 3988,
+    "completion_tokens": 152,
+    "cost_usd": 0.001576,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787948111.7534225
+}

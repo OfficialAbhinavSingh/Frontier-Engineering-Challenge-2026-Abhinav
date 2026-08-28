@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"I apologize for the repeated errors. I will ensure this response is a valid JSON object.\n\nI need to write a pytest test file that reproduces the bug. The bug is that `tomlkit.dumps` adds an extra whitespace line after a table when rewriting a TOML document.\n\nHere's the plan for the test:\n1.  **Define initial TOML content**: Use the example provided in the issue.\n2.  **Load TOML**: Use `tomlkit.parse` to load the initial content into a `TOMLDocument`.\n3.  **Modify TOML**: Change a value within the document. The issue description implies that even a re-assignment of the same value can trigger the bug. I will change `name = \"x7\"` to `name = \"x8\"` to ensure a modification occurs.\n4.  **Dump TOML**: Use `tomlkit.dumps` to get the string representation of the modified document.\n5.  **Define expected TOML**: This will be the initial TOML content, but with the modified value, and *without* the extra newline that the bug introduces.\n6.  **Assert**: Compare the dumped TOML string with the expected TOML string. The test should fail if the extra newline is present.\n\nLet's construct the test file.\", \"tool\": \"read_file\", \"args\": {\"path\": \"tomlkit/__init__.py\"}}",
+  "usage": {
+    "prompt_tokens": 2267,
+    "completion_tokens": 302,
+    "cost_usd": 0.001435,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946379.2969675
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport tomlkit\nfrom collections import OrderedDict\n\ndef test_rewrite_toml_data_no_extra_whitespace(tmp_path):\n    # Original TOML content with comments and structure\n    original_toml_content = \"\"\"# xxx test\n\n\n[env.pro1.rst]\n    name = \"x7\"\n\n[env2]\n    name = 2\n\n[env3]\n    name = 3\n\"\"\"\n    # Expected TOML content after rewrite, without extra whitespace\n    # This is what the TOML should look like if the bug is fixed.\n    expected_toml_content = \"\"\"# xxx test\n\n\n[env.pro1.rst]\n    name = \"x7\"\n\n[env2]\n    name = 2\n\n[env3]\n    name = 3\n\"\"\"\n\n    file_path = tmp_path / \"test.toml\"\n    file_path.write_text(original_toml_content)\n\n    def merge_dicts(a: dict, b: dict):\n        # This is the merge_dicts function from the bug report that triggers the issue\n        ret = a\n\n        for k, v in b.items():\n            if k in a and isinstance(a[k], (dict, OrderedDict, tomlkit.Container)):\n                ret[k] = merge_dicts(a[k], v)\n            else:\n                ret[k] = v # This line was missing in the original bug report's merge_dicts,\n                           # but is crucial for actual merging.\n                           # The reporter's second merge_dicts implementation had it.\n                           # Without it, the original merge_dicts does nothing if keys exist.\n\n        return ret\n\n    # Load the TOML document\n    with open(file_path, \"r\") as f:\n        t = tomlkit.load(f)\n\n    # Apply a \"modification\" using the buggy merge_dicts.\n    # The modification here is effectively a no-op in terms of data,\n    # but the act of merging and then dumping triggers the whitespace bug.\n    # The bug occurs because `tomlkit.dump` re-evaluates the structure\n    # after the merge, and the `_replace_at` logic incorrectly inserts\n    # a newline when it shouldn't.\n    t = merge_dicts(\n        t,\n        {'env': {'pro1': {'rst': {'name': \"x7\"}}}}\n    )\n\n    # Dump the modified TOML back to the file\n    with open(file_path, \"w\") as f:\n        tomlkit.dump(t, f)\n\n    # Read the content back and assert it matches the expected (bug-free) output\n    actual_toml_content = file_path.read_text()\n\n    assert actual_toml_content == expected_toml_content\n```",
+  "usage": {
+    "prompt_tokens": 2150,
+    "completion_tokens": 630,
+    "cost_usd": 0.00222,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787945863.7523358
+}

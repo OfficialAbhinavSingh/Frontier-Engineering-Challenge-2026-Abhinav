@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"My apologies, I misread the previous output. The test *did* raise a `ParseError`, but my assertion `assert parsed is None` was incorrect. The test should assert that a `ParseError` is raised. The previous attempt was closer to correct. I will revert to expecting a `ParseError`.\", \"tool\": \"run_test\", \"args\": {\"source\": \"\\nimport pytest\\nimport sqlglot\\n\\ndef test_databricks_insert_replace_using():\\n    sql = \\\"\\\"\\\"\\nINSERT INTO TABLE students\\n    REPLACE USING (country)\\n    SELECT * FROM new_students;\\n\\\"\\\"\\\"\\n    with pytest.raises(sqlglot.errors.ParseError):\\n        sqlglot.parse_one(sql, dialect=\\\"databricks\\\")\\n\"}}",
+  "usage": {
+    "prompt_tokens": 3314,
+    "completion_tokens": 181,
+    "cost_usd": 0.001447,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947394.9210842
+}

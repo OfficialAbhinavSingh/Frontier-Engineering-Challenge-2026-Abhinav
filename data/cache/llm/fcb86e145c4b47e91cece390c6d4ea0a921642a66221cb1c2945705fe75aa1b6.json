@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"My apologies for the repeated formatting error. I will ensure the response is a single JSON object this time. I have confirmed the test behaves as required.\", \"final_test\": \"import pytest\\nimport sqlglot\\nfrom sqlglot.errors import ParseError\\n\\ndef test_trino_cte_udf_parse_error():\\n    sql = \\\"\\\"\\\"\\n    WITH FUNCTION f(num int)\\n        RETURNS int\\n        RETURN num\\n    SELECT f(1);\\n    \\\"\\\"\\\"\\n    # This call should raise a ParseError at the buggy commit, causing the test to fail.\\n    # Once the bug is fixed, it should parse successfully, and the test will pass.\\n    sqlglot.parse_one(sql, dialect=\\\"trino\\\")\\n\"}",
+  "usage": {
+    "prompt_tokens": 4827,
+    "completion_tokens": 177,
+    "cost_usd": 0.000804,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946319.9489117
+}

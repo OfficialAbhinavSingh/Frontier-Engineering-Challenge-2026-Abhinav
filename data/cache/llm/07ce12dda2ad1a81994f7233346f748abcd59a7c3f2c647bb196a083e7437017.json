@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The user is reporting an issue where `tomlkit.dump` adds an extra whitespace line when rewriting a TOML file, specifically after a table. This happens when using `tomlkit.load` and then `tomlkit.dump` after some modifications. The user provided example TOML and Python code to reproduce the issue. The core of the problem seems to be related to how `tomlkit` handles whitespace and newlines, particularly in the `_replace_at` function and `ends_with_whitespace` check.\n\nI need to create a test that:\n1. Creates a TOML file with the structure provided by the user.\n2. Loads the TOML file using `tomlkit.load`.\n3. Modifies the TOML document (even a no-op modification should trigger the issue if it's related to rewriting).\n4. Dumps the modified TOML document back to a string or file.\n5. Asserts that the dumped TOML string does *not* contain the extra whitespace line that the user observed.\n\nLet's start by creating the initial TOML content and the Python code to reproduce the issue.\", \"tool\": \"read_file\", \"args\": {\"path\": \"tomlkit/tomlkit.py\"}}",
+  "usage": {
+    "prompt_tokens": 1141,
+    "completion_tokens": 265,
+    "cost_usd": 0.001005,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946370.303682
+}

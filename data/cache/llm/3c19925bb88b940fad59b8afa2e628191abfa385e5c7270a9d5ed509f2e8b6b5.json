@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport tomlkit\n\n\ndef test_missing_newline_after_inline_table():\n    \"\"\"\n    Test that a newline is inserted after an inline table when a new key is added.\n    \"\"\"\n    v = tomlkit.loads(\"\"\"[x]\\na.b = {}\"\"\")\n    v[\"x\"][\"c\"] = 3\n    expected_output = \"\"\"[x]\na.b = {}\nc = 3\n\"\"\"\n    assert tomlkit.dumps(v) == expected_output\n\n```",
+  "usage": {
+    "prompt_tokens": 2307,
+    "completion_tokens": 116,
+    "cost_usd": 0.000982,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947704.6444805
+}

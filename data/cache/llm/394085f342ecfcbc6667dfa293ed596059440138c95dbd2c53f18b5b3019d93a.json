@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"My apologies. I will ensure to output valid JSON.\n\nI've reviewed `src/click/shell_completion.py`. The relevant part for fish completion seems to be the `_generate_fish_completion` function. It iterates through commands and options, and for each option, it calls `_format_option_help` which eventually uses `_format_completion_message`. The issue description points to `string split` in the fish script, which suggests that the help text itself is being passed unescaped into the fish completion script, causing parsing errors when it contains newlines.\n\nTo reproduce this, I need to:\n1. Create a simple Click app with a command and an option that has multi-line help text.\n2. Simulate the fish completion environment by setting `_CLICK_COMPLETE=fish_source` and running the app.\n3. Assert that the output contains the unescaped multi-line help text in a way that would cause the fish script to fail. The issue description shows `plain,--at\\nAttachment with explicit mimetype,\\n--at image.jpg image/jpeg`. I should look for this exact pattern or similar.\n\nLet's create a simple Click app.\", \"tool\": \"read_file\", \"args\": {\"path\": \"src/click/testing.py\"}}",
+  "usage": {
+    "prompt_tokens": 2081,
+    "completion_tokens": 279,
+    "cost_usd": 0.001322,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947311.2359095
+}

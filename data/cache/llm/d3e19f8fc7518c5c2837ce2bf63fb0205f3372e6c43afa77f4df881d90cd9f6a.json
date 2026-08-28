@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport os\nimport pytest\nfrom click.testing import CliRunner\nfrom click import Command, Group, option\n\n\n@pytest.fixture\ndef runner():\n    return CliRunner()\n\n\ndef test_fish_completion_multiline_help(runner):\n    @option(\n        \"attachment_types\",\n        \"--at\",\n        \"--attachment-type\",\n        type=(str, str),\n        multiple=True,\n        help=\"\\b\\nAttachment with explicit mimetype,\\n--at image.jpg image/jpeg\",\n    )\n    @option(\"--test-opt\", help=\"A simple test option\")\n    @Group()\n    def cli(attachment_types, test_opt):\n        pass\n\n    # Simulate fish completion for 'llm --'\n    # The bug causes an error in the fish completion script due to unescaped newlines\n    # in the help text. This test asserts that the completion output does not contain\n    # the error message \"string split: --at image.jpg image/jpeg: unknown option\"\n    # which indicates the fish script failed to parse the completion output.\n    result = runner.invoke(\n        cli,\n        [\"--fish\", \"completion\"],\n        env={\n            \"_CLICK_COMPLETE\": \"fish_complete\",\n            \"COMP_WORDS\": \"cli --\",\n            \"COMP_CWORD\": \"--\",\n        },\n    )\n\n    assert \"string split: --at image.jpg image/jpeg: unknown option\" not in result.output\n```",
+  "usage": {
+    "prompt_tokens": 5694,
+    "completion_tokens": 332,
+    "cost_usd": 0.001435,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787949307.8566623
+}

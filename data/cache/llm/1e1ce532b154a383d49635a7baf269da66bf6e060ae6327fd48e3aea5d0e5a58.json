@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport os\nimport pytest\nimport sys\nimport warnings\n\nfrom click.testing import CliRunner\nfrom click import File, group, option\n\n\n@group()\n@option(\"--config-file\", type=File(\"r\"))\ndef cli(config_file):\n    pass\n\n\n@cli.command()\ndef sub():\n    pass\n\n\n@pytest.mark.skipif(sys.platform == \"win32\", reason=\"ResourceWarning not reliably triggered on Windows\")\ndef test_file_option_completion_closes_file(tmp_path):\n    config_path = tmp_path / \"config.txt\"\n    config_path.write_text(\"test_content\")\n\n    runner = CliRunner()\n\n    # Simulate shell completion for bash\n    env = {\n        \"_CLI_COMPLETE\": \"complete\",\n        \"COMP_WORDS\": f\"cli --config-file {config_path} s\",\n        \"COMP_CWORD\": \"2\",\n    }\n\n    with warnings.catch_warnings(record=True) as w:\n        warnings.simplefilter(\"always\")\n        result = runner.invoke(cli, [\"--completion\", \"bash\"], env=env, catch_exceptions=False)\n\n        assert not result.exception\n        assert \"sub\" in result.output\n\n        # Check that no ResourceWarning was issued for unclosed files\n        for warning_message in w:\n            assert issubclass(warning_message.category, ResourceWarning)\n            assert \"unclosed file\" not in str(warning_message.message)\n\n```",
+  "usage": {
+    "prompt_tokens": 4876,
+    "completion_tokens": 341,
+    "cost_usd": 0.002315,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787945759.9339635
+}

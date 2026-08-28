@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"tomlkit/toml_document.py\",\n    \"tomlkit/items.py\"\n  ],\n  \"test_file\": \"tests/test_toml_document.py\",\n  \"why\": \"The issue describes a loss of whitespace when parsing and then re-serializing a TOML document, specifically when reassigning parts of the document to themselves, suggesting a problem in how the TOML document structure or its items handle and preserve whitespace during manipulation.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 715,
+    "completion_tokens": 116,
+    "cost_usd": 0.000504,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787945848.755026
+}

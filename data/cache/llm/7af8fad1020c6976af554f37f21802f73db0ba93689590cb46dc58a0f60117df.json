@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport unittest\n\nfrom sqlglot import parse_one, exp\nfrom sqlglot.errors import ParseError\n\n\nclass TestIssue8225(unittest.TestCase):\n    def test_create_table_auto_increment(self):\n        sql = \"\"\"CREATE TABLE t1(id INT KEY AUTO_INCREMENT);\"\"\"\n        try:\n            ast = parse_one(sql, read=\"mysql\")\n            self.assertIsInstance(ast, exp.Create)\n            self.assertEqual(\n                ast.sql(dialect=\"mysql\"), \"CREATE TABLE t1 (id INT PRIMARY KEY AUTO_INCREMENT)\"\n            )\n        except ParseError as e:\n            self.fail(f\"Parsing failed with ParseError: {e}\")\n\n    def test_create_table_auto_increment_with_primary_key(self):\n        sql = \"\"\"CREATE TABLE t1(id INT PRIMARY KEY AUTO_INCREMENT);\"\"\"\n        try:\n            ast = parse_one(sql, read=\"mysql\")\n            self.assertIsInstance(ast, exp.Create)\n            self.assertEqual(\n                ast.sql(dialect=\"mysql\"), \"CREATE TABLE t1 (id INT PRIMARY KEY AUTO_INCREMENT)\"\n            )\n        except ParseError as e:\n            self.fail(f\"Parsing failed with ParseError: {e}\")\n\n```",
+  "usage": {
+    "prompt_tokens": 3843,
+    "completion_tokens": 294,
+    "cost_usd": 0.001888,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947819.2362707
+}

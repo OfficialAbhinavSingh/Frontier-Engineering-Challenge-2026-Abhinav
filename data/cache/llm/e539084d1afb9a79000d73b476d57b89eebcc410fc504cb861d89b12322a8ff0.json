@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport os\nimport sys\nimport pytest\nimport click\nfrom click.testing import CliRunner\n\n@pytest.fixture\ndef config_file(tmp_path):\n    f = tmp_path / \"config.txt\"\n    f.write_text(\"test_config_data\")\n    return str(f)\n\ndef test_file_option_completion_resource_warning(config_file):\n    @click.group()\n    @click.option('--config_file',\n                  default=config_file,\n                  type=click.File(mode='r'),\n                  help='help')\n    @click.pass_context\n    def cli(ctx, config_file):\n        pass\n\n    runner = CliRunner()\n\n    # Simulate shell completion environment variables\n    os.environ[\"_CLI_COMPLETE\"] = \"bash_source\"\n    os.environ[\"_CLI_COMPLETION\"] = \"complete\"\n    os.environ[\"COMP_WORDS\"] = \"cli --config_file\"\n    os.environ[\"COMP_CWORD\"] = \"1\"\n\n    # Capture stderr to check for ResourceWarning\n    with pytest.warns(ResourceWarning) as record:\n        result = runner.invoke(cli, [\"--config_file\"], complete_var=\"COMP_WORDS\")\n\n    # Assert that a ResourceWarning related to an unclosed file was issued\n    assert len(record) >= 1\n    assert any(\"unclosed file\" in str(w.message) for w in record)\n\n    # Clean up environment variables\n    del os.environ[\"_CLI_COMPLETE\"]\n    del os.environ[\"_CLI_COMPLETION\"]\n    del os.environ[\"COMP_WORDS\"]\n    del os.environ[\"COMP_CWORD\"]\n```",
+  "usage": {
+    "prompt_tokens": 1913,
+    "completion_tokens": 390,
+    "cost_usd": 0.001549,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787945652.0300577
+}

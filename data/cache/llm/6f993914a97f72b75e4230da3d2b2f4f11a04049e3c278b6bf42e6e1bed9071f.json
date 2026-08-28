@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport unittest\n\nfrom tests.dialects.test_dialect import Validator\n\n\nclass TestIssue5178(Validator):\n    def test_cte_udf_parse_error(self):\n        self.validate_identity(\n            \"\"\"\n            WITH FUNCTION f(num int)\n                RETURNS int\n                RETURN num\n            SELECT f(1);\n            \"\"\",\n            pretty=True,\n        )\n\n```",
+  "usage": {
+    "prompt_tokens": 3344,
+    "completion_tokens": 93,
+    "cost_usd": 0.001236,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787945898.6066606
+}

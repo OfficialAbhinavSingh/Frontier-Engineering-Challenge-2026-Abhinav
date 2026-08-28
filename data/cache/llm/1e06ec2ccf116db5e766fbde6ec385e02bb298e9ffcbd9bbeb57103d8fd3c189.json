@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"Okay, `table` and `inline_table` are indeed exposed directly from `tomlkit.api`. The issue describes that `tomlkit` *accepts* this invalid structure, meaning it doesn't raise an error. The desired fix is for it to *raise an error*. Therefore, my test should attempt to create the invalid structure and assert that an error (e.g., `ValueError` or a custom `tomlkit` exception) is raised.\n\nI'll construct the test case provided in the issue and wrap the `it.append(\\\"table\\\", t)` call in a `pytest.raises` context manager. I'll assume `ValueError` for now, as it's a common exception for invalid operations. If that doesn't work, I'll check `tomlkit/exceptions.py`.\", \"tool\": \"run_test\", \"args\": {\"source\": \"import pytest\\nimport tomlkit\\n\\ndef test_nesting_table_in_inlinetable_raises_error():\\n    t = tomlkit.table()\\n    t.append(\\\"a\\\", 1)\\n\\n    it = tomlkit.inline_table()\\n\\n    with pytest.raises(ValueError):  # Expecting an error to be raised\\n        it.append(\\\"table\\\", t)\\n\\n    # The original issue also showed dumping the document, which might be another point of failure.\\n    # However, the core issue is the ability to *append* it in the first place.\\n    # If the append itself doesn't raise, then the dump will produce invalid TOML.\\n    # For this test, we focus on the append operation.\\n\"}}",
+  "usage": {
+    "prompt_tokens": 1437,
+    "completion_tokens": 369,
+    "cost_usd": 0.001354,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947488.1522355
+}

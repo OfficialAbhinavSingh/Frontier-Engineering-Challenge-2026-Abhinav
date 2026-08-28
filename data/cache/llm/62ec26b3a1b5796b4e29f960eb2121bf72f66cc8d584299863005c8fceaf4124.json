@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The test failed as expected, but not because of an exception being raised. It failed because `pytest.raises(ValueError)` did *not* catch a `ValueError`. This confirms the bug: `tomlkit` currently allows appending a `Table` to an `InlineTable` without raising an error.\n\nNow I need to write the final test file. The current test correctly demonstrates the bug (it fails because no error is raised). Once the bug is fixed, and `it.append(\\\"table\\\", t)` raises a `ValueError` (or a more specific `tomlkit` exception), this test will pass.\n\nI will use the exact test code I just ran.\", \"final_test\": \"import pytest\\nimport tomlkit\\n\\ndef test_nesting_table_in_inlinetable_raises_error():\\n    t = tomlkit.table()\\n    t.append(\\\"a\\\", 1)\\n\\n    it = tomlkit.inline_table()\\n\\n    # The current implementation allows appending a Table to an InlineTable\\n    # without raising an error, which is invalid TOML.\\n    # This test expects a ValueError (or a more specific tomlkit exception)\\n    # to be raised when this invalid operation is attempted.\\n    # Therefore, this test will FAIL at the current commit because no error is raised.\\n    # Once the bug is fixed and an error is raised, this test will PASS.\\n    with pytest.raises(ValueError):  # Expecting an error to be raised\\n        it.append(\\\"table\\\", t)\\n\"}",
+  "usage": {
+    "prompt_tokens": 2233,
+    "completion_tokens": 346,
+    "cost_usd": 0.001535,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947492.7665439
+}

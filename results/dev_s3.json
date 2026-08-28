@@ -1,0 +1,195 @@
+{
+  "variant": "s3",
+  "description": "adds failure-class-specific repair instructions",
+  "model": "google/gemini-2.5-flash",
+  "n_cases": 6,
+  "f2p_solved": 3,
+  "f2p_rate": 0.5,
+  "total_cost_usd": 0.0,
+  "total_llm_calls": 12,
+  "cached_llm_calls": 12,
+  "mean_wall_clock_s": 3.5,
+  "wall_clock_total_s": 21.1,
+  "results": [
+    {
+      "case_id": "click__2263",
+      "repo": "pallets/click",
+      "variant": "s3",
+      "f2p": false,
+      "score_reason": "did_not_pass_at_fix:failed",
+      "verdict_at_parent": "reproduced_exception",
+      "self_reproduces": true,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 5381,
+        "completion_tokens": 705,
+        "cost_usd": 0.0,
+        "calls": 2,
+        "cached_calls": 2
+      },
+      "wall_clock_s": 2.6,
+      "error": null,
+      "test_source": "import pytest\nimport click\nfrom click.testing import CliRunner\n\n\n@pytest.fixture\ndef runner():\n    return CliRunner()\n\n\ndef test_deprecated_option(runner):\n    @click.command()\n    @click.option(\"--old-name\", deprecated=True, help=\"This is the old name.\")\n    @click.option(\"--new-name\", help=\"This is the new name.\")\n    def cli(old_name, new_name):\n        if old_name:\n            click.echo(f\"Old name used: {old_name}\")\n        if new_name:\n            click.echo(f\"New name used: {new_name}\")\n\n    # Test using the deprecated option\n    result = runner.invoke(cli, [\"--old-name\", \"value\"])\n    assert \"Deprecated: Option '--old-name' is deprecated.\" in result.output\n    assert \"Old name used: value\" in result.output\n    assert result.exit_code == 0\n\n    # Test using the new option\n    result = runner.invoke(cli, [\"--new-name\", \"value\"])\n    assert \"Deprecated: Option '--old-name' is deprecated.\" not in result.output\n    assert \"New name used: value\" in result.output\n    assert result.exit_code == 0\n\n    # Test help message includes deprecation warning\n    result = runner.invoke(cli, [\"--help\"])\n    assert \"Deprecated: Option '--old-name' is deprecated.\" in result.output\n    assert \"--old-name TEXT  [deprecated] This is the old name.\" in result.output\n    assert \"--new-name TEXT  This is the new name.\" in result.output\n\n    # Test using both deprecated and new option (should warn for deprecated)\n    @click.command()\n    @click.option(\"--count\", deprecated=True, help=\"Old count option.\")\n    @click.option(\"--greetings-count\", help=\"New greetings count option.\")\n    def hello(count, greetings_count):\n        if count is not None:\n            click.echo(f\"Count: {count}\")\n        if greetings_count is not None:\n            click.echo(f\"Greetings Count: {greetings_count}\")\n\n    result = runner.invoke(hello, [\"--count\", \"5\", \"--greetings-count\", \"10\"])\n    assert \"Deprecated: Option '--count' is deprecated.\" in result.output\n    assert \"Count: 5\" in result.output\n    assert \"Greetings Count: 10\" in result.output\n    assert result.exit_code == 0\n",
+      "test_rel_path": "tests/test_reprobot_click__2263.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "reproduced_exception",
+          "exception_type": "TypeError",
+          "reason": "TypeError was raised from inside the project's own code (src/click/decorators.py:375 in decorator)",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n____________________________ test_deprecated_option ____________________________\ntests/test_reprobot_click__2263.py:13: in test_deprecated_option\n    @click.option(\"--old-name\", deprecated=True, help=\"This is the old name.\")\n     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsrc/click/decorators.py:375: in decorator\n    _param_memo(f, cls(param_decls, **attrs))\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^\nsrc/click/core.py:2478: in __init__\n    super().__init__(param_decls, type=type, multiple=multiple, **attrs)\nE   TypeError: Parameter.__init__() got an unexpected keyword argument 'deprecated'\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_click__2263.py::test_deprecated_option - TypeError...\n1 failed in 0.05s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "click__2644",
+      "repo": "pallets/click",
+      "variant": "s3",
+      "f2p": false,
+      "score_reason": "did_not_pass_at_fix:failed",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": true,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 7079,
+        "completion_tokens": 599,
+        "cost_usd": 0.0,
+        "calls": 2,
+        "cached_calls": 2
+      },
+      "wall_clock_s": 2.6,
+      "error": null,
+      "test_source": "import os\nimport pytest\nimport click\nfrom click.testing import CliRunner\nfrom click.shell_completion import BashComplete\nfrom click.shell_completion import ZshComplete\nfrom click.shell_completion import FishComplete\n\n\n@pytest.fixture\ndef runner():\n    return CliRunner()\n\n\n@pytest.mark.parametrize(\"shell\", [\"bash\", \"zsh\", \"fish\"])\ndef test_file_option_completion_closes_file(runner, shell, tmp_path):\n    test_file = tmp_path / \"test.txt\"\n    test_file.write_text(\"hello\")\n\n    @click.group()\n    @click.option(\n        \"--config-file\",\n        default=str(test_file),\n        type=click.File(mode=\"r\"),\n        help=\"A config file.\",\n    )\n    def cli(config_file):\n        pass\n\n    # Simulate shell completion environment variables\n    env = {\n        f\"_{cli.name.upper()}_COMPLETE\": f\"{shell}_complete\",\n        \"COMP_WORDS\": \"cli --config-file\",\n        \"COMP_CWORD\": \"2\",\n        \"COMP_POINT\": \"18\",\n    }\n    if shell == \"zsh\":\n        env[\"_CLI_COMPLETE_LINE\"] = \"cli --config-file \"\n        env[\"_CLI_COMPLETE_POINT\"] = \"18\"\n    elif shell == \"fish\":\n        env[\"_CLI_COMPLETE_LINE\"] = \"cli --config-file \"\n        env[\"_CLI_COMPLETE_POINT\"] = \"18\"\n\n    # Run completion and check for ResourceWarning\n    with pytest.warns(ResourceWarning) as record:\n        result = runner.invoke(cli, [\"--completion\", f\"{shell}_complete\"], env=env)\n\n    # The bug is that the file is not closed, leading to a ResourceWarning.\n    # If the bug is fixed, there should be no ResourceWarning.\n    assert not record.list, \"ResourceWarning was raised, file was not closed.\"\n    assert result.exit_code == 0\n",
+      "test_rel_path": "tests/test_reprobot_click__2644.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "reproduced_assertion",
+          "exception_type": "AssertionError",
+          "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
+          "output": "ile_option_completion_closes_file\n    assert not record.list, \"ResourceWarning was raised, file was not closed.\"\nE   AssertionError: ResourceWarning was raised, file was not closed.\nE   assert not [<warnings.WarningMessage object at 0x7fa1a55bd6a0>]\nE    +  where [<warnings.WarningMessage object at 0x7fa1a55bd6a0>] = WarningsChecker(record=True).list\n________________ test_file_option_completion_closes_file[fish] _________________\ntests/test_reprobot_click__2644.py:50: in test_file_option_completion_closes_file\n    assert not record.list, \"ResourceWarning was raised, file was not closed.\"\nE   AssertionError: ResourceWarning was raised, file was not closed.\nE   assert not [<warnings.WarningMessage object at 0x7fa1a55be7b0>]\nE    +  where [<warnings.WarningMessage object at 0x7fa1a55be7b0>] = WarningsChecker(record=True).list\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_click__2644.py::test_file_option_completion_closes_file[bash]\nFAILED tests/test_reprobot_click__2644.py::test_file_option_completion_closes_file[zsh]\nFAILED tests/test_reprobot_click__2644.py::test_file_option_completion_closes_file[fish]\n3 failed in 0.03s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "sqlglot__5178",
+      "repo": "tobymao/sqlglot",
+      "variant": "s3",
+      "f2p": false,
+      "score_reason": "did_not_pass_at_fix:failed",
+      "verdict_at_parent": "reproduced_exception",
+      "self_reproduces": true,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 4205,
+        "completion_tokens": 210,
+        "cost_usd": 0.0,
+        "calls": 2,
+        "cached_calls": 2
+      },
+      "wall_clock_s": 8.8,
+      "error": null,
+      "test_source": "import unittest\n\nfrom tests.dialects.test_dialect import Validator\n\n\nclass TestIssue5178(Validator):\n    def test_cte_udf_parse_error(self):\n        self.validate_identity(\n            \"\"\"\n            WITH FUNCTION f(num int)\n                RETURNS int\n                RETURN num\n            SELECT f(1);\n            \"\"\",\n            pretty=True,\n        )\n",
+      "test_rel_path": "tests/dialects/test_reprobot_sqlglot__5178.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "reproduced_exception",
+          "exception_type": "ParseError",
+          "reason": "ParseError was raised from inside the project's own code (tests/dialects/test_dialect.py:61 in validate_identity)",
+          "output": "^^^^^^\nsqlglot/parser.py:2331: in _parse_statement\n    expression = self._parse_set_operations(expression) if expression else self._parse_select()\n                                                                           ^^^^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:3912: in _parse_select\n    query = self._parse_select_query(\nsqlglot/parser.py:3935: in _parse_select_query\n    cte = self._parse_with()\n          ^^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:4099: in _parse_with\n    cte = self._parse_cte()\n          ^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:4147: in _parse_cte\n    this=self._parse_wrapped(self._parse_statement),\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:8742: in _parse_wrapped\n    self.raise_error(\"Expecting (\")\nsqlglot/parser.py:2038: in raise_error\n    raise error\nE   sqlglot.errors.ParseError: Expecting (. Line 2, Col: 27.\nE     \nE               WITH FUNCTION \u001b[4mf\u001b[0m(num int)\nE                   RETURNS int\nE                   RETURN num\nE               SELECT f(1);\n=========================== short test summary info ============================\nFAILED tests/dialects/test_reprobot_sqlglot__5178.py::TestIssue5178::test_cte_udf_parse_error\n1 failed in 1.16s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "tomlkit__291",
+      "repo": "python-poetry/tomlkit",
+      "variant": "s3",
+      "f2p": true,
+      "score_reason": "ok",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": true,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 4167,
+        "completion_tokens": 346,
+        "cost_usd": 0.0,
+        "calls": 2,
+        "cached_calls": 2
+      },
+      "wall_clock_s": 2.3,
+      "error": null,
+      "test_source": "from tomlkit import dumps\nfrom tomlkit import parse\n\n\ndef test_issue_291_whitespace_preservation() -> None:\n    content = \"\"\"\n[keys.a]\n#    \u2193 this whitespace disappears\n[keys .'a'.'c']\n  'd'\t= 'e'\n\"\"\"\n    doc = parse(content)\n    for mode in doc[\"keys\"]:\n        doc[\"keys\"][mode] = doc[\"keys\"][mode]\n\n    # The bug causes the whitespace of [keys .'a'.'c'] to be overwritten\n    # by the whitespace of [keys.a] when reassigning.\n    # The expected behavior is that the original whitespace is preserved.\n    expected_content = \"\"\"\n[keys.a]\n#    \u2193 this whitespace disappears\n[keys .'a'.'c']\n  'd'\t= 'e'\n\"\"\"\n    assert dumps(doc) == expected_content\n",
+      "test_rel_path": "tests/test_reprobot_tomlkit__291.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "reproduced_assertion",
+          "exception_type": null,
+          "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n____________________ test_issue_291_whitespace_preservation ____________________\ntests/test_reprobot_tomlkit__291.py:25: in test_issue_291_whitespace_preservation\n    assert dumps(doc) == expected_content\nE   assert \"\\n[keys.a]\\n... 'd'\\t= 'e'\\n\" == \"\\n[keys.a]\\n... 'd'\\t= 'e'\\n\"\nE     \nE     Skipping 39 identical leading characters in diff, use -v to show\nE       ears\nE     - [keys .'a'.'c']\nE     ?      - - -\nE     + [keys.a.'c']\nE         'd'\t= 'e'\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_tomlkit__291.py::test_issue_291_whitespace_preservation\n1 failed in 0.05s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "tomlkit__352",
+      "repo": "python-poetry/tomlkit",
+      "variant": "s3",
+      "f2p": true,
+      "score_reason": "ok",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": true,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 4176,
+        "completion_tokens": 555,
+        "cost_usd": 0.0,
+        "calls": 2,
+        "cached_calls": 2
+      },
+      "wall_clock_s": 2.4,
+      "error": null,
+      "test_source": "import pytest\nfrom typing import Any\nfrom tomlkit import parse\nimport tomlkit\nfrom collections import OrderedDict\nfrom tomlkit.container import Container\n\n\ndef merge_dicts(a: dict, b: dict):\n    ret = a\n\n    for k, v in b.items():\n        if k in a and isinstance(a[k], (dict, OrderedDict, Container)):\n            ret[k] = merge_dicts(a[k], v)\n        else:\n            ret[k] = v\n    return ret\n\n\ndef test_rewrite_toml_data_no_extra_whitespace(tmp_path):\n    # Create a dummy TOML file with the reported structure\n    content = \"\"\"# xxx test\n\n\n[env.pro1.rst]\n    name = \"x7\"\n\n[env2]\n    name = 2\n\n[env3]\n    name = 3\n\"\"\"\n    file_ = tmp_path / \"test.toml\"\n    file_.write_text(content)\n\n    # Load, modify, and dump the TOML data\n    with open(file_, \"r\") as f:\n        t = tomlkit.load(f)\n\n    t = merge_dicts(\n        t,\n        {'env': {'pro1': {'rst': {'name': \"x7\"}}}}\n    )\n\n    with open(file_, \"w\") as f:\n        tomlkit.dump(t, f)\n\n    # Read the modified content and assert it matches the expected output\n    # (without the extra whitespace line)\n    expected_content = \"\"\"# xxx test\n\n\n[env.pro1.rst]\n    name = \"x7\"\n\n[env2]\n    name = 2\n\n[env3]\n    name = 3\n\"\"\"\n    assert file_.read_text() == expected_content\n",
+      "test_rel_path": "tests/test_reprobot_tomlkit__352.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "reproduced_assertion",
+          "exception_type": null,
+          "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n__________________ test_rewrite_toml_data_no_extra_whitespace __________________\ntests/test_reprobot_tomlkit__352.py:63: in test_rewrite_toml_data_no_extra_whitespace\n    assert file_.read_text() == expected_content\nE   assert '# xxx test\\n...   name = 3\\n' == '# xxx test\\n...   name = 3\\n'\nE     \nE     Skipping 35 identical leading characters in diff, use -v to show\nE       e = \"x7\"\nE     + \nE       \nE       [env2]\nE           name = 2...\nE     \nE     ...Full output truncated (3 lines hidden), use '-vv' to show\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_tomlkit__352.py::test_rewrite_toml_data_no_extra_whitespace\n1 failed in 0.05s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "tomlkit__439",
+      "repo": "python-poetry/tomlkit",
+      "variant": "s3",
+      "f2p": true,
+      "score_reason": "ok",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": true,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 3207,
+        "completion_tokens": 253,
+        "cost_usd": 0.0,
+        "calls": 2,
+        "cached_calls": 2
+      },
+      "wall_clock_s": 2.4,
+      "error": null,
+      "test_source": "from collections.abc import Callable\nfrom typing import Any\n\nimport pytest\n\nfrom tomlkit import parse\nfrom tomlkit.toml_document import TOMLDocument\n\n\ndef test_repr_of_nested_table_proxy_includes_all_keys() -> None:\n    content = \"\"\"\na.b.c = \"d\"\na.b.e = \"f\"\n\"\"\"\n    doc = parse(content)\n    value = doc[\"a\"]\n    expected = {\"b\": {\"c\": \"d\", \"e\": \"f\"}}\n\n    assert repr(value) == repr(expected)\n",
+      "test_rel_path": "tests/test_reprobot_tomlkit__439.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "reproduced_assertion",
+          "exception_type": null,
+          "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n______________ test_repr_of_nested_table_proxy_includes_all_keys _______________\ntests/test_reprobot_tomlkit__439.py:19: in test_repr_of_nested_table_proxy_includes_all_keys\n    assert repr(value) == repr(expected)\nE   assert \"{'b': {'e': 'f'}}\" == \"{'b': {'c': 'd', 'e': 'f'}}\"\nE     \nE     - {'b': {'c': 'd', 'e': 'f'}}\nE     ?        ----------\nE     + {'b': {'e': 'f'}}\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_tomlkit__439.py::test_repr_of_nested_table_proxy_includes_all_keys\n1 failed in 0.05s\n"
+        }
+      ]
+    }
+  ]
+}

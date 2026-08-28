@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"Okay, I've read `src/click/core.py` to understand how contexts are handled. Now I need to create a test case.\n\nThe test should:\n1. Define a simple Click command with a `click.File(mode='r')` option.\n2. Create a temporary file to be used by the `click.File` option.\n3. Simulate shell completion by setting the `_CLICK_COMPLETE` environment variable and running the Click application.\n4. Capture `ResourceWarning`s.\n\nI'll use `pytest` and `warnings.catch_warnings` to check for the warning. I'll also use `subprocess` to run the Click app in a way that simulates shell completion.\", \"tool\": \"read_file\", \"args\": {\"path\": \"src/click/shell_completion.py\"}}",
+  "usage": {
+    "prompt_tokens": 1774,
+    "completion_tokens": 182,
+    "cost_usd": 0.000987,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946627.5911388
+}

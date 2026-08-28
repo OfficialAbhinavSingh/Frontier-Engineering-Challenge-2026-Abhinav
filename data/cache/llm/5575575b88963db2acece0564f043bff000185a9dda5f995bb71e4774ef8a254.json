@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nimport sys\nimport os\nfrom click.testing import CliRunner\n\n\n@pytest.mark.skipif(sys.platform.startswith(\"win\"), reason=\"Linux-specific bug\")\ndef test_prompt_backspace_linux(runner: CliRunner, monkeypatch):\n    # Simulate a user typing \"hello\" then backspacing once to get \"hell\"\n    # The bug causes more than one character to be removed, or the whole line.\n    # It also causes the returned input to be different from what's displayed.\n    # We'll simulate the input and check the returned value.\n\n    # The expected behavior is that one backspace removes one character.\n    # So, typing \"hello\\b\" should result in \"hell\".\n    # The bug report shows that on Linux, hitting backspace once removes two characters.\n    # It also states \"The returned input is also different from the text shown on screen.\"\n    # This test focuses on the *returned input* being correct after a simulated backspace.\n\n    # We need to mock sys.stdin.isatty to ensure click uses readline on Linux.\n    # The bug description states: \"termui contains a workaround for windows where it\n    # prints a readline prompt itself. On linux, this confuses readline so things\n    # like backspace/ctrl-backspace and line wrapping don't work correctly.\"\n    # The fix is to let readline handle the prompt on Linux.\n    # So, we need to ensure isatty returns True for this test.\n    monkeypatch.setattr(sys.stdin, \"isatty\", lambda: True)\n\n    # Simulate input: \"hello\" followed by a backspace character, then Enter.\n    # The backspace character is '\\x7f' (DEL) or '\\x08' (BS).\n    # Readline typically interprets '\\x7f' as backspace.\n    input_sequence = \"hello\\x7f\\n\"\n\n    @click.command()\n    def cli():\n        name = click.prompt(\"Enter something\")\n        click.echo(f\"You entered: {name}\")\n\n    result = runner.invoke(cli, input=input_sequence)\n\n    # The bug causes the returned input to be incorrect.\n    # If the bug is present, \"hello\\x7f\" might result in \"hel\" or an empty string.\n    # The correct behavior is that one backspace removes one character, so \"hell\".\n    assert \"You entered: hell\" in result.output\n    assert result.exit_code == 0\n```",
+  "usage": {
+    "prompt_tokens": 4474,
+    "completion_tokens": 568,
+    "cost_usd": 0.002762,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787948061.055505
+}

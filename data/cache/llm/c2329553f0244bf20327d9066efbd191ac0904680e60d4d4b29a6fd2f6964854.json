@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nimport torch\n\nimport tomlkit\n\n\ndef test_array_of_floats_with_torch_tensor() -> None:\n    arr = tomlkit.loads(\n        \"\"\"\na = [1.0, 2.0, 3.0]\n\"\"\"\n    )\n\n    # The bug occurs when `torch.tensor` tries to process `tomlkit.items.Array`\n    # containing `tomlkit.items.Float` objects, specifically when it tries\n    # to determine the length of the individual `Float` items, leading to\n    # \"TypeError: object of type 'Float' has no len()\".\n    # The fix should allow `torch.tensor` to correctly convert the array\n    # of TOML floats into a PyTorch tensor of floats.\n    # We assert that the conversion to a torch.tensor succeeds without error\n    # and that the resulting tensor has the expected values and type.\n    t = torch.tensor(arr[\"a\"], dtype=torch.float32)\n    assert t.tolist() == [1.0, 2.0, 3.0]\n```",
+  "usage": {
+    "prompt_tokens": 3270,
+    "completion_tokens": 252,
+    "cost_usd": 0.001611,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787949361.1758425
+}

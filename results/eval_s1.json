@@ -1,0 +1,507 @@
+{
+  "variant": "s1",
+  "tag": "",
+  "temperature": 0.0,
+  "description": "structured pipeline with sandbox verification and a repair loop",
+  "model": "google/gemini-2.5-flash",
+  "n_cases": 14,
+  "f2p_solved": 3,
+  "f2p_rate": 0.2143,
+  "total_cost_usd": 0.0594,
+  "total_llm_calls": 38,
+  "cached_llm_calls": 0,
+  "mean_wall_clock_s": 14.6,
+  "wall_clock_total_s": 204.0,
+  "results": [
+    {
+      "case_id": "click__2703",
+      "repo": "pallets/click",
+      "variant": "s1",
+      "f2p": false,
+      "score_reason": "did_not_pass_at_fix:failed",
+      "verdict_at_parent": "reproduced_exception",
+      "self_reproduces": true,
+      "rounds": 3,
+      "usage": {
+        "prompt_tokens": 12257,
+        "completion_tokens": 2789,
+        "cost_usd": 0.01065,
+        "calls": 4,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 19.9,
+      "error": null,
+      "test_source": "import os\nimport re\nimport sys\n\nimport pytest\n\nfrom click.shell_completion import CompletionItem\nfrom click.testing import CliRunner\n\n\n@pytest.fixture\ndef runner():\n    return CliRunner()\n\n\n@pytest.fixture\ndef isolated_cli_runner(runner):\n    with runner.isolated_filesystem():\n        yield runner\n\n\n@pytest.mark.parametrize(\n    (\"shell\", \"incomplete\", \"expected_output\"),\n    [\n        (\"zsh\", \"\", \"baz:quux:adsf\\nspam:eggs:adsf\\n\"),\n        (\"zsh\", \"b\", \"baz:quux:adsf\\n\"),\n        (\"zsh\", \"s\", \"spam:eggs:adsf\\n\"),\n    ],\n)\ndef test_zsh_completion_with_colon(isolated_cli_runner, shell, incomplete, expected_output):\n    script_content = f\"\"\"#!/usr/bin/env python3\nfrom click.shell_completion import CompletionItem\nimport click\n\nclass Foo(click.ParamType):\n    def convert(self, value, param, ctx):\n        return value\n\n    def shell_complete(self, ctx, param, incomplete):\n        return [\n            CompletionItem(value=value, help=\"adsf\") for value in\n            [\"baz:quux\", \"spam:eggs\"]\n            if value.startswith(incomplete)\n        ]\n\n@click.command()\n@click.argument(\"foo\", type=Foo())\ndef main(foo):\n    print(foo)\n\nif __name__ == \"__main__\":\n    main()\n\"\"\"\n    with open(\"foo.py\", \"w\") as f:\n        f.write(script_content)\n\n    # Make the script executable\n    os.chmod(\"foo.py\", 0o755)\n\n    # Generate the completion script\n    # We need to simulate the shell calling the script with the completion environment variables.\n    # The `_FOO_COMPLETE` env var is what triggers the completion logic within the script.\n    # The `source` command is used to generate the completion script.\n    result = isolated_cli_runner.invoke(\n        sys.executable,\n        [\"foo.py\"],\n        env={\n            \"_FOO_COMPLETE\": f\"{shell}_source\",\n            \"PATH\": os.environ[\"PATH\"],  # Ensure python is found\n        },\n    )\n    assert not result.exception\n    assert result.exit_code == 0\n\n    # Extract the completion function name from the generated script\n    # This is specific to zsh completion script generation.\n    match = re.search(r\"compdef _(\\w+)_completion foo\", result.output)\n    assert match, f\"Could not find compdef in:\\n{result.output}\"\n    func_name = match.group(1)\n\n    # Simulate the shell completion call\n    # The `complete` command is used to get the actual completions.\n    # The `_FOO_COMPLETE` env var tells the script to enter completion mode.\n    # The `_CLI_COMPLETE_ARGS` env var contains the command line arguments.\n    # The `_CLI_COMPLETE_WORD` env var contains the word being completed.\n    completion_env = {\n        f\"_{func_name.upper()}_COMPLETE\": f\"{shell}_complete\",\n        \"_CLI_COMPLETE_ARGS\": f\"foo {incomplete}\".strip(),\n        \"_CLI_COMPLETE_WORD\": incomplete,\n        \"PATH\": os.environ[\"PATH\"],\n    }\n\n    completion_result = isolated_cli_runner.invoke(\n        sys.executable,\n        [\"foo.py\"],\n        env=completion_env,\n    )\n\n    assert not completion_result.exception\n    assert completion_result.exit_code == 0\n    assert completion_result.output == expected_output\n",
+      "test_rel_path": "tests/test_reprobot_click__2703.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "broken_test",
+          "exception_type": "AttributeError",
+          "reason": "the test could not be collected or ran into an import, syntax or fixture problem before exercising the reported behaviour",
+          "output": "ult = isolated_cli_runner.run(\n             ^^^^^^^^^^^^^^^^^^^^^^^\nE   AttributeError: 'CliRunner' object has no attribute 'run'\n___________________ test_completion[zsh-s-spam:eggs:adsf\\n] ____________________\n/work/repo/tests/test_reprobot_click__2703.py:106: in test_completion\n    result = isolated_cli_runner.run(\n             ^^^^^^^^^^^^^^^^^^^^^^^\nE   AttributeError: 'CliRunner' object has no attribute 'run'\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_click__2703.py::test_completion_script[zsh-_foo_completion () {\\n  local reply\\n  local completions\\n  local word=\"${1}\"\\n  local completions_src=( $( env _FOO_COMPLETE=zsh_complete \"${word}\" ) )\\n  while IFS= read -r line; do\\n    completions+=( \"${line}\" )\\n  done < <(printf \"%s\\\\n\" \"${completions_src[@]}\")\\n  _describe 'values' reply \"${completions[@]}\"\\n}\\ncompdef _foo_completion foo\\n]\nFAILED tests/test_reprobot_click__2703.py::test_completion[zsh--baz:quux:adsf\\nspam:eggs:adsf\\n]\nFAILED tests/test_reprobot_click__2703.py::test_completion[zsh-b-baz:quux:adsf\\n]\nFAILED tests/test_reprobot_click__2703.py::test_completion[zsh-s-spam:eggs:adsf\\n]\n4 failed in 0.03s\n"
+        },
+        {
+          "round": 2,
+          "verdict": "broken_test",
+          "exception_type": "AttributeError",
+          "reason": "the test could not be collected or ran into an import, syntax or fixture problem before exercising the reported behaviour",
+          "output": "ux:adsf\\n] _____________\n/work/repo/tests/test_reprobot_click__2703.py:62: in test_zsh_completion_with_colon\n    isolated_cli_runner.make_interactive_shell_completion_command(\"foo.py\", prog_name=\"foo\"),\n    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   AttributeError: 'CliRunner' object has no attribute 'make_interactive_shell_completion_command'\n____________ test_zsh_completion_with_colon[zsh-s-spam:eggs:adsf\\n] ____________\n/work/repo/tests/test_reprobot_click__2703.py:62: in test_zsh_completion_with_colon\n    isolated_cli_runner.make_interactive_shell_completion_command(\"foo.py\", prog_name=\"foo\"),\n    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   AttributeError: 'CliRunner' object has no attribute 'make_interactive_shell_completion_command'\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_click__2703.py::test_zsh_completion_with_colon[zsh--baz:quux:adsf\\nspam:eggs:adsf\\n]\nFAILED tests/test_reprobot_click__2703.py::test_zsh_completion_with_colon[zsh-b-baz:quux:adsf\\n]\nFAILED tests/test_reprobot_click__2703.py::test_zsh_completion_with_colon[zsh-s-spam:eggs:adsf\\n]\n3 failed in 0.03s\n"
+        },
+        {
+          "round": 3,
+          "verdict": "reproduced_exception",
+          "exception_type": "KeyError",
+          "reason": "KeyError was raised from inside the project's own code (/work/repo/src/click/testing.py:489 in invoke)",
+          "output": "   AttributeError: 'str' object has no attribute 'name'\n____________ test_zsh_completion_with_colon[zsh-s-spam:eggs:adsf\\n] ____________\n/work/repo/src/click/testing.py:489: in invoke\n    prog_name = extra.pop(\"prog_name\")\n                ^^^^^^^^^^^^^^^^^^^^^^\nE   KeyError: 'prog_name'\n\nDuring handling of the above exception, another exception occurred:\n/work/repo/tests/test_reprobot_click__2703.py:64: in test_zsh_completion_with_colon\n    result = isolated_cli_runner.invoke(\n/work/repo/src/click/testing.py:491: in invoke\n    prog_name = self.get_default_prog_name(cli)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/work/repo/src/click/testing.py:264: in get_default_prog_name\n    return cli.name or \"root\"\n           ^^^^^^^^\nE   AttributeError: 'str' object has no attribute 'name'\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_click__2703.py::test_zsh_completion_with_colon[zsh--baz:quux:adsf\\nspam:eggs:adsf\\n]\nFAILED tests/test_reprobot_click__2703.py::test_zsh_completion_with_colon[zsh-b-baz:quux:adsf\\n]\nFAILED tests/test_reprobot_click__2703.py::test_zsh_completion_with_colon[zsh-s-spam:eggs:adsf\\n]\n3 failed in 0.05s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "click__2817",
+      "repo": "pallets/click",
+      "variant": "s1",
+      "f2p": true,
+      "score_reason": "ok",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": true,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 2984,
+        "completion_tokens": 368,
+        "cost_usd": 0.001815,
+        "calls": 2,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 5.8,
+      "error": null,
+      "test_source": "import pytest\nimport click\nfrom click.testing import CliRunner\n\ndef test_runner_catch_exceptions_default():\n    @click.command()\n    def cli_error():\n        raise ValueError(\"This is an error\")\n\n    runner = CliRunner()\n    # The default for catch_exceptions is True, so the exception should be caught\n    result = runner.invoke(cli_error)\n    assert result.exception is not None\n    assert isinstance(result.exception, ValueError)\n    assert result.exit_code == 1\n\n    # Now, if we set catch_exceptions to False on the runner, it should propagate\n    # This is the behavior the user expects to be able to configure globally\n    runner.catch_exceptions = False\n    with pytest.raises(ValueError, match=\"This is an error\"):\n        runner.invoke(cli_error)\n\n    # Test that passing it directly to invoke still overrides the runner's setting\n    runner.catch_exceptions = False\n    result = runner.invoke(cli_error, catch_exceptions=True)\n    assert result.exception is not None\n    assert isinstance(result.exception, ValueError)\n    assert result.exit_code == 1\n",
+      "test_rel_path": "tests/test_reprobot_click__2817.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "reproduced_assertion",
+          "exception_type": null,
+          "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n_____________________ test_runner_catch_exceptions_default _____________________\ntests/test_reprobot_click__2817.py:20: in test_runner_catch_exceptions_default\n    with pytest.raises(ValueError, match=\"This is an error\"):\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   Failed: DID NOT RAISE ValueError\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_click__2817.py::test_runner_catch_exceptions_default\n1 failed in 0.02s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "click__2968",
+      "repo": "pallets/click",
+      "variant": "s1",
+      "f2p": false,
+      "score_reason": "did_not_pass_at_fix:failed",
+      "verdict_at_parent": "reproduced_exception",
+      "self_reproduces": true,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 4873,
+        "completion_tokens": 562,
+        "cost_usd": 0.002867,
+        "calls": 2,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 7.0,
+      "error": null,
+      "test_source": "import os\nimport sys\nfrom click.testing import CliRunner\nimport click\n\ndef test_prompt_backspace_linux(monkeypatch):\n    if sys.platform.startswith(\"linux\"):\n        runner = CliRunner()\n\n        # Simulate user typing \"hello\" then backspacing twice to get \"hel\"\n        # and then pressing enter.\n        # The bug causes backspace to remove two characters, so \"hello\\b\\b\"\n        # would result in \"he\" instead of \"hel\".\n        # The bug also causes the prompt to be deleted when backspacing the entire line.\n        # We'll test a simple backspace scenario.\n        input_data = \"hello\\b\\b\\n\"\n\n        # Mock sys.stdin.isatty to ensure we hit the interactive prompt path\n        monkeypatch.setattr(sys.stdin, \"isatty\", lambda: True)\n\n        result = runner.invoke(click.prompt, [\"Enter text\"], input=input_data)\n\n        # The expected output should be \"hel\" if backspace works correctly\n        assert result.output.strip().endswith(\"hel\")\n        assert \"hel\" in result.output\n        assert result.exit_code == 0\n        assert result.exception is None\n\n        # Test another scenario: typing \"abc\" and then backspacing all of it\n        # and then typing \"def\"\n        input_data_full_backspace = \"abc\\b\\b\\bdef\\n\"\n        result_full_backspace = runner.invoke(click.prompt, [\"Enter text\"], input=input_data_full_backspace)\n\n        assert result_full_backspace.output.strip().endswith(\"def\")\n        assert \"def\" in result_full_backspace.output\n        assert result_full_backspace.exit_code == 0\n        assert result_full_backspace.exception is None\n",
+      "test_rel_path": "tests/test_reprobot_click__2968.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "reproduced_exception",
+          "exception_type": "KeyError",
+          "reason": "KeyError was raised from inside the project's own code (src/click/testing.py:591 in invoke)",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n_________________________ test_prompt_backspace_linux __________________________\nsrc/click/testing.py:591: in invoke\n    prog_name = extra.pop(\"prog_name\")\n                ^^^^^^^^^^^^^^^^^^^^^^\nE   KeyError: 'prog_name'\n\nDuring handling of the above exception, another exception occurred:\ntests/test_reprobot_click__2968.py:21: in test_prompt_backspace_linux\n    result = runner.invoke(click.prompt, [\"Enter text\"], input=input_data)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsrc/click/testing.py:593: in invoke\n    prog_name = self.get_default_prog_name(cli)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsrc/click/testing.py:300: in get_default_prog_name\n    return cli.name or \"root\"\n           ^^^^^^^^\nE   AttributeError: 'function' object has no attribute 'name'\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_click__2968.py::test_prompt_backspace_linux - Attr...\n1 failed in 0.03s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "click__3043",
+      "repo": "pallets/click",
+      "variant": "s1",
+      "f2p": false,
+      "score_reason": "did_not_pass_at_fix:failed",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": true,
+      "rounds": 2,
+      "usage": {
+        "prompt_tokens": 10025,
+        "completion_tokens": 919,
+        "cost_usd": 0.005305,
+        "calls": 3,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 10.0,
+      "error": null,
+      "test_source": "import os\nimport re\nimport sys\n\nimport pytest\n\nfrom click import Command\nfrom click import option\nfrom click.shell_completion import CompletionItem\nfrom click.shell_completion import FishComplete\nfrom click.testing import CliRunner\n\n\n@pytest.fixture\ndef runner():\n    return CliRunner()\n\n\n@pytest.fixture\ndef prog_name():\n    return \"test-cli\"\n\n\n@pytest.fixture\ndef complete_var():\n    return \"_TEST_CLI_COMPLETE\"\n\n\n@pytest.fixture\ndef make_completion_context(prog_name, complete_var):\n    def _make_completion_context(cli, args, incomplete):\n        comp = FishComplete(cli, {}, prog_name, complete_var)\n        os.environ[\"COMP_WORDS\"] = \" \".join(args)\n        os.environ[\"COMP_CWORD\"] = str(len(args) - 1)\n        os.environ[\"_CLICK_COMPLETE_FISH_INCOMPLETE\"] = incomplete\n        return comp\n\n    return _make_completion_context\n\n\ndef test_fish_completion_multiline_help(\n    runner, make_completion_context, prog_name, complete_var\n):\n    @option(\n        \"--at\",\n        help=\"\\b\\nAttachment with explicit mimetype,\\n--at image.jpg image/jpeg\",\n    )\n    def cli(at):\n        pass\n\n    cmd = Command(\"cli\", callback=cli)\n    comp = make_completion_context(cmd, [prog_name, \"--\"], \"\")\n    result = comp.complete()\n\n    # The expected output should have the multiline help text on a single line,\n    # with newlines replaced by spaces, and the leading \\b removed.\n    expected_completion = (\n        \"plain,--at\\tAttachment with explicit mimetype, --at image.jpg image/jpeg\"\n    )\n    assert expected_completion in result\n",
+      "test_rel_path": "tests/test_reprobot_click__3043.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "broken_test",
+          "exception_type": "AttributeError",
+          "reason": "the test could not be collected or ran into an import, syntax or fixture problem before exercising the reported behaviour",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n_____________________ test_fish_completion_multiline_help ______________________\ntests/test_reprobot_click__3043.py:53: in test_fish_completion_multiline_help\n    result = comp.complete()\n             ^^^^^^^^^^^^^^^\nsrc/click/shell_completion.py:299: in complete\n    completions = self.get_completions(args, incomplete)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsrc/click/shell_completion.py:279: in get_completions\n    ctx = _resolve_context(self.cli, self.ctx_args, self.prog_name, args)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsrc/click/shell_completion.py:575: in _resolve_context\n    with cli.make_context(prog_name, args.copy(), **ctx_args) as ctx:\n         ^^^^^^^^^^^^^^^^\nE   AttributeError: 'function' object has no attribute 'make_context'\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_click__3043.py::test_fish_completion_multiline_help\n1 failed in 0.03s\n"
+        },
+        {
+          "round": 2,
+          "verdict": "reproduced_assertion",
+          "exception_type": "AssertionError",
+          "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n_____________________ test_fish_completion_multiline_help ______________________\ntests/test_reprobot_click__3043.py:60: in test_fish_completion_multiline_help\n    assert expected_completion in result\nE   AssertionError: assert 'plain,--at\\tAttachment with explicit mimetype, --at image.jpg image/jpeg' in ''\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_click__3043.py::test_fish_completion_multiline_help\n1 failed in 0.02s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "click__3105",
+      "repo": "pallets/click",
+      "variant": "s1",
+      "f2p": true,
+      "score_reason": "ok",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": true,
+      "rounds": 2,
+      "usage": {
+        "prompt_tokens": 6711,
+        "completion_tokens": 457,
+        "cost_usd": 0.003156,
+        "calls": 3,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 8.1,
+      "error": null,
+      "test_source": "import pytest\nimport click\n\n\ndef test_func_param_type_value_error_message():\n    class MyClass:\n        def __init__(self, value):\n            self.value = value\n\n        @staticmethod\n        def from_str(input_value):\n            if input_value != \"works\":\n                raise ValueError(f\"input was {input_value!r}, should be 'works'\")\n            return MyClass(input_value)\n\n    my_class_type = click.types.FuncParamType(MyClass.from_str)\n\n    with pytest.raises(click.BadParameter) as exc_info:\n        my_class_type.convert(\"fails\", None, None)\n\n    assert \"input was 'fails', should be 'works'\" in str(exc_info.value)\n",
+      "test_rel_path": "tests/test_reprobot_click__3105.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "broken_test",
+          "exception_type": "AttributeError",
+          "reason": "the test could not be collected or ran into an import, syntax or fixture problem before exercising the reported behaviour",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n___________________ test_func_param_type_value_error_message ___________________\ntests/test_reprobot_click__3105.py:16: in test_func_param_type_value_error_message\n    my_class_type = click.FuncParamType(MyClass.from_str)\n                    ^^^^^^^^^^^^^^^^^^^\nsrc/click/__init__.py:126: in __getattr__\n    raise AttributeError(name)\nE   AttributeError: FuncParamType. Did you mean: 'ParamType'?\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_click__3105.py::test_func_param_type_value_error_message\n1 failed in 0.02s\n"
+        },
+        {
+          "round": 2,
+          "verdict": "reproduced_assertion",
+          "exception_type": null,
+          "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n___________________ test_func_param_type_value_error_message ___________________\ntests/test_reprobot_click__3105.py:21: in test_func_param_type_value_error_message\n    assert \"input was 'fails', should be 'works'\" in str(exc_info.value)\nE   assert \"input was 'fails', should be 'works'\" in 'fails'\nE    +  where 'fails' = str(BadParameter('fails'))\nE    +    where BadParameter('fails') = <ExceptionInfo BadParameter('fails') tblen=3>.value\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_click__3105.py::test_func_param_type_value_error_message\n1 failed in 0.02s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "sqlglot__7949",
+      "repo": "tobymao/sqlglot",
+      "variant": "s1",
+      "f2p": false,
+      "score_reason": "did_not_pass_at_fix:failed",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": true,
+      "rounds": 2,
+      "usage": {
+        "prompt_tokens": 9874,
+        "completion_tokens": 473,
+        "cost_usd": 0.004145,
+        "calls": 3,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 44.5,
+      "error": null,
+      "test_source": "import pytest\nimport sqlglot\nfrom sqlglot.errors import ParseError\n\n\ndef test_insert_replace_using():\n    sql = \"\"\"\nINSERT INTO TABLE students\n    REPLACE USING (country)\n    SELECT * FROM new_students;\n\"\"\"\n    with pytest.raises(ParseError) as exc_info:\n        sqlglot.parse_one(sql, dialect=\"databricks\")\n\n    # Assert that the error message indicates an unexpected token related to \"REPLACE\"\n    assert \"Unexpected token 'REPLACE'\" in str(exc_info.value)\n",
+      "test_rel_path": "tests/dialects/test_reprobot_sqlglot__7949.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "no_fail",
+          "exception_type": null,
+          "reason": "the test passed at the buggy commit, so it does not demonstrate the reported behaviour",
+          "output": "__REPROBOT_SANDBOX_READY__\nx                                                                        [100%]\n1 xfailed in 0.61s\n"
+        },
+        {
+          "round": 2,
+          "verdict": "reproduced_assertion",
+          "exception_type": null,
+          "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
+          "output": "REPLACE'\" in str(exc_info.value)\nE   assert \"Unexpected token 'REPLACE'\" in 'Invalid expression / Unexpected token. Line 3, Col: 11.\\n  \\nINSERT INTO TABLE students\\n    \\x1b[4mREPLACE\\x1b[0m USING (country)\\n    SELECT * FROM new_students;\\n'\nE    +  where 'Invalid expression / Unexpected token. Line 3, Col: 11.\\n  \\nINSERT INTO TABLE students\\n    \\x1b[4mREPLACE\\x1b[0m USING (country)\\n    SELECT * FROM new_students;\\n' = str(ParseError('Invalid expression / Unexpected token. Line 3, Col: 11.\\n  \\nINSERT INTO TABLE students\\n    \\x1b[4mREPLACE\\x1b[0m USING (country)\\n    SELECT * FROM new_students;\\n'))\nE    +    where ParseError('Invalid expression / Unexpected token. Line 3, Col: 11.\\n  \\nINSERT INTO TABLE students\\n    \\x1b[4mREPLACE\\x1b[0m USING (country)\\n    SELECT * FROM new_students;\\n') = <ExceptionInfo ParseError('Invalid expression / Unexpected token. Line 3, Col: 11.\\n  \\nINSERT INTO TABLE students\\n    \\x1b[4mREPLACE\\x1b[0m USING (country)\\n    SELECT * FROM new_students;\\n') tblen=7>.value\n=========================== short test summary info ============================\nFAILED tests/dialects/test_reprobot_sqlglot__7949.py::test_insert_replace_using\n1 failed in 0.28s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "sqlglot__8225",
+      "repo": "tobymao/sqlglot",
+      "variant": "s1",
+      "f2p": false,
+      "score_reason": "did_not_pass_at_fix:failed",
+      "verdict_at_parent": "reproduced_exception",
+      "self_reproduces": true,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 5712,
+        "completion_tokens": 420,
+        "cost_usd": 0.002764,
+        "calls": 2,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 26.4,
+      "error": null,
+      "test_source": "import pytest\nfrom sqlglot import parse_one, exp\nfrom sqlglot.errors import ParseError\n\ndef test_mysql_create_table_auto_increment():\n    sql = \"\"\"CREATE TABLE t1(id INT KEY AUTO_INCREMENT);\"\"\"\n    expression = parse_one(sql, read=\"mysql\")\n    assert isinstance(expression, exp.Create)\n    assert expression.this.name == \"t1\"\n    column = expression.this.expressions[0]\n    assert column.name == \"id\"\n    assert isinstance(column.this, exp.DataType)\n    assert column.this.this == exp.DataType.Type.INT\n    assert any(isinstance(c, exp.PrimaryKey) for c in column.constraints)\n    assert any(isinstance(c, exp.AutoIncrement) for c in column.constraints)\n\n    sql_with_primary_key = \"\"\"CREATE TABLE t1(id INT PRIMARY KEY AUTO_INCREMENT);\"\"\"\n    expression_pk = parse_one(sql_with_primary_key, read=\"mysql\")\n    assert isinstance(expression_pk, exp.Create)\n    column_pk = expression_pk.this.expressions[0]\n    assert any(isinstance(c, exp.PrimaryKey) for c in column_pk.constraints)\n    assert any(isinstance(c, exp.AutoIncrement) for c in column_pk.constraints)\n",
+      "test_rel_path": "tests/dialects/test_reprobot_sqlglot__8225.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "reproduced_exception",
+          "exception_type": "ParseError",
+          "reason": "ParseError was raised from inside the project's own code (sqlglot/__init__.py:160 in parse_one)",
+          "output": "^^\nsqlglot/parser.py:7593: in _parse_column_def\n    constraint = self._parse_column_constraint()\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:7747: in _parse_column_constraint\n    constraint = self.CONSTRAINT_PARSERS[self._prev.text.upper()](self)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/parsers/mysql.py:244: in <lambda>\n    \"KEY\": lambda self: self._parse_index_constraint(),\n                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/parsers/mysql.py:390: in _parse_index_constraint\n    expressions = self._parse_wrapped_csv(self._parse_ordered)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:8942: in _parse_wrapped_csv\n    return self._parse_wrapped(\nsqlglot/parser.py:8949: in _parse_wrapped\n    self.raise_error(\"Expecting (\")\nsqlglot/parser.py:2102: in raise_error\n    raise error\nE   sqlglot.errors.ParseError: Expecting (. Line 1, Col: 42.\nE     CREATE TABLE t1(id INT KEY AUTO_INCREMENT\u001b[4m)\u001b[0m;\n=========================== short test summary info ============================\nFAILED tests/dialects/test_reprobot_sqlglot__8225.py::test_mysql_create_table_auto_increment\n1 failed in 1.30s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "sqlglot__8244",
+      "repo": "tobymao/sqlglot",
+      "variant": "s1",
+      "f2p": false,
+      "score_reason": "did_not_fail_at_parent:passed",
+      "verdict_at_parent": "no_fail",
+      "self_reproduces": false,
+      "rounds": 3,
+      "usage": {
+        "prompt_tokens": 13183,
+        "completion_tokens": 1300,
+        "cost_usd": 0.007205,
+        "calls": 4,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 20.6,
+      "error": null,
+      "test_source": "from sqlglot import parse, Dialect, exp\nfrom sqlglot.dialects.dialect import NormalizationStrategy\nfrom sqlglot.lineage import lineage\nfrom sqlglot.schema import MappingSchema\nimport pytest\nfrom sqlglot.errors import OptimizeError\n\n\ndef test_starrocks_table_valued_function_qualify_columns():\n    sql = \"\"\"\n    WITH t AS (\n      SELECT p.user_id, gs.n AS to_deposit_days\n      FROM tbl1 p\n      CROSS JOIN (\n        SELECT generate_series AS n FROM TABLE(generate_series(0, 8000))\n      ) gs\n    ),\n    t2 AS (\n      SELECT t.* FROM t\n    )\n    SELECT user_id, to_deposit_days FROM t2\n    \"\"\"\n\n    dialect = Dialect.get_or_raise('starrocks')\n    dialect.normalization_strategy = NormalizationStrategy.CASE_INSENSITIVE\n    expression = parse(sql, read='starrocks')[0]\n\n    schema = MappingSchema(dialect=dialect)\n    schema.add_table(\"default.tbl1\", column_mapping={\"user_id\": \"BIGINT\"}, match_depth=False)\n\n    # This test should fail with OptimizeError: Column 'generate_series' could not be resolved\n    # when the bug is present, and pass once the bug is fixed.\n    with pytest.raises(OptimizeError) as excinfo:\n        lineage(column=None, sql=expression, schema=schema, dialect=dialect,\n                expand_stars=True, validate_qualify_columns=True)\n\n    assert \"Column 'generate_series' could not be resolved\" in str(excinfo.value)\n",
+      "test_rel_path": "tests/dialects/test_reprobot_sqlglot__8244.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "no_fail",
+          "exception_type": null,
+          "reason": "the test passed at the buggy commit, so it does not demonstrate the reported behaviour",
+          "output": "__REPROBOT_SANDBOX_READY__\n.                                                                        [100%]\n1 passed in 0.31s\n"
+        },
+        {
+          "round": 2,
+          "verdict": "no_fail",
+          "exception_type": null,
+          "reason": "the test passed at the buggy commit, so it does not demonstrate the reported behaviour",
+          "output": "__REPROBOT_SANDBOX_READY__\n.                                                                        [100%]\n1 passed in 0.29s\n"
+        },
+        {
+          "round": 3,
+          "verdict": "no_fail",
+          "exception_type": null,
+          "reason": "the test passed at the buggy commit, so it does not demonstrate the reported behaviour",
+          "output": "__REPROBOT_SANDBOX_READY__\n.                                                                        [100%]\n1 passed in 0.29s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "tomlkit__440",
+      "repo": "python-poetry/tomlkit",
+      "variant": "s1",
+      "f2p": true,
+      "score_reason": "ok",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": true,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 2820,
+        "completion_tokens": 234,
+        "cost_usd": 0.001431,
+        "calls": 2,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 6.3,
+      "error": null,
+      "test_source": "import tomlkit\n\n\ndef test_missing_newline_after_inline_table():\n    \"\"\"\n    Test that a newline is inserted after an inline table when a new key is added.\n    \"\"\"\n    v = tomlkit.loads(\"\"\"[x]\\na.b = {}\"\"\")\n    v[\"x\"][\"c\"] = 3\n    expected_output = \"\"\"[x]\na.b = {}\nc = 3\n\"\"\"\n    assert tomlkit.dumps(v) == expected_output\n",
+      "test_rel_path": "tests/test_reprobot_tomlkit__440.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "reproduced_assertion",
+          "exception_type": "AssertionError",
+          "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n___________________ test_missing_newline_after_inline_table ____________________\ntests/test_reprobot_tomlkit__440.py:14: in test_missing_newline_after_inline_table\n    assert tomlkit.dumps(v) == expected_output\nE   AssertionError: assert '[x]\\na.b = {}c = 3\\n' == '[x]\\na.b = {}\\nc = 3\\n'\nE     \nE       [x]\nE     - a.b = {}\nE     + a.b = {}c = 3\nE     ?         +++++\nE     - c = 3\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_tomlkit__440.py::test_missing_newline_after_inline_table\n1 failed in 0.05s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "tomlkit__523",
+      "repo": "python-poetry/tomlkit",
+      "variant": "s1",
+      "f2p": false,
+      "score_reason": "did_not_pass_at_fix:failed",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": true,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 4356,
+        "completion_tokens": 391,
+        "cost_usd": 0.002284,
+        "calls": 2,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 6.8,
+      "error": null,
+      "test_source": "import pytest\n\nfrom tomlkit.exceptions import KeyAlreadyPresent\nfrom tomlkit.exceptions import TOMLKitError\nfrom tomlkit import parse\n\n\ndef test_value_then_table_redefinition_out_of_order_raises_at_parse() -> None:\n    \"\"\"\n    Test that an out-of-order value-vs-table redefinition raises KeyAlreadyPresent\n    at parse time, not lazily on access.\n    \"\"\"\n    src = '[a]\\nb = true\\n[zz]\\n[a.b]\\nc = 1\\n'\n    with pytest.raises(KeyAlreadyPresent):\n        parse(src)\n\n\ndef test_dotted_key_then_table_redefinition_out_of_order_raises_at_parse() -> None:\n    \"\"\"\n    Test that an out-of-order dotted-key-vs-table redefinition raises KeyAlreadyPresent\n    at parse time, not silently merging.\n    \"\"\"\n    src = '[a]\\nb.c = 1\\n[zz]\\nq = 9\\n[a.b]\\nd = 2\\n'\n    with pytest.raises(KeyAlreadyPresent):\n        parse(src)\n",
+      "test_rel_path": "tests/test_reprobot_tomlkit__523.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "reproduced_assertion",
+          "exception_type": null,
+          "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
+          "output": "__REPROBOT_SANDBOX_READY__\nFF                                                                       [100%]\n=================================== FAILURES ===================================\n_______ test_value_then_table_redefinition_out_of_order_raises_at_parse ________\ntests/test_reprobot_tomlkit__523.py:14: in test_value_then_table_redefinition_out_of_order_raises_at_parse\n    with pytest.raises(KeyAlreadyPresent):\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   Failed: DID NOT RAISE KeyAlreadyPresent\n_____ test_dotted_key_then_table_redefinition_out_of_order_raises_at_parse _____\ntests/test_reprobot_tomlkit__523.py:24: in test_dotted_key_then_table_redefinition_out_of_order_raises_at_parse\n    with pytest.raises(KeyAlreadyPresent):\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   Failed: DID NOT RAISE KeyAlreadyPresent\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_tomlkit__523.py::test_value_then_table_redefinition_out_of_order_raises_at_parse\nFAILED tests/test_reprobot_tomlkit__523.py::test_dotted_key_then_table_redefinition_out_of_order_raises_at_parse\n2 failed in 0.05s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "tomlkit__531",
+      "repo": "python-poetry/tomlkit",
+      "variant": "s1",
+      "f2p": false,
+      "score_reason": "did_not_pass_at_fix:failed",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": true,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 3371,
+        "completion_tokens": 231,
+        "cost_usd": 0.001589,
+        "calls": 2,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 7.6,
+      "error": null,
+      "test_source": "import pytest\nimport tomlkit\n\ndef test_nesting_table_in_inline_table_raises_error():\n    t = tomlkit.table()\n    t.append(\"a\", 1)\n\n    it = tomlkit.inline_table()\n\n    with pytest.raises(tomlkit.exceptions.TOMLKitError, match=\"Inline tables cannot contain other tables\"):\n        it.append(\"table\", t)\n",
+      "test_rel_path": "tests/test_reprobot_tomlkit__531.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "reproduced_assertion",
+          "exception_type": null,
+          "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n_______________ test_nesting_table_in_inline_table_raises_error ________________\ntests/test_reprobot_tomlkit__531.py:10: in test_nesting_table_in_inline_table_raises_error\n    with pytest.raises(tomlkit.exceptions.TOMLKitError, match=\"Inline tables cannot contain other tables\"):\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   Failed: DID NOT RAISE TOMLKitError\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_tomlkit__531.py::test_nesting_table_in_inline_table_raises_error\n1 failed in 0.05s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "tomlkit__542",
+      "repo": "python-poetry/tomlkit",
+      "variant": "s1",
+      "f2p": false,
+      "score_reason": "did_not_pass_at_fix:failed",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": true,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 2928,
+        "completion_tokens": 265,
+        "cost_usd": 0.001541,
+        "calls": 2,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 8.1,
+      "error": null,
+      "test_source": "import tomlkit\n\n\ndef test_aot_captures_too_many_keys():\n    doc = tomlkit.parse(\"a.b = 1\\nc.d = 2\\n\")\n    aot = tomlkit.aot()\n    t = tomlkit.table()\n    t[\"x\"] = 9\n    aot.append(t)\n    doc[\"a\"] = aot\n    expected_dump = \"[[a]]\\nx = 9\\n\\nc.d = 2\\n\"\n    assert tomlkit.dumps(doc) == expected_dump\n",
+      "test_rel_path": "tests/test_reprobot_tomlkit__542.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "reproduced_assertion",
+          "exception_type": "AssertionError",
+          "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n_______________________ test_aot_captures_too_many_keys ________________________\ntests/test_reprobot_tomlkit__542.py:12: in test_aot_captures_too_many_keys\n    assert tomlkit.dumps(doc) == expected_dump\nE   AssertionError: assert '[[a]]\\nx = 9\\nc.d = 2\\n' == '[[a]]\\nx = 9\\n\\nc.d = 2\\n'\nE     \nE       [[a]]\nE       x = 9\nE     - \nE       c.d = 2\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_tomlkit__542.py::test_aot_captures_too_many_keys\n1 failed in 0.05s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "tomlkit__543",
+      "repo": "python-poetry/tomlkit",
+      "variant": "s1",
+      "f2p": false,
+      "score_reason": "did_not_pass_at_fix:failed",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": true,
+      "rounds": 2,
+      "usage": {
+        "prompt_tokens": 2535,
+        "completion_tokens": 439,
+        "cost_usd": 0.001858,
+        "calls": 3,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 9.2,
+      "error": null,
+      "test_source": "import tomlkit\n\n\ndef test_issue_543():\n    doc = tomlkit.loads(\"a.b = 1\\n\")\n    doc[\"a\"][\"c\"] = {}\n    doc[\"z\"] = 2\n\n    # The bug causes 'z = 2' to be nested under '[a.c]'\n    # The expected behavior is for 'z = 2' to remain a top-level key.\n    expected_dump = \"\"\"a.b = 1\nz = 2\n\n[a.c]\n\"\"\"\n    assert tomlkit.dumps(doc) == expected_dump\n",
+      "test_rel_path": "tests/test_reprobot_tomlkit__543.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "no_fail",
+          "exception_type": null,
+          "reason": "the test passed at the buggy commit, so it does not demonstrate the reported behaviour",
+          "output": "__REPROBOT_SANDBOX_READY__\n.                                                                        [100%]\n1 passed in 0.04s\n"
+        },
+        {
+          "round": 2,
+          "verdict": "reproduced_assertion",
+          "exception_type": "AssertionError",
+          "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n________________________________ test_issue_543 ________________________________\ntests/test_reprobot_tomlkit__543.py:16: in test_issue_543\n    assert tomlkit.dumps(doc) == expected_dump\nE   AssertionError: assert 'a.b = 1\\n\\n[a.c]\\nz = 2\\n' == 'a.b = 1\\nz = 2\\n\\n[a.c]\\n'\nE     \nE       a.b = 1\nE     - z = 2\nE       \nE       [a.c]\nE     + z = 2\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_tomlkit__543.py::test_issue_543 - AssertionError: ...\n1 failed in 0.05s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "tomlkit__562",
+      "repo": "python-poetry/tomlkit",
+      "variant": "s1",
+      "f2p": false,
+      "score_reason": "did_not_fail_at_parent:passed",
+      "verdict_at_parent": "no_fail",
+      "self_reproduces": false,
+      "rounds": 3,
+      "usage": {
+        "prompt_tokens": 16194,
+        "completion_tokens": 3191,
+        "cost_usd": 0.012836,
+        "calls": 4,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 23.8,
+      "error": null,
+      "test_source": "import tomlkit\nimport pytest\n\ndef test_array_of_floats_to_list_for_tensor_conversion():\n    \"\"\"\n    Test that an Array of Floats can be converted to a Python list of floats\n    without raising a TypeError, specifically when passed to a function\n    that expects an iterable of native Python types (like torch.tensor).\n    \"\"\"\n    arr = tomlkit.loads(\"\"\"\n    a = [1.0, 2.0, 3.0]\n    \"\"\")\n\n    # The bug report states:\n    # TypeError: object of type 'Float' has no len()\n    # This error occurs when `torch.tensor(arr['a'], ...)` is called.\n    # It implies that `torch` is iterating over `arr['a']` (which is a tomlkit.items.Array),\n    # getting individual `tomlkit.items.Float` objects, and then, during its\n    # internal processing, attempts to call `len()` on one of these `tomlkit.items.Float` objects.\n\n    # To reproduce the *exact* error message and behavior without importing torch,\n    # we need to simulate the part where `len()` is called on a `tomlkit.items.Float` object.\n    # The `tomlkit.items.Array` itself is iterable, but its elements are `tomlkit.items.Float`.\n\n    # Access the first element of the TOML array, which is a tomlkit.items.Float object.\n    float_item = arr['a'][0]\n\n    # The bug is that `tomlkit.items.Float` does not have a `__len__` method,\n    # and some consumers (like torch.tensor) might implicitly call `len()` on it.\n    # This `pytest.raises` block will catch the `TypeError` with the specific message\n    # if the bug is present.\n    with pytest.raises(TypeError, match=\"object of type 'Float' has no len()\"):\n        len(float_item)\n\n    # Once the bug is fixed, `tomlkit.items.Array` should ideally yield native Python floats\n    # when iterated, or `tomlkit.items.Float` should be designed such that `len()` is not\n    # implicitly called on it in such contexts, or it should convert to a native float\n    # before such an operation.\n    # The most robust fix would be for `arr['a']` to behave like a list of native floats.\n    # If `arr['a'][0]` were to return a native float after the fix, then `len(float_item)`\n    # would still raise a TypeError, but the `float_item` would be a native float,\n    # and the error message would be \"object of type 'float' has no len()\".\n    # The key is the specific error message \"object of type 'Float' has no len()\",\n    # indicating it's the `tomlkit.items.Float` type.\n",
+      "test_rel_path": "tests/test_reprobot_tomlkit__562.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "no_fail",
+          "exception_type": null,
+          "reason": "the test passed at the buggy commit, so it does not demonstrate the reported behaviour",
+          "output": "__REPROBOT_SANDBOX_READY__\n.                                                                        [100%]\n1 passed in 0.04s\n"
+        },
+        {
+          "round": 2,
+          "verdict": "no_fail",
+          "exception_type": null,
+          "reason": "the test passed at the buggy commit, so it does not demonstrate the reported behaviour",
+          "output": "__REPROBOT_SANDBOX_READY__\n.                                                                        [100%]\n1 passed in 0.04s\n"
+        },
+        {
+          "round": 3,
+          "verdict": "no_fail",
+          "exception_type": null,
+          "reason": "the test passed at the buggy commit, so it does not demonstrate the reported behaviour",
+          "output": "__REPROBOT_SANDBOX_READY__\n.                                                                        [100%]\n1 passed in 0.04s\n"
+        }
+      ]
+    }
+  ]
+}

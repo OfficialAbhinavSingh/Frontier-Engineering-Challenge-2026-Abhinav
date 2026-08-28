@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport os\nimport pytest\nimport click\nfrom click.testing import CliRunner\nimport warnings\n\n@pytest.fixture\ndef runner():\n    return CliRunner()\n\ndef test_file_option_completion_closes_file(runner):\n    config_file_path = \"test_config.txt\"\n    with open(config_file_path, \"w\") as f:\n        f.write(\"test content\")\n\n    @click.group()\n    @click.option(\n        \"--config_file\",\n        default=config_file_path,\n        type=click.File(mode=\"r\"),\n        help=\"help\",\n    )\n    @click.pass_context\n    def cli(ctx, config_file):\n        pass\n\n    # Simulate shell completion by setting the environment variable\n    # and calling the CLI with the completion instruction.\n    # We use a non-existent command to trigger the context creation\n    # and file opening without actually executing a command.\n    env = {\n        \"_CLI_COMPLETE\": \"complete_bash\",\n        \"COMP_WORDS\": \"cli --config_file\",\n        \"COMP_CWORD\": \"1\",\n    }\n\n    with warnings.catch_warnings(record=True) as w:\n        warnings.simplefilter(\"always\")\n        result = runner.invoke(cli, [\"--config_file\", \"nonexistent\"], env=env, catch_exceptions=False)\n\n        # Assert that no ResourceWarning related to unclosed files is issued\n        for warning_message in w:\n            assert \"unclosed file\" not in str(warning_message.message)\n\n    os.remove(config_file_path)\n```",
+  "usage": {
+    "prompt_tokens": 5413,
+    "completion_tokens": 374,
+    "cost_usd": 0.002559,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946988.3474023
+}

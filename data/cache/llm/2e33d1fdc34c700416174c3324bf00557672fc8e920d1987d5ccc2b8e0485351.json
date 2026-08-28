@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nimport tomlkit\nimport torch\n\n\ndef test_array_of_floats_to_torch_tensor() -> None:\n    arr = tomlkit.loads(\n        \"\"\"\na = [1.0, 2.0, 3.0]\n\"\"\"\n    )\n\n    # The bug causes a TypeError when trying to convert to a torch.tensor\n    # because the tomlkit.items.Array object does not correctly expose\n    # its underlying Python list behavior for iteration/length.\n    # The fix should make this line execute without error.\n    t = torch.tensor(arr[\"a\"], dtype=torch.float32)\n\n    # Assert that the tensor was created correctly with the expected values\n    expected_tensor = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float32)\n    assert torch.equal(t, expected_tensor)\n```",
+  "usage": {
+    "prompt_tokens": 2857,
+    "completion_tokens": 210,
+    "cost_usd": 0.001382,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787948271.9657612
+}

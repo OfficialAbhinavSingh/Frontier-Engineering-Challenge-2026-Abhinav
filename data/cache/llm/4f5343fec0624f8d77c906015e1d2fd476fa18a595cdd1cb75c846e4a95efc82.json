@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"tomlkit/container.py\",\n    \"tomlkit/parser.py\"\n  ],\n  \"test_file\": \"tests/test_api.py\",\n  \"why\": \"The bug report explicitly states the root cause is in `Container.append` and `_validate_out_of_order_table` logic, and the regression test should extend existing `test_api.py` tests for parse-time rejections of out-of-order collisions.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 1921,
+    "completion_tokens": 120,
+    "cost_usd": 0.000876,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947709.1989043
+}

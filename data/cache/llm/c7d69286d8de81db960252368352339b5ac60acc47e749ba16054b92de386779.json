@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nimport tomlkit\nfrom tomlkit.items import Array\n\n\ndef test_array_of_floats_behaves_like_list_for_len() -> None:\n    # The bug report indicates that `torch.tensor(arr['a'])` fails because\n    # `tomlkit.items.Float` has no `len()`. However, the traceback shows\n    # `TypeError: object of type 'Float' has no len()` when `torch.tensor`\n    # tries to iterate over `arr['a']` which is a `tomlkit.items.Array`.\n    # The core issue is that `tomlkit.items.Array` does not correctly\n    # delegate `len()` calls to its underlying list of items, or that\n    # its iteration protocol is broken in a way that `torch.tensor`\n    # cannot consume it.\n    #\n    # The expectation is that `arr['a']` should behave like a standard Python list\n    # when passed to functions expecting an iterable or sequence.\n    # A simple way to trigger this is to call `len()` directly on the Array item.\n    # If `len()` works on the Array, then `torch.tensor` (which internally\n    # calls `len()` or iterates) should also work.\n\n    arr = tomlkit.loads(\n        \"\"\"\na = [1.0, 2.0, 3.0]\n\"\"\"\n    )\n\n    # Ensure that arr['a'] is indeed a tomlkit.items.Array\n    assert isinstance(arr[\"a\"], Array)\n\n    # The bug implies that the Array object itself might not correctly\n    # expose its length or iterable nature.\n    # The reporter's expectation is that it should behave like a Python list.\n    # Therefore, asserting that len() works on the Array and returns the\n    # correct length is a direct way to test this.\n    # If this passes, it means the Array object correctly implements the\n    # sequence protocol, which should then allow `torch.tensor` to consume it.\n    assert len(arr[\"a\"]) == 3\n```",
+  "usage": {
+    "prompt_tokens": 3452,
+    "completion_tokens": 469,
+    "cost_usd": 0.002208,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787948277.3979087
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"When adding new parameters to decorators like `click.option`, ensure the underlying `Parameter` class (or its relevant superclass) also accepts the new keyword argument. The decorator's `attrs` are passed directly to the parameter's constructor.\",\n  \"The `_param_memo` helper function in `src/click/decorators.py` is a common point where decorator arguments are passed to parameter constructors. If a `TypeError` originates from there, it's likely an argument mismatch between the decorator and the parameter class.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 734,
+    "completion_tokens": 120,
+    "cost_usd": 0.00052,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787949517.006709
+}

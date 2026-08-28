@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"I apologize for the malformed response. I will ensure to provide a valid JSON object from now on.\n\nThe issue description already provides a clear example of the bug. I will directly create a test based on that example. The test will parse the initial TOML, create an `aot`, assign it, dump the document, and then assert that the dumped string does not contain `c.d = 2` inside the `[[a]]` block. The expected output should have `c.d = 2` outside of `[[a]]` or not at all if `c.d` is not a top-level key.\n\nThe issue states the *buggy* output is:\\n```\\n[[a]]\\nx = 9\\nc.d = 2\\n```\\nThe *correct* output should be:\\n```\\n[[a]]\\nx = 9\\n\\nc.d = 2\\n```\\nOr, more precisely, `c.d` should not be part of the `[[a]]` table.\n\nI will write a test that asserts `c.d = 2` is *not* present within the `[[a]]` block. A simple string check for `[[a]]\\nx = 9\\nc.d = 2` should fail at the buggy commit and pass once fixed.\", \"tool\": \"run_test\", \"args\": {\"source\": \"import tomlkit\\n\\ndef test_aot_captures_too_many_keys():\\n    doc = tomlkit.parse(\\\"a.b = 1\\\\nc.d = 2\\\\n\\\")\\n    aot = tomlkit.aot()\\n    t = tomlkit.table()\\n    t[\\\"x\\\"] = 9\\n    aot.append(t)\\n    doc[\\\"a\\\"] = aot\\n    \\n    result = tomlkit.dumps(doc)\\n    \\n    # The bug is that 'c.d = 2' is captured within the '[[a]]' block.\\n    # The expected correct behavior is that 'c.d = 2' is a separate top-level key.\\n    # So, the string '[[a]]\\\\nx = 9\\\\nc.d = 2' should NOT appear in the output.\\n    # If it does, the test should fail.\\n    assert \\\"[[a]]\\\\nx = 9\\\\nc.d = 2\\\" not in result\\n    \\n    # Also ensure that c.d is still present, but not under 'a'\\n    assert \\\"c.d = 2\\\" in result\\n    assert \\\"[[a]]\\\" in result\\n    assert \\\"x = 9\\\" in result\\n\"}}",
+  "usage": {
+    "prompt_tokens": 673,
+    "completion_tokens": 607,
+    "cost_usd": 0.001719,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947500.0778987
+}

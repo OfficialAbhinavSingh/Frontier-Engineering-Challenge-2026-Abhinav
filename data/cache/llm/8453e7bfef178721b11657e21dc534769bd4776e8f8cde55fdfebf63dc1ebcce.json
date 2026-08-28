@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The user wants a pytest test that fails due to multi-line help text in Click's shell completion for fish. I need to create a Click application with a multi-line help text option, then simulate the fish completion environment and check for an error or incorrect output. The key is to check the output of `_CLICK_COMPLETE=fish_source <app_name>` or similar, as that's what fish uses to generate completions.\n\nFirst, I need to understand how Click generates fish completions. I'll look at `click/shell_completion.py` to see the relevant code.\", \"tool\": \"read_file\", \"args\": {\"path\": \"src/click/shell_completion.py\"}}",
+  "usage": {
+    "prompt_tokens": 1892,
+    "completion_tokens": 153,
+    "cost_usd": 0.00095,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947308.766172
+}

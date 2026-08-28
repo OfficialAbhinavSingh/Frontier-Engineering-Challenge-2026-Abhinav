@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"I understand. I will provide a valid JSON object this time.\n\nI need to construct a pytest file. The core of the issue is that `tomlkit.dump` (or `dumps`) adds an extra newline. I will simulate the user's scenario.\n\nHere's the plan for the test:\n1.  **Initial TOML content**: The exact content provided in the issue description.\n2.  **Load and Modify**: Load this content using `tomlkit.parse` (or `tomlkit.loads`). Then, modify a value. The issue description modifies `name = \"x7\"` to `name = \"x7\"` (effectively a no-op if `merge_dicts` is used). To ensure a change, I'll modify it to something else, like `name = \"x8\"`.\n3.  **Dump**: Use `tomlkit.dumps` to get the string representation of the modified TOML.\n4.  **Expected Output**: Define the expected output *without* the extra newline that the bug introduces.\n5.  **Assertion**: Assert that the actual dumped output matches the expected output.\n\nLet's define the initial TOML and the expected TOML after modification and dumping.\", \"tool\": \"read_file\", \"args\": {\"path\": \"tomlkit/toml_file.py\"}}",
+  "usage": {
+    "prompt_tokens": 1958,
+    "completion_tokens": 286,
+    "cost_usd": 0.001302,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946377.127875
+}

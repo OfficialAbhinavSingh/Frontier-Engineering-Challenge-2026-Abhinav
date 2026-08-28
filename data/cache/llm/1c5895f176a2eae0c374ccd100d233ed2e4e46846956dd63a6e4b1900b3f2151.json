@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The user wants a pytest test file that demonstrates the bug described in the issue. The bug is that `FuncParamType` re-raises `ValueError` directly instead of using `self.fail(str(e))` when its `func` callable raises a `ValueError`. This results in a less informative error message.\n\nI need to create a Click application that uses `FuncParamType` with a function that raises a `ValueError`. Then, I'll invoke this application with an invalid input and assert that the error message is not the expected one (i.e., it's the raw `ValueError` message, not the one formatted by `self.fail`).\n\nFirst, I need to understand how `FuncParamType` is used in Click and how to create a minimal reproducible example.\", \"tool\": \"read_file\", \"args\": {\"path\": \"src/click/types.py\"}}",
+  "usage": {
+    "prompt_tokens": 762,
+    "completion_tokens": 189,
+    "cost_usd": 0.000701,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947349.5210023
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport os\nimport re\nimport sys\n\nimport pytest\n\nfrom click.shell_completion import CompletionItem\nfrom click.shell_completion import FishComplete\nfrom click.testing import CliRunner\n\n\n@pytest.fixture\ndef runner():\n    return CliRunner()\n\n\n@pytest.fixture\ndef prog_name():\n    return \"test-cli\"\n\n\n@pytest.fixture\ndef complete_var():\n    return \"_TEST_CLI_COMPLETE\"\n\n\n@pytest.fixture\ndef make_completion_context(prog_name, complete_var):\n    def _make_completion_context(cli, args, incomplete):\n        comp = FishComplete(cli, {}, prog_name, complete_var)\n        os.environ[\"COMP_WORDS\"] = \" \".join(args)\n        os.environ[\"COMP_CWORD\"] = str(len(args) - 1)\n        os.environ[\"_CLICK_COMPLETE_FISH_INCOMPLETE\"] = incomplete\n        return comp\n\n    return _make_completion_context\n\n\ndef test_fish_completion_multiline_help(\n    runner, make_completion_context, prog_name, complete_var\n):\n    from click import Command\n    from click import option\n\n    @option(\n        \"--at\",\n        help=\"\\b\\nAttachment with explicit mimetype,\\n--at image.jpg image/jpeg\",\n    )\n    def cli(at):\n        pass\n\n    comp = make_completion_context(cli, [prog_name, \"--\"], \"\")\n    result = comp.complete()\n\n    assert (\n        \"plain,--at\\tAttachment with explicit mimetype, --at image.jpg image/jpeg\"\n        in result\n    )\n```",
+  "usage": {
+    "prompt_tokens": 3437,
+    "completion_tokens": 374,
+    "cost_usd": 0.001966,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947595.4107158
+}

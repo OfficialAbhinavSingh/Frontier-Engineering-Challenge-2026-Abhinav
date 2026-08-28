@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"I apologize again for the repeated error. I will ensure this response is a single, valid JSON object.\n\nThe test case I've constructed directly reflects the user's problem description. It parses the TOML, performs the self-assignment that the user identified as problematic, and then asserts that the dumped output is identical to the original input. This assertion will fail if the whitespace is lost, thus demonstrating the bug. If the bug is fixed, the assertion will pass. This is precisely what is required.\", \"final_test\": \"from tomlkit import dumps\nfrom tomlkit import parse\n\ndef test_whitespace_preservation_in_dot_notation():\n    content = \\\"\\\"\\\"\n[keys.a]\n#    \\u2193 this whitespace disappears\n[keys .'a'.'c']\n  'd'\\t= 'e'\n\\\"\\\"\\\"\n    doc = parse(content)\n    # The original issue description mentions this loop as the trigger for the bug.\n    # It seems to be related to how `tomlkit` handles reassigning sub-documents.\n    for mode in doc[\\\"keys\\\"]:\n        doc[\\\"keys\\\"][mode] = doc[\\\"keys\\\"][mode]\n\n    # The bug is that the whitespace in `[keys .'a'.'c']` is not preserved.\n    # Specifically, the leading space before `'a'` in `.'a'` is lost.\n    # The expected behavior is that `dumps(doc)` should be identical to `content`.\n    # However, due to the bug, it will not be.\n    # The test should FAIL if the whitespace is lost (i.e., dumps(doc) != content).\n    # It should PASS if the whitespace is preserved (i.e., dumps(doc) == content).\n    assert dumps(doc) == content\"}",
+  "usage": {
+    "prompt_tokens": 1539,
+    "completion_tokens": 400,
+    "cost_usd": 0.001462,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787945730.152731
+}

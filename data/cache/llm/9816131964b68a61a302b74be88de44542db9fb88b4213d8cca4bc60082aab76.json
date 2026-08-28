@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nimport click\nfrom click.testing import CliRunner\n\n\n@pytest.fixture\ndef runner():\n    return CliRunner()\n\n\ndef test_deprecated_option(runner):\n    @click.command()\n    @click.option(\"--old-name\", deprecated=True, help=\"This is the old name.\")\n    @click.option(\"--new-name\", help=\"This is the new name.\")\n    def cli(old_name, new_name):\n        if old_name:\n            click.echo(f\"Old name used: {old_name}\")\n        if new_name:\n            click.echo(f\"New name used: {new_name}\")\n\n    # Test using the deprecated option\n    result = runner.invoke(cli, [\"--old-name\", \"value\"])\n    assert \"Deprecated: Option '--old-name' is deprecated.\" in result.output\n    assert \"Old name used: value\" in result.output\n    assert result.exit_code == 0\n\n    # Test using the new option\n    result = runner.invoke(cli, [\"--new-name\", \"value\"])\n    assert \"Deprecated: Option '--old-name' is deprecated.\" not in result.output\n    assert \"New name used: value\" in result.output\n    assert result.exit_code == 0\n\n    # Test help message includes deprecation warning\n    result = runner.invoke(cli, [\"--help\"])\n    assert \"Deprecated: Option '--old-name' is deprecated.\" in result.output\n    assert \"--old-name TEXT  [deprecated] This is the old name.\" in result.output\n    assert \"--new-name TEXT  This is the new name.\" in result.output\n\n    # Test using both deprecated and new option (should warn for deprecated)\n    @click.command()\n    @click.option(\"--count\", deprecated=True, help=\"Old count option.\")\n    @click.option(\"--greetings-count\", help=\"New greetings count option.\")\n    def hello(count, greetings_count):\n        if count is not None:\n            click.echo(f\"Count: {count}\")\n        if greetings_count is not None:\n            click.echo(f\"Greetings Count: {greetings_count}\")\n\n    result = runner.invoke(hello, [\"--count\", \"5\", \"--greetings-count\", \"10\"])\n    assert \"Deprecated: Option '--count' is deprecated.\" in result.output\n    assert \"Count: 5\" in result.output\n    assert \"Greetings Count: 10\" in result.output\n    assert result.exit_code == 0\n\n```",
+  "usage": {
+    "prompt_tokens": 4362,
+    "completion_tokens": 583,
+    "cost_usd": 0.002766,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787945882.7176616
+}

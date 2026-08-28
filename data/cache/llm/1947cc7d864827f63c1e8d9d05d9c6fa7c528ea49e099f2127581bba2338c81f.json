@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nimport click\nfrom click.testing import CliRunner\n\n\ndef test_deprecated_option_warns(runner: CliRunner) -> None:\n    @click.command()\n    @click.option(\"--count\", default=1, help=\"Number of greetings.\")\n    @click.option(\"--name\", prompt=\"Your name\", help=\"The person to greet.\")\n    def hello(count, name):\n        \"\"\"Simple program that greets NAME for a total of COUNT times.\"\"\"\n        for x in range(count):\n            click.echo(f\"Hello {name}!\")\n\n    # The bug report describes a desire for a mechanism to mark an option as deprecated\n    # and have Click issue a warning. Since such a mechanism doesn't exist yet,\n    # the current behavior is that no warning is issued.\n    # The test should fail because no warning is present when it should be.\n    # Once the feature is implemented, this test should pass.\n    result = runner.invoke(hello, [\"--count\", \"2\", \"--name\", \"Test\"], input=\"Test\\n\")\n    assert \"Option '--count' is deprecated.\" not in result.output\n    assert result.exit_code == 0\n```",
+  "usage": {
+    "prompt_tokens": 5212,
+    "completion_tokens": 268,
+    "cost_usd": 0.002234,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946460.778037
+}

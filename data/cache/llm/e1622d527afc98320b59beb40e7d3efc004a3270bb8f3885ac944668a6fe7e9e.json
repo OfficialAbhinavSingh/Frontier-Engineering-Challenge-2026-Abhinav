@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nimport sqlglot\nfrom sqlglot.errors import ParseError\n\n\ndef test_insert_replace_using():\n    sql = \"\"\"\nINSERT INTO TABLE students\n    REPLACE USING (country)\n    SELECT * FROM new_students;\n\"\"\"\n    with pytest.raises(ParseError) as exc_info:\n        sqlglot.parse_one(sql, dialect=\"databricks\")\n\n    # Assert that the error message indicates an unexpected token related to \"REPLACE\"\n    assert \"Unexpected token 'REPLACE'\" in str(exc_info.value)\n```",
+  "usage": {
+    "prompt_tokens": 3396,
+    "completion_tokens": 131,
+    "cost_usd": 0.001346,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947650.496332
+}

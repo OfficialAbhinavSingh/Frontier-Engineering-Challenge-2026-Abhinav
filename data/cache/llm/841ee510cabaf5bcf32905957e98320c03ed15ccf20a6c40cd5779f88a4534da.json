@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"src/click/termui.py\",\n    \"src/click/_termui_impl.py\"\n  ],\n  \"test_file\": \"tests/test_termui.py\",\n  \"why\": \"The issue describes strange backspace and line-wrapping behavior with `click.prompt` on Linux, and the `termui` module is directly responsible for terminal UI interactions, including prompt handling, making `test_termui.py` the appropriate place for a regression test.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 864,
+    "completion_tokens": 124,
+    "cost_usd": 0.000569,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947780.0355341
+}

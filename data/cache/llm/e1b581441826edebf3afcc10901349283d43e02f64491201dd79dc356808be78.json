@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\"reproduced\": true, \"why\": \"The test failed because the expected deprecation warning 'Option '--count' is deprecated.' was not found in the output, which aligns with the bug report stating that there is no mechanism to mark a parameter as deprecated and issue a warning.\"}\n```",
+  "usage": {
+    "prompt_tokens": 959,
+    "completion_tokens": 63,
+    "cost_usd": 0.000445,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946465.4007628
+}

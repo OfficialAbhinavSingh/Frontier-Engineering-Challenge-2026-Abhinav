@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"When adding new parameters to decorators like `click.option` or `click.argument`, ensure the underlying `Param` or `Option` class (or their superclasses) in `click/core.py` also accepts these parameters in their `__init__` method.\",\n  \"New features or parameters should be added to the core `click/core.py` classes first, as decorators in `click/decorators.py` often pass keyword arguments directly to these core classes.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 734,
+    "completion_tokens": 110,
+    "cost_usd": 0.000495,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946983.4728534
+}

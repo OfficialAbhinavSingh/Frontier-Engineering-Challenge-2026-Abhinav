@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nfrom tomlkit import parse\nfrom tomlkit.exceptions import KeyAlreadyPresent\n\n\ndef test_value_then_table_redefinition_raises_on_parse() -> None:\n    src = '[a]\\nb = true\\n[zz]\\n[a.b]\\nc = 1\\n'\n    with pytest.raises(KeyAlreadyPresent):\n        parse(src)\n\n```",
+  "usage": {
+    "prompt_tokens": 4552,
+    "completion_tokens": 92,
+    "cost_usd": 0.001596,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787948131.1843183
+}

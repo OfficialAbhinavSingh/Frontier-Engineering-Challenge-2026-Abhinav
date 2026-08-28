@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\"reproduced\": true, \"why\": \"The test failed because the actual content of the TOML file after modification contained an extra newline character, which was not present in the expected content, matching the bug report's description of an added whitespace line.\"}\n```",
+  "usage": {
+    "prompt_tokens": 1587,
+    "completion_tokens": 58,
+    "cost_usd": 0.000621,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946503.7168949
+}

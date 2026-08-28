@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The user wants a pytest test file that exposes the bug described in issue #523. The bug is that `tomlkit.parse()` accepts an invalid TOML document where a value is redefined as a table out-of-order, and only raises `KeyAlreadyPresent` on access, instead of at parse time. The test should fail at the current commit and pass once the bug is fixed.\n\nI need to:\n1. Create a test file `tests/test_reprobot_tomlkit__523.py`.\n2. Use the `src` string provided in the issue: `'[a]\\\\nb = true\\\\n[zz]\\\\n[a.b]\\\\nc = 1\\\\n'`.\n3. Assert that `tomlkit.parse(src)` raises a `TOMLKitError` (or `KeyAlreadyPresent` which is a subclass) at parse time.\n\nLet's start by creating the test file content.\", \"tool\": \"run_test\", \"args\": {\"source\": \"import pytest\\nimport tomlkit\\n\\ndef test_value_vs_table_redefinition_out_of_order_raises_at_parse():\\n    src = '[a]\\\\nb = true\\\\n[zz]\\\\n[a.b]\\\\nc = 1\\\\n'\\n    with pytest.raises(tomlkit.exceptions.KeyAlreadyPresent):\\n        tomlkit.parse(src)\\n\"}}",
+  "usage": {
+    "prompt_tokens": 1851,
+    "completion_tokens": 311,
+    "cost_usd": 0.001333,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947468.1448143
+}

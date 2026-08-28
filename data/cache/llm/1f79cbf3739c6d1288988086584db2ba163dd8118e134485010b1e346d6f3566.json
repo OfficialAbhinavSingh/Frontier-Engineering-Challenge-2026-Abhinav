@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The test *passed*, which means `ParseError` was raised as expected. This is good, it confirms the bug exists. The issue states that the test should *fail* at the current commit and *pass* once the bug is fixed. My current test *passes* at the current commit, which is the opposite of what's required.\n\nI need to modify the test so that it *fails* when the `ParseError` is raised, and *passes* when the `ParseError` is *not* raised (i.e., when the bug is fixed).\n\nThe correct way to do this is to *expect* the parsing to succeed. If it raises a `ParseError`, the test should fail. If it parses successfully, the test should pass.\n\nSo, I will remove the `pytest.raises` context manager and simply call `sqlglot.parse_one`. If it raises an error, the test will fail, which is the desired behavior for the buggy state.\", \"tool\": \"run_test\", \"args\": {\"source\": \"import pytest\\nimport sqlglot\\nfrom sqlglot.errors import ParseError\\n\\ndef test_trino_cte_udf_parse_error():\\n    sql = \\\"\\\"\\\"\\n    WITH FUNCTION f(num int)\\n        RETURNS int\\n        RETURN num\\n    SELECT f(1);\\n    \\\"\\\"\\\"\\n    # This call should raise a ParseError at the buggy commit, causing the test to fail.\\n    # Once the bug is fixed, it should parse successfully, and the test will pass.\\n    sqlglot.parse_one(sql, dialect=\\\"trino\\\")\\n\"}}",
+  "usage": {
+    "prompt_tokens": 3204,
+    "completion_tokens": 362,
+    "cost_usd": 0.001322,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946313.2155383
+}

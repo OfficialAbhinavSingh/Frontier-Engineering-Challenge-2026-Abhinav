@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"When testing `tomlkit.dumps`, be mindful of the order of key-value pairs and tables. `tomlkit` preserves insertion order, so the expected string must match the exact order of elements as they would be serialized.\",\n  \"When constructing TOML documents for testing, prefer using `tomlkit.parse` on a string literal rather than direct manipulation of `tomlkit.toml_document.TOMLDocument` objects, as this more closely mirrors how users interact with the library and helps avoid subtle ordering issues.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 507,
+    "completion_tokens": 117,
+    "cost_usd": 0.000445,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787948000.6461303
+}

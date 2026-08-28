@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"My apologies. I will ensure to provide a valid JSON object.\n\nI need to create a test file that demonstrates the bug. The bug is that `tomlkit.dump` adds an extra whitespace line after a table when rewriting a TOML file.\n\nHere's the plan:\n1. Create a temporary TOML file with the content provided in the issue.\n2. Load the TOML file using `tomlkit.load`.\n3. Modify the TOML document slightly (e.g., change a value, or even just reassign a value to itself to trigger the rewrite logic).\n4. Dump the modified TOML document back to a string.\n5. Assert that the dumped string does not contain the extra newline. The original TOML has a blank line after `# xxx test`, but not after `name = \"x7\"`. The bug adds one after `name = \"x7\"`.\n\nLet's define the initial TOML content and the expected content after the fix.\", \"tool\": \"read_file\", \"args\": {\"path\": \"tomlkit/toml_document.py\"}}",
+  "usage": {
+    "prompt_tokens": 1429,
+    "completion_tokens": 235,
+    "cost_usd": 0.001016,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946372.7036395
+}

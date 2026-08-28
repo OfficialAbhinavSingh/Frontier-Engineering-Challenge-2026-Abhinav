@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "[\n  \"When testing `tomlkit.dumps`, be mindful of subtle newline differences; the `tomlkit` parser and dumper can be sensitive to these, and they might not always roundtrip exactly as written.\",\n  \"Tests should directly import `tomlkit` rather than relying on relative imports or internal module structures, as the public API is what needs to be guaranteed stable.\"\n]",
+  "usage": {
+    "prompt_tokens": 550,
+    "completion_tokens": 81,
+    "cost_usd": 0.000367,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787948262.977728
+}

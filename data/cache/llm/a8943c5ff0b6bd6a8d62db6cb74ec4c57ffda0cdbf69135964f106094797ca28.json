@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The issue describes a `ResourceWarning` due to an unclosed file when using `click.File` in a `click.option` during shell completion. The core problem is that the `Context` created during shell completion is not properly exited, preventing `click.File` from closing the file.\n\nTo reproduce this, I need to:\n1. Create a Click application with a `click.option` that uses `click.File(mode='r')`.\n2. Trigger shell completion for this application.\n3. Check for a `ResourceWarning` related to an unclosed file.\n\nI'll start by creating a dummy Click application and a test that attempts to trigger the shell completion and capture warnings.\", \"tool\": \"read_file\", \"args\": {\"path\": \"src/click/core.py\"}}",
+  "usage": {
+    "prompt_tokens": 1563,
+    "completion_tokens": 175,
+    "cost_usd": 0.000906,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946213.3384552
+}

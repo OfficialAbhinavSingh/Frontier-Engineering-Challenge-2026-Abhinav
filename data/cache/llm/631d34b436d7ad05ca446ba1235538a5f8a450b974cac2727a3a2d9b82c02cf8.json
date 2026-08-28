@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nimport sys\nimport os\nimport tempfile\nfrom click._utils import UNSET\nimport click\n\ndef test_prompt_backspace_linux(runner, monkeypatch):\n    if sys.platform.startswith(\"win\"):\n        pytest.skip(\"This bug is specific to Linux.\")\n\n    # Simulate a user typing \"hello\" then backspacing once to get \"hell\"\n    # and then pressing enter.\n    # The bug causes backspace to remove two characters or the entire line.\n    # We expect \"hell\" as the output.\n    input_data = \"hello\\x7f\\n\"  # \\x7f is the ASCII code for backspace\n\n    @click.command()\n    def cli():\n        name = click.prompt(\"Enter your name\")\n        click.echo(f\"You entered: {name}\")\n\n    result = runner.invoke(cli, input=input_data)\n\n    assert not result.exception\n    assert \"You entered: hell\" in result.output\n\n    # Simulate a user typing \"world\" then backspacing multiple times to get \"\"\n    # and then pressing enter.\n    input_data_full_backspace = \"world\\x7f\\x7f\\x7f\\x7f\\x7f\\n\"\n\n    result_full_backspace = runner.invoke(cli, input=input_data_full_backspace)\n\n    assert not result_full_backspace.exception\n    assert \"You entered: \" in result_full_backspace.output # Expecting an empty string after \"You entered: \"\n    assert \"You entered: \\n\" in result_full_backspace.output # Ensure it's an empty string, not something else\n```",
+  "usage": {
+    "prompt_tokens": 4214,
+    "completion_tokens": 386,
+    "cost_usd": 0.002229,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947782.824663
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\"reproduced\": true, \"why\": \"The test failed with a ParseError, specifically 'Expecting (', at the exact line and column reported in the bug, indicating the bug is still present.\"}\n```",
+  "usage": {
+    "prompt_tokens": 1134,
+    "completion_tokens": 47,
+    "cost_usd": 0.000458,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787948237.268534
+}

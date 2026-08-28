@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\"src/click/types.py\"],\n  \"test_file\": \"tests/test_types.py\",\n  \"why\": \"The issue describes incorrect error handling within `FuncParamType`, which is defined in `src/click/types.py`, and a regression test for type conversion issues belongs in `tests/test_types.py`.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 1260,
+    "completion_tokens": 91,
+    "cost_usd": 0.000606,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947603.017723
+}

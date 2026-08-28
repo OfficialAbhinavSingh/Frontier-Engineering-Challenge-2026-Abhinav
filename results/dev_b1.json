@@ -1,0 +1,147 @@
+{
+  "variant": "b1",
+  "description": "one general-purpose agent with tools and a test runner",
+  "model": "google/gemini-2.5-flash",
+  "n_cases": 6,
+  "f2p_solved": 1,
+  "f2p_rate": 0.1667,
+  "total_cost_usd": 0.007,
+  "total_llm_calls": 51,
+  "cached_llm_calls": 47,
+  "mean_wall_clock_s": 4.3,
+  "wall_clock_total_s": 25.9,
+  "results": [
+    {
+      "case_id": "click__2263",
+      "repo": "pallets/click",
+      "variant": "b1",
+      "f2p": false,
+      "score_reason": "did_not_pass_at_fix:failed",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 8636,
+        "completion_tokens": 2136,
+        "cost_usd": 0.002049,
+        "calls": 6,
+        "cached_calls": 5
+      },
+      "wall_clock_s": 6.5,
+      "error": null,
+      "test_source": "import click\nfrom click.testing import CliRunner\nimport pytest\n\n\n@click.command()\n@click.option(\n    \"--old-option\",\n    help=\"This is an old option that should be deprecated.\",\n)\n@click.option(\n    \"--new-option\",\n    help=\"This is the new option.\",\n)\ndef cli(old_option, new_option):\n    \"\"\"A simple CLI for testing deprecation.\"\"\"\n    if old_option:\n        click.echo(f\"Old option used with value: {old_option}\")\n    if new_option:\n        click.echo(f\"New option used with value: {new_option}\")\n\n\ndef test_deprecated_option_emits_warning():\n    runner = CliRunner()\n    result = runner.invoke(cli, [\"--old-option\", \"test_value\"])\n\n    assert result.exit_code == 0\n    # This assertion will FAIL at the current commit because Click does not\n    # emit a deprecation warning for --old-option. Once a deprecation\n    # mechanism is implemented, this test should PASS as it will then\n    # correctly detect the presence of a warning.\n    assert \"deprecated\" in result.output.lower() or \"deprecated\" in result.stderr.lower()\n\n    # Also check that the command still functions\n    assert \"Old option used with value: test_value\" in result.output\n",
+      "test_rel_path": "tests/test_reprobot_click__2263.py",
+      "attempts": []
+    },
+    {
+      "case_id": "click__2644",
+      "repo": "pallets/click",
+      "variant": "b1",
+      "f2p": false,
+      "score_reason": "did_not_fail_at_parent:no_tests",
+      "verdict_at_parent": "broken_test",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 65758,
+        "completion_tokens": 12345,
+        "cost_usd": 0.0,
+        "calls": 11,
+        "cached_calls": 11
+      },
+      "wall_clock_s": 0.7,
+      "error": null,
+      "test_source": "import gc\n# ...\nif __name__ == '__main__':\n    # ...\n    try:\n        cli.main()\n    except SystemExit:\n        pass\n    gc.collect() # Explicitly trigger garbage collection\n    # ...\n",
+      "test_rel_path": "tests/test_reprobot_click__2644.py",
+      "attempts": []
+    },
+    {
+      "case_id": "sqlglot__5178",
+      "repo": "tobymao/sqlglot",
+      "variant": "b1",
+      "f2p": false,
+      "score_reason": "did_not_fail_at_parent:passed",
+      "verdict_at_parent": "no_fail",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 18564,
+        "completion_tokens": 1868,
+        "cost_usd": 0.004948,
+        "calls": 7,
+        "cached_calls": 4
+      },
+      "wall_clock_s": 14.9,
+      "error": null,
+      "test_source": "import pytest\nimport sqlglot\nfrom sqlglot.errors import ParseError\n\ndef test_trino_cte_udf_parse_error():\n    sql = \"\"\"\n    WITH FUNCTION f(num int)\n        RETURNS int\n        RETURN num\n    SELECT f(1);\n    \"\"\"\n    # This test should FAIL at the buggy commit because a ParseError is expected.\n    # It should PASS once the bug is fixed and the SQL parses successfully.\n    with pytest.raises(ParseError) as excinfo:\n        sqlglot.parse_one(sql, dialect=\"trino\")\n    assert \"Expecting (\" in str(excinfo.value) or \"Unexpected token\" in str(excinfo.value)\n",
+      "test_rel_path": "tests/dialects/test_reprobot_sqlglot__5178.py",
+      "attempts": []
+    },
+    {
+      "case_id": "tomlkit__291",
+      "repo": "python-poetry/tomlkit",
+      "variant": "b1",
+      "f2p": false,
+      "score_reason": "did_not_fail_at_parent:collection_error",
+      "verdict_at_parent": "broken_test",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 14592,
+        "completion_tokens": 3418,
+        "cost_usd": 0.0,
+        "calls": 8,
+        "cached_calls": 8
+      },
+      "wall_clock_s": 0.8,
+      "error": null,
+      "test_source": "============================= test session starts ==============================\n...\ncollected 1 item\n\ntest_reprobot_tomlkit__291.py F                                          [100%]\n\n=================================== FAILURES ===================================\n______________________ test_whitespace_preservation_in_keys ______________________\n\n    def test_whitespace_preservation_in_keys():\n        content = \\\"\\\"\\\"\n[keys.a]\n#    \u2193 this whitespace disappears\n[keys .'a'.'c']\n  'd'\\t= 'e'\n\\\"\\\"\\\"\n        doc = parse(content)\n\n        # The bug description implies that reassigning breaks the structure\n        # and causes whitespace to be lost.\n        # The original issue's example uses a loop, so we'll replicate that.\n        for mode in doc[\\\"keys\\\"]:\n            doc[\\\"keys\\\"][mode] = doc[\\\"keys\\\"][mode]\n\n        # The bug is that the whitespace around 'a'.'c' is lost.\n        # If the bug is present, dumps(doc) will NOT be equal to content.\n        # Therefore, to make the test FAIL at the buggy commit, we assert equality.\n        # When the bug is fixed, dumps(doc) WILL be equal to content, and the test will pass.\n>       assert dumps(doc) == content\nE       AssertionError: assert '[keys.a]\\\\n#    \u2193 this whitespace disappears\\\\n[keys.'a'.'c']\\\\n  'd'\\\\t= 'e'\\\\n' == '[keys.a]\\\\n#    \u2193 this whitespace disappears\\\\n[keys .'a'.'c']\\\\n  'd'\\\\t= 'e'\\\\n'\nE         - [keys.a]\nE         - #    \u2193 this whitespace disappears\nE         - [keys .'a'.'c']\nE         ?       ^\nE         + [keys.'a'.'c']\nE         ?       ^\nE         -   'd'\\t= 'e'\n\ntest_reprobot_tomlkit__291.py:26: AssertionError\n=========================== short test summary info ============================\nFAILED test_reprobot_tomlkit__291.py::test_whitespace_preservation_in_keys - AssertionError: assert '[keys.a]\\\\n#    \u2193 this whitespace disappears\\\\n[keys.'a'.'c']\\\\n  'd'\\\\t= 'e'\\\\n' == '[keys.a]\\\\n#    \u2193 this whitespace disappears\\\\n[keys .'a'.'c']\\\\n  'd'\\\\t= 'e'\\\\n'\n======================== 1 failed, 0 skipped in ...s =========================\n",
+      "test_rel_path": "tests/test_reprobot_tomlkit__291.py",
+      "attempts": []
+    },
+    {
+      "case_id": "tomlkit__352",
+      "repo": "python-poetry/tomlkit",
+      "variant": "b1",
+      "f2p": false,
+      "score_reason": "did_not_fail_at_parent:passed",
+      "verdict_at_parent": "no_fail",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 25504,
+        "completion_tokens": 6268,
+        "cost_usd": 0.0,
+        "calls": 7,
+        "cached_calls": 7
+      },
+      "wall_clock_s": 1.4,
+      "error": null,
+      "test_source": "import tomlkit\nimport io\nimport pytest\n\ndef test_rewrite_adds_whitespace_line():\n    original_toml_content = \"\"\"# xxx test\n\n\n[env.pro1.rst]\n    name = \"x7\"\n\n[env2]\n    name = 2\n\n[env3]\n    name = 3\n\"\"\"\n\n    f_in = io.StringIO(original_toml_content)\n    doc = tomlkit.load(f_in)\n\n    # Modify a value to ensure a write operation happens\n    doc[\"env2\"][\"name\"] = 2 # No actual change, but ensures the document is \"modified\"\n\n    f_out = io.StringIO()\n    tomlkit.dump(doc, f_out)\n    rewritten_toml_content = f_out.getvalue()\n\n    print(\"\\\\n--- Rewritten TOML Content ---\")\n    print(rewritten_toml_content)\n    print(\"------------------------------\")\n\n    # The bug adds an extra newline after 'name = \"x7\"'.\n    # Original has: 'name = \"x7\"\\\\n\\\\n[env2]' (two newlines)\n    # Buggy has:    'name = \"x7\"\\\\n\\\\n\\\\n[env2]' (three newlines)\n\n    # The test should FAIL if the buggy pattern (three newlines) is found.\n    # The test should PASS if the buggy pattern is NOT found (meaning only two newlines).\n    expected_buggy_pattern = 'name = \"x7\"\\\\n\\\\n\\\\n[env2]'\n    assert expected_buggy_pattern not in rewritten_toml_content, (\\\n        \"Found an unexpected extra newline after 'name = \\\\\\\"x7\\\\\\\"'. \"\\\n        \"The TOML was rewritten with an additional whitespace line.\"\\\n    )\n",
+      "test_rel_path": "tests/test_reprobot_tomlkit__352.py",
+      "attempts": []
+    },
+    {
+      "case_id": "tomlkit__439",
+      "repo": "python-poetry/tomlkit",
+      "variant": "b1",
+      "f2p": true,
+      "score_reason": "ok",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 27780,
+        "completion_tokens": 3187,
+        "cost_usd": 0.0,
+        "calls": 12,
+        "cached_calls": 12
+      },
+      "wall_clock_s": 1.5,
+      "error": null,
+      "test_source": "import tomlkit\n\ndef test_repro_issue_439():\n    toml_content = \"\"\"\na.b.c = \"d\"\na.b.e = \"f\"\n\"\"\"\n    \n    a = tomlkit.parse(toml_content)\n    value = a[\"a\"]\n    expected = {\"b\": {\"c\": \"d\", \"e\": \"f\"}}\n\n    # This assertion should pass, showing that the equality check works\n    assert value == expected\n\n    # This assertion should fail due to the bug described in issue #439\n    # The repr of value (an OutOfOrderTableProxy) is missing the 'c' key.\n    assert repr(value) == repr(expected)\n",
+      "test_rel_path": "tests/test_reprobot_tomlkit__439.py",
+      "attempts": []
+    }
+  ]
+}

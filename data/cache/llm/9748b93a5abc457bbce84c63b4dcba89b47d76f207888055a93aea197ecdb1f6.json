@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The user is reporting a `ParseError` when parsing a Trino query with a CTE UDF. I need to create a pytest file that reproduces this error. The test should attempt to parse the provided SQL query using `sqlglot.parse_one` with `dialect='trino'` and assert that a `ParseError` is raised. Once the bug is fixed, the test should pass, meaning no `ParseError` is raised.\", \"tool\": \"read_file\", \"args\": {\"path\": \"sqlglot/parse.py\"}}",
+  "usage": {
+    "prompt_tokens": 458,
+    "completion_tokens": 118,
+    "cost_usd": 0.000432,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946304.0443635
+}

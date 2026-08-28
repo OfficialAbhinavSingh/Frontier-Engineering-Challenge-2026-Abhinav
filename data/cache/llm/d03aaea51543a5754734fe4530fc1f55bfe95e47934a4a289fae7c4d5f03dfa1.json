@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"When a `TypeError` indicates an unexpected keyword argument for a `CliRunner` method, check the `CliRunner` class and its `invoke` method for the correct parameter names and their placement (constructor vs. `invoke`).\",\n  \"When testing `CliRunner` behavior, ensure that the test explicitly checks the outcome of `runner.invoke()` (e.g., `result.exception`, `result.exit_code`) rather than just letting the command run, to properly assert the expected behavior.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 754,
+    "completion_tokens": 115,
+    "cost_usd": 0.000514,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787948055.206005
+}

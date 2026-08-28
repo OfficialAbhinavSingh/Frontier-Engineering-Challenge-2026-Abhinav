@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"tomlkit/toml_document.py\",\n    \"tomlkit/container.py\"\n  ],\n  \"test_file\": \"tests/test_toml_document.py\",\n  \"why\": \"The issue describes incorrect serialization of a TOML document, specifically how keys are ordered and nested, which directly relates to the `toml_document.py` file responsible for managing the document structure and `container.py` which handles how items are stored and retrieved within sections, and a regression test would fit best in `tests/test_toml_document.py`.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 490,
+    "completion_tokens": 140,
+    "cost_usd": 0.000497,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947732.4775903
+}

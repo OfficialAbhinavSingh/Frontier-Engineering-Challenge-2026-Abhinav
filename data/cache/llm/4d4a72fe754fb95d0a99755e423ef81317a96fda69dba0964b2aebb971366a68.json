@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"src/click/shell_completion.py\",\n    \"src/click/types.py\"\n  ],\n  \"test_file\": \"tests/test_shell_completion.py\",\n  \"why\": \"The issue describes incorrect zsh shell completion behavior when completion items contain colons, directly implicating `shell_completion.py` which handles completion logic, and `types.py` as `ParamType` is used, with `test_shell_completion.py` being the dedicated test file for this functionality.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 1342,
+    "completion_tokens": 131,
+    "cost_usd": 0.00073,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947764.337704
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"You are absolutely right. I need to run the test to confirm its behavior at the current commit. I will use `run_test` with the generated test code.\", \"tool\": \"run_test\", \"args\": {\"source\": \"import click\\nfrom click.testing import CliRunner\\n\\ndef test_fish_completion_multiline_help_bug():\\n    @click.group()\\n    def cli():\\n        pass\\n\\n    @cli.command()\\n    @click.option(\\n        \\\"--test-option\\\",\\n        help=\\\"This is the first line.\\\\nThis is the second line of help.\\\",\\n    )\\n    def hello(test_option):\\n        click.echo(f\\\"Hello {test_option}\\\")\\n\\n    runner = CliRunner()\\n    result = runner.invoke(\\n        cli,\\n        [],\\n        env={\\n            \\\"_CLICK_COMPLETE\\\": \\\"fish_source\\\",\\n            \\\"_CLICK_CLI_NAME\\\": \\\"cli\\\",\\n            \\\"COMP_WORDS\\\": \\\"cli --\\\",\\n            \\\"COMP_CWORD\\\": \\\"1\\\",\\n        },\\n    )\\n\\n    assert result.exit_code == 0\\n    # The bug is that the multi-line help text is not escaped/handled correctly\\n    # and appears directly in the completion output, which would break fish.\\n    # We expect to see the raw multi-line help text in the output.\\n    expected_output_part = \\\"plain,--test-option\\\\nThis is the first line.\\\\nThis is the second line of help.\\\"\\n    assert expected_output_part in result.output\\n\"}}",
+  "usage": {
+    "prompt_tokens": 2915,
+    "completion_tokens": 375,
+    "cost_usd": 0.001812,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947316.7131734
+}

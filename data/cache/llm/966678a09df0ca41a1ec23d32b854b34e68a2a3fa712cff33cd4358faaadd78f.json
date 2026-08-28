@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"The `CliRunner` class does not accept `catch_exceptions` as an `__init__` argument; it is an argument to the `invoke` method.\",\n  \"When testing `CliRunner` behavior, always import `CliRunner` from `click.testing`.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 692,
+    "completion_tokens": 69,
+    "cost_usd": 0.00038,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787949292.09389
+}

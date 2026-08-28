@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"tomlkit/items.py\",\n    \"tomlkit/container.py\"\n  ],\n  \"test_file\": \"tests/test_items.py\",\n  \"why\": \"The issue describes an invalid state created by appending a Table to an InlineTable, which directly relates to how these item types are handled and validated within `tomlkit/items.py` and `tomlkit/container.py`, and a regression test would fit best in `tests/test_items.py`.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 828,
+    "completion_tokens": 125,
+    "cost_usd": 0.000561,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947848.3017943
+}

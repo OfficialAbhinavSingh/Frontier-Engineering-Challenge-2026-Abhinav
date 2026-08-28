@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"src/click/core.py\",\n    \"src/click/testing.py\"\n  ],\n  \"test_file\": \"tests/test_testing.py\",\n  \"why\": \"The issue describes a desired change to CLIRunner's `catch_exceptions` behavior, which is defined in `src/click/testing.py`, and the core `invoke` method is in `src/click/core.py`. A regression test would naturally belong in `tests/test_testing.py` as it directly relates to the testing utilities.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 753,
+    "completion_tokens": 139,
+    "cost_usd": 0.000573,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947773.0943468
+}

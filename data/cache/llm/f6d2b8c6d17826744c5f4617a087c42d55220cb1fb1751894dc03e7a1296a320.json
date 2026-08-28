@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\"reproduced\": false, \"why\": \"The test failed because 'FuncParamType' was not found in the click module, preventing the test from even running against the buggy code as intended.\"}\n```",
+  "usage": {
+    "prompt_tokens": 1033,
+    "completion_tokens": 46,
+    "cost_usd": 0.000425,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787948214.5266123
+}

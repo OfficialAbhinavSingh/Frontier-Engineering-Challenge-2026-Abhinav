@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The user wants a pytest test that fails when parsing a Databricks `INSERT ... REPLACE USING` statement. I need to use `sqlglot.parse_one` with the `databricks` dialect. The test should assert that parsing this specific SQL string raises an error or doesn't produce the expected AST.\", \"tool\": \"read_file\", \"args\": {\"path\": \"sqlglot/expressions/dml.py\"}}",
+  "usage": {
+    "prompt_tokens": 668,
+    "completion_tokens": 95,
+    "cost_usd": 0.000438,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947387.7094672
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport os\nimport pytest\nimport click\nfrom click.testing import CliRunner\n\n\n@pytest.fixture\ndef runner():\n    return CliRunner()\n\n\n@click.group()\n@click.option(\n    \"--config_file\",\n    default=\"config.txt\",\n    type=click.File(mode=\"r\"),\n    help=\"help\",\n)\ndef cli(config_file):\n    pass\n\n\n@cli.command()\ndef hello():\n    pass\n\n\ndef test_shell_completion_closes_file_option(runner, monkeypatch, tmp_path):\n    config_file_path = tmp_path / \"config.txt\"\n    config_file_path.write_text(\"test config\")\n\n    monkeypatch.setenv(\"_CLICK_CLI_COMPLETE\", \"bash_source\")\n    monkeypatch.setenv(\"_CLICK_CLI_COMPLETE_USER_PROMPT\", \"1\")\n    monkeypatch.setenv(\"CONFIG_FILE\", str(config_file_path))\n\n    # Simulate shell completion by calling the CLI with the completion environment variables\n    # We expect no ResourceWarning, which means the file was closed.\n    # The easiest way to check for ResourceWarning is to ensure it's NOT in stderr.\n    # Python's default warnings behavior prints to stderr.\n    result = runner.invoke(cli, [\"--config_file\", str(config_file_path)], env={\n        \"_CLICK_CLI_COMPLETE\": \"bash_complete\",\n        \"_CLICK_CLI_COMPLETE_USER_PROMPT\": \"1\",\n        \"COMP_WORDS\": \"cli --config_file\",\n        \"COMP_CWORD\": \"2\",\n    })\n\n    assert \"ResourceWarning\" not in result.stderr\n```",
+  "usage": {
+    "prompt_tokens": 5423,
+    "completion_tokens": 385,
+    "cost_usd": 0.002589,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787949522.1731958
+}

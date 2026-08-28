@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"My apologies again. I will be more careful.\n\nI need to read the `click/termui.py` file to understand how `prompt` is implemented and how it interacts with `readline`.\", \"tool\": \"read_file\", \"args\": {\"path\": \"click/termui.py\"}}",
+  "usage": {
+    "prompt_tokens": 850,
+    "completion_tokens": 68,
+    "cost_usd": 0.000425,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947294.0746205
+}

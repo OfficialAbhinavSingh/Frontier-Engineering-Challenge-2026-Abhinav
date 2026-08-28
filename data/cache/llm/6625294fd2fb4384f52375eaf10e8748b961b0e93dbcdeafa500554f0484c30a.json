@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"I apologize for the formatting error. I will ensure the response is a single JSON object.\n\nThe test I've written directly addresses the issue: it attempts to parse the problematic `src` string and asserts that `KeyAlreadyPresent` is raised. According to the issue description, `tomlkit.parse(src)` *does not* raise an exception at the buggy commit, so this test should fail as expected. Once the bug is fixed, `tomlkit.parse(src)` *will* raise `KeyAlreadyPresent`, and the test will pass.\n\nLet's run this test to confirm its behavior.\", \"tool\": \"run_test\", \"args\": {\"source\": \"import pytest\\nimport tomlkit\\n\\ndef test_value_vs_table_redefinition_out_of_order_raises_at_parse():\\n    src = '[a]\\\\nb = true\\\\n[zz]\\\\n[a.b]\\\\nc = 1\\\\n'\\n    with pytest.raises(tomlkit.exceptions.KeyAlreadyPresent):\\n        tomlkit.parse(src)\\n\"}}",
+  "usage": {
+    "prompt_tokens": 2198,
+    "completion_tokens": 236,
+    "cost_usd": 0.001249,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947469.994442
+}

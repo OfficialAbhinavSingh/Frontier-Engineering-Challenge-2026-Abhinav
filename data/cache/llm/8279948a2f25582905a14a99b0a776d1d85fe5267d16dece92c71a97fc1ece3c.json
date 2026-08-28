@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The user wants a pytest test that fails due to a zsh completion bug with colons in `CompletionItem` values. The bug causes `baz:quux` to be split into `baz` and `quux` in the completion output, instead of being treated as a single item.\n\nI need to:\n1. Create a dummy `foo.py` script that uses `click` and `CompletionItem` with values containing colons, as described in the issue.\n2. Write a pytest test that:\n    a. Generates zsh completion script for `foo.py`.\n    b. Simulates zsh completion for `foo.py`.\n    c. Asserts that the completion output is incorrect (i.e., split by colon).\n\nLet's start by creating the `foo.py` content.\", \"tool\": \"read_file\", \"args\": {\"path\": \"click/shell_completion.py\"}}",
+  "usage": {
+    "prompt_tokens": 999,
+    "completion_tokens": 202,
+    "cost_usd": 0.000805,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947228.4787183
+}

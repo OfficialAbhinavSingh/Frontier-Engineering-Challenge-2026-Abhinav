@@ -11,3 +11,8 @@ data/repos/
 # Local secrets never belong in the submission.
 .env
 *.key
+
+# Repeat-run caches are large and derivable; the primary cache below is committed
+# so the reported numbers can be replayed offline.
+data/cache/llm_r2/
+data/cache/llm_r3/

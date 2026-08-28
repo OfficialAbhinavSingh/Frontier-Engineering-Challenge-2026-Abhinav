@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nfrom tomlkit import dumps\nfrom tomlkit import parse\n\n\ndef test_issue_291_whitespace_preservation() -> None:\n    content = \"\"\"\n[keys.a]\n#    \u2193 this whitespace disappears\n[keys .'a'.'c']\n  'd'\t= 'e'\n\"\"\"\n    doc = parse(content)\n    for mode in doc[\"keys\"]:\n        doc[\"keys\"][mode] = doc[\"keys\"][mode]\n\n    # The bug causes the whitespace of [keys .'a'.'c'] to be overwritten\n    # by the whitespace of [keys.a] when reassigning.\n    # The expected behavior is that the original whitespace is preserved.\n    expected_content = \"\"\"\n[keys.a]\n#    \u2193 this whitespace disappears\n[keys .'a'.'c']\n  'd'\t= 'e'\n\"\"\"\n    assert dumps(doc) == expected_content\n\n```",
+  "usage": {
+    "prompt_tokens": 3172,
+    "completion_tokens": 207,
+    "cost_usd": 0.001469,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787945624.6168973
+}

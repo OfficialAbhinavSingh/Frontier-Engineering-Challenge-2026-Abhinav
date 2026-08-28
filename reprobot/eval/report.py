@@ -53,6 +53,9 @@ def _stats(entries: list[dict]) -> dict:
     n = entries[0]["n_cases"]
     costs = [e["total_cost_usd"] for e in entries]
     rounds = [r.get("rounds", 1) for e in entries for r in e["results"]]
+    calls = sum(e["total_llm_calls"] for e in entries)
+    cached = sum(e["cached_llm_calls"] for e in entries)
+    cases = sum(e["n_cases"] for e in entries)
     return {
         "runs": len(entries),
         "n": n,
@@ -62,13 +65,15 @@ def _stats(entries: list[dict]) -> dict:
         "rate": (sum(solved) / len(solved)) / n if n else 0.0,
         "cost": sum(costs) / len(costs),
         "mean_rounds": sum(rounds) / len(rounds) if rounds else 0,
+        "calls_per_case": calls / cases if cases else 0,
+        "cached_share": cached / calls if calls else 0,
         "desc": entries[0]["description"],
     }
 
 
 def headline_table(runs: dict[str, list[dict]]) -> str:
     rows = [
-        "| Variant | What it is | Runs | Fail-to-Pass | Rate | Cost/run | Mean rounds |",
+        "| Variant | What it is | Runs | Fail-to-Pass | Rate | Model calls/case | Cost/run |",
         "| --- | --- | ---: | ---: | ---: | ---: | ---: |",
     ]
     for variant, entries in runs.items():
@@ -80,7 +85,7 @@ def headline_table(runs: dict[str, list[dict]]) -> str:
         mark = " +" if variant in FOOTNOTES else ""
         rows.append(
             f"| `{variant}`{mark} | {s['desc']} | {s['runs']} | {score} | "
-            f"{s['rate']:.0%} | ${s['cost']:.4f} | {s['mean_rounds']:.1f} |"
+            f"{s['rate']:.0%} | {s['calls_per_case']:.1f} | ${s['cost']:.4f} |"
         )
     notes = [f"\n**+ `{v}`** — {FOOTNOTES[v]}" for v in runs if v in FOOTNOTES]
     return "\n".join(rows) + "\n" + "\n".join(notes)
@@ -164,6 +169,10 @@ def build(results_dir: Path, split: str) -> str:
         "commit, with no model involved in scoring.\n",
         "## Headline comparison\n",
         headline_table(runs),
+        "\nModel calls per case is the honest efficiency measure here. The dollar "
+        "column is deflated for any variant whose prompts were already in the "
+        "committed cache from an earlier run, so it understates what a cold run "
+        "costs; the call count is not affected by caching.\n",
         "\n## Per-case outcomes\n",
         "First run of each variant.\n",
         per_case_matrix(runs),

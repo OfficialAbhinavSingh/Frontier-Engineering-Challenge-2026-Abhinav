@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The test *passed*, but it should have *failed* at the current commit because the issue states there's a `ParseError`. This means my assertion `assert \\\"Expecting (\\\" in str(excinfo.value)` is incorrect, or the `ParseError` message has changed, or the `ParseError` is not being raised at all.\n\nThe issue description explicitly states: `sqlglot.errors.ParseError: Expecting (. Line 1, Col: 15.`\n\nLet me re-examine the issue description and the test. The test *should* pass if the bug is fixed, meaning `parse_one` should *not* raise a `ParseError`. Since the bug *exists* at this commit, the test should *fail* because `parse_one` *should* raise a `ParseError`.\n\nMy current test asserts that a `ParseError` *is* raised. If the bug is present, `ParseError` *will* be raised, and the test will pass. This is the opposite of what's desired.\n\nI need to write a test that *fails* when the `ParseError` is raised, and *passes* when it's not. This means I should *not* expect a `ParseError` to be raised. If `parse_one` raises a `ParseError`, the test should fail. If it parses successfully, the test should pass.\n\nSo, the correct test should simply call `sqlglot.parse_one` without `pytest.raises`. If `ParseError` is raised, the test will fail, which is the desired behavior for a bug-reproducing test. If the bug is fixed, `parse_one` will succeed, and the test will pass.\", \"tool\": \"run_test\", \"args\": {\"source\": \"import pytest\\nimport sqlglot\\nfrom sqlglot.errors import ParseError\\n\\ndef test_trino_cte_udf_parse_error():\\n    sql = \\\"\\\"\\\"\\n    WITH FUNCTION f(num int)\\n        RETURNS int\\n        RETURN num\\n    SELECT f(1);\\n    \\\"\\\"\\\"\\n    # This test should FAIL at the buggy commit because a ParseError is expected.\\n    # It should PASS once the bug is fixed and the SQL parses successfully.\\n    expression = sqlglot.parse_one(sql, dialect=\\\"trino\\\")\\n    # Optionally, assert something about the parsed expression if it parses successfully\\n    # For now, just successfully parsing is enough to indicate the bug is fixed.\\n    assert expression is not None\\n\"}}",
+  "usage": {
+    "prompt_tokens": 3217,
+    "completion_tokens": 559,
+    "cost_usd": 0.002363,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946878.5786033
+}

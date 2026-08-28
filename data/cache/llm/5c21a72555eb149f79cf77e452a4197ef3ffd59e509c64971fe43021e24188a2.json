@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nfrom tomlkit import aot\nfrom tomlkit import dumps\nfrom tomlkit import parse\nfrom tomlkit import table\n\n\ndef test_aot_does_not_capture_other_keys() -> None:\n    doc = parse(\"a.b = 1\\nc.d = 2\\n\")\n    aot_item = aot()\n    t = table()\n    t[\"x\"] = 9\n    aot_item.append(t)\n    doc[\"a\"] = aot_item\n    # The bug report states that c.d is wrongly captured by the array of tables.\n    # This means that the output should NOT contain \"c.d = 2\" inside the [[a]] block.\n    # The expected output should have \"c.d = 2\" outside the [[a]] block.\n    expected_dump = \"[[a]]\\nx = 9\\n\\nc.d = 2\\n\"\n    assert dumps(doc) == expected_dump\n\n```",
+  "usage": {
+    "prompt_tokens": 3049,
+    "completion_tokens": 229,
+    "cost_usd": 0.001487,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787948142.2956548
+}

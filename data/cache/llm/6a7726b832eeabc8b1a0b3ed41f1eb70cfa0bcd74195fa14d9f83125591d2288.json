@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\"reproduced\": true, \"why\": \"The test expects a KeyAlreadyPresent exception during parsing, but no exception was raised, which aligns with the bug report's description that tomlkit.parse() accepts the invalid TOML without error.\"}\n```",
+  "usage": {
+    "prompt_tokens": 1928,
+    "completion_tokens": 57,
+    "cost_usd": 0.000721,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787948253.50517
+}

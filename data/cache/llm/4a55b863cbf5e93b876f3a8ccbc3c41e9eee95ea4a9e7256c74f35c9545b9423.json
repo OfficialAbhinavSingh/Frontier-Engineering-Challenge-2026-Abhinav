@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The test failed as expected, confirming the bug. The `AssertionError` shows that `result` was `'[x]\\\\na.b = {}c = 3\\\\n'` while `expected` was `'[x]\\\\na.b = {}\\\\nc = 3\\\\n'`. This is exactly the behavior described in the issue. I can now provide the test file.\", \"final_test\": \"import tomlkit\\n\\ndef test_inline_table_newline_after_add():\\n    v = tomlkit.loads(\\\"\\\"\\\"[x]\\\\na.b = {}\\\"\\\"\\\")\\n    v[\\\"x\\\"][\\\"c\\\"] = 3\\n    result = tomlkit.dumps(v)\\n    expected = \\\"\\\"\\\"[x]\\\\na.b = {}\\\\nc = 3\\\\n\\\"\\\"\\\"\\n    assert result == expected\"}",
+  "usage": {
+    "prompt_tokens": 1413,
+    "completion_tokens": 193,
+    "cost_usd": 0.000906,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947464.3059916
+}

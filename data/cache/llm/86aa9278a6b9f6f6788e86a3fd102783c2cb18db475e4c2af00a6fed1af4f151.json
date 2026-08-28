@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nimport click\nimport tempfile\nimport collections.abc as cabc\nimport contextlib\nimport io\n\nfrom click.testing import CliRunner\n\n\ndef test_runner_catch_exceptions_default():\n    @click.command()\n    def cli_raises():\n        raise ValueError(\"This is an error\")\n\n    runner = CliRunner()\n    result = runner.invoke(cli_raises)\n    assert result.exception is not None\n    assert isinstance(result.exception, ValueError)\n\n\ndef test_runner_catch_exceptions_override_invoke():\n    @click.command()\n    def cli_raises():\n        raise ValueError(\"This is an error\")\n\n    runner = CliRunner()\n    result = runner.invoke(cli_raises, catch_exceptions=False)\n    with pytest.raises(ValueError, match=\"This is an error\"):\n        _ = result.exception\n\n\ndef test_runner_catch_exceptions_on_runner():\n    @click.command()\n    def cli_raises():\n        raise ValueError(\"This is an error\")\n\n    # This test expects the bug to be present, so it will fail.\n    # Once the bug is fixed, this test should pass.\n    runner = CliRunner(catch_exceptions=False)\n    result = runner.invoke(cli_raises)\n    with pytest.raises(ValueError, match=\"This is an error\"):\n        _ = result.exception\n\n```",
+  "usage": {
+    "prompt_tokens": 4138,
+    "completion_tokens": 315,
+    "cost_usd": 0.002029,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947775.569318
+}

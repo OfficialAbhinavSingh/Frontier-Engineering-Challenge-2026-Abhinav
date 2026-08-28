@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\n\nimport tomlkit\n\n\ndef test_array_of_floats_to_list_conversion() -> None:\n    arr = tomlkit.loads(\n        \"\"\"\na = [1.0, 2.0, 3.0]\n\"\"\"\n    )\n\n    # The bug causes `arr['a']` to not behave like a standard Python list\n    # when its elements are `tomlkit.items.Float` objects.\n    # Specifically, it fails when an external library (like torch) tries to\n    # iterate over it or determine its length, because the `Float` objects\n    # themselves are not iterable and do not have a `len()`.\n    # The expectation is that `arr['a']` should be convertible to a standard\n    # Python list of floats.\n    # We assert that the list comprehension works as expected, which implies\n    # that the individual items can be unwrapped or cast to float.\n    assert [float(x) for x in arr[\"a\"]] == [1.0, 2.0, 3.0]\n```",
+  "usage": {
+    "prompt_tokens": 3344,
+    "completion_tokens": 244,
+    "cost_usd": 0.001613,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787949358.0066187
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"src/click/types.py\"\n  ],\n  \"test_file\": \"tests/test_custom_classes.py\",\n  \"why\": \"The issue directly points to a proposed change in `FuncParamType` within `src/click/types.py`, and `tests/test_custom_classes.py` is the most appropriate place for a regression test as it deals with custom type conversions.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 1088,
+    "completion_tokens": 107,
+    "cost_usd": 0.000594,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947794.3351524
+}

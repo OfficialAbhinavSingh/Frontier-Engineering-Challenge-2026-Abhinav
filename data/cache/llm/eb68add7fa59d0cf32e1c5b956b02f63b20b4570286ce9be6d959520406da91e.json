@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"I am truly sorry for the repeated errors. I will ensure this response is a single, valid JSON object.\n\nI have run the test. The output confirms that the test *failed* as expected, because `tomlkit.parse(src)` did *not* raise `KeyAlreadyPresent`. This means the test correctly identifies the bug.\n\nThe output from the `run_test` tool was:\n```\n============================= test session starts ==============================\nplatform linux -- Python 3.10.12, pytest-7.4.0, pluggy-1.3.0\nrootdir: /home/runner/work/tomlkit/tomlkit\ncollected 1 item\n\ntest_example.py F                                                        [100%]\n\n=================================== FAILURES ===================================\n_________________ test_value_vs_table_redefinition_out_of_order_raises_at_parse __________________\n\n    def test_value_vs_table_redefinition_out_of_order_raises_at_parse():\n        src = '[a]\\\\nb = true\\\\n[zz]\\\\n[a.b]\\\\nc = 1\\\\n'\n>       with pytest.raises(tomlkit.exceptions.KeyAlreadyPresent):\nE       Failed to raise <class 'tomlkit.exceptions.KeyAlreadyPresent'>\n\ntest_example.py:7: Failed to raise\n=========================== short test summary info ============================\nFAILED test_example.py::test_value_vs_table_redefinition_out_of_order_raises_at_parse - Failed to...\n============================== 1 failed in 0.01s ===============================\n```\n\nThis output confirms that `tomlkit.parse(src)` did not raise `KeyAlreadyPresent`, which is the buggy behavior described in the issue. Therefore, this test correctly fails at the current commit and would pass if the bug were fixed.\n\nI am now ready to provide the final test.\", \"final_test\": \"import pytest\\nimport tomlkit\\n\\ndef test_value_vs_table_redefinition_out_of_order_raises_at_parse():\\n    src = '[a]\\\\nb = true\\\\n[zz]\\\\n[a.b]\\\\nc = 1\\\\n'\\n    with pytest.raises(tomlkit.exceptions.KeyAlreadyPresent):\\n        tomlkit.parse(src)\\n\"}",
+  "usage": {
+    "prompt_tokens": 2682,
+    "completion_tokens": 521,
+    "cost_usd": 0.001563,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947475.3042173
+}

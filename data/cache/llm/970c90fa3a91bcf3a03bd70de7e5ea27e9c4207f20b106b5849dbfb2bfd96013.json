@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport tomlkit\n\ndef test_rewrite_toml_data_no_extra_whitespace(tmp_path):\n    # Original TOML content with comments and structure\n    original_toml_content = \"\"\"# xxx test\n\n\n[env.pro1.rst]\n    name = \"x7\"\n\n[env2]\n    name = 2\n\n[env3]\n    name = 3\n\"\"\"\n    # Expected TOML content after rewrite, without extra whitespace\n    expected_toml_content = \"\"\"# xxx test\n\n\n[env.pro1.rst]\n    name = \"x7\"\n\n[env2]\n    name = 2\n\n[env3]\n    name = 3\n\"\"\"\n\n    file_path = tmp_path / \"test.toml\"\n    file_path.write_text(original_toml_content)\n\n    # Load, modify (without actual change to trigger the bug), and dump\n    with open(file_path, \"r\") as f:\n        t = tomlkit.load(f)\n\n    # The bug is triggered by dumping a document that has a table\n    # followed by a non-table item, where the table itself doesn't\n    # explicitly end with a whitespace, but the next item is not\n    # directly adjacent.\n    # In this case, [env.pro1.rst] is followed by [env2], but there's\n    # an implicit newline after 'name = \"x7\"' and before '[env2]'.\n    # The merge_dicts operation in the bug report effectively re-writes\n    # the document structure, which can trigger the whitespace insertion.\n    # For this test, simply loading and dumping without modification\n    # should preserve the original formatting if the bug is fixed.\n    # If the bug is present, dumping will insert an extra newline.\n\n    with open(file_path, \"w\") as f:\n        tomlkit.dump(t, f)\n\n    actual_toml_content = file_path.read_text()\n\n    assert actual_toml_content == expected_toml_content\n\n```",
+  "usage": {
+    "prompt_tokens": 1599,
+    "completion_tokens": 464,
+    "cost_usd": 0.00164,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787945859.1322277
+}

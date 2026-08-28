@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The user is reporting a `ParseError` when trying to parse a Trino query that uses a CTE User-Defined Function. I need to create a pytest file that reproduces this error. The test should attempt to parse the provided SQL query using `sqlglot.parse_one` with the `trino` dialect and assert that a `ParseError` is raised. This test should fail at the current commit and pass once the bug is fixed.\", \"final_test\": \"import pytest\\nfrom sqlglot import parse_one, errors\\n\\ndef test_trino_cte_udf_parse_error():\\n    sql = \\\"\\\"\\\"\\n        WITH FUNCTION f(num int)\\n            RETURNS int\\n            RETURN num\\n        SELECT f(1);\\n    \\\"\\\"\\\"\\n    with pytest.raises(errors.ParseError) as exc_info:\\n        parse_one(sql, dialect=\\\"trino\\\")\\n    assert \\\"Expecting (\\\" in str(exc_info.value)\\n\"}",
+  "usage": {
+    "prompt_tokens": 412,
+    "completion_tokens": 221,
+    "cost_usd": 0.000676,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787945720.1697447
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\"reproduced\": false, \"why\": \"The test failed because it could not import a private function `_get_completions` from `click.shell_completion`, not due to the reported bug regarding multi-line help text in fish shell completion.\"}\n```",
+  "usage": {
+    "prompt_tokens": 2791,
+    "completion_tokens": 60,
+    "cost_usd": 0.000987,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787948192.5875375
+}

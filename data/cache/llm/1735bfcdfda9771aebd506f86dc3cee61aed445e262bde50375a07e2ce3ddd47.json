@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"sqlglot/optimizer/qualify_columns.py\",\n    \"sqlglot/schema.py\"\n  ],\n  \"test_file\": \"tests/test_lineage.py\",\n  \"why\": \"The issue describes a failure in qualify_columns when resolving columns from table-valued functions, which is directly handled by qualify_columns.py and impacts schema resolution, and the reproduction uses lineage, making tests/test_lineage.py the appropriate place for a regression test.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 1259,
+    "completion_tokens": 125,
+    "cost_usd": 0.00069,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947829.413482
+}

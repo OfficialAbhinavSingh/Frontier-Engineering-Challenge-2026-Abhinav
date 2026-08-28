@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"Okay, I've updated the test to use `click.FuncParamType` directly, which is a more accurate representation of the bug. I will now run this updated test to confirm it still passes at the buggy commit.\", \"tool\": \"run_test\", \"args\": {\"source\": \"\\nimport click\\nfrom click.testing import CliRunner\\nimport pytest\\n\\nclass MyClass:\\n    def __init__(self, value: str):\\n        self.value = value\\n\\n    @staticmethod\\n    def from_str(input_str: str) -> \\\"MyClass\\\":\\n        if input_str != \\\"works\\\":\\n            raise ValueError(f\\\"input was {input_str=}, should be works\\\")\\n        return MyClass(input_str)\\n\\n\\n@click.command()\\n@click.argument(\\\"mydata\\\", type=click.FuncParamType(MyClass.from_str))\\ndef cli(mydata):\\n    click.echo(f\\\"Success: {mydata.value}\\\")\\n\\ndef test_func_param_type_value_error_message():\\n    runner = CliRunner()\\n    result = runner.invoke(cli, [\\\"fails\\\"])\\n\\n    assert result.exit_code == 2\\n    # At the buggy commit, FuncParamType calls self.fail with the raw value.\\n    # So, the detailed error message from ValueError should NOT be in the output.\\n    assert \\\"input was input_str='fails', should be works\\\" not in result.output\\n    # Instead, the output should contain the generic message with the raw input.\\n    assert \\\"Error: Invalid value for 'MYDATA': fails\\\" in result.output\\n\\n    # This test is designed to PASS at the buggy commit and FAIL once the fix is applied.\\n    # After the fix, FuncParamType would call self.fail with str(e),\\n    # causing the first assert to fail.\\n\\n\"}}",
+  "usage": {
+    "prompt_tokens": 3916,
+    "completion_tokens": 443,
+    "cost_usd": 0.001466,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787947370.0425153
+}

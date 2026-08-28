@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport os\nimport pytest\nimport click\nfrom click.testing import CliRunner\nimport warnings\nimport typing\n\n\n@pytest.fixture\ndef runner():\n    return CliRunner()\n\n\n@click.group()\n@click.option(\n    \"--config_file\",\n    default=\"config.txt\",\n    type=click.File(mode=\"r\"),\n    help=\"help\",\n)\n@click.pass_context\ndef cli(ctx, config_file: typing.TextIO):\n    pass\n\n\n@cli.command()\ndef hello():\n    pass\n\n\ndef test_shell_completion_closes_file_option(runner, monkeypatch, tmp_path):\n    config_file_path = tmp_path / \"config.txt\"\n    config_file_path.write_text(\"test config\")\n\n    # Set up environment variables for shell completion\n    monkeypatch.setenv(\"_CLICK_CLI_COMPLETE\", \"bash_complete\")\n    monkeypatch.setenv(\"_CLICK_CLI_COMPLETE_USER_PROMPT\", \"1\")\n    monkeypatch.setenv(\"COMP_WORDS\", f\"cli --config_file {config_file_path}\")\n    monkeypatch.setenv(\"COMP_CWORD\", \"2\")\n    monkeypatch.setenv(\"COMP_POINT\", str(len(f\"cli --config_file {config_file_path}\")))\n\n    # Capture ResourceWarnings\n    with warnings.catch_warnings(record=True) as w:\n        warnings.simplefilter(\"always\")\n        # The bug occurs during shell completion, which is triggered by\n        # calling the main function with specific environment variables.\n        # The actual command line arguments don't matter much for this\n        # specific bug, as it's about context creation during completion.\n        runner.invoke(cli, [], catch_exceptions=False)\n\n        # Assert that a ResourceWarning related to unclosed files was issued\n        # This test should fail with the bug present and pass when fixed.\n        assert any(\n            issubclass(warning.category, ResourceWarning)\n            and \"unclosed file\" in str(warning.message)\n            and str(config_file_path) in str(warning.message)\n            for warning in w\n        )\n```",
+  "usage": {
+    "prompt_tokens": 5968,
+    "completion_tokens": 500,
+    "cost_usd": 0.00304,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787949529.7773046
+}

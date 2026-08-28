@@ -1,0 +1,17 @@
+[
+  {
+    "text": "When testing `tomlkit.dumps`, be mindful of expected newline characters. The `tomlkit.dumps` function often adds an extra newline at the end of sections or documents, which can lead to subtle assertion failures if not accounted for in the expected string.",
+    "from_case": "tomlkit__542",
+    "added_at": 1787949144.547161
+  },
+  {
+    "text": "Do not import `torch` in tests; it is not a dependency of `tomlkit` and will cause `ModuleNotFoundError`.",
+    "from_case": "tomlkit__562",
+    "added_at": 1787949162.943333
+  },
+  {
+    "text": "Tests should be placed in `tomlkit/tests/` and follow the naming convention `test_*.py`.",
+    "from_case": "tomlkit__562",
+    "added_at": 1787949162.9433358
+  }
+]

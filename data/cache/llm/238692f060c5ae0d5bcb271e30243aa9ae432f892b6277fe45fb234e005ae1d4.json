@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport os\nimport pytest\nimport click\nfrom click.testing import CliRunner\nimport warnings\n\n@pytest.fixture\ndef runner():\n    return CliRunner()\n\ndef test_file_option_completion_closes_file(runner):\n    config_file_path = \"test_config.txt\"\n    with open(config_file_path, \"w\") as f:\n        f.write(\"test content\")\n\n    @click.group()\n    @click.option(\n        \"--config_file\",\n        default=config_file_path,\n        type=click.File(mode=\"r\"),\n        help=\"help\",\n    )\n    @click.pass_context\n    def cli(ctx, config_file):\n        pass\n\n    # Simulate shell completion by setting the environment variable\n    # and calling the CLI with the completion instruction.\n    # The bug occurs when _resolve_context is called during completion,\n    # which opens the file but doesn't close it.\n    env = {\n        \"_CLICK_COMPLETE\": \"complete_bash\",\n        \"COMP_WORDS\": \"cli --config_file\",\n        \"COMP_CWORD\": \"1\",\n    }\n\n    # The bug report specifically mentions ResourceWarning: unclosed file\n    # during shell completion. We need to ensure this warning is caught.\n    with warnings.catch_warnings(record=True) as w:\n        warnings.simplefilter(\"always\")\n        # We need to invoke the CLI with the completion environment variable\n        # set, but without any actual command arguments that would cause\n        # the CLI to execute normally. The `_CLICK_COMPLETE` variable\n        # triggers the completion logic.\n        # The `prog_name` is important for shell completion.\n        result = runner.invoke(cli, [], env=env, prog_name=\"cli\")\n\n        # Assert that a ResourceWarning related to an unclosed file is issued.\n        # The bug is that this warning *is* issued. Once fixed, this assertion\n        # should fail, and the test will pass.\n        found_warning = False\n        for warning_message in w:\n            if issubclass(warning_message.category, ResourceWarning) and \"unclosed file\" in str(warning_message.message):\n                found_warning = True\n                break\n        assert found_warning, \"ResourceWarning for unclosed file was not found during shell completion.\"\n\n    os.remove(config_file_path)\n```",
+  "usage": {
+    "prompt_tokens": 5939,
+    "completion_tokens": 550,
+    "cost_usd": 0.003157,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946993.2949386
+}

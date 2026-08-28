@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport unittest\n\nfrom sqlglot import parse_one\nfrom sqlglot.errors import ParseError\n\n\nclass TestReprobot5178(unittest.TestCase):\n    def test_trino_cte_udf_parse_error(self):\n        sql = \"\"\"\n        WITH FUNCTION f(num int)\n            RETURNS int\n            RETURN num\n        SELECT f(1);\n        \"\"\"\n        try:\n            parse_one(sql, dialect=\"trino\")\n            self.assertTrue(True)  # If no ParseError, test passes\n        except ParseError as e:\n            self.fail(f\"Parsing the CTE UDF raised a ParseError: {e}\")\n\n```",
+  "usage": {
+    "prompt_tokens": 3489,
+    "completion_tokens": 154,
+    "cost_usd": 0.001432,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787946436.9708061
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"When comparing TOML dumps, be mindful of subtle whitespace differences, especially empty lines, as `tomlkit.dumps` can produce them in ways that might not be immediately obvious but are significant for exact string comparison.\",\n  \"When testing `tomlkit.dumps` output, consider using `tomlkit.parse` on both the actual and expected strings to compare the parsed document structures rather than raw string equality, which can be brittle due to formatting variations.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 480,
+    "completion_tokens": 103,
+    "cost_usd": 0.000402,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787948145.039162
+}
