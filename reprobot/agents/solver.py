@@ -37,7 +37,7 @@ from reprobot.agents.common import (
     test_path_for,
 )
 from reprobot.agents.memory import RepoMemory
-from reprobot.agents.verifier import repair_instruction, verify
+from reprobot.agents.verifier import repair_instruction, verify, verify_with_model
 from reprobot.llm.client import LLMClient
 from reprobot.repo import RepoView
 from reprobot.trace import Trace
@@ -79,6 +79,9 @@ class SolverConfig:
     use_examples: bool = True
     use_typed_repair: bool = True
     use_memory: bool = True
+    # The removed experiment: judge the run with a model instead of reading the
+    # traceback. Kept switchable so the claim that it lost stays checkable.
+    use_llm_verdict: bool = False
     max_rounds: int = 3
     budget: Budget = field(default_factory=Budget)
 
@@ -210,7 +213,12 @@ def solve(case: dict, view: RepoView, client: LLMClient, trace: Trace,
             "pytest_output": run.stdout_tail[-2000:],
         })
 
-        verdict = verify(run, test_rel_path)
+        if cfg.use_llm_verdict:
+            verdict = verify_with_model(
+                run, test_rel_path, issue_text, source, client, trace
+            )
+        else:
+            verdict = verify(run, test_rel_path)
         final_verdict = verdict
         trace.verdict(round_no, verdict.verdict, verdict.to_dict())
 

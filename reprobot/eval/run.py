@@ -61,6 +61,14 @@ VARIANTS: dict[str, dict] = {
         "desc": "adds cross-case repository memory (full Repro-Bot)",
         "cfg": dict(use_map=True, use_examples=True, use_typed_repair=True, use_memory=True),
     },
+    # Ran, measured, removed. Same pipeline as s4 with the deterministic verifier
+    # swapped for a model asked "did this reproduce the bug?".
+    "s5": {
+        "kind": "solver",
+        "desc": "REMOVED: model-judged verification instead of traceback analysis",
+        "cfg": dict(use_map=True, use_examples=True, use_typed_repair=True,
+                    use_memory=True, use_llm_verdict=True),
+    },
 }
 
 

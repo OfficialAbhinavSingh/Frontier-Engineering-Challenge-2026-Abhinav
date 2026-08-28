@@ -157,3 +157,65 @@ def repair_instruction(verdict: Verdict) -> str:
         verdict.verdict,
         "Improve the test so that it fails because of the reported bug.",
     )
+
+
+# --- The experiment that was removed -------------------------------------
+
+LLM_VERIFIER_SYSTEM = """You are checking whether a generated test actually
+reproduces a reported bug.
+
+You are given the bug report, the test, and the pytest output from running it
+against the code that still contains the bug.
+
+Answer one question: did this test fail *because of the reported bug*?
+
+Reply with one JSON object and nothing else:
+{"reproduced": true or false, "why": "one sentence"}"""
+
+
+def verify_with_model(run: RunResult, test_rel_path: str, issue_text: str,
+                      test_source: str, client, trace=None) -> Verdict:
+    """Ask a model whether the bug was reproduced, instead of reading the traceback.
+
+    This is the obvious way to build the verifier and it is the version that was
+    tried and dropped. It is kept in the tree because the changelog claims it lost,
+    and a reader should be able to re-run it rather than take that on trust.
+
+    Structurally it cannot do better than the deterministic check on the one
+    distinction that matters: whether a frame entered the project's own code is a
+    fact in the traceback, and asking a model to infer it introduces an opinion
+    where a fact was already available.
+    """
+    from reprobot.agents.common import parse_json_object
+
+    if run.outcome == "passed":
+        return verify(run, test_rel_path)
+    if run.outcome == "timeout":
+        return verify(run, test_rel_path)
+
+    user = (
+        f"--- bug report ---\n{issue_text}\n\n"
+        f"--- the test ---\n{test_source}\n\n"
+        f"--- pytest output at the buggy commit ---\n{run.stdout_tail[-2500:]}"
+    )
+    if trace is not None:
+        trace.agent_start("llm_verifier", LLM_VERIFIER_SYSTEM, user)
+    reply = client.chat(
+        [{"role": "system", "content": LLM_VERIFIER_SYSTEM},
+         {"role": "user", "content": user}],
+        max_tokens=300,
+    )
+    if trace is not None:
+        trace.llm_reply("llm_verifier", reply.text, reply.usage.to_dict(),
+                        reply.from_cache)
+
+    parsed = parse_json_object(reply.text) or {}
+    reproduced = bool(parsed.get("reproduced"))
+    why = str(parsed.get("why", ""))[:300]
+    source_frames, test_frames = _split_frames(run.stdout_tail, test_rel_path)
+
+    return Verdict(
+        "reproduced_assertion" if reproduced else "no_fail",
+        run.exception_type, source_frames, test_frames,
+        f"model verdict: {why}", run,
+    )

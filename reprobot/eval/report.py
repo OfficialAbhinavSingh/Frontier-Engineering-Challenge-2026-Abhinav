@@ -24,7 +24,7 @@ def load(results_dir: Path, split: str) -> list[dict]:
     for path in sorted(results_dir.glob(f"{split}_*.json")):
         out.append(json.loads(path.read_text()))
     # Report in pipeline order rather than alphabetically.
-    order = {"b0": 0, "b1": 1, "s1": 2, "s2": 3, "s3": 4, "s4": 5}
+    order = {"b0": 0, "b1": 1, "s1": 2, "s2": 3, "s3": 4, "s4": 5, "s5": 6}
     return sorted(out, key=lambda s: order.get(s["variant"], 99))
 
 
