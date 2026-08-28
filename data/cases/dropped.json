@@ -1,0 +1,146 @@
+[
+  {
+    "case_id": "sqlglot__8268",
+    "reason": "gold_test_not_failing_at_parent:collection_error"
+  },
+  {
+    "case_id": "sqlglot__8209",
+    "reason": "no_added_test_functions"
+  },
+  {
+    "case_id": "sqlglot__8211",
+    "reason": "no_added_test_functions"
+  },
+  {
+    "case_id": "sqlglot__8232",
+    "reason": "no_added_test_functions"
+  },
+  {
+    "case_id": "sqlglot__8227",
+    "reason": "no_added_test_functions"
+  },
+  {
+    "case_id": "sqlglot__8222",
+    "reason": "no_added_test_functions"
+  },
+  {
+    "case_id": "sqlglot__8175",
+    "reason": "no_added_test_functions"
+  },
+  {
+    "case_id": "arrow__1221",
+    "reason": "gold_test_not_passing_at_fix:failed"
+  },
+  {
+    "case_id": "arrow__1138",
+    "reason": "gold_test_not_failing_at_parent:collection_error"
+  },
+  {
+    "case_id": "arrow__1178",
+    "reason": "no_added_test_functions"
+  },
+  {
+    "case_id": "arrow__1078",
+    "reason": "gold_test_not_passing_at_fix:failed"
+  },
+  {
+    "case_id": "arrow__996",
+    "reason": "gold_test_not_passing_at_fix:failed"
+  },
+  {
+    "case_id": "arrow__1062",
+    "reason": "gold_test_not_passing_at_fix:failed"
+  },
+  {
+    "case_id": "arrow__1056",
+    "reason": "gold_test_not_passing_at_fix:failed"
+  },
+  {
+    "case_id": "arrow__1015",
+    "reason": "gold_test_not_passing_at_fix:failed"
+  },
+  {
+    "case_id": "arrow__1033",
+    "reason": "gold_test_not_passing_at_fix:failed"
+  },
+  {
+    "case_id": "sqlglot__8080",
+    "reason": "no_added_test_functions"
+  },
+  {
+    "case_id": "sqlglot__8172",
+    "reason": "no_added_test_functions"
+  },
+  {
+    "case_id": "sqlglot__8152",
+    "reason": "no_added_test_functions"
+  },
+  {
+    "case_id": "sqlglot__8132",
+    "reason": "gold_test_not_failing_at_parent:collection_error"
+  },
+  {
+    "case_id": "sqlglot__8019",
+    "reason": "no_added_test_functions"
+  },
+  {
+    "case_id": "sqlglot__8076",
+    "reason": "no_added_test_functions"
+  },
+  {
+    "case_id": "sqlglot__8011",
+    "reason": "no_added_test_functions"
+  },
+  {
+    "case_id": "sqlglot__6220",
+    "reason": "gold_test_not_failing_at_parent:no_tests"
+  },
+  {
+    "case_id": "sqlglot__7958",
+    "reason": "gold_test_not_failing_at_parent:collection_error"
+  },
+  {
+    "case_id": "sqlglot__7972",
+    "reason": "no_added_test_functions"
+  },
+  {
+    "case_id": "sqlglot__7954",
+    "reason": "gold_test_not_failing_at_parent:collection_error"
+  },
+  {
+    "case_id": "sqlglot__7962",
+    "reason": "no_added_test_functions"
+  },
+  {
+    "case_id": "sqlglot__7960",
+    "reason": "gold_test_not_failing_at_parent:collection_error"
+  },
+  {
+    "case_id": "sqlglot__7952",
+    "reason": "gold_test_not_failing_at_parent:collection_error"
+  },
+  {
+    "case_id": "sqlglot__7793",
+    "reason": "no_added_test_functions"
+  },
+  {
+    "case_id": "click__2995",
+    "reason": "gold_test_not_failing_at_parent:passed"
+  },
+  {
+    "case_id": "click__605",
+    "reason": "gold_test_not_failing_at_parent:collection_error"
+  },
+  {
+    "case_id": "click__2674",
+    "reason": "gold_test_not_failing_at_parent:timeout"
+  },
+  {
+    "case_id": "click__2626",
+    "reason": "gold_test_not_failing_at_parent:collection_error"
+  },
+  {
+    "case_id": "click__2621",
+    "reason": "gold_test_not_failing_at_parent:infra_error"
+  }
+]

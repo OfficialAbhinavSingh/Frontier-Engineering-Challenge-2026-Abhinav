@@ -19,6 +19,7 @@ import shlex
 import subprocess
 import tempfile
 import time
+import uuid
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
@@ -72,6 +73,11 @@ class RunResult:
 
     def to_dict(self) -> dict:
         return asdict(self)
+
+
+def _force_remove(container: str) -> None:
+    subprocess.run(["docker", "rm", "-f", container],
+                   capture_output=True, check=False)
 
 
 def image_name(repo_name: str) -> str:
@@ -167,8 +173,13 @@ def run_test(
         f"-q --no-header -p no:cacheprovider --tb=short "
         f"{' '.join(extra_pytest_args)}"
     )
+    # Named, so a run that outlives its client can still be cleaned up. Killing
+    # the docker CLI does not stop the container it started, and an orphan keeps
+    # burning CPU and distorting every timing measured after it.
+    container = f"reprobot-{uuid.uuid4().hex[:12]}"
     cmd = [
         "docker", "run", "--rm",
+        "--name", container,
         "--network", "none",
         "--memory", "2g",
         "--cpus", "2",
@@ -181,7 +192,10 @@ def run_test(
     timed_out = False
     try:
         proc = subprocess.run(
-            cmd, capture_output=True, text=True, timeout=timeout_s + 30, check=False
+            cmd, capture_output=True, text=True, timeout=timeout_s + 30, check=False,
+            # A generated test that reads stdin would otherwise block until the
+            # timeout instead of failing immediately.
+            stdin=subprocess.DEVNULL,
         )
         output = proc.stdout + proc.stderr
         exit_code = proc.returncode
@@ -189,6 +203,7 @@ def run_test(
         timed_out = True
         output = (exc.stdout or b"").decode(errors="replace") if isinstance(exc.stdout, bytes) else (exc.stdout or "")
         exit_code = -1
+        _force_remove(container)
     finally:
         Path(host_path).unlink(missing_ok=True)
 
@@ -220,8 +235,9 @@ def run_suite(repo_name: str, sha: str, timeout_s: int = 900) -> RunResult:
         f"git checkout -q {shlex.quote(sha)} && "
         "python -m pytest -q --no-header -p no:cacheprovider --tb=no"
     )
+    container = f"reprobot-suite-{uuid.uuid4().hex[:12]}"
     cmd = [
-        "docker", "run", "--rm", "--network", "none",
+        "docker", "run", "--rm", "--name", container, "--network", "none",
         "--memory", "2g", "--cpus", "2",
         "-w", "/work/repo",
         image_name(repo_name),
@@ -229,12 +245,14 @@ def run_suite(repo_name: str, sha: str, timeout_s: int = 900) -> RunResult:
     ]
     try:
         proc = subprocess.run(
-            cmd, capture_output=True, text=True, timeout=timeout_s, check=False
+            cmd, capture_output=True, text=True, timeout=timeout_s, check=False,
+            stdin=subprocess.DEVNULL,
         )
         output = proc.stdout + proc.stderr
         outcome, exc = classify(proc.returncode, output, False)
         code = proc.returncode
     except subprocess.TimeoutExpired:
+        _force_remove(container)
         output, outcome, exc, code = "", "timeout", None, -1
     return RunResult(outcome, code, exc, round(time.time() - started, 2), output[-4000:])
 

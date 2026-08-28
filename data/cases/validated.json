@@ -1,0 +1,942 @@
+[
+  {
+    "case_id": "sqlglot__8244",
+    "repo": "tobymao/sqlglot",
+    "repo_name": "sqlglot",
+    "fix_sha": "d5e3f14b109ebe5decd66bc77bde38fd5b001bb1",
+    "parent_sha": "40f285cb61edff4a40950fc708e79ae4e8ed583d",
+    "pr_number": 8246,
+    "issue_number": 8244,
+    "issue_title": "qualify_columns fails on StarRocks TABLE() (table-valued functions) \u2014 Column could not be resolved",
+    "issue_body": "## Description\n\nWhen using `lineage()` with `validate_qualify_columns=True` on SQL containing StarRocks table-valued functions (TVF) like `TABLE(generate_series(...))`, `qualify_columns` raises `OptimizeError: Column 'xxx' could not be resolved`.\n\nThe root cause is that `TABLE(func(...))` is parsed as `Table(this=Anonymous('TABLE', [...]))`, resulting in an empty `Table.name`. This means:\n1. No schema can be registered for it in `MappingSchema` (no valid table name to use as key)\n2. `qualify_columns` recursively validates column sources and fails when it reaches columns from the TVF\n\n## Reproduce\n\n```python\nfrom sqlglot import parse, Dialect, exp\nfrom sqlglot.dialects.dialect import NormalizationStrategy\nfrom sqlglot.lineage import lineage\nfrom sqlglot.schema import MappingSchema\n\nsql = \"\"\"\nWITH t AS (\n  SELECT p.user_id, gs.n AS to_deposit_days\n  FROM tbl1 p\n  CROSS JOIN (\n    SELECT generate_series AS n FROM TABLE(generate_series(0, 8000))\n  ) gs\n),\nt2 AS (\n  SELECT t.* FROM t\n)\nSELECT user_id, to_deposit_days FROM t2\n\"\"\"\n\ndialect = Dialect.get_or_raise('starrocks')\ndialect.normalization_strategy = NormalizationStrategy.CASE_INSENSITIVE\nexpression = parse(sql, read='starrocks')[0]\n\nschema = MappingSchema(dialect=dialect)\nschema.add_table(\"default.tbl1\", column_mapping={\"user_id\": \"BIGINT\"}, match_depth=False)\n\n# This raises: OptimizeError: Column 'generate_series' could not be resolved\nlineage(column=None, sql=expression, schema=schema, dialect=dialect,\n        expand_stars=True, validate_qualify_columns=True)\nExpected Behavior\nTABLE(func(...)) should be recognized as a table-valued function source. Columns referencing TVF output should either:\n\nBe resolved against the TVF's known output schema (e.g., generate_series outputs a column named generate_series), or\nBe skipped during validation (not treated as unresolvable external columns)\nWorkaround\nSetting validate_qualify_columns=False allows lineage to complete, but loses strict column validation for the entire query.\n\nEnvironment\nsqlglot version: 30.12.0\nDialect: starrocks",
+    "source_files": [
+      "sqlglot/dialects/starrocks.py",
+      "sqlglot/optimizer/qualify_tables.py",
+      "sqlglot/parser.py",
+      "sqlglot/parsers/snowflake.py",
+      "sqlglot/parsers/starrocks.py"
+    ],
+    "gold_test_files": [
+      "tests/dialects/test_starrocks.py",
+      "tests/test_lineage.py"
+    ],
+    "gold_test_patch": "commit d5e3f14b109ebe5decd66bc77bde38fd5b001bb1\nAuthor: Giorgos Michas <geomichas96@gmail.com>\nDate:   Mon Aug 24 18:43:34 2026 +0300\n\n    fix(parser, optimizer): support starrocks GENERATE_SERIES parse and qualify (#8246)\n    \n    * fix(parser, optimizer): support starrocks GENERATE_SERIES parse and qualify\n    \n    * simplify test\n\ndiff --git a/tests/dialects/test_starrocks.py b/tests/dialects/test_starrocks.py\nindex 82a3b401..f7cf074c 100644\n--- a/tests/dialects/test_starrocks.py\n+++ b/tests/dialects/test_starrocks.py\n@@ -136,6 +136,16 @@ class TestStarrocks(Validator):\n             \"WITH RECURSIVE _generated_dates(date_week) AS (SELECT CAST('2020-01-01' AS DATE) AS date_week UNION ALL SELECT CAST(DATE_ADD(date_week, INTERVAL 1 WEEK) AS DATE) FROM _generated_dates WHERE CAST(DATE_ADD(date_week, INTERVAL 1 WEEK) AS DATE) <= CAST('2020-02-01' AS DATE)) SELECT * FROM (SELECT date_week FROM _generated_dates) AS _generated_dates\",\n         )\n \n+    def test_table_function(self):\n+        # https://docs.starrocks.io/docs/sql-reference/sql-functions/table-functions/generate_series/\n+        self.validate_identity(\"SELECT * FROM TABLE(GENERATE_SERIES(0, 10))\").args[\n+            \"from_\"\n+        ].this.assert_is(exp.TableFromRows).this.assert_is(exp.GenerateSeries)\n+        self.validate_identity(\"SELECT generate_series FROM TABLE(GENERATE_SERIES(0, 10, 2)) AS t\")\n+        self.validate_identity(\"SELECT x FROM TABLE(GENERATE_SERIES(0, 10)) AS t(x)\")\n+\n+        self.validate_identity(\"SELECT * FROM t, GENERATE_SERIES(t.s, t.e)\")\n+\n     def test_ddl(self):\n         self.validate_identity(\"INSERT OVERWRITE my_table SELECT * FROM other_table\")\n         self.validate_identity(\"CREATE TABLE t (c INT) COMMENT 'c'\")\ndiff --git a/tests/test_lineage.py b/tests/test_lineage.py\nindex 869d705f..49eccf75 100644\n--- a/tests/test_lineage.py\n+++ b/tests/test_lineage.py\n@@ -972,6 +972,38 @@ class TestLineage(unittest.TestCase):\n             \"DATABASE_NAME.SCHEMA_NAME.TABLE_NAME AS RAW\",\n         )\n \n+    def test_table_udtfs(self) -> None:\n+        sql = \"\"\"\n+        WITH t AS (\n+          SELECT p.user_id, gs.n AS to_deposit_days\n+          FROM tbl1 AS p\n+          CROSS JOIN (\n+            SELECT generate_series AS n FROM TABLE(generate_series(0, 8000))\n+          ) AS gs\n+        ),\n+        t2 AS (\n+          SELECT t.* FROM t\n+        )\n+        SELECT user_id, to_deposit_days FROM t2\n+        \"\"\"\n+        schema = {\"tbl1\": {\"user_id\": \"BIGINT\"}}\n+\n+        node = lineage(\n+            \"to_deposit_days\",\n+            sql,\n+            schema=schema,\n+            dialect=\"starrocks\",\n+            expand_stars=True,\n+            validate_qualify_columns=True,\n+        )\n+\n+        node = node.downstream[0].downstream[0].downstream[0].downstream[0]\n+        self.assertEqual(node.name, \"_0.generate_series\")\n+        self.assertEqual(\n+            node.source.sql(\"starrocks\"),\n+            \"TABLE(GENERATE_SERIES(0, 8000)) AS _0(generate_series)\",\n+        )\n+\n     def test_pivot_with_subquery(self) -> None:\n         schema = {\n             \"loan_ledger\": {\n",
+    "commit_date": "2026-08-24T18:43:34+03:00",
+    "notes": {
+      "subject": "fix(parser, optimizer): support starrocks GENERATE_SERIES parse and qualify (#8246)"
+    },
+    "validation": {
+      "valid": true,
+      "reason": "ok",
+      "gold_test_names": [
+        "test_table_function",
+        "test_ddl",
+        "test_table_udtfs",
+        "test_pivot_with_subquery"
+      ],
+      "gold_test_path": "tests/dialects/test_starrocks.py",
+      "gold_failure_type": "AssertionError",
+      "parent": {
+        "outcome": "failed",
+        "exit_code": 1,
+        "exception_type": "AssertionError",
+        "duration_s": 1.27,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\n.F                              [100%]\n=================================== FAILURES ===================================\n______________________ TestStarrocks.test_table_function _______________________\ntests/dialects/test_starrocks.py:143: in test_table_function\n    ].this.assert_is(exp.TableFromRows).this.assert_is(exp.GenerateSeries)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/expressions/core.py:1303: in assert_is\n    raise AssertionError(f\"{self} is not {type_}.\")\nE   AssertionError: TABLE(GENERATE_SERIES(0, 10)) is not <class 'sqlglot.expressions.query.TableFromRows'>.\n=========================== short test summary info ============================\nFAILED tests/dialects/test_starrocks.py::TestStarrocks::test_table_function\n1 failed, 1 passed, 15 deselected, 41 subtests passed in 0.51s\n"
+      },
+      "fix": {
+        "outcome": "passed",
+        "exit_code": 0,
+        "exception_type": null,
+        "duration_s": 1.21,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\n..                              [100%]\n2 passed, 15 deselected, 41 subtests passed in 0.47s\n"
+      }
+    }
+  },
+  {
+    "case_id": "sqlglot__8225",
+    "repo": "tobymao/sqlglot",
+    "repo_name": "sqlglot",
+    "fix_sha": "91119bcaac977ede6f4a641bdda593b0015ef998",
+    "parent_sha": "05eed63b281f7ac020045e2b792beef8fad8d3ee",
+    "pr_number": 8230,
+    "issue_number": 8225,
+    "issue_title": "Mysql: CREATE TABLE parse error when has AUTO_INCREMENT",
+    "issue_body": "```python\nsql = \"\"\"CREATE TABLE t1(id INT KEY AUTO_INCREMENT);\n\"\"\"\nast = sqlglot.parse_one(sql, read = \"mysql\")\n```\nerror messages:\n```\nsqlglot.errors.ParseError: Expecting (. Line 1, Col: 42.\n  CREATE TABLE t1(id INT KEY AUTO_INCREMENT);\n```",
+    "source_files": [
+      "sqlglot/parsers/mysql.py"
+    ],
+    "gold_test_files": [
+      "tests/dialects/test_mysql.py"
+    ],
+    "gold_test_patch": "commit 91119bcaac977ede6f4a641bdda593b0015ef998\nAuthor: Trey Spiller <1831878+treysp@users.noreply.github.com>\nDate:   Fri Aug 21 04:44:37 2026 -0500\n\n    fix(mysql): support KEY in CREATE TABLE column definition (#8230)\n\ndiff --git a/tests/dialects/test_mysql.py b/tests/dialects/test_mysql.py\nindex 39b5660b..7e482148 100644\n--- a/tests/dialects/test_mysql.py\n+++ b/tests/dialects/test_mysql.py\n@@ -297,6 +297,20 @@ class TestMySQL(Validator):\n             \"CREATE FUNCTION f() RETURNS TEXT LANGUAGE SQL SQL SECURITY INVOKER AS SELECT 'abc'\",\n         )\n \n+    def test_column_key_constraint(self):\n+        self.validate_identity(\n+            \"CREATE TABLE t1 (id INT KEY AUTO_INCREMENT)\",\n+            \"CREATE TABLE t1 (id INT PRIMARY KEY AUTO_INCREMENT)\",\n+        )\n+        self.validate_identity(\n+            \"CREATE TABLE t1 (id INT AUTO_INCREMENT KEY)\",\n+            \"CREATE TABLE t1 (id INT AUTO_INCREMENT PRIMARY KEY)\",\n+        )\n+        self.validate_identity(\n+            \"CREATE TABLE t1 (id INT KEY)\",\n+            \"CREATE TABLE t1 (id INT PRIMARY KEY)\",\n+        )\n+\n     def test_identity(self):\n         self.validate_identity(\"SELECT HIGH_PRIORITY STRAIGHT_JOIN SQL_CALC_FOUND_ROWS * FROM t\")\n         self.validate_identity(\"SELECT CAST(COALESCE(`id`, 'NULL') AS CHAR CHARACTER SET binary)\")\n",
+    "commit_date": "2026-08-21T04:44:37-05:00",
+    "notes": {
+      "subject": "fix(mysql): support KEY in CREATE TABLE column definition (#8230)"
+    },
+    "validation": {
+      "valid": true,
+      "reason": "ok",
+      "gold_test_names": [
+        "test_column_key_constraint",
+        "test_identity"
+      ],
+      "gold_test_path": "tests/dialects/test_mysql.py",
+      "gold_failure_type": "ParseError",
+      "parent": {
+        "outcome": "failed",
+        "exit_code": 1,
+        "exception_type": "ParseError",
+        "duration_s": 2.26,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\nF.                                                                       [100%]\n=================================== FAILURES ===================================\n_____________________ TestMySQL.test_column_key_constraint _____________________\ntests/dialects/test_mysql.py:301: in test_column_key_constraint\n    self.validate_identity(\ntests/dialects/test_dialect.py:61: in validate_identity\n    expression = self.parse_one(sql)\n                 ^^^^^^^^^^^^^^^^^^^\ntests/dialects/test_dialect.py:30: in parse_one\n    return parse_one(sql, read=self.dialect, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/__init__.py:160: in parse_one\n    result = dialect.parse(sql, **opts)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/dialects/dialect.py:1187: in parse\n    return self.parser(**opts).parse(self.tokenize(sql), sql)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:2145: in parse\n    return self._parse(\nsqlglot/parser.py:2265: in _parse\n    return self._parse_batch_statements(parse_method=parse_method, sep_first_statement=False)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:2232: in _parse_batch_statements\n    expressions.append(parse_method(self))\n                       ^^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:2384: in _parse_statement\n    stmt = self.STATEMENT_PARSERS[self._prev.token_type](self)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:1164: in <lambda>\n    TokenType.CREATE: lambda self: self._parse_create(),\n                                   ^^^^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:2655: in _parse_create\n    this = self._parse_schema(this=table_parts)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:7518: in _parse_schema\n    args = self._parse_csv(lambda: self._parse_constraint() or self._parse_field_def())\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:8921: in _parse_csv\n    parse_result = parse_method()\n                   ^^^^^^^^^^^^^^\nsqlglot/parser.py:7518: in <lambda>\n    args = self._parse_csv(lambda: self._parse_constraint() or self._parse_field_def())\n                                                               ^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:7523: in _parse_field_def\n    return self._parse_column_def(self._parse_field(any_token=True))\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:7593: in _parse_column_def\n    constraint = self._parse_column_constraint()\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:7747: in _parse_column_constraint\n    constraint = self.CONSTRAINT_PARSERS[self._prev.text.upper()](self)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/parsers/mysql.py:244: in <lambda>\n    \"KEY\": lambda self: self._parse_index_constraint(),\n                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/parsers/mysql.py:390: in _parse_index_constraint\n    expressions = self._parse_wrapped_csv(self._parse_ordered)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:8942: in _parse_wrapped_csv\n    return self._parse_wrapped(\nsqlglot/parser.py:8949: in _parse_wrapped\n    self.raise_error(\"Expecting (\")\nsqlglot/parser.py:2102: in raise_error\n    raise error\nE   sqlglot.errors.ParseError: Expecting (. Line 1, Col: 43.\nE     CREATE TABLE t1 (id INT KEY AUTO_INCREMENT\u001b[4m)\u001b[0m\n=========================== short test summary info ============================\nFAILED tests/dialects/test_mysql.py::TestMySQL::test_column_key_constraint - ...\n1 failed, 1 passed, 50 deselected in 1.52s\n"
+      },
+      "fix": {
+        "outcome": "passed",
+        "exit_code": 0,
+        "exception_type": null,
+        "duration_s": 1.21,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\n..                                                                       [100%]\n2 passed, 50 deselected in 0.45s\n"
+      }
+    }
+  },
+  {
+    "case_id": "tomlkit__562",
+    "repo": "python-poetry/tomlkit",
+    "repo_name": "tomlkit",
+    "fix_sha": "94e62fbef9d16093dec86728888474197f4a5cc7",
+    "parent_sha": "495a42ecc9119eaaeb895def0fd025a71cd1cf60",
+    "pr_number": 563,
+    "issue_number": 562,
+    "issue_title": "Object of type 'Float' has no len()",
+    "issue_body": "We recently updated to tomlkit 0.15.0 from 0.14.0 and we have stumbled across an odd bug that can be reproduced with this snippet of code: \n\n```python\nimport tomlkit\nimport torch\n\narr = tomlkit.loads(\"\"\"\na = [1.0, 2.0, 3.0]\n\"\"\")\n\nprint(arr)\nprint(type(arr['a']))\nprint(type(arr['a'][0]))\nt = torch.tensor(arr['a'], dtype=torch.float32)\n```\n\n## Output with tomlkit==0.15.0\n```\n{'a': [1.0, 2.0, 3.0]}\n<class 'tomlkit.items.Array'>\n<class 'tomlkit.items.Float'>\n---------------------------------------------------------------------------\nTypeError                                 Traceback (most recent call last)\n      7 \n      8 print(arr)\n      9 print(type(arr['a']))\n     10 print(type(arr['a'][0]))\n---> 11 t = torch.tensor(arr['a'], dtype=torch.float32)\n\nTypeError: object of type 'Float' has no len()\n```\n## Output with tomlkit==0.14.0\n```\n{'a': [1.0, 2.0, 3.0]}\n<class 'tomlkit.items.Array'>\n<class 'tomlkit.items.Float'>\n```\n\nThe expectation is that we should be able to read an array of floats from the .toml file and treat it as we would a python list of floats.",
+    "source_files": [
+      "tomlkit/items.py"
+    ],
+    "gold_test_files": [
+      "tests/test_items.py"
+    ],
+    "gold_test_patch": "commit 94e62fbef9d16093dec86728888474197f4a5cc7\nAuthor: David Hotham <david.hotham@microsoft.com>\nDate:   Thu Jul 16 09:39:11 2026 +0200\n\n    Float is not a sequence  (#563)\n    \n    * Remove scalar indexing fallbacks\n    \n    * Clean up obsolete override suppressions\n    \n    ---------\n    \n    Co-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\n\ndiff --git a/tests/test_items.py b/tests/test_items.py\nindex 45b1245..e331cae 100644\n--- a/tests/test_items.py\n+++ b/tests/test_items.py\n@@ -1,8 +1,10 @@\n from __future__ import annotations\n \n import copy\n+import ctypes\n import math\n import pickle\n+import sys\n \n from collections.abc import Callable\n from datetime import date\n@@ -101,6 +103,18 @@ def test_float_unwrap() -> None:\n     elementary_test(item(2.78), float)\n \n \n+@pytest.mark.skipif(\n+    sys.implementation.name != \"cpython\", reason=\"PySequence_Check is CPython-specific\"\n+)\n+def test_float_is_not_a_sequence() -> None:\n+    value = parse(\"a = [1.0, 2.0, 3.0]\")[\"a\"][0]\n+    py_sequence_check = ctypes.pythonapi.PySequence_Check\n+    py_sequence_check.argtypes = [ctypes.py_object]\n+    py_sequence_check.restype = ctypes.c_int\n+\n+    assert not py_sequence_check(value)\n+\n+\n def test_false_unwrap() -> None:\n     elementary_test(item(False), bool)\n \n",
+    "commit_date": "2026-07-16T09:39:11+02:00",
+    "notes": {
+      "subject": "Float is not a sequence  (#563)"
+    },
+    "validation": {
+      "valid": true,
+      "reason": "ok",
+      "gold_test_names": [
+        "test_float_is_not_a_sequence",
+        "test_false_unwrap"
+      ],
+      "gold_test_path": "tests/test_items.py",
+      "gold_failure_type": null,
+      "parent": {
+        "outcome": "failed",
+        "exit_code": 1,
+        "exception_type": null,
+        "duration_s": 0.9,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\nF.                                                                       [100%]\n=================================== FAILURES ===================================\n_________________________ test_float_is_not_a_sequence _________________________\ntests/test_items.py:115: in test_float_is_not_a_sequence\n    assert not py_sequence_check(value)\nE   assert not 1\nE    +  where 1 = <_FuncPtr object at 0x7feb2d14a2d0>(1.0)\n=========================== short test summary info ============================\nFAILED tests/test_items.py::test_float_is_not_a_sequence - assert not 1\n1 failed, 1 passed, 84 deselected in 0.21s\n"
+      },
+      "fix": {
+        "outcome": "passed",
+        "exit_code": 0,
+        "exception_type": null,
+        "duration_s": 0.84,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\n..                                                                       [100%]\n2 passed, 84 deselected in 0.19s\n"
+      }
+    }
+  },
+  {
+    "case_id": "tomlkit__543",
+    "repo": "python-poetry/tomlkit",
+    "repo_name": "tomlkit",
+    "fix_sha": "495a42ecc9119eaaeb895def0fd025a71cd1cf60",
+    "parent_sha": "21a4942ed31e773061c9fc047d55b1bb3c637ee3",
+    "pr_number": 550,
+    "issue_number": 543,
+    "issue_title": "scalar wrongly captured by dictionary",
+    "issue_body": "Another on the theme of: output keys in the wrong order changing the meaning of the dictionary:\n```python\n#!/usr/bin/env python3\n\nimport tomlkit\n\n\ndoc = tomlkit.loads(\"a.b = 1\\n\")\ndoc[\"a\"][\"c\"] = {}\ndoc[\"z\"] = 2\n\nprint(tomlkit.dumps(doc))\n```\nresult\n```\na.b = 1\n\n[a.c]\nz = 2\n```\nin which `z` is no longer a top-level key",
+    "source_files": [
+      "tomlkit/container.py"
+    ],
+    "gold_test_files": [
+      "tests/test_toml_document.py"
+    ],
+    "gold_test_patch": "commit 495a42ecc9119eaaeb895def0fd025a71cd1cf60\nAuthor: Vineeth Sai <vineethsai4444@gmail.com>\nDate:   Tue Jul 14 17:36:12 2026 -0700\n\n    Fix top-level scalar captured by a table rendered from a dotted key (#550)\n    \n    Appending a scalar to a document after a dotted-key entry (a.b = 1)\n    whose super table had gained a child that renders a [a.c]-style header\n    placed the scalar textually inside that table's scope, so it silently\n    re-nested as a.c.z on round-trip.\n    \n    _get_last_index_before_table treated every dotted-key table as inline;\n    now it also stops at a dotted-key table whose children render a table\n    header, so new scalars are inserted before it, matching the existing\n    behavior for regular tables. Purely inline dotted keys are unaffected.\n    \n    Fixes #543\n\ndiff --git a/tests/test_toml_document.py b/tests/test_toml_document.py\nindex 769c919..7ba61f5 100644\n--- a/tests/test_toml_document.py\n+++ b/tests/test_toml_document.py\n@@ -1639,3 +1639,30 @@ value = 5\n \"\"\"\n \n     assert doc.as_string() == expected\n+\n+\n+def test_scalar_is_not_captured_by_table_rendered_from_dotted_key() -> None:\n+    # https://github.com/python-poetry/tomlkit/issues/543\n+    # A dotted-key super table renders inline (`a.b = 1`) until a child that\n+    # renders a `[table]` header is added; a scalar appended after that must\n+    # not land inside the table's scope.\n+    doc = parse(\"a.b = 1\\n\")\n+    doc[\"a\"][\"c\"] = {}\n+    doc[\"z\"] = 2\n+\n+    expected = \"\"\"\\\n+z = 2\n+\n+a.b = 1\n+\n+[a.c]\n+\"\"\"\n+\n+    assert doc.as_string() == expected\n+    assert parse(doc.as_string()) == {\"z\": 2, \"a\": {\"b\": 1, \"c\": {}}}\n+\n+    # A purely inline dotted key still gets the scalar appended after it.\n+    doc = parse(\"a.b = 1\\n\")\n+    doc[\"z\"] = 2\n+\n+    assert doc.as_string() == \"a.b = 1\\nz = 2\\n\"\n",
+    "commit_date": "2026-07-14T17:36:12-07:00",
+    "notes": {
+      "subject": "Fix top-level scalar captured by a table rendered from a dotted key (#550)"
+    },
+    "validation": {
+      "valid": true,
+      "reason": "ok",
+      "gold_test_names": [
+        "test_scalar_is_not_captured_by_table_rendered_from_dotted_key"
+      ],
+      "gold_test_path": "tests/test_toml_document.py",
+      "gold_failure_type": "AssertionError",
+      "parent": {
+        "outcome": "failed",
+        "exit_code": 1,
+        "exception_type": "AssertionError",
+        "duration_s": 0.82,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n________ test_scalar_is_not_captured_by_table_rendered_from_dotted_key _________\ntests/test_toml_document.py:1661: in test_scalar_is_not_captured_by_table_rendered_from_dotted_key\n    assert doc.as_string() == expected\nE   AssertionError: assert 'a.b = 1\\n\\n[a.c]\\nz = 2\\n' == 'z = 2\\n\\na.b = 1\\n\\n[a.c]\\n'\nE     \nE     - z = 2\nE     - \nE       a.b = 1\nE       \nE       [a.c]\nE     + z = 2\n=========================== short test summary info ============================\nFAILED tests/test_toml_document.py::test_scalar_is_not_captured_by_table_rendered_from_dotted_key\n1 failed, 70 deselected in 0.16s\n"
+      },
+      "fix": {
+        "outcome": "passed",
+        "exit_code": 0,
+        "exception_type": null,
+        "duration_s": 0.79,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\n.                                                                        [100%]\n1 passed, 70 deselected in 0.13s\n"
+      }
+    }
+  },
+  {
+    "case_id": "tomlkit__542",
+    "repo": "python-poetry/tomlkit",
+    "repo_name": "tomlkit",
+    "fix_sha": "67d3e86502706df2a9ed67114ab67e25bcdcbbb7",
+    "parent_sha": "e23a25438c6cc9b8cc28b6dcf76dc52f9c7a33e3",
+    "pr_number": 549,
+    "issue_number": 542,
+    "issue_title": "AoT captures too many keys",
+    "issue_body": "```python\n#!/usr/bin/env python3\n\nimport tomlkit\n\n\ndoc = tomlkit.parse(\"a.b = 1\\nc.d = 2\\n\")\naot = tomlkit.aot()\nt = tomlkit.table()\nt[\"x\"] = 9\naot.append(t)\ndoc[\"a\"] = aot\nprint(tomlkit.dumps(doc))\n```\nresult\n```\n[[a]]\nx = 9\nc.d = 2\n```\nin which `c.d` has wrongly been captured by the array of tables.\n\nSimilar in flavour to other recent bug reports and fixes, I expect the fix will be nearby too.",
+    "source_files": [
+      "tomlkit/container.py"
+    ],
+    "gold_test_files": [
+      "tests/test_toml_document.py"
+    ],
+    "gold_test_patch": "commit 67d3e86502706df2a9ed67114ab67e25bcdcbbb7\nAuthor: Zain Dana Harper <zaindharper@gmail.com>\nDate:   Mon Jul 13 17:59:45 2026 -0700\n\n    Fix array of tables replacing a dotted key swallowing the next sibling (#542) (#549)\n    \n    Assigning an AoT over a dotted key (e.g. `doc[\"a\"] = aot(...)` where `a`\n    came from `a.b = ...`) left the new `[[a]]` header in the dotted key's\n    inline slot, so a following dotted sibling such as `c.d = 2` was rendered\n    inside the array of tables and captured on round-trip.\n    \n    `_replace_at`'s `dotted_to_header` guard only recognised non-super Tables,\n    not AoTs, so the reposition-before-inline-siblings path that already fixes\n    the table case (#513/#524) never ran for arrays of tables. Extend the guard\n    to AoT. Adds a regression test mirroring the table case and a changelog entry.\n    \n    Co-authored-by: Zain Dana Harper <zain@aurora-framework.dev>\n    Co-authored-by: Claude Opus 4.8 <noreply@anthropic.com>\n    Co-authored-by: Frost Ming <me@frostming.com>\n\ndiff --git a/tests/test_toml_document.py b/tests/test_toml_document.py\nindex 0e950cb..769c919 100644\n--- a/tests/test_toml_document.py\n+++ b/tests/test_toml_document.py\n@@ -1170,6 +1170,28 @@ x = 9\n     assert parse(doc.as_string()) == {\"c\": {\"d\": 2}, \"a\": {\"x\": 9}}\n \n \n+def test_replace_dotted_key_with_aot_keeps_following_sibling() -> None:\n+    # https://github.com/python-poetry/tomlkit/issues/542\n+    content = \"\"\"a.b = 1\n+c.d = 2\n+\"\"\"\n+    doc = parse(content)\n+    arr = tomlkit.aot()\n+    tbl = tomlkit.table()\n+    tbl[\"x\"] = 9\n+    arr.append(tbl)\n+    doc[\"a\"] = arr\n+    assert (\n+        doc.as_string()\n+        == \"\"\"c.d = 2\n+\n+[[a]]\n+x = 9\n+\"\"\"\n+    )\n+    assert parse(doc.as_string()) == {\"c\": {\"d\": 2}, \"a\": [{\"x\": 9}]}\n+\n+\n def test_replace_value_with_table_keeps_following_dotted_sibling() -> None:\n     # A plain value turning into a table must likewise clear the inline region\n     # (including dotted keys) before emitting its header.\n",
+    "commit_date": "2026-07-13T17:59:45-07:00",
+    "notes": {
+      "subject": "Fix array of tables replacing a dotted key swallowing the next sibling (#542) (#549)"
+    },
+    "validation": {
+      "valid": true,
+      "reason": "ok",
+      "gold_test_names": [
+        "test_replace_dotted_key_with_aot_keeps_following_sibling",
+        "test_replace_value_with_table_keeps_following_dotted_sibling"
+      ],
+      "gold_test_path": "tests/test_toml_document.py",
+      "gold_failure_type": "AssertionError",
+      "parent": {
+        "outcome": "failed",
+        "exit_code": 1,
+        "exception_type": "AssertionError",
+        "duration_s": 0.79,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\nF.                                                                       [100%]\n=================================== FAILURES ===================================\n___________ test_replace_dotted_key_with_aot_keeps_following_sibling ___________\ntests/test_toml_document.py:1184: in test_replace_dotted_key_with_aot_keeps_following_sibling\n    assert (\nE   AssertionError: assert '[[a]]\\nx = 9\\nc.d = 2\\n' == 'c.d = 2\\n\\n[[a]]\\nx = 9\\n'\nE     \nE     - c.d = 2\nE     - \nE       [[a]]\nE       x = 9\nE     + c.d = 2\n=========================== short test summary info ============================\nFAILED tests/test_toml_document.py::test_replace_dotted_key_with_aot_keeps_following_sibling\n1 failed, 1 passed, 68 deselected in 0.15s\n"
+      },
+      "fix": {
+        "outcome": "passed",
+        "exit_code": 0,
+        "exception_type": null,
+        "duration_s": 0.79,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\n..                                                                       [100%]\n2 passed, 68 deselected in 0.13s\n"
+      }
+    }
+  },
+  {
+    "case_id": "tomlkit__439",
+    "repo": "python-poetry/tomlkit",
+    "repo_name": "tomlkit",
+    "fix_sha": "cc05afa962244b3d1c781a7fc54f66b7f29ef8b7",
+    "parent_sha": "76bb47aec93e8928b894f59d062be3adf6bdb36e",
+    "pr_number": 536,
+    "issue_number": 439,
+    "issue_title": "Missing keys in repro of tomlkit.container.OutOfOrderTableProxy",
+    "issue_body": "Hello,\nHere's a strange one.\n\nFrom this toml:\n```toml\na.b.c = \"d\"\na.b.e = \"f\"\n```\n\nWhen we access `value[\"a\"]`, it behaves correctly but the `repr` is missing the \"c\" key.\n\n```python\nimport tomlkit\n\nprint(tomlkit.__version__)\n# 0.13.3\n\na = tomlkit.parse(\"\"\"\na.b.c = \"d\"\na.b.e = \"f\"\n\"\"\")\nassert a == {\"a\": {\"b\": {\"c\": \"d\", \"e\": \"f\"}}}  # ok\nvalue = a[\"a\"]\nexpected = {\"b\": {\"c\": \"d\", \"e\": \"f\"}}\nassert value == expected  # ok\n\nprint(value)\n# {'b': {'e': 'f'}}\nprint(expected)\n# {'b': {'c': 'd', 'e': 'f'}}\n\nassert repr(value) == repr(expected)\n# Traceback (most recent call last):\n#   File \"/Users/joachim/code/raincoat2/oops.py\", line 19, in <module>\n#     assert repr(value) == repr(expected)\n#            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n# AssertionError\n```\n\nAs far as I can tell, this doesn't happen on a, only on `a[\"a\"]`.\nI've tried to simplify the issue as much as possible.",
+    "source_files": [
+      "tomlkit/container.py"
+    ],
+    "gold_test_files": [
+      "tests/test_toml_document.py"
+    ],
+    "gold_test_patch": "commit cc05afa962244b3d1c781a7fc54f66b7f29ef8b7\nAuthor: Vincent Gao <gaobing1230@gmail.com>\nDate:   Tue Jul 14 02:26:12 2026 +0200\n\n    Represent out-of-order table proxies with merged values (#536)\n\ndiff --git a/tests/test_toml_document.py b/tests/test_toml_document.py\nindex 36ac0de..c6e38c8 100644\n--- a/tests/test_toml_document.py\n+++ b/tests/test_toml_document.py\n@@ -887,6 +887,17 @@ inline = {\"foo\" = \"bar\", \"bar\" = \"baz\"}\n     assert repr(doc[\"namespace\"]) == \"{'key1': 'value1', 'key2': 'value2'}\"\n \n \n+def test_repr_out_of_order_table_proxy() -> None:\n+    doc = parse(\"\"\"\\\n+a.b.c = \"d\"\n+a.b.e = \"f\"\n+\"\"\")\n+    expected = \"{'b': {'c': 'd', 'e': 'f'}}\"\n+\n+    assert repr(doc[\"a\"]) == expected\n+    assert str(doc[\"a\"]) == expected\n+\n+\n def test_deepcopy() -> None:\n     content = \"\"\"\n [tool]\n",
+    "commit_date": "2026-07-14T02:26:12+02:00",
+    "notes": {
+      "subject": "Represent out-of-order table proxies with merged values (#536)"
+    },
+    "validation": {
+      "valid": true,
+      "reason": "ok",
+      "gold_test_names": [
+        "test_repr_out_of_order_table_proxy",
+        "test_deepcopy"
+      ],
+      "gold_test_path": "tests/test_toml_document.py",
+      "gold_failure_type": null,
+      "parent": {
+        "outcome": "failed",
+        "exit_code": 1,
+        "exception_type": null,
+        "duration_s": 0.82,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\nF.                                                                       [100%]\n=================================== FAILURES ===================================\n______________________ test_repr_out_of_order_table_proxy ______________________\ntests/test_toml_document.py:897: in test_repr_out_of_order_table_proxy\n    assert repr(doc[\"a\"]) == expected\nE   assert \"{'b': {'e': 'f'}}\" == \"{'b': {'c': 'd', 'e': 'f'}}\"\nE     \nE     - {'b': {'c': 'd', 'e': 'f'}}\nE     ?        ----------\nE     + {'b': {'e': 'f'}}\n=========================== short test summary info ============================\nFAILED tests/test_toml_document.py::test_repr_out_of_order_table_proxy - asse...\n1 failed, 1 passed, 66 deselected in 0.15s\n"
+      },
+      "fix": {
+        "outcome": "passed",
+        "exit_code": 0,
+        "exception_type": null,
+        "duration_s": 0.78,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\n..                                                                       [100%]\n2 passed, 66 deselected in 0.12s\n"
+      }
+    }
+  },
+  {
+    "case_id": "tomlkit__291",
+    "repo": "python-poetry/tomlkit",
+    "repo_name": "tomlkit",
+    "fix_sha": "49069361a41d2050086b7ec0f69a38a548802867",
+    "parent_sha": "b2821370ca8a7ead712287d7ec856b36165aaef7",
+    "pr_number": 537,
+    "issue_number": 291,
+    "issue_title": "Difference in whitespace in dot notation disappears ",
+    "issue_body": "upd: or maybe it's because\r\n\r\nhttps://github.com/sdispater/tomlkit/issues/255#issuecomment-1407551898\r\n\r\n> Copy and reassign breaks the structure\r\n\r\nThen the question is how to avoid breaking the structure on copy\r\n\r\n\r\nI'm using whitespace to vertically align some toml config and when editing said config with your great library noticed that alignment disappears, below is a small repro\r\n\r\n```py\r\ncontent = \"\"\"\r\n[keys.a]\r\n#    \u2193 this whitespace disappears\r\n[keys .'a'.'c']\r\n  'd'\t= 'e'\r\n\"\"\"\r\ndef testtoml():\r\n  from tomlkit import dumps\r\n  from tomlkit import parse\r\n  doc = parse(content)\r\n  for mode in doc[\"keys\"]: # self to self shouldn't change anything?\r\n    doc[\"keys\"][mode] = doc[\"keys\"][mode]\r\n  assert dumps(doc) == doc\r\n  # print(dumps(doc))\r\ntesttoml()\r\n```\r\n\r\nIt seems that the latter whitespace matches the first encountered in `[keys.a]` (if I add whitespace to `[keys.a]` then it propagates to further as well\r\n\r\nIs it possible to preserve the difference in whitespace so that editing wouldn't \"import\" whitespace from upper keys, but retain its own?\r\n\r\n(tested this on a master branch of your library)",
+    "source_files": [
+      "tomlkit/container.py"
+    ],
+    "gold_test_files": [
+      "tests/test_toml_document.py"
+    ],
+    "gold_test_patch": "commit 49069361a41d2050086b7ec0f69a38a548802867\nAuthor: Vincent Gao <gaobing1230@gmail.com>\nDate:   Tue Jul 14 02:23:47 2026 +0200\n\n    Preserve table display names on self assignment (#537)\n\ndiff --git a/tests/test_toml_document.py b/tests/test_toml_document.py\nindex a1eea7a..36ac0de 100644\n--- a/tests/test_toml_document.py\n+++ b/tests/test_toml_document.py\n@@ -1024,6 +1024,20 @@ name = 3\n     assert doc.as_string() == content\n \n \n+def test_replace_table_with_itself_preserves_display_name() -> None:\n+    content = \"\"\"\\\n+[keys.a]\n+[keys .'a'.'c']\n+  'd'\t= 'e'\n+\"\"\"\n+    doc = parse(content)\n+\n+    for mode in doc[\"keys\"]:\n+        doc[\"keys\"][mode] = doc[\"keys\"][mode]\n+\n+    assert doc.as_string() == content\n+\n+\n def test_replace_with_table_of_nested() -> None:\n     example = \"\"\"\\\n     [a]\n",
+    "commit_date": "2026-07-14T02:23:47+02:00",
+    "notes": {
+      "subject": "Preserve table display names on self assignment (#537)"
+    },
+    "validation": {
+      "valid": true,
+      "reason": "ok",
+      "gold_test_names": [
+        "test_replace_table_with_itself_preserves_display_name",
+        "test_replace_with_table_of_nested"
+      ],
+      "gold_test_path": "tests/test_toml_document.py",
+      "gold_failure_type": null,
+      "parent": {
+        "outcome": "failed",
+        "exit_code": 1,
+        "exception_type": null,
+        "duration_s": 0.82,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\nF.                                                                       [100%]\n=================================== FAILURES ===================================\n____________ test_replace_table_with_itself_preserves_display_name _____________\ntests/test_toml_document.py:1038: in test_replace_table_with_itself_preserves_display_name\n    assert doc.as_string() == content\nE   assert \"[keys.a]\\n[k... 'd'\\t= 'e'\\n\" == \"[keys.a]\\n[k... 'd'\\t= 'e'\\n\"\nE     \nE       [keys.a]\nE     - [keys .'a'.'c']\nE     ?      - - -\nE     + [keys.a.'c']\nE         'd'\t= 'e'\n=========================== short test summary info ============================\nFAILED tests/test_toml_document.py::test_replace_table_with_itself_preserves_display_name\n1 failed, 1 passed, 65 deselected in 0.15s\n"
+      },
+      "fix": {
+        "outcome": "passed",
+        "exit_code": 0,
+        "exception_type": null,
+        "duration_s": 0.8,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\n..                                                                       [100%]\n2 passed, 65 deselected in 0.13s\n"
+      }
+    }
+  },
+  {
+    "case_id": "tomlkit__352",
+    "repo": "python-poetry/tomlkit",
+    "repo_name": "tomlkit",
+    "fix_sha": "b2821370ca8a7ead712287d7ec856b36165aaef7",
+    "parent_sha": "53b8850163ac297466c5e9ae10fe81733e15012d",
+    "pr_number": 534,
+    "issue_number": 352,
+    "issue_title": "rewrite new toml-data will has a new whitespace line",
+    "issue_body": "rewrite toml data will has a new whitespace line.\r\n\r\neg toml:\r\n\r\ntoml\r\n```\r\n# xxx test\r\n\r\n\r\n[env.pro1.rst]\r\n    name = \"x7\"\r\n\r\n[env2]\r\n    name = 2\r\n\r\n[env3]\r\n    name = 3\r\n```\r\n\r\nmodified with rewrite new tool data, like this\r\n\r\n```python\r\nfile_ = \"test.toml\"\r\n\r\ndef update_toml():\r\n    with open(file_, \"r\") as f:\r\n        t = tomlkit.load(f)\r\n\r\n    t = merge_dicts(\r\n        t,\r\n        {'env': {'pro1': {'rst': {'name': \"x7\"}}}}\r\n    )\r\n\r\n    with open(file_, \"w\") as f:\r\n        tomlkit.dump(t, f)\r\n\r\ndef merge_dicts(a: dict, b: dict):\r\n    # ret = a.copy()\r\n    ret = a\r\n\r\n    for k, v in b.items():\r\n        if k in a and isinstance(a[k], (dict, OrderedDict, Container)):\r\n            ret[k] = merge_dicts(a[k], v)\r\n\r\n    return ret\r\n\r\n```\r\n\r\nthe result  (has a new line after `name = \"x7\"`)\r\n\r\n```toml\r\n# xxx test\r\n\r\n\r\n[env.pro1.rst]\r\n    name = \"x7\"\r\n\r\n\r\n[env2]\r\n    name = 2\r\n\r\n[env3]\r\n    name = 3\r\n```\r\n\r\nand if I edit in local with code \r\n\r\n```python\r\n\r\ndef merge_dicts(a: dict, b: dict):\r\n    # ret = a.copy()\r\n    return merge_dict_to_toml_local(a, b)\r\n\r\n\r\ndef merge_dict_to_toml_local(a: tomlkit.TOMLDocument, b: dict):\r\n\r\n    for k, v in b.items():\r\n        if k in a and isinstance(a[k], (dict, OrderedDict, Container)):\r\n            merge_dict_to_toml_local(a[k], v)\r\n        else:\r\n            a[k] = v\r\n\r\n```\r\nThere will be no more line. \r\n\r\n\r\nI'm not sure if this is a bug, so I checked the source code. \r\nin file `tomlkit/container.py`, line 703 with function `_replace_at` , it will add a `whitespace-line` where there is not has `whitespace-line`. \r\nhow check ?  the end of `tomlkit/container.py`\r\n\r\n```python\r\n\r\ndef ends_with_whitespace(it: Any) -> bool:\r\n    \"\"\"Returns ``True`` if the given item ``it`` is a ``Table`` or ``AoT`` object\r\n    ending with a ``Whitespace``.\r\n    \"\"\"\r\n    return (\r\n        isinstance(it, Table) and isinstance(it.value._previous_item(), Whitespace)\r\n    ) or (isinstance(it, AoT) and len(it) > 0 and isinstance(it[-1], Whitespace))\r\n\r\n```\r\n\r\n`ends_with_whitespace` only check last and current without sub-tree.  \r\nShould subdata be checked ?",
+    "source_files": [
+      "tomlkit/container.py"
+    ],
+    "gold_test_files": [
+      "tests/test_toml_document.py"
+    ],
+    "gold_test_patch": "commit b2821370ca8a7ead712287d7ec856b36165aaef7\nAuthor: Vincent Gao <gaobing1230@gmail.com>\nDate:   Mon Jul 13 09:51:35 2026 +0200\n\n    Preserve whitespace when replacing super tables (#534)\n\ndiff --git a/tests/test_toml_document.py b/tests/test_toml_document.py\nindex 0ee5ed8..a1eea7a 100644\n--- a/tests/test_toml_document.py\n+++ b/tests/test_toml_document.py\n@@ -1006,6 +1006,24 @@ b  =  \"how\"\n     )\n \n \n+def test_replace_super_table_preserves_whitespace() -> None:\n+    content = \"\"\"\\\n+[env.pro1.rst]\n+name = \"x7\"\n+\n+[env2]\n+name = 2\n+\n+[env3]\n+name = 3\n+\"\"\"\n+    doc = parse(content)\n+\n+    doc[\"env\"] = doc[\"env\"]\n+\n+    assert doc.as_string() == content\n+\n+\n def test_replace_with_table_of_nested() -> None:\n     example = \"\"\"\\\n     [a]\n",
+    "commit_date": "2026-07-13T09:51:35+02:00",
+    "notes": {
+      "subject": "Preserve whitespace when replacing super tables (#534)"
+    },
+    "validation": {
+      "valid": true,
+      "reason": "ok",
+      "gold_test_names": [
+        "test_replace_super_table_preserves_whitespace",
+        "test_replace_with_table_of_nested"
+      ],
+      "gold_test_path": "tests/test_toml_document.py",
+      "gold_failure_type": null,
+      "parent": {
+        "outcome": "failed",
+        "exit_code": 1,
+        "exception_type": null,
+        "duration_s": 0.82,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\nF.                                                                       [100%]\n=================================== FAILURES ===================================\n________________ test_replace_super_table_preserves_whitespace _________________\ntests/test_toml_document.py:1024: in test_replace_super_table_preserves_whitespace\n    assert doc.as_string() == content\nE   assert '[env.pro1.rs...]\\nname = 3\\n' == '[env.pro1.rs...]\\nname = 3\\n'\nE     \nE       [env.pro1.rst]\nE       name = \"x7\"\nE     + \nE       \nE       [env2]\nE       name = 2...\nE     \nE     ...Full output truncated (3 lines hidden), use '-vv' to show\n=========================== short test summary info ============================\nFAILED tests/test_toml_document.py::test_replace_super_table_preserves_whitespace\n1 failed, 1 passed, 64 deselected in 0.14s\n"
+      },
+      "fix": {
+        "outcome": "passed",
+        "exit_code": 0,
+        "exception_type": null,
+        "duration_s": 0.84,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\n..                                                                       [100%]\n2 passed, 64 deselected in 0.13s\n"
+      }
+    }
+  },
+  {
+    "case_id": "tomlkit__440",
+    "repo": "python-poetry/tomlkit",
+    "repo_name": "tomlkit",
+    "fix_sha": "43668ddebc3f082bf385d328aceed18d26976897",
+    "parent_sha": "d3c76f0bbe90af4b12a3b83bd8e59bc9061dfe85",
+    "pr_number": 533,
+    "issue_number": 440,
+    "issue_title": "Missing newline after inline table",
+    "issue_body": "Hello,\nSorry to be opening another issue so early after the last one, but I found something else:\n\n```python\nv = tomlkit.loads(\"\"\"[x]\\na.b = {}\"\"\")\nv[\"x\"][\"c\"] = 3\nprint(tomlkit.dumps(v))\n```\n\noutput:\n```toml\n[x]\na.b = {}c = 3\n```\n\nAs you can see, there should be a new line before `c = 3`\n\nNote that this doesn't happens with either:\n- `\"\"\"[x]\\na.b = {}\\n\"\"\"`\n- `\"\"\"[x]\\na = {}\"\"\"`",
+    "source_files": [
+      "tomlkit/container.py"
+    ],
+    "gold_test_files": [
+      "tests/test_toml_document.py"
+    ],
+    "gold_test_patch": "commit 43668ddebc3f082bf385d328aceed18d26976897\nAuthor: Vincent Gao <gaobing1230@gmail.com>\nDate:   Tue Jun 23 10:36:56 2026 +0200\n\n    fix: keep newline after dotted inline table (#533)\n\ndiff --git a/tests/test_toml_document.py b/tests/test_toml_document.py\nindex a3fd566..0ee5ed8 100644\n--- a/tests/test_toml_document.py\n+++ b/tests/test_toml_document.py\n@@ -1528,6 +1528,19 @@ name = \"Nail\"\n     }\n \n \n+def test_add_key_after_dotted_inline_table_without_ending_newline() -> None:\n+    content = \"[x]\\na.b = {}\"\n+    doc = parse(content)\n+    doc[\"x\"][\"c\"] = 3\n+\n+    assert doc.as_string() == \"[x]\\na.b = {}\\nc = 3\\n\"\n+\n+    doc = parse(f\"{content}\\n\")\n+    doc[\"x\"][\"c\"] = 3\n+\n+    assert doc.as_string() == \"[x]\\na.b = {}\\nc = 3\\n\"\n+\n+\n def test_appending_to_super_table() -> None:\n     content = \"\"\"\\\n [a.b]\n",
+    "commit_date": "2026-06-23T10:36:56+02:00",
+    "notes": {
+      "subject": "fix: keep newline after dotted inline table (#533)"
+    },
+    "validation": {
+      "valid": true,
+      "reason": "ok",
+      "gold_test_names": [
+        "test_add_key_after_dotted_inline_table_without_ending_newline",
+        "test_appending_to_super_table"
+      ],
+      "gold_test_path": "tests/test_toml_document.py",
+      "gold_failure_type": "AssertionError",
+      "parent": {
+        "outcome": "failed",
+        "exit_code": 1,
+        "exception_type": "AssertionError",
+        "duration_s": 0.81,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\nF.                                                                       [100%]\n=================================== FAILURES ===================================\n________ test_add_key_after_dotted_inline_table_without_ending_newline _________\ntests/test_toml_document.py:1536: in test_add_key_after_dotted_inline_table_without_ending_newline\n    assert doc.as_string() == \"[x]\\na.b = {}\\nc = 3\\n\"\nE   AssertionError: assert '[x]\\na.b = {}c = 3\\n' == '[x]\\na.b = {}\\nc = 3\\n'\nE     \nE       [x]\nE     - a.b = {}\nE     + a.b = {}c = 3\nE     ?         +++++\nE     - c = 3\n=========================== short test summary info ============================\nFAILED tests/test_toml_document.py::test_add_key_after_dotted_inline_table_without_ending_newline\n1 failed, 1 passed, 63 deselected in 0.14s\n"
+      },
+      "fix": {
+        "outcome": "passed",
+        "exit_code": 0,
+        "exception_type": null,
+        "duration_s": 0.79,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\n..                                                                       [100%]\n2 passed, 63 deselected in 0.13s\n"
+      }
+    }
+  },
+  {
+    "case_id": "tomlkit__523",
+    "repo": "python-poetry/tomlkit",
+    "repo_name": "tomlkit",
+    "fix_sha": "d3c76f0bbe90af4b12a3b83bd8e59bc9061dfe85",
+    "parent_sha": "f40ae46323992b1cda523424bdfb30de899eb4f6",
+    "pr_number": 530,
+    "issue_number": 523,
+    "issue_title": "Out-of-order value-vs-table redefinition parses OK and only raises on access (should reject at parse)",
+    "issue_body": "## Summary\n\nAn **out-of-order value-vs-table redefinition** is invalid TOML, but `tomlkit.parse()` accepts it and the conflict only surfaces **lazily on first access** (raising `KeyAlreadyPresent`), instead of failing at parse time. The equivalent **in-order** document is correctly rejected at parse. Both are invalid per the TOML spec and per stdlib `tomllib`.\n\n## Minimal repro\n\n```python\nimport tomlkit, tomllib\n\nsrc = '[a]\\nb = true\\n[zz]\\n[a.b]\\nc = 1\\n'   # the splitter table [zz] may be empty\n\ndoc = tomlkit.parse(src)   # -> OK, no exception   (BUG: should raise here)\n\ndoc.unwrap()               # -> raises KeyAlreadyPresent: Key \"b\" already exists.\ndoc['a']                   # -> same raise (also .get('a'), 'a' in doc, dict(doc))\ndoc.value                  # -> SUCCEEDS but silently drops b=true:\n                           #    {'a': {'b': {'c': 1}}, 'zz': {}}\n\n# In-order twin is correctly rejected at parse:\ntomlkit.parse('[a]\\nb = true\\n[a.b]\\nc = 1\\n')   # -> raises KeyAlreadyPresent AT PARSE\n\n# Stdlib oracle agrees the input is invalid TOML:\ntomllib.loads(src)         # -> tomllib.TOMLDecodeError: Cannot overwrite a value\n```\n\n## Expected vs actual\n\n- **Expected:** `tomlkit.parse(src)` raises a `TOMLKitError` (e.g. `ParseError` / `KeyAlreadyPresent`) at **parse time**, matching the in-order form and `tomllib`.\n- **Actual:** `parse()` returns a document that looks healthy (`len(doc) == 2`, `list(doc.keys()) == ['a', 'zz']`, `doc.as_string()` round-trips byte-for-byte), but materializing key `a` raises `KeyAlreadyPresent('Key \"b\" already exists.')`. The raise is deterministic on every access (no caching of a good value).\n\n## Two failure modes from one defect\n\n1. **Value-then-table split** (above): `parse()` OK, then **raise on access**.\n2. **Dotted-key-then-table split** \u2014 *strictly worse, a silent false-accept*:\n   ```python\n   doc = tomlkit.parse('[a]\\nb.c = 1\\n[zz]\\nq = 9\\n[a.b]\\nd = 2\\n')\n   doc.unwrap()   # NO error; silently merges to {'a': {'b': {'c': 1, 'd': 2}}, ...}\n   # tomllib rejects this: \"Cannot declare (a, b) twice\"\n   ```\n\n**Accessor divergence** on the same conflicting document: `doc.unwrap()`, `doc['a']`, `doc.get('a')`, `'a' in doc`, `dict(doc)` all **raise**, while `doc.value` **succeeds with silent data loss** (drops `b = true`).\n\n## Why it happens (root cause)\n\nThe in-order path raises synchronously in `Container.append` (the `isinstance(item, Table)` / `not isinstance(current, (Table, AoT))` branch). On the out-of-order path, the existing entry for `a` is a **concrete** table and the new entry is a **super**-table wrapper for `[a.b]`. In `Container.append` the out-of-order validation (`_validate_out_of_order_table`, `_validate_table_candidate`) lives **only inside the `current.is_super_table()` branch**; because `current` here is concrete, that whole block is skipped, no validation runs, and the unvalidated out-of-order tuple is recorded. The clash is then only discovered when `OutOfOrderTableProxy` materializes that tuple (terminal raise `if not isinstance(current, Table): raise KeyAlreadyPresent(key)` in `Container._raw_append`) \u2014 i.e. at access, not parse.\n\n## Spec & conformance\n\n- TOML **v1.0.0 and v1.1.0** both state: *\"Like keys, you cannot define a table more than once. Doing so is invalid.\"* with the canonical `[fruit]` / `[fruit.apple]` example \u2014 exactly this value-then-table-reopen shape.\n- `toml-test` ships the in-order twin as `invalid/table/redefine-01.toml` (`[a]` / `b = 1` / `[a.b]` / `c = 2`), and its contract requires decoders to **reject** invalid fixtures. There is no out-of-order (intervening-table) variant in the suite, so this exact permutation isn't exercised.\n- tomlkit's own suite already encodes parse-time rejection: `tests/test_toml_tests.py` runs the whole `invalid/` suite under `pytest.raises(TOMLKitError)` on `parse()`, and `tests/test_api.py::test_parse_rejects_collisions_across_out_of_order_fragments` (#479) demands a parse-time error for out-of-order collisions \u2014 but only for **table-vs-table** fragments, leaving **value-vs-table** out-of-order uncovered.\n\n`KeyAlreadyPresent` is already a `TOMLKitError` subclass, so raising it at parse needs no new exception type \u2014 the fix is about **when** it raises (parse, not access).\n\n## Suggested fix direction\n\nValidate the out-of-order *concrete-existing + super-new* (and *dotted-value + super-new*) cases during parse so invalid documents fail at `parse()`, consistent with the in-order path and with the project's recent direction (#509 \"collisions across fragments still raise at parse time\"; #516 \"reject a table redefined after its parent table header\").\n\n## Related\n\n- #505 (open) \u2014 `KeyAlreadyPresent` accessing an out-of-order document; AoT-flavored twin of this, same `OutOfOrderTableProxy` construction path. Open fix PR #507.\n- #261 (open) / #498 (open PR) \u2014 out-of-order AoT rejected by the parser.\n- #437 (open) \u2014 interleaved AoT.\n- #509, #516 (merged) \u2014 project policy that out-of-order collisions are a parse-time concern.\n\n**Environment:** tomlkit 0.15.0 (also reproduces under 0.14.0 per #505); cross-checked against stdlib `tomllib`.",
+    "source_files": [
+      "tomlkit/container.py"
+    ],
+    "gold_test_files": [
+      "tests/test_toml_document.py"
+    ],
+    "gold_test_patch": "commit d3c76f0bbe90af4b12a3b83bd8e59bc9061dfe85\nAuthor: Vincent Gao <gaobing1230@gmail.com>\nDate:   Tue Jun 23 10:23:13 2026 +0200\n\n    fix: reject out-of-order concrete+super table redefinitions at parse time (#530)\n    \n    Out-of-order value-vs-table and dotted-key-vs-table redefinitions\n    were silently accepted (or only raised on access) because the inner\n    if-elif chain in Container.append had no else clause for the case\n    where an existing concrete table is extended by a super-table after\n    an unrelated table header.\n    \n    - Add else clause that validates the super-table against the concrete\n      table, catching type mismatches and double table definitions at parse\n      time instead of lazily during access/unwrap.\n    - Enhance _validate_table_candidate to detect when a non-dotted\n      candidate key is a prefix of an existing dotted key.\n    - Call _validate_out_of_order_table after _raw_append in the fallthrough\n      path so out-of-order fragments are validated before the document is\n      materialized.\n    \n    Fixes #523\n    \n    Co-authored-by: Frost Ming <me@frostming.com>\n\ndiff --git a/tests/test_toml_document.py b/tests/test_toml_document.py\nindex 0eea87e..a3fd566 100644\n--- a/tests/test_toml_document.py\n+++ b/tests/test_toml_document.py\n@@ -16,8 +16,9 @@ from tomlkit import parse\n from tomlkit import ws\n from tomlkit._utils import _utc\n from tomlkit.api import document\n-from tomlkit.exceptions import KeyAlreadyPresent\n from tomlkit.exceptions import NonExistentKey\n+from tomlkit.exceptions import ParseError\n+from tomlkit.exceptions import TOMLKitError\n from tomlkit.toml_document import TOMLDocument\n \n \n@@ -607,18 +608,39 @@ def test_unwrap_out_of_order_tables() -> None:\n \n \n def test_unwrap_preserves_raise_on_invalid_out_of_order_fragment() -> None:\n-    # Regression guard for the unwrap() fast path: this document is actually\n-    # *invalid* TOML -- `b` is a value under [a], then reopened as a table by\n-    # the out-of-order [a.b]. Ideally tomlkit would reject it at parse (it does\n-    # for the in-order form, and so does the stdlib tomllib); today the conflict\n-    # is only detected lazily when the out-of-order proxy is built, so it\n-    # surfaces at access/unwrap time. This test does NOT bless that deferred\n-    # timing -- it only pins that the faster unwrap() keeps going through the\n-    # proxy and still raises, rather than silently merging the conflict into a\n-    # corrupted dict.\n-    doc = parse(\"[a]\\nb = true\\n[zz]\\nq = 9\\n[a.b]\\narr = [1, 2]\\n\")\n-    with pytest.raises(KeyAlreadyPresent):\n-        doc.unwrap()\n+    # Regression guard: this document is actually *invalid* TOML -- `b` is a value\n+    # under [a], then reopened as a table by the out-of-order [a.b].  The in-order\n+    # form and stdlib tomllib both reject it.  Since the Container.append concrete-\n+    # +super fix, tomlkit now rejects it at parse time as well.\n+    with pytest.raises(ParseError):\n+        parse(\"[a]\\nb = true\\n[zz]\\nq = 9\\n[a.b]\\narr = [1, 2]\\n\")\n+\n+\n+def test_reject_out_of_order_dotted_key_redefinition_at_parse() -> None:\n+    # https://github.com/python-poetry/tomlkit/issues/523\n+    # A dotted key (b.c) creates an implicit table definition that is later\n+    # redefined by an explicit [a.b] table header after an unrelated table [zz].\n+    # This is invalid TOML (defining a table multiple times) and must be rejected\n+    # at parse, not silently accepted.\n+    with pytest.raises(ParseError):\n+        parse(\"[a]\\nb.c = 1\\n[zz]\\nq = 9\\n[a.b]\\nd = 2\\n\")\n+\n+\n+def test_reject_out_of_order_dotted_prefix_at_parse() -> None:\n+    # https://github.com/python-poetry/tomlkit/issues/523\n+    # A non-dotted candidate key (b) that is a prefix of an existing dotted key\n+    # (b.c) means the table would be defined twice \u2014 once implicitly by the\n+    # dotted key and once explicitly by the table header.  This must raise.\n+    with pytest.raises((ParseError, TOMLKitError)):\n+        parse(\"[a]\\nb.c=1\\n[a.b]\\nd=2\\n\")\n+\n+\n+def test_valid_out_of_order_independent_tables() -> None:\n+    # [zz] splits unrelated tables; the concrete+super merge must not break\n+    # valid out-of-order extensions.\n+    doc = parse(\"[a]\\nx=1\\n[zz]\\n[a.b]\\nc=1\\n\")\n+    assert doc.unwrap() == {\"a\": {\"x\": 1, \"b\": {\"c\": 1}}, \"zz\": {}}\n+    assert doc.as_string() == \"[a]\\nx=1\\n[zz]\\n[a.b]\\nc=1\\n\"\n \n \n def test_out_of_order_table_merges_aot_fragments() -> None:\n",
+    "commit_date": "2026-06-23T10:23:13+02:00",
+    "notes": {
+      "subject": "fix: reject out-of-order concrete+super table redefinitions at parse time (#530)"
+    },
+    "validation": {
+      "valid": true,
+      "reason": "ok",
+      "gold_test_names": [
+        "test_reject_out_of_order_dotted_key_redefinition_at_parse",
+        "test_reject_out_of_order_dotted_prefix_at_parse",
+        "test_valid_out_of_order_independent_tables"
+      ],
+      "gold_test_path": "tests/test_toml_document.py",
+      "gold_failure_type": null,
+      "parent": {
+        "outcome": "failed",
+        "exit_code": 1,
+        "exception_type": null,
+        "duration_s": 0.81,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\nF..                                                                      [100%]\n=================================== FAILURES ===================================\n__________ test_reject_out_of_order_dotted_key_redefinition_at_parse ___________\ntests/test_toml_document.py:625: in test_reject_out_of_order_dotted_key_redefinition_at_parse\n    with pytest.raises(ParseError):\n         ^^^^^^^^^^^^^^^^^^^^^^^^^\nE   Failed: DID NOT RAISE ParseError\n=========================== short test summary info ============================\nFAILED tests/test_toml_document.py::test_reject_out_of_order_dotted_key_redefinition_at_parse\n1 failed, 2 passed, 61 deselected in 0.15s\n"
+      },
+      "fix": {
+        "outcome": "passed",
+        "exit_code": 0,
+        "exception_type": null,
+        "duration_s": 0.78,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\n...                                                                      [100%]\n3 passed, 61 deselected in 0.12s\n"
+      }
+    }
+  },
+  {
+    "case_id": "tomlkit__531",
+    "repo": "python-poetry/tomlkit",
+    "repo_name": "tomlkit",
+    "fix_sha": "11e22aefccd8069a90ae75d20613b9b1068754a1",
+    "parent_sha": "ee4eedbacc8eb72872af050996c7396ecce190b9",
+    "pr_number": 532,
+    "issue_number": 531,
+    "issue_title": "Nesting a Table inside an InlineTable is accepted",
+    "issue_body": "Hi,\n\nI noticed `tomlkit` accepts appending a `Table` within an `InlineTable`, which isn't allowed in the toml format.\n\nThe following code does that:\n```python\nimport tomlkit\n\nt = tomlkit.table()\nt.append(\"a\", 1)\n\nit = tomlkit.inline_table()\nit.append(\"table\", t)\n\nd = tomlkit.document()\nd.append(\"inline_table\", it)\n\nwith open(\"output.toml\", \"w\") as f:\n    tomlkit.dump(d, f)\n```\n\nwhich results in the following invalid toml file:\n```toml\ninline_table = {table = a = 1\n}\n```\n\nMaybe `tomlkit` should raise an error when this happen, instead of writing invalid toml ?",
+    "source_files": [
+      "tomlkit/items.py"
+    ],
+    "gold_test_files": [
+      "tests/test_items.py"
+    ],
+    "gold_test_patch": "commit 11e22aefccd8069a90ae75d20613b9b1068754a1\nAuthor: Vincent Gao <gaobing1230@gmail.com>\nDate:   Tue Jun 23 09:44:27 2026 +0200\n\n    fix: reject tables inside inline tables (#532)\n\ndiff --git a/tests/test_items.py b/tests/test_items.py\nindex 6256fbd..b785a5e 100644\n--- a/tests/test_items.py\n+++ b/tests/test_items.py\n@@ -887,6 +887,17 @@ def test_trim_comments_when_building_inline_table() -> None:\n     assert table.as_string() == '{foo = \"bar\", baz = \"foobaz\"}'\n \n \n+def test_append_table_to_inline_table_raises() -> None:\n+    table = api.table()\n+    table.append(\"a\", 1)\n+    inline_table = api.inline_table()\n+\n+    with pytest.raises(ValueError, match=\"cannot contain a table\"):\n+        inline_table.append(\"table\", table)\n+    with pytest.raises(ValueError, match=\"cannot contain a table\"):\n+        inline_table[\"table\"] = table\n+\n+\n def test_deleting_inline_table_element_does_not_leave_trailing_separator() -> None:\n     table = api.inline_table()\n     table[\"foo\"] = \"bar\"\n",
+    "commit_date": "2026-06-23T09:44:27+02:00",
+    "notes": {
+      "subject": "fix: reject tables inside inline tables (#532)"
+    },
+    "validation": {
+      "valid": true,
+      "reason": "ok",
+      "gold_test_names": [
+        "test_append_table_to_inline_table_raises",
+        "test_deleting_inline_table_element_does_not_leave_trailing_separator"
+      ],
+      "gold_test_path": "tests/test_items.py",
+      "gold_failure_type": null,
+      "parent": {
+        "outcome": "failed",
+        "exit_code": 1,
+        "exception_type": null,
+        "duration_s": 0.85,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\nF..                                                                      [100%]\n=================================== FAILURES ===================================\n___________________ test_append_table_to_inline_table_raises ___________________\ntests/test_items.py:895: in test_append_table_to_inline_table_raises\n    with pytest.raises(ValueError, match=\"cannot contain a table\"):\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   Failed: DID NOT RAISE ValueError\n=========================== short test summary info ============================\nFAILED tests/test_items.py::test_append_table_to_inline_table_raises - Failed...\n1 failed, 2 passed, 79 deselected in 0.20s\n"
+      },
+      "fix": {
+        "outcome": "passed",
+        "exit_code": 0,
+        "exception_type": null,
+        "duration_s": 0.86,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\n...                                                                      [100%]\n3 passed, 79 deselected in 0.18s\n"
+      }
+    }
+  },
+  {
+    "case_id": "sqlglot__7949",
+    "repo": "tobymao/sqlglot",
+    "repo_name": "sqlglot",
+    "fix_sha": "8a79d074b3ddf41f9b1e0467785db339ceff5991",
+    "parent_sha": "29432ba4571f7f91a5f76eee9dc74f989e3694de",
+    "pr_number": 7950,
+    "issue_number": 7949,
+    "issue_title": "Support `REPLACE USING` for INSERT",
+    "issue_body": "**Is your feature request related to a problem? Please describe.**\nI am trying to parse a Databricks SQL as such\n```\nimport sqlglot\n\n# https://docs.databricks.com/aws/en/sql/language-manual/sql-ref-syntax-dml-insert-into#replace-using\nsql = \"\"\"\nINSERT INTO TABLE students\n    REPLACE USING (country)\n    SELECT * FROM new_students;\n\"\"\"\nsqlglot.parse_one(sql, dialect=\"databricks\"\n```\n\nBut currently the core parser/generator does not handle such case, and are impossible to be overridden at dialect level.\n\n**Describe the solution you'd like**\n\nI would like the core parser/generator to support this `REPLACE USING` expression.\n\n**Describe alternatives you've considered**\n\nI think the most fundamental solution is change `where` in [dml.Insert](https://github.com/tobymao/sqlglot/blob/33de21fc21cdc05755a2de39318b292c10ccec0f/sqlglot/expressions/dml.py#L195) to something more general, like `replace`, and implement a method `parse_insert_replace` in the core parser, in this way, each dialect can implement their own \"insert replace\" parsing/generation.\nBut this solution introduces a breaking change.\n\nI am new to sqlglot so just came up with the two solutions. Would like to hear some feedback from the team.\n\n**Additional context**\nAdd any other context or screenshots about the feature request here.",
+    "source_files": [
+      "sqlglot/expressions/dml.py",
+      "sqlglot/generator.py",
+      "sqlglot/parser.py"
+    ],
+    "gold_test_files": [
+      "tests/dialects/test_databricks.py"
+    ],
+    "gold_test_patch": "commit 8a79d074b3ddf41f9b1e0467785db339ceff5991\nAuthor: nlpersimon <simon2020291@gmail.com>\nDate:   Mon Aug 3 22:10:31 2026 +0800\n\n    feat(parser): support \"replace using\" for insert DML (#7950)\n    \n    * feat: support parsing \"replace using\" for insert\n    \n    * feat: support generate sql for \"replace using\"\n    \n    * fix: remove unnecessary error parsing and test\n    \n    * fix: parse `using` with _parse_using_identifiers\n    \n    * feat: support replace on\n    \n    * fix: remove unused import\n    \n    * chore: remove unnecessary error raising\n    \n    * Revert \"feat: support replace on\"\n    \n    This reverts commit 1480c2c49bc973a394033629f1c2afb26b9df699.\n\ndiff --git a/tests/dialects/test_databricks.py b/tests/dialects/test_databricks.py\nindex ce6d64f6..8afbb953 100644\n--- a/tests/dialects/test_databricks.py\n+++ b/tests/dialects/test_databricks.py\n@@ -6,6 +6,11 @@ from tests.dialects.test_dialect import Validator\n class TestDatabricks(Validator):\n     dialect = \"databricks\"\n \n+    def test_insert_replace_using(self):\n+        self.validate_identity(\n+            \"INSERT INTO target REPLACE USING (c1, c2) SELECT c1, c2 FROM source\"\n+        )\n+\n     def test_databricks(self):\n         self.validate_identity(\"CREATE TABLE foo (my_arr ARRAY<STRING COLLATE UTF8_BINARY>)\")\n         self.validate_identity(\"CREATE TABLE foo (m MAP<STRING, STRING COLLATE UTF8_BINARY>)\")\n",
+    "commit_date": "2026-08-03T22:10:31+08:00",
+    "notes": {
+      "subject": "feat(parser): support \"replace using\" for insert DML (#7950)"
+    },
+    "validation": {
+      "valid": true,
+      "reason": "ok",
+      "gold_test_names": [
+        "test_insert_replace_using",
+        "test_databricks"
+      ],
+      "gold_test_path": "tests/dialects/test_databricks.py",
+      "gold_failure_type": "ParseError",
+      "parent": {
+        "outcome": "failed",
+        "exit_code": 1,
+        "exception_type": "ParseError",
+        "duration_s": 1.72,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\n...... [ 30%]\n.F............                                               [100%]\n=================================== FAILURES ===================================\n___________________ TestDatabricks.test_insert_replace_using ___________________\ntests/dialects/test_databricks.py:10: in test_insert_replace_using\n    self.validate_identity(\ntests/dialects/test_dialect.py:61: in validate_identity\n    expression = self.parse_one(sql)\n                 ^^^^^^^^^^^^^^^^^^^\ntests/dialects/test_dialect.py:30: in parse_one\n    return parse_one(sql, read=self.dialect, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/__init__.py:160: in parse_one\n    result = dialect.parse(sql, **opts)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/dialects/dialect.py:1169: in parse\n    return self.parser(**opts).parse(self.tokenize(sql), sql)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:2087: in parse\n    return self._parse(\nsqlglot/parser.py:2207: in _parse\n    return self._parse_batch_statements(parse_method=parse_method, sep_first_statement=False)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:2177: in _parse_batch_statements\n    self.raise_error(\"Invalid expression / Unexpected token\")\nsqlglot/parser.py:2044: in raise_error\n    raise error\nE   sqlglot.errors.ParseError: Invalid expression / Unexpected token. Line 1, Col: 26.\nE     INSERT INTO target \u001b[4mREPLACE\u001b[0m USING (c1, c2) SELECT c1, c2 FROM source\n=========================== short test summary info ============================\nFAILED tests/dialects/test_databricks.py::TestDatabricks::test_insert_replace_using\n1 failed, 19 passed, 78 subtests passed in 0.95s\n"
+      },
+      "fix": {
+        "outcome": "passed",
+        "exit_code": 0,
+        "exception_type": null,
+        "duration_s": 1.31,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\n...... [ 30%]\n..............                                               [100%]\n20 passed, 78 subtests passed in 0.52s\n"
+      }
+    }
+  },
+  {
+    "case_id": "sqlglot__5178",
+    "repo": "tobymao/sqlglot",
+    "repo_name": "sqlglot",
+    "fix_sha": "c1475e7997ac1561d073cf5816e39b61eada70bc",
+    "parent_sha": "8ef659e414117628f59cb7cd4948a4d6ab7767df",
+    "pr_number": 7934,
+    "issue_number": 5178,
+    "issue_title": "Trino: CTE User-Defined Function Parse Error",
+    "issue_body": "We are using a CTE UDF in a complex Trino query. Parsing that CTE UDF with SQLGlot (26.25.3)  results in a ParseError exception. A normal UDF and a normal CTE query parses as expected.\n\n```\nWITH FUNCTION f(num int)\n    RETURNS int\n    RETURN num\nSELECT f(1);\n```\n`sqlglot.parse_one(sql, dialect=\"trino\")`\n\n```\nsqlglot.errors.ParseError: Expecting (. Line 1, Col: 15.\n  WITH FUNCTION f(num int)\n    RETURNS int\n    RETURN num\nSELECT f(1);\n```",
+    "source_files": [
+      "sqlglot/expressions/query.py",
+      "sqlglot/generator.py",
+      "sqlglot/generators/trino.py",
+      "sqlglot/parser.py",
+      "sqlglot/parsers/clickhouse.py",
+      "sqlglot/parsers/trino.py",
+      "sqlglot/transforms.py"
+    ],
+    "gold_test_files": [
+      "tests/dialects/test_trino.py"
+    ],
+    "gold_test_patch": "commit c1475e7997ac1561d073cf5816e39b61eada70bc\nAuthor: Evan Rusackas <evan@preset.io>\nDate:   Tue Jul 28 04:15:44 2026 -0700\n\n    feat(trino): parse WITH FUNCTION ... RETURNS ... RETURN inline UDFs [CLAUDE] (#7934)\n    \n    * feat(trino): parse WITH FUNCTION ... RETURNS ... RETURN inline UDFs\n    \n    Trino supports declaring SQL UDFs inline in a WITH clause preceding the\n    query (https://trino.io/docs/current/udf/sql.html). These currently fail\n    to parse (\"Expecting (\") because a WITH-clause entry starting with\n    FUNCTION isn't recognized. Closes #5178.\n    \n    This is the minimal slice: TrinoParser._parse_cte recognizes a\n    `FUNCTION <name>(...)` entry (as opposed to a CTE literally named\n    \"function\") and parses it into a new exp.FunctionSpecification node, with\n    a mandatory RETURNS clause and a RETURN <expr> body. Inline functions live\n    in their own WITH clause before the query's own WITH clause per the\n    grammar, so TrinoGenerator.with_sql emits `WITH <functions> WITH <ctes>`\n    when both are present. walk_in_scope treats FunctionSpecification as\n    opaque so qualify does not try to resolve UDF parameters as outer-scope\n    columns.\n    \n    Not covered here, tracked as follow-ups: routine characteristics\n    (LANGUAGE, DETERMINISTIC, SECURITY, ...), BEGIN...END block bodies with\n    DECLARE/SET, and control statements (IF, CASE, LOOP/WHILE/REPEAT). This\n    supersedes #7926, which bundled all of the above and was closed as too\n    large to review in one pass.\n    \n    Disclosure: implemented with Claude Code, reviewed, tested (make unit,\n    make style) and understood by me.\n    \n    Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>\n    \n    * fix: address review feedback on WITH FUNCTION PR\n    \n    - Parse routine characteristics via the existing _parse_properties()\n      instead of a bespoke _parse_routine_characteristics wrapper.\n    - Simplify TrinoGenerator.with_sql to delegate to the base\n      implementation for the CTE portion instead of reimplementing it.\n    - Use properties(..., prefix=\" \") instead of a separate blank-check line.\n    - Revert the walk_in_scope/FunctionSpecification opacity change; that's\n      deferred to a follow-up once merge_subqueries and friends are audited.\n    - Trim test_inline_udf: drop explanatory comments, the find_all-based\n      scope-traversal assertions, and the invalid-input cases.\n    \n    Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>\n    \n    * fix: support RECURSIVE on the query's own WITH clause after WITH FUNCTION\n    \n    WITH FUNCTION f(...) ... WITH RECURSIVE t AS (...) SELECT ... failed to\n    parse: the base _parse_with() only checks for RECURSIVE once, right after\n    the very first WITH token, so it choked trying to parse a RECURSIVE that\n    shows up on the query's own (second) WITH clause. TrinoParser._parse_with\n    now also checks for RECURSIVE after a later bare WITH.\n    \n    Also guards add_recursive_cte_column_names (inherited from Presto) against\n    non-CTE entries in a recursive With's expressions -- it assumed every\n    entry had an \"alias\" arg, which a FunctionSpecification doesn't, and\n    crashed with a KeyError building this AST directly rather than through\n    the parser.\n    \n    Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>\n    \n    * fix: track RECURSIVE on a later WITH in the base parser, not Trino\n    \n    TrinoParser._parse_with duplicated the base parser's CTE-list loop just to\n    track RECURSIVE showing up on a second, later WITH token (e.g. after an\n    inline UDF's own WITH clause: `WITH FUNCTION f(...) ... WITH RECURSIVE t\n    AS (...) SELECT ...`). The base parser's loop already matches a bare WITH\n    mid-list, so the fix belongs there instead: one line, and it's inert for\n    every other dialect's grammar. Drops the Trino override entirely.\n    \n    Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>\n    \n    ---------\n    \n    Co-authored-by: Claude Sonnet 5 <noreply@anthropic.com>\n\ndiff --git a/tests/dialects/test_trino.py b/tests/dialects/test_trino.py\nindex adbf3286..f8f96d95 100644\n--- a/tests/dialects/test_trino.py\n+++ b/tests/dialects/test_trino.py\n@@ -176,3 +176,30 @@ class TestTrino(Validator):\n     def test_array_first(self):\n         self.validate_identity(\"SELECT ARRAY_FIRST(ARRAY['a', 'b']) FROM tbl\")\n         self.validate_identity(\"SELECT ARRAY_FIRST(ARRAY['a', 'b'], x -> x = 'b') FROM tbl\")\n+\n+    def test_inline_udf(self):\n+        self.validate_identity(\n+            \"WITH FUNCTION f(num INTEGER) RETURNS INTEGER RETURN num SELECT F(1)\"\n+        )\n+        self.validate_identity(\n+            \"WITH FUNCTION hello(name VARCHAR) RETURNS VARCHAR RETURN FORMAT('Hello %s!', name), \"\n+            \"FUNCTION bye() RETURNS VARCHAR RETURN 'Bye!' \"\n+            \"SELECT HELLO('Finn') || BYE()\"\n+        )\n+        self.validate_identity(\n+            \"WITH FUNCTION doubled(x INTEGER) RETURNS INTEGER RETURN x * 2 \"\n+            \"WITH t AS (SELECT 3 AS v) SELECT DOUBLED(v) FROM t\"\n+        )\n+        self.validate_identity(\n+            \"WITH FUNCTION f(x INTEGER) RETURNS INTEGER RETURN x \"\n+            \"WITH RECURSIVE t(n) AS (SELECT 1 AS n) SELECT F(n) FROM t\"\n+        )\n+        self.validate_identity(\n+            \"\"\"WITH FUNCTION f(num int)\n+    RETURNS int\n+    RETURN num\n+SELECT f(1)\"\"\",\n+            \"WITH FUNCTION f(num INTEGER) RETURNS INTEGER RETURN num SELECT F(1)\",\n+        )\n+        self.validate_identity(\"WITH function AS (SELECT 1 AS x) SELECT x FROM function\")\n+        self.validate_identity(\"WITH function(x) AS (SELECT 1) SELECT x FROM function\")\n",
+    "commit_date": "2026-07-28T04:15:44-07:00",
+    "notes": {
+      "subject": "feat(trino): parse WITH FUNCTION ... RETURNS ... RETURN inline UDFs [CLAUDE] (#7934)"
+    },
+    "validation": {
+      "valid": true,
+      "reason": "ok",
+      "gold_test_names": [
+        "test_inline_udf"
+      ],
+      "gold_test_path": "tests/dialects/test_trino.py",
+      "gold_failure_type": "ParseError",
+      "parent": {
+        "outcome": "failed",
+        "exit_code": 1,
+        "exception_type": "ParseError",
+        "duration_s": 1.93,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n__________________________ TestTrino.test_inline_udf ___________________________\ntests/dialects/test_trino.py:181: in test_inline_udf\n    self.validate_identity(\ntests/dialects/test_dialect.py:61: in validate_identity\n    expression = self.parse_one(sql)\n                 ^^^^^^^^^^^^^^^^^^^\ntests/dialects/test_dialect.py:30: in parse_one\n    return parse_one(sql, read=self.dialect, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/__init__.py:160: in parse_one\n    result = dialect.parse(sql, **opts)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/dialects/dialect.py:1168: in parse\n    return self.parser(**opts).parse(self.tokenize(sql), sql)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:2081: in parse\n    return self._parse(\nsqlglot/parser.py:2201: in _parse\n    return self._parse_batch_statements(parse_method=parse_method, sep_first_statement=False)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:2168: in _parse_batch_statements\n    expressions.append(parse_method(self))\n                       ^^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:2331: in _parse_statement\n    expression = self._parse_set_operations(expression) if expression else self._parse_select()\n                                                                           ^^^^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:3912: in _parse_select\n    query = self._parse_select_query(\nsqlglot/parser.py:3935: in _parse_select_query\n    cte = self._parse_with()\n          ^^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:4099: in _parse_with\n    cte = self._parse_cte()\n          ^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:4147: in _parse_cte\n    this=self._parse_wrapped(self._parse_statement),\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:8742: in _parse_wrapped\n    self.raise_error(\"Expecting (\")\nsqlglot/parser.py:2038: in raise_error\n    raise error\nE   sqlglot.errors.ParseError: Expecting (. Line 1, Col: 15.\nE     WITH FUNCTION \u001b[4mf\u001b[0m(num INTEGER) RETURNS INTEGER RETURN num SELECT F(1)\n=========================== short test summary info ============================\nFAILED tests/dialects/test_trino.py::TestTrino::test_inline_udf - sqlglot.err...\n1 failed, 7 deselected in 1.15s\n"
+      },
+      "fix": {
+        "outcome": "passed",
+        "exit_code": 0,
+        "exception_type": null,
+        "duration_s": 1.22,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\n.                                                                        [100%]\n1 passed, 7 deselected in 0.41s\n"
+      }
+    }
+  },
+  {
+    "case_id": "click__3105",
+    "repo": "pallets/click",
+    "repo_name": "click",
+    "fix_sha": "fc6c7c47edd6110b6bd5a1a5297b2035214b0cd1",
+    "parent_sha": "5b9630f50fde938b72ad8c99542efe3a6f5717e2",
+    "pr_number": 3211,
+    "issue_number": 3105,
+    "issue_title": "`FuncParamType` should use `ValueError` for `self.fail(message)`",
+    "issue_body": "FuncParamType currently just calls self.fail(value,...) if it self.func(value) raise a ValueError.  This is missing the point of the self.fail which is to give better feedback.  \nUsing typer so something like \n```python\n\n@dataclass\nclass MyClass:\n    myvalue: str\n     @staticmethod\n      def from_str(cls, input:Any) -> 'MyClass':\n              if input != 'works':\n                  raise ValueError(f'input was  {input=}, should be works')\n              return cls(input)\n@app.command('test', help='get snapshot')\nasync def test(\n    mydata: Annotated[\n        MyClass, typer.Argument(parser=MyClass.from_str)\n    ],\n) -> None:\n```\n<!--\nDescribe the expected behavior that should have happened but didn't.\n-->\nshould give str(error) not str(input)\n\n\nfix would be \n```python\nclass FuncParamType(ParamType):\n    def __init__(self, func: t.Callable[[t.Any], t.Any]) -> None:\n        self.name: str = func.__name__\n        self.func = func\n\n    def to_info_dict(self) -> dict[str, t.Any]:\n        info_dict = super().to_info_dict()\n        info_dict[\"func\"] = self.func\n        return info_dict\n\n    def convert(\n        self, value: t.Any, param: Parameter | None, ctx: Context | None\n    ) -> t.Any:\n        try:\n            return self.func(value)\n        except ValueError as e:\n            self.fail(str(e), param, ctx)\n```\nhappy to submit a PR if this makes sense.  Rather not have to create a customclass when `FuncParamType` is so close.  Not sure what else `FuncParamType` there there for, as there isn't really any documentation of why it exists, but typer uses it.",
+    "source_files": [
+      "src/click/types.py"
+    ],
+    "gold_test_files": [
+      "tests/test_types.py"
+    ],
+    "gold_test_patch": "commit fc6c7c47edd6110b6bd5a1a5297b2035214b0cd1\nAuthor: STEPHEN OTIENO ONYANGO <142543761+StevOti@users.noreply.github.com>\nDate:   Fri May 8 16:47:47 2026 +0300\n\n    `FuncParamType` should use `ValueError` message in `self.fail()` (#3211)\n    \n    Co-authored-by: Andreas Backx <andreas@backx.org>\n\ndiff --git a/tests/test_types.py b/tests/test_types.py\nindex e633be4..55560ad 100644\n--- a/tests/test_types.py\n+++ b/tests/test_types.py\n@@ -51,6 +51,25 @@ def test_range_fail(type, value, expect):\n     assert expect in exc_info.value.message\n \n \n+@pytest.mark.parametrize(\n+    (\"error_message\", \"expected\"),\n+    [\n+        (\"bad value: nope\", \"bad value: nope\"),\n+        (\"\", \"nope\"),\n+    ],\n+)\n+def test_func_param_type_uses_value_error_message(error_message, expected):\n+    def parse(value):\n+        raise ValueError(error_message if error_message else \"\")\n+\n+    func_type = click.types.FuncParamType(parse)\n+\n+    with pytest.raises(click.BadParameter) as exc_info:\n+        func_type.convert(\"nope\", None, None)\n+\n+    assert expected in exc_info.value.message\n+\n+\n def test_float_range_no_clamp_open():\n     with pytest.raises(TypeError):\n         click.FloatRange(0, 1, max_open=True, clamp=True)\n",
+    "commit_date": "2026-05-08T16:47:47+03:00",
+    "notes": {
+      "subject": "`FuncParamType` should use `ValueError` message in `self.fail()` (#3211)"
+    },
+    "validation": {
+      "valid": true,
+      "reason": "ok",
+      "gold_test_names": [
+        "test_func_param_type_uses_value_error_message",
+        "test_float_range_no_clamp_open"
+      ],
+      "gold_test_path": "tests/test_types.py",
+      "gold_failure_type": "AssertionError",
+      "parent": {
+        "outcome": "failed",
+        "exit_code": 1,
+        "exception_type": "AssertionError",
+        "duration_s": 0.76,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\nF..                                                                      [100%]\n=================================== FAILURES ===================================\n_ test_func_param_type_uses_value_error_message[bad value: nope-bad value: nope] _\ntests/test_types.py:70: in test_func_param_type_uses_value_error_message\n    assert expected in exc_info.value.message\nE   AssertionError: assert 'bad value: nope' in 'nope'\nE    +  where 'nope' = BadParameter('nope').message\nE    +    where BadParameter('nope') = <ExceptionInfo BadParameter('nope') tblen=3>.value\n=========================== short test summary info ============================\nFAILED tests/test_types.py::test_func_param_type_uses_value_error_message[bad value: nope-bad value: nope]\n1 failed, 2 passed, 39 deselected in 0.03s\n"
+      },
+      "fix": {
+        "outcome": "passed",
+        "exit_code": 0,
+        "exception_type": null,
+        "duration_s": 0.74,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\n...                                                                      [100%]\n3 passed, 39 deselected in 0.02s\n"
+      }
+    }
+  },
+  {
+    "case_id": "click__3043",
+    "repo": "pallets/click",
+    "repo_name": "click",
+    "fix_sha": "19fd4d6e18bc9fce451f92f422696b11169faa57",
+    "parent_sha": "c69643b60cf971cd5d8e5d3902632807ceab9b8f",
+    "pr_number": 3126,
+    "issue_number": 3043,
+    "issue_title": "Multi-line help text is not handled correctly in fish",
+    "issue_body": "Multi-line help text (e.g. `help=\"\\b\\nAttachment with explicit mimetype,\\n--at image.jpg image/jpeg\"`) causes error when doing shell completion in fish.\n\n# How to replicate\n\nFrom [simonw/llm](https://github.com/simonw/llm/blob/921fae9a0ad3d664a872e35e4639b16089b61c1d/llm/cli.py#L365-L373):\n\n```py\n@click.option(\n    \"attachment_types\",\n    \"--at\",\n    \"--attachment-type\",\n    type=(str, str),\n    multiple=True,\n    callback=attachment_types_callback,\n    help=\"\\b\\nAttachment with explicit mimetype,\\n--at image.jpg image/jpeg\",\n)\n```\n\nType `llm --`, then press <kbd>Tab</kbd> to complete, observe the following error output:\n\n```shellsession\n$ llm --\nstring split: --at image.jpg image/jpeg: unknown option\n\n/opt/homebrew/share/fish/vendor_completions.d/llm.fish (line 1):\nstring split \",\" $completion\n^\nin command substitution\n\tcalled on line 5 of file /opt/homebrew/share/fish/vendor_completions.d/llm.fish\nin function '_llm_completion'\nin command substitution\n\n(Type 'help string' for related documentation)\ntest: Missing argument at index 3\n= dir\n      ^\n/opt/homebrew/share/fish/vendor_completions.d/llm.fish (line 7):\n        if test $metadata[1] = \"dir\";\n           ^\nin function '_llm_completion'\nin command substitution\ntest: Missing argument at index 3\n= file\n       ^\n/opt/homebrew/share/fish/vendor_completions.d/llm.fish (line 9):\n        else if test $metadata[1] = \"file\";\n                ^\nin function '_llm_completion'\nin command substitution\ntest: Missing argument at index 3\n= plain\n        ^\n/opt/homebrew/share/fish/vendor_completions.d/llm.fish (line 11):\n        else if test $metadata[1] = \"plain\";\n                ^\nin function '_llm_completion'\nin command substitution\nstring split: --at image.jpg image/jpeg: unknown option\n\n/opt/homebrew/share/fish/vendor_completions.d/llm.fish (line 1):\nstring split \",\" $completion\n^\nin command substitution\n\tcalled on line 5 of file /opt/homebrew/share/fish/vendor_completions.d/llm.fish\nin function '_llm_completion'\nin command substitution\n\n(Type 'help string' for related documentation)\ntest: Missing argument at index 3\n= dir\n      ^\n/opt/homebrew/share/fish/vendor_completions.d/llm.fish (line 7):\n        if test $metadata[1] = \"dir\";\n           ^\nin function '_llm_completion'\nin command substitution\ntest: Missing argument at index 3\n= file\n       ^\n/opt/homebrew/share/fish/vendor_completions.d/llm.fish (line 9):\n        else if test $metadata[1] = \"file\";\n                ^\nin function '_llm_completion'\nin command substitution\ntest: Missing argument at index 3\n= plain\n        ^\n/opt/homebrew/share/fish/vendor_completions.d/llm.fish (line 11):\n        else if test $metadata[1] = \"plain\";\n                ^\nin function '_llm_completion'\nin command substitution\n```\n\n# Analysis\n\nObtaining raw completion from click:\n\n```shellsession\n$ env _LLM_COMPLETE=fish_complete COMP_WORDS='llm --' COMP_CWORD='--' llm\nplain,--system\tSystem prompt to use\nplain,--model\tModel to use\nplain,--database\tPath to log database\nplain,--query\tUse first model matching these strings\nplain,--attachment\tAttachment path or URL or -\nplain,--at\nAttachment with explicit mimetype,\n--at image.jpg image/jpeg\nplain,--attachment-type\nAttachment with explicit mimetype,\n--at image.jpg image/jpeg\nplain,--tool\tName of a tool to make available to the model\nplain,--functions\tPython code block or file path defining functions to register as tools\nplain,--td\tShow full details of tool executions\nplain,--tools-debug\tShow full details of tool executions\nplain,--ta\tManually approve every tool execution\nplain,--tools-approve\tManually approve every tool execution\nplain,--cl\tHow many chained tool responses to allow, default 5, set 0 for unlimited\nplain,--chain-limit\tHow many chained tool responses to allow, default 5, set 0 for unlimited\nplain,--option\tkey/value options for the model\nplain,--schema\tJSON schema, filepath or ID\nplain,--schema-multi\tJSON schema to use for multiple results\nplain,--fragment\tFragment (alias, URL, hash or file path) to add to the prompt\nplain,--sf\tFragment to add to system prompt\nplain,--system-fragment\tFragment to add to system prompt\nplain,--template\tTemplate to use\nplain,--param\tParameters for template\nplain,--no-stream\tDo not stream output\nplain,--no-log\tDon't log to database\nplain,--log\tLog prompt and response to the database\nplain,--continue\tContinue the most recent conversation.\nplain,--cid\tContinue the conversation with the given ID.\nplain,--conversation\tContinue the conversation with the given ID.\nplain,--key\tAPI key to use\nplain,--save\tSave prompt with this template name\nplain,--async\tRun prompt asynchronously\nplain,--usage\tShow token usage\nplain,--extract\tExtract first fenced code block\nplain,--xl\tExtract last fenced code block\nplain,--extract-last\tExtract last fenced code block\nplain,--help\tShow this message and exit.\n```\n\nObserve that option with multi-line help text is not escaped/handled:\n\n```\nplain,--at\nAttachment with explicit mimetype,\n--at image.jpg image/jpeg\nplain,--attachment-type\nAttachment with explicit mimetype,\n--at image.jpg image/jpeg\n```\n\nWhich causes unexpected arguments passed to `string split`, causing the error:\n\nhttps://github.com/pallets/click/blob/9b13d463a4e2b455310f39122d5e6135abf3835e/src/click/shell_completion.py#L183\n\n# Environment\n\n- Python version: 3.13.7\n- Click version: 8.2.1\n- Fish version: 4.0.2",
+    "source_files": [
+      "src/click/shell_completion.py"
+    ],
+    "gold_test_files": [
+      "tests/test_shell_completion.py"
+    ],
+    "gold_test_patch": "commit 19fd4d6e18bc9fce451f92f422696b11169faa57\nAuthor: ReneS <148054878+ReneSoltes@users.noreply.github.com>\nDate:   Thu Apr 30 01:37:31 2026 +0200\n\n    Fix: Ensure fish completion handles multiline help strings correctly (#3126)\n\ndiff --git a/tests/test_shell_completion.py b/tests/test_shell_completion.py\nindex 20cff23..492231e 100644\n--- a/tests/test_shell_completion.py\n+++ b/tests/test_shell_completion.py\n@@ -357,9 +357,9 @@ def test_full_source(runner, shell):\n         (\"bash\", {\"COMP_WORDS\": \"a b\", \"COMP_CWORD\": \"1\"}, \"plain,b\\n\"),\n         (\"zsh\", {\"COMP_WORDS\": \"\", \"COMP_CWORD\": \"0\"}, \"plain\\na\\n_\\nplain\\nb\\nbee\\n\"),\n         (\"zsh\", {\"COMP_WORDS\": \"a b\", \"COMP_CWORD\": \"1\"}, \"plain\\nb\\nbee\\n\"),\n-        (\"fish\", {\"COMP_WORDS\": \"\", \"COMP_CWORD\": \"\"}, \"plain,a\\nplain,b\\tbee\\n\"),\n-        (\"fish\", {\"COMP_WORDS\": \"a b\", \"COMP_CWORD\": \"b\"}, \"plain,b\\tbee\\n\"),\n-        (\"fish\", {\"COMP_WORDS\": 'a \"b', \"COMP_CWORD\": '\"b'}, \"plain,b\\tbee\\n\"),\n+        (\"fish\", {\"COMP_WORDS\": \"\", \"COMP_CWORD\": \"\"}, \"plain\\na\\n_\\nplain\\nb\\nbee\\n\"),\n+        (\"fish\", {\"COMP_WORDS\": \"a b\", \"COMP_CWORD\": \"b\"}, \"plain\\nb\\nbee\\n\"),\n+        (\"fish\", {\"COMP_WORDS\": 'a \"b', \"COMP_CWORD\": '\"b'}, \"plain\\nb\\nbee\\n\"),\n     ],\n )\n @pytest.mark.usefixtures(\"_patch_for_completion\")\n@@ -559,3 +559,50 @@ def test_files_closed(runner) -> None:\n             assert not current_warnings, \"There should be no warnings to start\"\n             _get_completions(cli, args=[], incomplete=\"\")\n             assert not current_warnings, \"There should be no warnings after either\"\n+\n+\n+@pytest.mark.usefixtures(\"_patch_for_completion\")\n+def test_fish_multiline_help_complete(runner):\n+    \"\"\"Test Fish completion with multi-line help text doesn't cause errors.\"\"\"\n+    cli = Command(\n+        \"cli\",\n+        params=[\n+            Option(\n+                [\"--at\", \"--attachment-type\"],\n+                type=(str, str),\n+                multiple=True,\n+                help=(\n+                    \"\\b\\nAttachment with explicit mimetype,\\n--at image.jpg image/jpeg\"\n+                ),\n+            ),\n+            Option([\"--other\"], help=\"Normal help\"),\n+        ],\n+    )\n+\n+    result = runner.invoke(\n+        cli,\n+        env={\n+            \"COMP_WORDS\": \"cli --\",\n+            \"COMP_CWORD\": \"--\",\n+            \"_CLI_COMPLETE\": \"fish_complete\",\n+        },\n+    )\n+\n+    # Should not fail\n+    assert result.exit_code == 0\n+\n+    # Output should contain escaped newlines, not literal newlines\n+    # Fish expects: plain\\n--at\\n{help_with_\\\\n}\n+    lines = result.output.split(\"\\n\")\n+\n+    # Find the --at completion block (3 lines: type, value, help)\n+    for i in range(0, len(lines) - 2, 3):\n+        if lines[i] == \"plain\" and lines[i + 1] in (\"--at\", \"--attachment-type\"):\n+            help_line = lines[i + 2]\n+            # Help should have escaped newlines (\\\\n), not actual newlines\n+            assert \"\\\\n\" in help_line\n+            # Should contain the example text\n+            assert \"image.jpg\" in help_line.replace(\"\\\\n\", \" \")\n+            break\n+    else:\n+        pytest.fail(\"--at completion not found in output\")\n",
+    "commit_date": "2026-04-30T01:37:31+02:00",
+    "notes": {
+      "subject": "Fix: Ensure fish completion handles multiline help strings correctly (#3126)"
+    },
+    "validation": {
+      "valid": true,
+      "reason": "ok",
+      "gold_test_names": [
+        "test_fish_multiline_help_complete"
+      ],
+      "gold_test_path": "tests/test_shell_completion.py",
+      "gold_failure_type": null,
+      "parent": {
+        "outcome": "failed",
+        "exit_code": 1,
+        "exception_type": null,
+        "duration_s": 0.81,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n______________________ test_fish_multiline_help_complete _______________________\ntests/test_shell_completion.py:608: in test_fish_multiline_help_complete\n    pytest.fail(\"--at completion not found in output\")\nE   Failed: --at completion not found in output\n=========================== short test summary info ============================\nFAILED tests/test_shell_completion.py::test_fish_multiline_help_complete - Fa...\n1 failed, 52 deselected in 0.09s\n"
+      },
+      "fix": {
+        "outcome": "passed",
+        "exit_code": 0,
+        "exception_type": null,
+        "duration_s": 0.8,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\n.                                                                        [100%]\n1 passed, 52 deselected in 0.07s\n"
+      }
+    }
+  },
+  {
+    "case_id": "click__2968",
+    "repo": "pallets/click",
+    "repo_name": "click",
+    "fix_sha": "2468b70997a6ec27ced4b4867954c90da3f92075",
+    "parent_sha": "ddede2147c9370ab8275f81db4826b6895d2e7dc",
+    "pr_number": 2969,
+    "issue_number": 2968,
+    "issue_title": "backspace and line-wrapping acting strange on Linux",
+    "issue_body": "When running any app using click.prompt on linux, something weird happens with backspace.\n\n### Recording\nThis screen recording shows 2 letters being removed when I hit backspace once, and the prompt being deleted when I backspace the entire line.\n\n![Image](https://github.com/user-attachments/assets/dd505b9f-b412-49e0-aceb-d878cd291552)\n([asciinema link](https://asciinema.org/a/qWORhMIcnEuG3iLtLvm9FwkhY))\n\nThe returned input is also different from the text shown on screen.\n\n### Environment:\n\n- Python version: 3.13.3\n- Click version: 8.2.1\n\n\n### Cause:\n\ntermui contains a workaround for windows where it prints a readline prompt itself. On linux, this confuses readline so things like backspace/ctrl-backspace and line wrapping don't work correctly.\n\nThis can be fixed by letting readline handling the prompt on linux: #2969",
+    "source_files": [
+      "src/click/termui.py"
+    ],
+    "gold_test_files": [
+      "tests/test_utils.py"
+    ],
+    "gold_test_patch": "commit 2468b70997a6ec27ced4b4867954c90da3f92075\nAuthor: Yorick <yorickvanpelt@gmail.com>\nDate:   Wed Apr 29 16:20:22 2026 -0700\n\n    Fix readline backspace/line-wrapping on linux (#2969)\n    \n    Co-authored-by: Kevin Deldycke <kevin@deldycke.com>\n\ndiff --git a/tests/test_utils.py b/tests/test_utils.py\nindex f5da596..ec68d30 100644\n--- a/tests/test_utils.py\n+++ b/tests/test_utils.py\n@@ -225,7 +225,38 @@ def test_prompts_abort(monkeypatch, capsys):\n         click.echo(\"interrupted\")\n \n     out, err = capsys.readouterr()\n-    assert out == \"Password:\\ninterrupted\\n\"\n+    # On non-Windows, prompt is passed directly to getpass, not echoed separately\n+    assert out == \"\\ninterrupted\\n\"\n+\n+\n+@pytest.mark.skipif(WIN, reason=\"Different behavior on windows.\")\n+@pytest.mark.parametrize(\n+    (\"call\", \"expected_prompt\"),\n+    [\n+        (lambda: click.prompt(\"Name\"), \"Name: \"),\n+        (lambda: click.prompt(\"Pw\", hide_input=True), \"Pw: \"),\n+        (lambda: click.prompt(\"IP\", prompt_suffix=\".\"), \"IP.\"),\n+        (lambda: click.confirm(\"OK\"), \"OK [y/N]: \"),\n+    ],\n+    ids=[\"prompt\", \"prompt-hidden\", \"prompt-custom-suffix\", \"confirm\"],\n+)\n+def test_full_prompt_passed_to_readline(monkeypatch, call, expected_prompt):\n+    \"\"\"On non-Windows, prompt and confirm pass the full prompt text to the\n+    underlying prompt function so readline handles editing correctly.\n+\n+    https://github.com/pallets/click/issues/2968\n+    https://github.com/pallets/click/pull/2969\n+    \"\"\"\n+    received = []\n+\n+    def capture(text):\n+        received.append(text)\n+        return \"y\"\n+\n+    monkeypatch.setattr(\"click.termui.visible_prompt_func\", capture)\n+    monkeypatch.setattr(\"click.termui.hidden_prompt_func\", capture)\n+    call()\n+    assert received == [expected_prompt]\n \n \n def test_prompts_eof(runner):\n@@ -484,17 +515,21 @@ def test_echo_writing_to_standard_error(capfd, monkeypatch):\n     assert out == \"Prompt to stdin with no suffix\"\n     assert err == \"\"\n \n+    # On non-Windows the full prompt goes through redirect_stdout so\n+    # nothing leaks to stdout when err=True.\n+    # https://github.com/pallets/click/issues/2968\n     emulate_input(\"asdlkj\\n\")\n     click.prompt(\"Prompt to stderr\", err=True)\n     out, err = capfd.readouterr()\n-    assert out == \" \"\n-    assert err == \"Prompt to stderr:\"\n+    assert out == \"\"\n+    assert err == \"Prompt to stderr: \"\n \n+    # https://github.com/pallets/click/issues/3019\n     emulate_input(\"asdlkj\\n\")\n     click.prompt(\"Prompt to stderr with no suffix\", prompt_suffix=\"\", err=True)\n     out, err = capfd.readouterr()\n-    assert out == \"x\"\n-    assert err == \"Prompt to stderr with no suffi\"\n+    assert out == \"\"\n+    assert err == \"Prompt to stderr with no suffix\"\n \n     emulate_input(\"y\\n\")\n     click.confirm(\"Prompt to stdin\")\n@@ -508,17 +543,19 @@ def test_echo_writing_to_standard_error(capfd, monkeypatch):\n     assert out == \"Prompt to stdin with no suffix [y/N]\"\n     assert err == \"\"\n \n+    # https://github.com/pallets/click/issues/2968\n     emulate_input(\"y\\n\")\n     click.confirm(\"Prompt to stderr\", err=True)\n     out, err = capfd.readouterr()\n-    assert out == \" \"\n-    assert err == \"Prompt to stderr [y/N]:\"\n+    assert out == \"\"\n+    assert err == \"Prompt to stderr [y/N]: \"\n \n+    # https://github.com/pallets/click/issues/3019\n     emulate_input(\"y\\n\")\n     click.confirm(\"Prompt to stderr with no suffix\", prompt_suffix=\"\", err=True)\n     out, err = capfd.readouterr()\n-    assert out == \"]\"\n-    assert err == \"Prompt to stderr with no suffix [y/N\"\n+    assert out == \"\"\n+    assert err == \"Prompt to stderr with no suffix [y/N]\"\n \n     monkeypatch.setattr(click.termui, \"isatty\", lambda x: True)\n     monkeypatch.setattr(click.termui, \"getchar\", lambda: \" \")\n",
+    "commit_date": "2026-04-29T16:20:22-07:00",
+    "notes": {
+      "subject": "Fix readline backspace/line-wrapping on linux (#2969)"
+    },
+    "validation": {
+      "valid": true,
+      "reason": "ok",
+      "gold_test_names": [
+        "test_full_prompt_passed_to_readline"
+      ],
+      "gold_test_path": "tests/test_utils.py",
+      "gold_failure_type": "AssertionError",
+      "parent": {
+        "outcome": "failed",
+        "exit_code": 1,
+        "exception_type": "AssertionError",
+        "duration_s": 1.01,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\nFFFF                                                                     [100%]\n=================================== FAILURES ===================================\n_________________ test_full_prompt_passed_to_readline[prompt] __________________\ntests/test_utils.py:259: in test_full_prompt_passed_to_readline\n    assert received == [expected_prompt]\nE   AssertionError: assert [' '] == ['Name: ']\nE     \nE     At index 0 diff: ' ' != 'Name: '\nE     Use -v to get more diff\n----------------------------- Captured stdout call -----------------------------\nName:\n______________ test_full_prompt_passed_to_readline[prompt-hidden] ______________\ntests/test_utils.py:259: in test_full_prompt_passed_to_readline\n    assert received == [expected_prompt]\nE   AssertionError: assert [' '] == ['Pw: ']\nE     \nE     At index 0 diff: ' ' != 'Pw: '\nE     Use -v to get more diff\n----------------------------- Captured stdout call -----------------------------\nPw:\n__________ test_full_prompt_passed_to_readline[prompt-custom-suffix] ___________\ntests/test_utils.py:259: in test_full_prompt_passed_to_readline\n    assert received == [expected_prompt]\nE   AssertionError: assert ['.'] == ['IP.']\nE     \nE     At index 0 diff: '.' != 'IP.'\nE     Use -v to get more diff\n----------------------------- Captured stdout call -----------------------------\nIP\n_________________ test_full_prompt_passed_to_readline[confirm] _________________\ntests/test_utils.py:259: in test_full_prompt_passed_to_readline\n    assert received == [expected_prompt]\nE   AssertionError: assert [' '] == ['OK [y/N]: ']\nE     \nE     At index 0 diff: ' ' != 'OK [y/N]: '\nE     Use -v to get more diff\n----------------------------- Captured stdout call -----------------------------\nOK [y/N]:\n=========================== short test summary info ============================\nFAILED tests/test_utils.py::test_full_prompt_passed_to_readline[prompt] - Ass...\nFAILED tests/test_utils.py::test_full_prompt_passed_to_readline[prompt-hidden]\nFAILED tests/test_utils.py::test_full_prompt_passed_to_readline[prompt-custom-suffix]\nFAILED tests/test_utils.py::test_full_prompt_passed_to_readline[confirm] - As...\n4 failed, 143 deselected in 0.22s\n"
+      },
+      "fix": {
+        "outcome": "passed",
+        "exit_code": 0,
+        "exception_type": null,
+        "duration_s": 0.88,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\n....                                                                     [100%]\n4 passed, 143 deselected in 0.15s\n"
+      }
+    }
+  },
+  {
+    "case_id": "click__2703",
+    "repo": "pallets/click",
+    "repo_name": "click",
+    "fix_sha": "a1235aacb1be55dc66ddcfefbf64dec44b6ab54d",
+    "parent_sha": "565f36d5bc4a15d304337b749e113fb4477b1843",
+    "pr_number": 2846,
+    "issue_number": 2703,
+    "issue_title": "zsh completion still misbehaving in the presence of `:`",
+    "issue_body": "<!--\r\nThis issue tracker is a tool to address bugs in Click itself. Please use\r\nPallets Discord or Stack Overflow for questions about your own code.\r\n\r\nReplace this comment with a clear outline of what the bug is.\r\n-->\r\n\r\n<!--\r\nDescribe how to replicate the bug.\r\n\r\nInclude a minimal reproducible example that demonstrates the bug.\r\nInclude the full traceback if there was an exception.\r\n-->\r\n\r\nGiven `foo` containing:\r\n\r\n```python\r\n#!/usr/bin/env python3\r\nfrom click.shell_completion import CompletionItem\r\nimport click\r\n\r\nclass Foo(click.ParamType):\r\n    def convert(self, value, param, ctx):\r\n        return value\r\n\r\n    def shell_complete(self, ctx, param, incomplete):\r\n        return [\r\n            CompletionItem(value=value, help=\"adsf\") for value in \r\n            [\"baz:quux\", \"spam:eggs\"]\r\n        ]\r\n\r\n@click.command()\r\n@click.argument(\"foo\", type=Foo())\r\ndef main(foo):\r\n    print(foo)\r\n```\r\n\r\nand running shell completion generation, followed by attempting to complete the command (indicated via `<Tab>`, produces:\r\n\r\n```\r\n\u2299  PATH=$PWD:/Users/Julian/.local/share/virtualenvs/bowtie/bin/:$PATH\r\n\u2299  eval \"$(_FOO_COMPLETE=zsh_source ./foo)\"                                                                                                                                                                                                                                                                         \r\n\u2299  foo <Tab>\r\nbaz   -- quux:adsf\r\nspam  -- eggs:adsf\r\n```\r\n\r\nrather than the expected:\r\n\r\n```\r\nbaz:quux   -- adsf\r\nspam:eggs -- adsf\r\n```\r\n\r\n<!--\r\nDescribe the expected behavior that should have happened but didn't.\r\n-->\r\n\r\nThis seems to be a regression on #1812.\r\n\r\nThe fix mentioned there (of \"fake escaping\" the colons via `.replace(\":\", \"\\\\:\")` seems to work.\r\n\r\nEnvironment:\r\n\r\n- Python version:\r\n\r\n```\r\n\u2299  python --version                                                                                                                                                                                                                                                                                                 julian@Airm\r\nPython 3.11.9\r\n```\r\n\r\n- Click version:\r\n\r\n```\r\n\u2299  python -m pip show click                                                                                                                                                                                                                                                                                         julian@Airm\r\nName: click\r\nVersion: 8.1.7\r\nSummary: Composable command line interface toolkit\r\nHome-page: https://palletsprojects.com/p/click/\r\nAuthor: \r\nAuthor-email: \r\nLicense: BSD-3-Clause\r\nLocation: /Users/julian/.dotfiles/.local/share/virtualenvs/bowtie/lib/python3.11/site-packages\r\nRequires: \r\nRequired-by: rich-click, trogon, virtue\r\n```",
+    "source_files": [
+      "src/click/shell_completion.py"
+    ],
+    "gold_test_files": [
+      "tests/test_shell_completion.py"
+    ],
+    "gold_test_patch": "commit a1235aacb1be55dc66ddcfefbf64dec44b6ab54d\nAuthor: Marco Ricci <the-13th-letter@users.noreply.github.com>\nDate:   Mon Jul 21 21:35:04 2025 +0200\n\n    Fix Zsh completions with colons (#2846)\n    \n    Resolves #2846.\n    \n    Co-authored-by: Andreas Backx <andreas@backx.org>\n\ndiff --git a/tests/test_shell_completion.py b/tests/test_shell_completion.py\nindex fb39486..819ca8b 100644\n--- a/tests/test_shell_completion.py\n+++ b/tests/test_shell_completion.py\n@@ -1,4 +1,6 @@\n+import textwrap\n import warnings\n+from collections.abc import Mapping\n \n import pytest\n \n@@ -354,6 +356,79 @@ def test_full_complete(runner, shell, env, expect):\n     assert result.output == expect\n \n \n+@pytest.mark.parametrize(\n+    (\"env\", \"expect\"),\n+    [\n+        (\n+            {\"COMP_WORDS\": \"\", \"COMP_CWORD\": \"0\"},\n+            textwrap.dedent(\n+                \"\"\"\\\n+                    plain\n+                    a\n+                    _\n+                    plain\n+                    b\n+                    bee\n+                    plain\n+                    c\\\\:d\n+                    cee:dee\n+                    plain\n+                    c:e\n+                    _\n+                \"\"\"\n+            ),\n+        ),\n+        (\n+            {\"COMP_WORDS\": \"a c\", \"COMP_CWORD\": \"1\"},\n+            textwrap.dedent(\n+                \"\"\"\\\n+                    plain\n+                    c\\\\:d\n+                    cee:dee\n+                    plain\n+                    c:e\n+                    _\n+                \"\"\"\n+            ),\n+        ),\n+        (\n+            {\"COMP_WORDS\": \"a c:\", \"COMP_CWORD\": \"1\"},\n+            textwrap.dedent(\n+                \"\"\"\\\n+                    plain\n+                    c\\\\:d\n+                    cee:dee\n+                    plain\n+                    c:e\n+                    _\n+                \"\"\"\n+            ),\n+        ),\n+    ],\n+)\n+@pytest.mark.usefixtures(\"_patch_for_completion\")\n+def test_zsh_full_complete_with_colons(\n+    runner, env: Mapping[str, str], expect: str\n+) -> None:\n+    cli = Group(\n+        \"cli\",\n+        commands=[\n+            Command(\"a\"),\n+            Command(\"b\", help=\"bee\"),\n+            Command(\"c:d\", help=\"cee:dee\"),\n+            Command(\"c:e\"),\n+        ],\n+    )\n+    result = runner.invoke(\n+        cli,\n+        env={\n+            **env,\n+            \"_CLI_COMPLETE\": \"zsh_complete\",\n+        },\n+    )\n+    assert result.output == expect\n+\n+\n @pytest.mark.usefixtures(\"_patch_for_completion\")\n def test_context_settings(runner):\n     def complete(ctx, param, incomplete):\n",
+    "commit_date": "2025-07-21T21:35:04+02:00",
+    "notes": {
+      "subject": "Fix Zsh completions with colons (#2846)"
+    },
+    "validation": {
+      "valid": true,
+      "reason": "ok",
+      "gold_test_names": [
+        "test_zsh_full_complete_with_colons"
+      ],
+      "gold_test_path": "tests/test_shell_completion.py",
+      "gold_failure_type": "AssertionError",
+      "parent": {
+        "outcome": "failed",
+        "exit_code": 1,
+        "exception_type": "AssertionError",
+        "duration_s": 0.89,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\nFFF                                                                      [100%]\n=================================== FAILURES ===================================\n_ test_zsh_full_complete_with_colons[env0-plain\\na\\n_\\nplain\\nb\\nbee\\nplain\\nc\\\\:d\\ncee:dee\\nplain\\nc:e\\n_\\n] _\ntests/test_shell_completion.py:429: in test_zsh_full_complete_with_colons\n    assert result.output == expect\nE   AssertionError: assert 'plain\\na\\n_\\...ain\\nc:e\\n_\\n' == 'plain\\na\\n_\\...ain\\nc:e\\n_\\n'\nE     \nE       plain\nE       a\nE       _\nE       plain\nE       b\nE       bee...\nE     \nE     ...Full output truncated (8 lines hidden), use '-vv' to show\n_ test_zsh_full_complete_with_colons[env1-plain\\nc\\\\:d\\ncee:dee\\nplain\\nc:e\\n_\\n] _\ntests/test_shell_completion.py:429: in test_zsh_full_complete_with_colons\n    assert result.output == expect\nE   AssertionError: assert 'plain\\nc:d\\n...ain\\nc:e\\n_\\n' == 'plain\\nc\\\\:d...ain\\nc:e\\n_\\n'\nE     \nE       plain\nE     - c\\:d\nE     ?  -\nE     + c:d\nE       cee:dee\nE       plain\nE       c:e\nE       _\n_ test_zsh_full_complete_with_colons[env2-plain\\nc\\\\:d\\ncee:dee\\nplain\\nc:e\\n_\\n] _\ntests/test_shell_completion.py:429: in test_zsh_full_complete_with_colons\n    assert result.output == expect\nE   AssertionError: assert 'plain\\nc:d\\n...ain\\nc:e\\n_\\n' == 'plain\\nc\\\\:d...ain\\nc:e\\n_\\n'\nE     \nE       plain\nE     - c\\:d\nE     ?  -\nE     + c:d\nE       cee:dee\nE       plain\nE       c:e\nE       _\n=========================== short test summary info ============================\nFAILED tests/test_shell_completion.py::test_zsh_full_complete_with_colons[env0-plain\\na\\n_\\nplain\\nb\\nbee\\nplain\\nc\\\\:d\\ncee:dee\\nplain\\nc:e\\n_\\n]\nFAILED tests/test_shell_completion.py::test_zsh_full_complete_with_colons[env1-plain\\nc\\\\:d\\ncee:dee\\nplain\\nc:e\\n_\\n]\nFAILED tests/test_shell_completion.py::test_zsh_full_complete_with_colons[env2-plain\\nc\\\\:d\\ncee:dee\\nplain\\nc:e\\n_\\n]\n3 failed, 47 deselected in 0.10s\n"
+      },
+      "fix": {
+        "outcome": "passed",
+        "exit_code": 0,
+        "exception_type": null,
+        "duration_s": 0.83,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\n...                                                                      [100%]\n3 passed, 47 deselected in 0.07s\n"
+      }
+    }
+  },
+  {
+    "case_id": "click__2817",
+    "repo": "pallets/click",
+    "repo_name": "click",
+    "fix_sha": "88328fc8743d43566081d9f17acad5f5552f5a87",
+    "parent_sha": "5961d31fb566f089ad468a5b26a32f1ebfa7f63e",
+    "pr_number": 2818,
+    "issue_number": 2817,
+    "issue_title": "Set the `catch_exceptions` value for the whole runner",
+    "issue_body": "I always pass `catch_exceptions=False` for all my test suites.\r\nIt would be convenient to configure this value once for all in `CLIRunner` for example.\r\n\r\nFor example, we could add a `CLIRunner.catch_exceptions` parameter, and make `invoke` use that value if not directly passed in parameter of `invoke`. Then I would just have to put the runner in a pytest fixture and that would do the thing for me.\r\n\r\nIf that is OK, I can open a PR for this.\r\n\r\nWhat do you think?",
+    "source_files": [
+      "src/click/testing.py"
+    ],
+    "gold_test_files": [
+      "tests/test_testing.py"
+    ],
+    "gold_test_patch": "commit 88328fc8743d43566081d9f17acad5f5552f5a87\nAuthor: \u00c9loi Rivard <eloi.rivard@nubla.fr>\nDate:   Thu Dec 19 17:54:32 2024 +0100\n\n    Add CliRunner default `catch_exceptions` parameter (#2818)\n    \n    Co-authored-by: Luke Kuzmish <42181698+cosmastech@users.noreply.github.com>\n    Co-authored-by: Andreas Backx <andreas@backx.org>\n\ndiff --git a/tests/test_testing.py b/tests/test_testing.py\nindex 0f2d512..55d6470 100644\n--- a/tests/test_testing.py\n+++ b/tests/test_testing.py\n@@ -184,6 +184,28 @@ def test_catch_exceptions():\n     assert result.exit_code == 1\n \n \n+def test_catch_exceptions_cli_runner():\n+    \"\"\"Test that invoke `catch_exceptions` takes the value from CliRunner if not set\n+    explicitly.\"\"\"\n+\n+    class CustomError(Exception):\n+        pass\n+\n+    @click.command()\n+    def cli():\n+        raise CustomError(1)\n+\n+    runner = CliRunner(catch_exceptions=False)\n+\n+    result = runner.invoke(cli, catch_exceptions=True)\n+    assert isinstance(result.exception, CustomError)\n+    assert type(result.exc_info) is tuple\n+    assert len(result.exc_info) == 3\n+\n+    with pytest.raises(CustomError):\n+        runner.invoke(cli)\n+\n+\n def test_with_color():\n     @click.command()\n     def cli():\n",
+    "commit_date": "2024-12-19T17:54:32+01:00",
+    "notes": {
+      "subject": "Add CliRunner default `catch_exceptions` parameter (#2818)"
+    },
+    "validation": {
+      "valid": true,
+      "reason": "ok",
+      "gold_test_names": [
+        "test_catch_exceptions_cli_runner",
+        "test_with_color"
+      ],
+      "gold_test_path": "tests/test_testing.py",
+      "gold_failure_type": "TypeError",
+      "parent": {
+        "outcome": "failed",
+        "exit_code": 1,
+        "exception_type": "TypeError",
+        "duration_s": 0.78,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\nF...                                                                     [100%]\n=================================== FAILURES ===================================\n_______________________ test_catch_exceptions_cli_runner _______________________\ntests/test_testing.py:198: in test_catch_exceptions_cli_runner\n    runner = CliRunner(catch_exceptions=False)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   TypeError: CliRunner.__init__() got an unexpected keyword argument 'catch_exceptions'\n=========================== short test summary info ============================\nFAILED tests/test_testing.py::test_catch_exceptions_cli_runner - TypeError: C...\n1 failed, 3 passed, 21 deselected in 0.06s\n"
+      },
+      "fix": {
+        "outcome": "passed",
+        "exit_code": 0,
+        "exception_type": null,
+        "duration_s": 0.75,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\n....                                                                     [100%]\n4 passed, 21 deselected in 0.04s\n"
+      }
+    }
+  },
+  {
+    "case_id": "click__2263",
+    "repo": "pallets/click",
+    "repo_name": "click",
+    "fix_sha": "5961d31fb566f089ad468a5b26a32f1ebfa7f63e",
+    "parent_sha": "fde47b4b4f978f179b9dff34583cb2b99021f482",
+    "pr_number": 2271,
+    "issue_number": 2263,
+    "issue_title": "Mark parameter as deprecated",
+    "issue_body": "Thanks for this great project!\r\nPerhaps it's just me who feels that it is rather cumbersome mark a single parameter as deprecated (the closet I found was https://stackoverflow.com/a/50402799). Is there perhaps a more official method to mark a single parameter as deprecated?\r\nThat would somewhat be similar to https://github.com/pallets/click/issues/1507.\r\n\r\nPossible scenarios:\r\n- the parameter was renamed (e.g. a previous version was using `--name` as option, but now a dev want's to make sure it's the `--sur-name`.\r\n- the parameter is not needed anymore\r\n\r\nPerhaps as an example consider:\r\n```\r\nimport click\r\n\r\n@click.command()\r\n@click.option('--count', default=1, help='Number of greetings.')\r\n@click.option('--name', prompt='Your name',\r\n              help='The person to greet.')\r\ndef hello(count, name):\r\n    \"\"\"Simple program that greets NAME for a total of COUNT times.\"\"\"\r\n    for x in range(count):\r\n        click.echo(f\"Hello {name}!\")\r\n\r\nif __name__ == '__main__':\r\n    hello()\r\n```\r\nand I want to rename `--count` to `--greetings-count`.\r\nHowever I don't want to remove  `--count`  instantly, instead when users use `--count` prompt a message that they should use the new `--greetings-count`. The usage of `--count` and `--greetings-count` should be forbidden.\r\n\r\nThanks.",
+    "source_files": [
+      "src/click/core.py"
+    ],
+    "gold_test_files": [
+      "tests/test_arguments.py",
+      "tests/test_commands.py",
+      "tests/test_options.py"
+    ],
+    "gold_test_patch": "commit 5961d31fb566f089ad468a5b26a32f1ebfa7f63e\nAuthor: Peacock <me@p3ac0ck.net>\nDate:   Fri Nov 29 09:31:31 2024 +0900\n\n    Introduce Parameter.deprecated + Command.deprecated message customization (#2271)\n    \n    Co-authored-by: Andreas Backx <andreas@backx.org>\n\ndiff --git a/tests/test_arguments.py b/tests/test_arguments.py\nindex 5dc56a4..8c1ff00 100644\n--- a/tests/test_arguments.py\n+++ b/tests/test_arguments.py\n@@ -275,6 +275,44 @@ def test_implicit_non_required(runner):\n     assert result.output == \"test\\n\"\n \n \n+def test_deprecated_usage(runner):\n+    @click.command()\n+    @click.argument(\"f\", required=False, deprecated=True)\n+    def cli(f):\n+        click.echo(f)\n+\n+    result = runner.invoke(cli, [\"--help\"])\n+    assert result.exit_code == 0, result.output\n+    assert \"[F!]\" in result.output\n+\n+\n+@pytest.mark.parametrize(\"deprecated\", [True, \"USE B INSTEAD\"])\n+def test_deprecated_warning(runner, deprecated):\n+    @click.command()\n+    @click.argument(\n+        \"my-argument\", required=False, deprecated=deprecated, default=\"default argument\"\n+    )\n+    def cli(my_argument: str):\n+        click.echo(f\"{my_argument}\")\n+\n+    # defaults should not give a deprecated warning\n+    result = runner.invoke(cli, [])\n+    assert result.exit_code == 0, result.output\n+    assert \"is deprecated\" not in result.output\n+\n+    result = runner.invoke(cli, [\"hello\"])\n+    assert result.exit_code == 0, result.output\n+    assert \"argument 'MY_ARGUMENT' is deprecated\" in result.output\n+\n+    if isinstance(deprecated, str):\n+        assert deprecated in result.output\n+\n+\n+def test_deprecated_required(runner):\n+    with pytest.raises(ValueError, match=\"is deprecated and still required\"):\n+        click.Argument([\"a\"], required=True, deprecated=True)\n+\n+\n def test_eat_options(runner):\n     @click.command()\n     @click.option(\"-f\")\ndiff --git a/tests/test_commands.py b/tests/test_commands.py\nindex 02c4a30..eb8df85 100644\n--- a/tests/test_commands.py\n+++ b/tests/test_commands.py\n@@ -318,23 +318,31 @@ def test_unprocessed_options(runner):\n \n \n @pytest.mark.parametrize(\"doc\", [\"CLI HELP\", None])\n-def test_deprecated_in_help_messages(runner, doc):\n-    @click.command(deprecated=True, help=doc)\n+@pytest.mark.parametrize(\"deprecated\", [True, \"USE OTHER COMMAND INSTEAD\"])\n+def test_deprecated_in_help_messages(runner, doc, deprecated):\n+    @click.command(deprecated=deprecated, help=doc)\n     def cli():\n         pass\n \n     result = runner.invoke(cli, [\"--help\"])\n-    assert \"(Deprecated)\" in result.output\n+    assert \"(DEPRECATED\" in result.output\n \n+    if isinstance(deprecated, str):\n+        assert deprecated in result.output\n \n-def test_deprecated_in_invocation(runner):\n-    @click.command(deprecated=True)\n+\n+@pytest.mark.parametrize(\"deprecated\", [True, \"USE OTHER COMMAND INSTEAD\"])\n+def test_deprecated_in_invocation(runner, deprecated):\n+    @click.command(deprecated=deprecated)\n     def deprecated_cmd():\n         pass\n \n     result = runner.invoke(deprecated_cmd)\n     assert \"DeprecationWarning:\" in result.output\n \n+    if isinstance(deprecated, str):\n+        assert deprecated in result.output\n+\n \n def test_command_parse_args_collects_option_prefixes():\n     @click.command()\ndiff --git a/tests/test_options.py b/tests/test_options.py\nindex 2a3b692..b7267c1 100644\n--- a/tests/test_options.py\n+++ b/tests/test_options.py\n@@ -33,6 +33,52 @@ def test_invalid_option(runner):\n     assert \"'--foo'\" in message\n \n \n+@pytest.mark.parametrize(\"deprecated\", [True, \"USE B INSTEAD\"])\n+def test_deprecated_usage(runner, deprecated):\n+    @click.command()\n+    @click.option(\"--foo\", default=\"bar\", deprecated=deprecated)\n+    def cmd(foo):\n+        click.echo(foo)\n+\n+    result = runner.invoke(cmd, [\"--help\"])\n+    assert \"(DEPRECATED\" in result.output\n+\n+    if isinstance(deprecated, str):\n+        assert deprecated in result.output\n+\n+\n+@pytest.mark.parametrize(\"deprecated\", [True, \"USE B INSTEAD\"])\n+def test_deprecated_warning(runner, deprecated):\n+    @click.command()\n+    @click.option(\n+        \"--my-option\", required=False, deprecated=deprecated, default=\"default option\"\n+    )\n+    def cli(my_option: str):\n+        click.echo(f\"{my_option}\")\n+\n+    # defaults should not give a deprecated warning\n+    result = runner.invoke(cli, [])\n+    assert result.exit_code == 0, result.output\n+    assert \"is deprecated\" not in result.output\n+\n+    result = runner.invoke(cli, [\"--my-option\", \"hello\"])\n+    assert result.exit_code == 0, result.output\n+    assert \"option 'my_option' is deprecated\" in result.output\n+\n+    if isinstance(deprecated, str):\n+        assert deprecated in result.output\n+\n+\n+def test_deprecated_required(runner):\n+    with pytest.raises(ValueError, match=\"is deprecated and still required\"):\n+        click.Option([\"--a\"], required=True, deprecated=True)\n+\n+\n+def test_deprecated_prompt(runner):\n+    with pytest.raises(ValueError, match=\"`deprecated` options cannot use `prompt`\"):\n+        click.Option([\"--a\"], prompt=True, deprecated=True)\n+\n+\n def test_invalid_nargs(runner):\n     with pytest.raises(TypeError, match=\"nargs=-1\"):\n \n",
+    "commit_date": "2024-11-29T09:31:31+09:00",
+    "notes": {
+      "subject": "Introduce Parameter.deprecated + Command.deprecated message customization (#2271)"
+    },
+    "validation": {
+      "valid": true,
+      "reason": "ok",
+      "gold_test_names": [
+        "test_deprecated_usage",
+        "test_deprecated_warning",
+        "test_deprecated_required",
+        "test_eat_options",
+        "test_deprecated_in_help_messages",
+        "test_deprecated_in_invocation",
+        "test_command_parse_args_collects_option_prefixes",
+        "test_deprecated_prompt",
+        "test_invalid_nargs"
+      ],
+      "gold_test_path": "tests/test_arguments.py",
+      "gold_failure_type": "TypeError",
+      "parent": {
+        "outcome": "failed",
+        "exit_code": 1,
+        "exception_type": "TypeError",
+        "duration_s": 0.97,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\nFFFF.                                                                    [100%]\n=================================== FAILURES ===================================\n____________________________ test_deprecated_usage _____________________________\ntests/test_arguments.py:280: in test_deprecated_usage\n    @click.argument(\"f\", required=False, deprecated=True)\n     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsrc/click/decorators.py:347: in decorator\n    _param_memo(f, cls(param_decls, **attrs))\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^\nsrc/click/core.py:2968: in __init__\n    super().__init__(param_decls, required=required, **attrs)\nE   TypeError: Parameter.__init__() got an unexpected keyword argument 'deprecated'\n________________________ test_deprecated_warning[True] _________________________\ntests/test_arguments.py:292: in test_deprecated_warning\n    @click.argument(\nsrc/click/decorators.py:347: in decorator\n    _param_memo(f, cls(param_decls, **attrs))\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^\nsrc/click/core.py:2968: in __init__\n    super().__init__(param_decls, required=required, **attrs)\nE   TypeError: Parameter.__init__() got an unexpected keyword argument 'deprecated'\n____________________ test_deprecated_warning[USE B INSTEAD] ____________________\ntests/test_arguments.py:292: in test_deprecated_warning\n    @click.argument(\nsrc/click/decorators.py:347: in decorator\n    _param_memo(f, cls(param_decls, **attrs))\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^\nsrc/click/core.py:2968: in __init__\n    super().__init__(param_decls, required=required, **attrs)\nE   TypeError: Parameter.__init__() got an unexpected keyword argument 'deprecated'\n___________________________ test_deprecated_required ___________________________\ntests/test_arguments.py:313: in test_deprecated_required\n    click.Argument([\"a\"], required=True, deprecated=True)\nsrc/click/core.py:2968: in __init__\n    super().__init__(param_decls, required=required, **attrs)\nE   TypeError: Parameter.__init__() got an unexpected keyword argument 'deprecated'\n=========================== short test summary info ============================\nFAILED tests/test_arguments.py::test_deprecated_usage - TypeError: Parameter....\nFAILED tests/test_arguments.py::test_deprecated_warning[True] - TypeError: Pa...\nFAILED tests/test_arguments.py::test_deprecated_warning[USE B INSTEAD] - Type...\nFAILED tests/test_arguments.py::test_deprecated_required - TypeError: Paramet...\n4 failed, 1 passed, 37 deselected in 0.26s\n"
+      },
+      "fix": {
+        "outcome": "passed",
+        "exit_code": 0,
+        "exception_type": null,
+        "duration_s": 0.87,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\n.....                                                                    [100%]\n5 passed, 37 deselected in 0.13s\n"
+      }
+    }
+  },
+  {
+    "case_id": "click__2644",
+    "repo": "pallets/click",
+    "repo_name": "click",
+    "fix_sha": "0ef55fda47bb3d0dece21197d81d8d72a4250e73",
+    "parent_sha": "d8763b93021c416549b5f8b4b5497234619410db",
+    "pr_number": 2800,
+    "issue_number": 2644,
+    "issue_title": "Click doesn't close file options during shell completion",
+    "issue_body": "Click doesn't close file options during shell completion, which causes a resource warning if a program uses a file option.\r\n\r\nFor example, I have group like this:\r\n\r\n```python\r\n@click.group()\r\n@click.option('--config_file',\r\n              default=CONFIG,\r\n              type=click.File(mode='r'),\r\n              help='help')\r\n@click.pass_context\r\ndef cli(ctx, config_file: typing.TextIO):\r\n```\r\n\r\nand I get this warning:\r\n\r\n```\r\n/Users/grzesiek/Library/Caches/pypoetry/virtualenvs/findata-fetcher-3hK6JJJX-py3.12/lib/python3.12/site-packages/click/shell_completion.py:293: ResourceWarning: unclosed file <_io.TextIOWrapper name='/Users/grzesiek/.config/findata/fetcher.json' mode='r' encoding='UTF-8'>\r\n  completions = self.get_completions(args, incomplete)\r\n```\r\n\r\n## Details\r\n\r\nI don't come with reproduction steps, but I can give something equally valuable, I can explain how this bug comes to be.\r\n\r\nThe issue stems from allocating a context in `core.py` outside of a `with` statement during shell completion. Here's a stack-trace of how that happens:\r\n\r\n```\r\n  File \"/Users/grzesiek/.local/bin/findata-fetcher\", line 8, in <module>\r\n    sys.exit(main())\r\n  File \"/Users/grzesiek/.local/pipx/venvs/findata-fetcher/lib/python3.12/site-packages/fetcher/tool.py\", line 576, in main\r\n    cli(obj={})\r\n  File \"/Users/grzesiek/.local/pipx/venvs/findata-fetcher/lib/python3.12/site-packages/click/core.py\", line 1171, in __call__\r\n    return self.main(*args, **kwargs)\r\n  File \"/Users/grzesiek/.local/pipx/venvs/findata-fetcher/lib/python3.12/site-packages/click/core.py\", line 1084, in main\r\n    self._main_shell_completion(extra, prog_name, complete_var)\r\n  File \"/Users/grzesiek/.local/pipx/venvs/findata-fetcher/lib/python3.12/site-packages/click/core.py\", line 1165, in _main_shell_completion\r\n    rv = shell_complete(self, ctx_args, prog_name, complete_var,\r\n  File \"/Users/grzesiek/.local/pipx/venvs/findata-fetcher/lib/python3.12/site-packages/click/shell_completion.py\", line 49, in shell_complete\r\n    echo(comp.complete())\r\n  File \"/Users/grzesiek/.local/pipx/venvs/findata-fetcher/lib/python3.12/site-packages/click/shell_completion.py\", line 296, in complete\r\n    completions = self.get_completions(args, incomplete)\r\n  File \"/Users/grzesiek/.local/pipx/venvs/findata-fetcher/lib/python3.12/site-packages/click/shell_completion.py\", line 273, in get_completions\r\n    ctx = _resolve_context(self.cli, self.ctx_args, self.prog_name, args)\r\n  File \"/Users/grzesiek/.local/pipx/venvs/findata-fetcher/lib/python3.12/site-packages/click/shell_completion.py\", line 513, in _resolve_context\r\n    ctx = cli.make_context(prog_name, args.copy(), **ctx_args)\r\n  File \"/Users/grzesiek/.local/pipx/venvs/findata-fetcher/lib/python3.12/site-packages/click/core.py\", line 952, in make_context\r\n    with ctx.scope(cleanup=False):\r\n```\r\n\r\nThis context gets [returned](https://github.com/pallets/click/blob/ca5e1c3d75e95cbc70fa6ed51ef263592e9ac0d0/src/click/core.py#L1147C19-L1147C19) to `get_completions`, but `get_completions` or its caller never call the context's `__exit__` function. \r\n\r\nCalling the `__exit__` function is essential, because `types.File` depends on it for cleanup: https://github.com/pallets/click/blob/ca5e1c3d75e95cbc70fa6ed51ef263592e9ac0d0/src/click/types.py#L740.\r\n\r\n## Environment\r\n\r\n- Python version: 3.12\r\n- Click version: 8.1.7",
+    "source_files": [
+      "src/click/core.py",
+      "src/click/shell_completion.py"
+    ],
+    "gold_test_files": [
+      "tests/test_shell_completion.py"
+    ],
+    "gold_test_patch": "commit 0ef55fda47bb3d0dece21197d81d8d72a4250e73\nAuthor: Andreas Backx <AndreasBackx@users.noreply.github.com>\nDate:   Sun Nov 3 20:38:31 2024 +0000\n\n    Close contexts created during shell completion #2644. (#2800)\n    \n    Co-authored-by: akhil-vempali <avempali@atlassian.com>\n\ndiff --git a/tests/test_shell_completion.py b/tests/test_shell_completion.py\nindex 3e7a2bd..3511f07 100644\n--- a/tests/test_shell_completion.py\n+++ b/tests/test_shell_completion.py\n@@ -1,3 +1,5 @@\n+import warnings\n+\n import pytest\n \n import click.shell_completion\n@@ -414,3 +416,27 @@ def test_add_completion_class_decorator():\n     # Using `add_completion_class` as a decorator adds the new shell immediately\n     assert \"mysh\" in click.shell_completion._available_shells\n     assert click.shell_completion._available_shells[\"mysh\"] is MyshComplete\n+\n+\n+# Don't make the ResourceWarning give an error\n+@pytest.mark.filterwarnings(\"default\")\n+def test_files_closed(runner) -> None:\n+    with runner.isolated_filesystem():\n+        config_file = \"foo.txt\"\n+        with open(config_file, \"w\") as f:\n+            f.write(\"bar\")\n+\n+        @click.group()\n+        @click.option(\n+            \"--config-file\",\n+            default=config_file,\n+            type=click.File(mode=\"r\"),\n+        )\n+        @click.pass_context\n+        def cli(ctx, config_file):\n+            pass\n+\n+        with warnings.catch_warnings(record=True) as current_warnings:\n+            assert not current_warnings, \"There should be no warnings to start\"\n+            _get_completions(cli, args=[], incomplete=\"\")\n+            assert not current_warnings, \"There should be no warnings after either\"\n",
+    "commit_date": "2024-11-03T20:38:31Z",
+    "notes": {
+      "subject": "Close contexts created during shell completion #2644. (#2800)"
+    },
+    "validation": {
+      "valid": true,
+      "reason": "ok",
+      "gold_test_names": [
+        "test_files_closed"
+      ],
+      "gold_test_path": "tests/test_shell_completion.py",
+      "gold_failure_type": "AssertionError",
+      "parent": {
+        "outcome": "failed",
+        "exit_code": 1,
+        "exception_type": "AssertionError",
+        "duration_s": 0.78,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n______________________________ test_files_closed _______________________________\ntests/test_shell_completion.py:442: in test_files_closed\n    assert not current_warnings, \"There should be no warnings after either\"\nE   AssertionError: There should be no warnings after either\nE   assert not [<warnings.WarningMessage object at 0x7faac7839c40>]\n=========================== short test summary info ============================\nFAILED tests/test_shell_completion.py::test_files_closed - AssertionError: Th...\n1 failed, 40 deselected in 0.08s\n"
+      },
+      "fix": {
+        "outcome": "passed",
+        "exit_code": 0,
+        "exception_type": null,
+        "duration_s": 0.84,
+        "stdout_tail": "__REPROBOT_SANDBOX_READY__\n.                                                                        [100%]\n1 passed, 40 deselected in 0.06s\n"
+      }
+    }
+  }
+]
