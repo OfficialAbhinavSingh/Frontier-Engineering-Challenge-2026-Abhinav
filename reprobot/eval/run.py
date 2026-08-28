@@ -67,6 +67,13 @@ VARIANTS: dict[str, dict] = {
         "cfg": dict(use_map=True, use_examples=True, use_typed_repair=True,
                     use_memory=True, use_minimal_claim=True),
     },
+    "s6": {
+        "kind": "solver",
+        "desc": "adds signature grounding: a missing API the report names is a reproduction",
+        "cfg": dict(use_map=True, use_examples=True, use_typed_repair=True,
+                    use_memory=True, use_minimal_claim=True,
+                    use_signature_grounding=True),
+    },
     # Ran, measured, removed. Same pipeline as s5 with the deterministic verifier
     # swapped for a model asked "did this reproduce the bug?".
     "x1": {

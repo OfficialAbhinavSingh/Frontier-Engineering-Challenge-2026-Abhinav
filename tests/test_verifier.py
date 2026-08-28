@@ -113,3 +113,46 @@ def test_classify_treats_a_failed_checkout_shaped_exit_as_collection_error():
     assert classify(2, "!!! Interrupted: 1 error during collection !!!", False)[0] == "collection_error"
     assert classify(0, "3 passed", False)[0] == "passed"
     assert classify(-1, "", True)[0] == "timeout"
+
+
+def test_a_missing_signature_the_report_names_is_a_reproduction():
+    """Some bugs *are* a missing parameter.
+
+    When the fix adds one, the correct reproduction calls it and gets a
+    TypeError at the call site, with no frame entering project code. By frames
+    alone that is indistinguishable from the agent inventing an API, and
+    rejecting it costs a case that was already solved.
+    """
+    output = (
+        "tests/test_reprobot_case.py:39: in test_runner\n"
+        "    runner = CliRunner(catch_exceptions=True)\n"
+        "E   TypeError: CliRunner.__init__() got an unexpected keyword argument "
+        "'catch_exceptions'\n"
+    )
+    issue = "CliRunner should accept catch_exceptions so it can be set on the runner."
+    verdict = verify(result("failed", "TypeError", output), TEST_PATH, issue)
+    assert verdict.verdict == "reproduced_signature"
+    assert verdict.reproduces
+
+
+def test_an_invented_parameter_is_still_a_shallow_failure():
+    """The same shape, but the report never mentions it."""
+    output = (
+        "tests/test_reprobot_case.py:6: in test_x\n"
+        "    doc.parse_value('x', mode='strict')\n"
+        "E   TypeError: parse_value() got an unexpected keyword argument 'mode'\n"
+    )
+    issue = "Whitespace in dotted keys is not preserved when re-serialising."
+    verdict = verify(result("failed", "TypeError", output), TEST_PATH, issue)
+    assert verdict.verdict == "shallow_fail"
+    assert not verdict.reproduces
+
+
+def test_signature_grounding_is_off_unless_the_report_is_supplied():
+    output = (
+        "tests/test_reprobot_case.py:6: in test_x\n"
+        "    CliRunner(catch_exceptions=True)\n"
+        "E   TypeError: CliRunner.__init__() got an unexpected keyword argument "
+        "'catch_exceptions'\n"
+    )
+    assert verify(result("failed", "TypeError", output), TEST_PATH).verdict == "shallow_fail"

@@ -107,6 +107,9 @@ class SolverConfig:
     # Authored under the minimal-claim rules, and over-specified tests are sent
     # back for repair instead of being accepted as reproductions.
     use_minimal_claim: bool = False
+    # Treat a signature error the report itself names as a reproduction rather
+    # than as a misused API.
+    use_signature_grounding: bool = False
     max_rounds: int = 3
     budget: Budget = field(default_factory=Budget)
 
@@ -244,7 +247,10 @@ def solve(case: dict, view: RepoView, client: LLMClient, trace: Trace,
                 run, test_rel_path, issue_text, source, client, trace
             )
         else:
-            verdict = verify(run, test_rel_path)
+            verdict = verify(
+                run, test_rel_path,
+                issue_text if cfg.use_signature_grounding else "",
+            )
 
         # A reproduction that asserts things the report never claimed will fail
         # at the fix commit as well, which scores zero. That is visible here,

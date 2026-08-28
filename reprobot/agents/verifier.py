@@ -42,7 +42,55 @@ VERDICTS = (
     "timeout",
 )
 
-REPRODUCING = {"reproduced_exception", "reproduced_assertion"}
+REPRODUCING = {"reproduced_exception", "reproduced_assertion", "reproduced_signature"}
+
+# The message of the exception that ended the run, e.g.
+# "CliRunner.__init__() got an unexpected keyword argument 'catch_exceptions'".
+EXC_MESSAGE = re.compile(
+    r"^E\s+[A-Za-z_][A-Za-z0-9_.]*(?:Error|Exception):\s*(.+)$", re.M
+)
+QUOTED_IDENT = re.compile(r"['\"`]([A-Za-z_][A-Za-z0-9_]{2,})['\"`]")
+BARE_IDENT = re.compile(r"[A-Za-z_][A-Za-z0-9_]{2,}")
+
+# Words that appear in almost every interpreter message and identify nothing.
+MESSAGE_NOISE = {
+    "got", "unexpected", "keyword", "argument", "arguments", "object", "type",
+    "has", "attribute", "module", "name", "not", "defined", "required",
+    "positional", "missing", "takes", "were", "given", "callable", "instance",
+    "supported", "operand", "str", "int", "list", "dict", "none", "nonetype",
+}
+
+
+def _message_identifiers(output: str) -> list[str]:
+    """Identifiers named by the exception message, most specific first."""
+    matches = EXC_MESSAGE.findall(output or "")
+    if not matches:
+        return []
+    message = matches[-1]
+    quoted = QUOTED_IDENT.findall(message)
+    if quoted:
+        return quoted
+    return [w for w in BARE_IDENT.findall(message) if w.lower() not in MESSAGE_NOISE]
+
+
+def failure_is_named_in_report(output: str, issue_text: str) -> str | None:
+    """Return the identifier that ties this failure to the report, if any.
+
+    Some bugs *are* a missing or wrong signature. When the fix adds a parameter,
+    the correct reproduction calls it and gets a TypeError at the call site, with
+    no frame ever entering project code -- which is indistinguishable, by frames
+    alone, from the agent inventing an API.
+
+    The report separates them. If the thing the interpreter complained about is
+    what the reporter asked for, the test is demonstrating the bug.
+    """
+    if not issue_text:
+        return None
+    haystack = re.sub(r"\s+", " ", issue_text).lower()
+    for ident in _message_identifiers(output):
+        if ident.lower() in haystack:
+            return ident
+    return None
 
 
 @dataclass
@@ -81,7 +129,8 @@ def _split_frames(output: str, test_rel_path: str) -> tuple[list[str], list[str]
     return source_frames, test_frames
 
 
-def verify(run: RunResult, test_rel_path: str) -> Verdict:
+def verify(run: RunResult, test_rel_path: str,
+           issue_text: str = "") -> Verdict:
     output = run.stdout_tail
     source_frames, test_frames = _split_frames(output, test_rel_path)
     exc = run.exception_type
@@ -114,6 +163,15 @@ def verify(run: RunResult, test_rel_path: str) -> Verdict:
             "reproduced_exception", exc, source_frames, test_frames,
             f"{exc} was raised from inside the project's own code "
             f"({source_frames[0]})", run,
+        )
+
+    named = failure_is_named_in_report(output, issue_text)
+    if named:
+        return Verdict(
+            "reproduced_signature", exc, source_frames, test_frames,
+            f"{exc} names {named!r}, which the report itself asks about, so the "
+            "missing or wrong signature is the reported bug rather than a "
+            "misused API", run,
         )
 
     return Verdict(
