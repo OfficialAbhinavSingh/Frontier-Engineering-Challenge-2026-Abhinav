@@ -37,6 +37,15 @@ class RepoView:
             files = [f for f in files if f.endswith(suffix)]
         return sorted(files)
 
+    def read_raw(self, path: str) -> str:
+        """Untruncated contents, for tooling that parses the file rather than reads it.
+
+        The truncation in `read_file` protects a model's context window. Applying
+        it to an AST parse silently turns every large module into a syntax error,
+        which quietly drops the biggest files out of any ranking built on symbols.
+        """
+        return self._git("show", f"{self.sha}:{path}")
+
     def read_file(self, path: str, start: int | None = None,
                   end: int | None = None) -> str:
         content = self._git("show", f"{self.sha}:{path}")

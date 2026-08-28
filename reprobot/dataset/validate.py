@@ -19,8 +19,14 @@ from pathlib import Path
 
 from reprobot.sandbox.run import build_image, image_exists, run_test
 
-ADDED_TEST_DEF = re.compile(r"^\+\s*def (test_[A-Za-z0-9_]+)\s*\(", re.M)
-ADDED_ASYNC_TEST_DEF = re.compile(r"^\+\s*async def (test_[A-Za-z0-9_]+)\s*\(", re.M)
+ADDED_TEST_DEF = re.compile(r"^\+\s*(?:async )?def (test_[A-Za-z0-9_]+)\s*\(", re.M)
+# Not every project adds a new test function. Table-driven suites extend an
+# existing one instead, and for those the enclosing function is what git prints
+# in the hunk header. Ignoring that class of commit would have silently biased
+# the dataset towards projects with one style of test.
+ENCLOSING_TEST_DEF = re.compile(
+    r"^@@[^@]*@@\s*(?:async )?def (test_[A-Za-z0-9_]+)\s*\(", re.M
+)
 
 
 def git_show(repo_dir: Path, ref: str) -> str:
@@ -32,7 +38,9 @@ def git_show(repo_dir: Path, ref: str) -> str:
 
 
 def added_test_names(patch: str) -> list[str]:
-    names = ADDED_TEST_DEF.findall(patch) + ADDED_ASYNC_TEST_DEF.findall(patch)
+    names = ADDED_TEST_DEF.findall(patch)
+    if not names:
+        names = ENCLOSING_TEST_DEF.findall(patch)
     # Preserve order, drop duplicates.
     seen, out = set(), []
     for n in names:
