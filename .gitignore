@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.pytest_cache/
+
+# Working clones of the target repositories. Recreated by `make repos`;
+# never committed, because they are large and fully derivable.
+data/repos/
+
+# Local secrets never belong in the submission.
+.env
+*.key
