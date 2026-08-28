@@ -16,3 +16,12 @@ data/repos/
 # so the reported numbers can be replayed offline.
 data/cache/llm_r2/
 data/cache/llm_r3/
+
+# Intermediate mining output, superseded by data/cases/mined_all.json.
+data/cases/mined.json
+data/cases/mined_extra.json
+data/cases/mined_sqlglot.json
+data/cases/probe.json
+
+# Written by `uv run` when borrowing pytest for the harness tests.
+uv.lock

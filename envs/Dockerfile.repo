@@ -22,5 +22,20 @@ WORKDIR /work/repo
 RUN git checkout -q "$PIN_SHA"
 
 # Install the project plus its test tooling once, at image build time.
-# Cases only move the checkout within the same dependency generation.
+# Cases only move the checkout within the same dependency generation, so the
+# dependency set is identical for every case in a repository -- no case can
+# perturb the environment another case is measured in.
 RUN pip install --no-cache-dir -e . && pip install --no-cache-dir pytest
+
+# Test-only dependencies live in a different place in every project. Try the
+# usual spellings and keep going if one is absent; a missing extra shows up
+# later as an honest infra_error on a specific case rather than a silent skip.
+RUN for extra in test tests dev testing; do \
+        pip install --no-cache-dir -e ".[$extra]" && break || true; \
+    done; \
+    for req in requirements-tests.txt requirements-test.txt requirements-dev.txt \
+               requirements/tests.txt requirements/test.txt requirements/dev.txt \
+               tests/requirements.txt; do \
+        if [ -f "$req" ]; then pip install --no-cache-dir -r "$req" || true; fi; \
+    done; \
+    true
