@@ -174,6 +174,27 @@ the baselines, not the gaps inside the ladder.
 
 ---
 
+### A limitation found by testing the reproducibility claim itself
+
+Replaying the final system offline reproduces all fourteen Fail-to-Pass verdicts
+exactly, at zero cost, with every model call served from the committed cache.
+One case reached that same verdict by a different route.
+
+pytest prints its own runtime into its output, and that output is quoted into
+repair prompts, so a repair prompt can differ by a few characters between runs.
+A different prompt is a different cache key, and that lookup misses.
+
+Normalising timings out of prompt text fixes it and was not shipped, on purpose:
+changing prompt text changes every cache key, which would invalidate the whole
+committed cache and break the offline replay it was meant to protect.
+Regenerating the cache would have cost roughly another dollar and taken the
+project past its budget. Shipping a working replay with a documented edge is the
+better trade, and the edge is documented rather than left for a reader to find.
+
+**Learning:** a cache keyed on prompt text inherits the determinism of everything
+that text quotes. Anything a tool prints that varies between runs — a timing, a
+temporary path, an address — becomes part of the key.
+
 ## What the numbers say about the central problem
 
 The agent's own judgement of whether it reproduced the bug, checked against

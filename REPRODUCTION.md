@@ -46,9 +46,28 @@ make replay     # re-run all six variants from cache    (see timings below)
 ```
 
 `make replay` writes `results/eval_*.json` and regenerates `results/REPORT.md`.
-Compare that file to the one committed in the repository — they should agree
-exactly on Fail-to-Pass, because no model is called and the sandbox is
-deterministic.
+Compare that file to the one committed in the repository.
+
+**What replay guarantees, precisely.** Verified on the final system over the
+fourteen evaluation cases: **14 of 14 Fail-to-Pass verdicts reproduce
+identically, at $0.00, with no API key**, and 43 of 43 model calls are served
+from the committed cache.
+
+**What it does not guarantee.** One case in fourteen took a different internal
+path on replay while reaching the same verdict. The cause is worth stating
+because it is a genuine limitation rather than flakiness: pytest prints its own
+runtime into its output (`1 failed in 0.02s`), that output is quoted verbatim
+into repair prompts, and so a repair prompt can differ by a few characters
+between two runs. A different prompt is a different cache key, so that one
+lookup misses; in replay mode the run then ends early for that case rather than
+inventing a response.
+
+The obvious fix is to normalise timings out of the text before it enters a
+prompt. That is deliberately **not** applied here: it would change every prompt,
+therefore every cache key, therefore invalidate the entire committed cache and
+break the offline replay this section is about. Regenerating the cache costs
+real money and would have exceeded this project's budget. The honest trade is to
+ship a working replay with a documented edge, and to say which is which.
 
 What each step does, and what you should see:
 
