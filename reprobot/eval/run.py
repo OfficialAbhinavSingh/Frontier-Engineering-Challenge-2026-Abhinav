@@ -131,7 +131,8 @@ def score_case(case: dict, test_rel_path: str, test_source: str,
 
 def run_variant(variant: str, cases: list[dict], repos_dir: Path, model: str,
                 traces_root: Path, memory_root: Path, cache_dir: Path,
-                budget: Budget, timeout_s: int) -> dict:
+                budget: Budget, timeout_s: int, temperature: float = 0.0,
+                tag: str = "") -> dict:
     spec = VARIANTS[variant]
     results = []
     started = time.time()
@@ -148,8 +149,9 @@ def run_variant(variant: str, cases: list[dict], repos_dir: Path, model: str,
     for case in sorted(cases, key=lambda c: (c["repo_name"], c["case_id"])):
         case_started = time.time()
         view = RepoView(repos_dir / case["repo_name"], case["parent_sha"])
-        trace = Trace(traces_root, variant, case["case_id"])
-        client = LLMClient(model=model, cache_dir=cache_dir)
+        trace = Trace(traces_root, variant + tag, case["case_id"])
+        client = LLMClient(model=model, cache_dir=cache_dir,
+                           temperature=temperature)
 
         trace.event("case_start", repo=case["repo"], issue=case["issue_number"],
                     parent_sha=case["parent_sha"], variant=variant,
@@ -201,6 +203,8 @@ def run_variant(variant: str, cases: list[dict], repos_dir: Path, model: str,
     solved = sum(1 for r in results if r["f2p"])
     summary = {
         "variant": variant,
+        "tag": tag,
+        "temperature": temperature,
         "description": spec["desc"],
         "model": model,
         "n_cases": len(results),
@@ -233,6 +237,9 @@ def main() -> None:
     ap.add_argument("--max-steps", type=int, default=12)
     ap.add_argument("--max-test-runs", type=int, default=6)
     ap.add_argument("--limit", type=int, default=0, help="run only the first N cases")
+    ap.add_argument("--temperature", type=float, default=0.0)
+    ap.add_argument("--tag", default="",
+                    help="suffix for result files and traces, used for repeat runs")
     args = ap.parse_args()
 
     all_cases = json.loads(Path(args.cases).read_text())
@@ -251,9 +258,9 @@ def main() -> None:
         summary = run_variant(
             variant, chosen, Path(args.repos_dir), args.model,
             Path(args.traces_dir), Path(args.memory_dir), Path(args.cache_dir),
-            budget, args.timeout,
+            budget, args.timeout, args.temperature, args.tag,
         )
-        path = out_dir / f"{args.split}_{variant}.json"
+        path = out_dir / f"{args.split}_{variant}{args.tag}.json"
         path.write_text(json.dumps(summary, indent=2))
         print(f"  -> {summary['f2p_solved']}/{summary['n_cases']} "
               f"({summary['f2p_rate']:.0%})  ${summary['total_cost_usd']}  -> {path}")
