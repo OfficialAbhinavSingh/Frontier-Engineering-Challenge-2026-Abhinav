@@ -4,7 +4,7 @@ REPOS := tobymao/sqlglot python-poetry/tomlkit pallets/click arrow-py/arrow
 MODEL ?= google/gemini-2.5-flash
 SPLIT ?= eval
 
-.PHONY: help repos images dataset validate demo baseline solution eval report replay clean-results
+.PHONY: help repos images dataset validate demo baseline solution eval report replay test clean-results
 
 help:
 	@echo "Repro-Bot — turn a bug report into a verified failing test"
@@ -18,6 +18,7 @@ help:
 	@echo "  make eval        run every variant live           (needs OPENROUTER_API_KEY)"
 	@echo "  make report      rebuild results/REPORT.md from results/"
 	@echo "  make demo        run one case end to end, printing the trajectory"
+	@echo "  make test        run the harness unit tests (needs uv)"
 	@echo ""
 	@echo "  MODEL=$(MODEL)  SPLIT=$(SPLIT)"
 
@@ -69,6 +70,11 @@ report:
 
 demo:
 	$(PY) -m reprobot.demo --model $(MODEL)
+
+# The host stays dependency-free, so the harness tests borrow pytest through uv
+# rather than making every reader install something to read the code.
+test:
+	uv run --quiet --with pytest --python 3.12 python -m pytest tests/ -q
 
 clean-results:
 	rm -rf results traces data/memory
