@@ -1,6 +1,7 @@
 SHELL := /bin/bash
 PY := python3
-REPOS := tobymao/sqlglot python-poetry/tomlkit pallets/click arrow-py/arrow
+REPOS := tobymao/sqlglot python-poetry/tomlkit pallets/click \
+         pallets/jinja Textualize/rich python-jsonschema/jsonschema
 MODEL ?= google/gemini-2.5-flash
 SPLIT ?= eval
 
@@ -9,7 +10,7 @@ SPLIT ?= eval
 help:
 	@echo "Repro-Bot — turn a bug report into a verified failing test"
 	@echo ""
-	@echo "  make repos       clone the target repositories (~5 min, ~400 MB)"
+	@echo "  make repos       clone the target repositories (~8 min, ~700 MB)"
 	@echo "  make dataset     mine candidate cases from merged bugfix commits"
 	@echo "  make validate    build sandbox images and keep only provable cases"
 	@echo "  make replay      reproduce every reported number from the shipped cache (no API key)"
@@ -35,7 +36,7 @@ repos:
 dataset: repos
 	$(PY) -m reprobot.dataset.mine \
 		$(foreach r,$(REPOS),--repo $(r)) \
-		--limit 4000 --want 26 --out data/cases/mined_all.json
+		--limit 4000 --want 26 --max-lookups 200 --out data/cases/mined_all.json
 
 validate:
 	$(PY) -m reprobot.dataset.validate \

@@ -142,5 +142,169 @@
   {
     "case_id": "click__2621",
     "reason": "gold_test_not_failing_at_parent:infra_error"
+  },
+  {
+    "case_id": "jinja__1705",
+    "reason": "gold_test_not_failing_at_parent:passed"
+  },
+  {
+    "case_id": "jinja__2032",
+    "reason": "no_added_test_functions"
+  },
+  {
+    "case_id": "jinja__2025",
+    "reason": "gold_test_not_failing_at_parent:no_tests"
+  },
+  {
+    "case_id": "jinja__1781",
+    "reason": "gold_test_not_failing_at_parent:collection_error"
+  },
+  {
+    "case_id": "marshmallow__2893",
+    "reason": "gold_test_not_failing_at_parent:collection_error"
+  },
+  {
+    "case_id": "marshmallow__2985",
+    "reason": "gold_test_not_failing_at_parent:collection_error"
+  },
+  {
+    "case_id": "marshmallow__2936",
+    "reason": "gold_test_not_failing_at_parent:collection_error"
+  },
+  {
+    "case_id": "marshmallow__2821",
+    "reason": "gold_test_not_failing_at_parent:collection_error"
+  },
+  {
+    "case_id": "marshmallow__1636",
+    "reason": "gold_test_not_failing_at_parent:collection_error"
+  },
+  {
+    "case_id": "marshmallow__2869",
+    "reason": "gold_test_not_failing_at_parent:collection_error"
+  },
+  {
+    "case_id": "marshmallow__2900",
+    "reason": "gold_test_not_failing_at_parent:collection_error"
+  },
+  {
+    "case_id": "marshmallow__2924",
+    "reason": "gold_test_not_failing_at_parent:collection_error"
+  },
+  {
+    "case_id": "marshmallow__2868",
+    "reason": "gold_test_not_failing_at_parent:collection_error"
+  },
+  {
+    "case_id": "marshmallow__2870",
+    "reason": "gold_test_not_failing_at_parent:collection_error"
+  },
+  {
+    "case_id": "marshmallow__2249",
+    "reason": "gold_test_not_failing_at_parent:collection_error"
+  },
+  {
+    "case_id": "marshmallow__1369",
+    "reason": "gold_test_not_failing_at_parent:collection_error"
+  },
+  {
+    "case_id": "marshmallow__2270",
+    "reason": "gold_test_not_failing_at_parent:collection_error"
+  },
+  {
+    "case_id": "marshmallow__2133",
+    "reason": "no_added_test_functions"
+  },
+  {
+    "case_id": "attrs__1575",
+    "reason": "gold_test_not_failing_at_parent:collection_error"
+  },
+  {
+    "case_id": "attrs__240",
+    "reason": "gold_test_not_failing_at_parent:collection_error"
+  },
+  {
+    "case_id": "attrs__1400",
+    "reason": "gold_test_not_failing_at_parent:collection_error"
+  },
+  {
+    "case_id": "attrs__1479",
+    "reason": "gold_test_not_failing_at_parent:collection_error"
+  },
+  {
+    "case_id": "attrs__980",
+    "reason": "gold_test_not_failing_at_parent:collection_error"
+  },
+  {
+    "case_id": "attrs__1450",
+    "reason": "gold_test_not_failing_at_parent:collection_error"
+  },
+  {
+    "case_id": "attrs__1243",
+    "reason": "gold_test_not_failing_at_parent:collection_error"
+  },
+  {
+    "case_id": "attrs__1246",
+    "reason": "gold_test_not_failing_at_parent:collection_error"
+  },
+  {
+    "case_id": "attrs__1427",
+    "reason": "gold_test_not_failing_at_parent:collection_error"
+  },
+  {
+    "case_id": "attrs__1416",
+    "reason": "gold_test_not_failing_at_parent:collection_error"
+  },
+  {
+    "case_id": "attrs__1354",
+    "reason": "no_added_test_functions"
+  },
+  {
+    "case_id": "attrs__1147",
+    "reason": "gold_test_not_failing_at_parent:collection_error"
+  },
+  {
+    "case_id": "attrs__1313",
+    "reason": "gold_test_not_failing_at_parent:collection_error"
+  },
+  {
+    "case_id": "attrs__1348",
+    "reason": "gold_test_not_failing_at_parent:collection_error"
+  },
+  {
+    "case_id": "rich__4038",
+    "reason": "gold_test_not_passing_at_fix:failed"
+  },
+  {
+    "case_id": "rich__3841",
+    "reason": "gold_test_not_failing_at_parent:passed"
+  },
+  {
+    "case_id": "rich__3871",
+    "reason": "gold_test_not_failing_at_parent:no_tests"
+  },
+  {
+    "case_id": "rich__3727",
+    "reason": "gold_test_not_passing_at_fix:failed"
+  },
+  {
+    "case_id": "rich__3762",
+    "reason": "no_added_test_functions"
+  },
+  {
+    "case_id": "jsonschema__728",
+    "reason": "gold_test_not_failing_at_parent:collection_error"
+  },
+  {
+    "case_id": "jsonschema__743",
+    "reason": "no_added_test_functions"
+  },
+  {
+    "case_id": "jsonschema__623",
+    "reason": "no_added_test_functions"
+  },
+  {
+    "case_id": "jsonschema__607",
+    "reason": "no_added_test_functions"
   }
 ]
