@@ -138,6 +138,43 @@ def self_verification_gap(runs: dict[str, list[dict]]) -> str:
     return "\n".join(rows) if any_row else "_No variant reported a self-verdict._"
 
 
+# Repositories added to the dataset after s6 was written. Cases from these were
+# never seen when the signature-grounding rule was designed, so they are the
+# clean held-out test of it.
+LATE_REPOS = {"jinja", "marshmallow", "attrs", "rich", "jsonschema"}
+
+
+def held_out_subset(runs: dict[str, list[dict]]) -> str:
+    """Scores restricted to cases added after the final rule was written.
+
+    s6 was designed in response to a case on the first evaluation split, which
+    makes that split no longer held out for it. The repositories added afterwards
+    restore a clean test, so the same comparison is repeated on those alone.
+    """
+    rows = [
+        "| Variant | Fail-to-Pass on later repositories | Rate |",
+        "| --- | ---: | ---: |",
+    ]
+    any_row = False
+    for variant, entries in runs.items():
+        totals, counts = [], []
+        for entry in entries:
+            subset = [r for r in entry["results"]
+                      if r["case_id"].split("__")[0] in LATE_REPOS]
+            if not subset:
+                continue
+            totals.append(sum(1 for r in subset if r["f2p"]))
+            counts.append(len(subset))
+        if not totals:
+            continue
+        mean, n = sum(totals) / len(totals), counts[0]
+        rows.append(f"| `{variant}` | {mean:.1f}/{n} | {mean / n:.0%} |")
+        any_row = True
+    if not any_row:
+        return ("_No cases from later repositories in these results._")
+    return "\n".join(rows)
+
+
 def verdict_distribution(entries: list[dict]) -> str:
     verdicts: Counter = Counter()
     for entry in entries:
@@ -182,6 +219,12 @@ def build(results_dir: Path, split: str) -> str:
         verdict_distribution(final),
         "\n## Where the final system still fails\n",
         failure_breakdown(final),
+        "\n## Clean held-out check\n",
+        "The signature-grounding rule in `s6` was written in response to a case on "
+        "the first evaluation split, so that split is no longer held out for it. "
+        "These repositories were added to the dataset afterwards and were never "
+        "seen when the rule was designed.\n",
+        held_out_subset(runs),
         "\n## Self-verification gap\n",
         "The agent decides for itself whether it reproduced the bug. This is how "
         "often that judgement was wrong.\n",
