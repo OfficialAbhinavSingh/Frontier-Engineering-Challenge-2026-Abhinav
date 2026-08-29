@@ -19,6 +19,8 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
 PR_IN_SUBJECT = re.compile(r"\(#(\d+)\)\s*$")
+# Some projects keep the merge commit's wording instead of squashing.
+PR_IN_MERGE = re.compile(r"^Merge pull request #(\d+) ")
 
 # Anything that would hand the agent the fix rather than the symptom.
 LEAK_MARKERS = (
@@ -101,20 +103,35 @@ def candidate_commits(repo_dir: Path, limit: int) -> list[dict]:
         srcs = [f for f in files if is_python_source(f, repo_dir.name)]
         if not tests or not srcs:
             continue
-        m = PR_IN_SUBJECT.search(subject)
-        if not m:
-            continue
+        m = PR_IN_SUBJECT.search(subject) or PR_IN_MERGE.match(subject)
         out.append(
             {
                 "sha": sha,
                 "date": iso,
                 "subject": subject,
-                "pr": int(m.group(1)),
+                # None means the subject does not name a PR. The number can still
+                # be recovered from the API, which is what a project that neither
+                # squashes nor keeps merge wording requires -- and excluding those
+                # projects silently biased the dataset towards one merge style.
+                "pr": int(m.group(1)) if m else None,
                 "tests": tests,
                 "sources": srcs,
             }
         )
     return out
+
+
+def pr_for_commit(repo: str, sha: str) -> int | None:
+    """Ask GitHub which pull request introduced a commit."""
+    proc = subprocess.run(
+        ["gh", "api", f"repos/{repo}/commits/{sha}/pulls",
+         "--jq", ".[0].number"],
+        capture_output=True, text=True, check=False,
+    )
+    if proc.returncode != 0:
+        return None
+    text = proc.stdout.strip()
+    return int(text) if text.isdigit() else None
 
 
 GRAPHQL_QUERY = """
@@ -181,13 +198,25 @@ def test_only_patch(repo_dir: Path, sha: str, test_files: list[str]) -> str:
     return _git(repo_dir, "show", sha, "--", *test_files)
 
 
-def mine_repo(repo: str, repo_dir: Path, limit: int, want: int) -> list[Case]:
+def mine_repo(repo: str, repo_dir: Path, limit: int, want: int,
+              max_lookups: int = 250) -> list[Case]:
     cases: list[Case] = []
     rejected: dict[str, int] = {}
+    lookups = 0
 
     for cand in candidate_commits(repo_dir, limit):
         if len(cases) >= want:
             break
+        if cand["pr"] is None:
+            # Each recovery is an API call, so it is capped rather than unbounded.
+            if lookups >= max_lookups:
+                rejected["pr_lookup_budget"] = rejected.get("pr_lookup_budget", 0) + 1
+                continue
+            lookups += 1
+            cand["pr"] = pr_for_commit(repo, cand["sha"])
+            if cand["pr"] is None:
+                rejected["no_pr_for_commit"] = rejected.get("no_pr_for_commit", 0) + 1
+                continue
         issue = linked_issue(repo, cand["pr"])
         if issue is None:
             rejected["no_linked_issue"] = rejected.get("no_linked_issue", 0) + 1
@@ -235,6 +264,8 @@ def main() -> None:
                     help="how many commits back to scan per repo")
     ap.add_argument("--want", type=int, default=12,
                     help="max cases to keep per repo")
+    ap.add_argument("--max-lookups", type=int, default=250,
+                    help="cap on API calls used to recover PR numbers per repo")
     args = ap.parse_args()
 
     all_cases: list[Case] = []
@@ -243,7 +274,8 @@ def main() -> None:
         if not repo_dir.exists():
             print(f"[{repo}] missing clone at {repo_dir}, skipping")
             continue
-        all_cases.extend(mine_repo(repo, repo_dir, args.limit, args.want))
+        all_cases.extend(mine_repo(repo, repo_dir, args.limit, args.want,
+                                   args.max_lookups))
 
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)

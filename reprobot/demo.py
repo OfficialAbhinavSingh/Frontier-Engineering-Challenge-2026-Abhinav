@@ -13,6 +13,7 @@ import textwrap
 from pathlib import Path
 
 from reprobot.agents.memory import RepoMemory
+from reprobot.artifact import Proposal, render_report, write_proposal
 from reprobot.agents.solver import SolverConfig, solve
 from reprobot.eval.run import DEFAULT_MODEL, score_case
 from reprobot.llm.client import LLMClient
@@ -20,6 +21,16 @@ from reprobot.repo import RepoView
 from reprobot.trace import Trace
 
 RULE = "─" * 78
+
+# Mirrors variant s6 in reprobot/eval/run.py -- the final system.
+FINAL_CONFIG = SolverConfig(
+    use_map=True,
+    use_examples=True,
+    use_typed_repair=True,
+    use_memory=True,
+    use_minimal_claim=True,
+    use_signature_grounding=True,
+)
 
 
 def header(title: str) -> None:
@@ -70,7 +81,9 @@ def main() -> None:
 
     header("REPRO-BOT RUNNING")
     print("  cartographer → locator → author → sandbox → verifier → repair\n")
-    result = solve(case, view, client, trace, memory, SolverConfig())
+    # The narrated run uses the final configuration, not the library default,
+    # so what a reader sees here is the system the results describe.
+    result = solve(case, view, client, trace, memory, FINAL_CONFIG)
 
     for attempt in result["attempts"]:
         print(f"  round {attempt['round']}: {attempt['verdict']}"
@@ -96,15 +109,35 @@ def main() -> None:
           f"${usage['cost_usd']:.4f}")
     print(f"  trajectory: {trace.path}")
 
+    proposal = Proposal(
+        case=case,
+        test_rel_path=result["test_rel_path"],
+        test_source=result["test_source"],
+        attempts=result["attempts"],
+        verdict=result.get("self_verdict"),
+        located=result.get("located", {}),
+        usage=result["usage"],
+        trace_path=trace.path,
+    )
+
     header("HUMAN CHECKPOINT")
     if args.approve:
-        out = Path(args.out_dir) / case["case_id"] / result["test_rel_path"]
-        out.parent.mkdir(parents=True, exist_ok=True)
-        out.write_text(result["test_source"])
-        print(f"  approved — proposal written to {out}")
+        target = write_proposal(proposal, args.out_dir)
+        print(f"  Approved. Reviewable bundle written to {target}/\n")
+        for item in sorted(target.iterdir()):
+            print(f"    {item.name}")
+        print("\n  Apply it with:")
+        print(f"    git apply {target}/add-test.patch")
     else:
-        print("  Not approved. Repro-Bot never writes to a repository on its own;")
-        print("  re-run with --approve to emit the file after you have read it.")
+        print("  Not approved, so nothing was written. Repro-Bot never commits.")
+        print("  Re-run with --approve to emit the reviewable bundle:")
+        print("    the test, a git-applyable patch, the verifier's evidence,")
+        print("    the attempts that were rejected, and what is still unverified.\n")
+        preview = render_report(proposal).splitlines()
+        print("  --- report preview ---")
+        for line in preview[:16]:
+            print(f"  {line}")
+        print(f"  … [{len(preview) - 16} more lines]")
 
 
 if __name__ == "__main__":

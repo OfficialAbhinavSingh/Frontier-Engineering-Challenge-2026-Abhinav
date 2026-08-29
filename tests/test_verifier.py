@@ -156,3 +156,44 @@ def test_signature_grounding_is_off_unless_the_report_is_supplied():
         "'catch_exceptions'\n"
     )
     assert verify(result("failed", "TypeError", output), TEST_PATH).verdict == "shallow_fail"
+
+
+def test_the_proposed_patch_adds_one_file_and_touches_nothing_else():
+    """The patch is the part a maintainer applies, so its shape is load-bearing.
+
+    Add-only is what makes the proposal safe to review at a glance: no existing
+    test or source file can be modified by it.
+    """
+    from reprobot.artifact import build_patch
+
+    source = "import pytest\n\n\ndef test_thing():\n    assert 1 == 2\n"
+    patch = build_patch("tests/test_reprobot_case.py", source)
+
+    assert patch.startswith("diff --git a/tests/test_reprobot_case.py")
+    assert "new file mode 100644" in patch
+    assert "--- /dev/null" in patch
+    # Every content line is an addition; nothing is removed anywhere.
+    body = patch.split("@@")[-1]
+    assert all(line.startswith("+") for line in body.splitlines() if line.strip())
+    assert "\n-" not in body
+    assert f"+1,{len(source.splitlines())} @@" in patch
+
+
+def test_a_report_states_what_it_has_not_established():
+    """A proposal that hides its own limit is worse than useless to a reviewer."""
+    from reprobot.artifact import Proposal, render_report
+
+    case = {
+        "case_id": "demo__1", "repo": "o/demo", "repo_name": "demo",
+        "issue_number": 1, "issue_title": "it breaks", "parent_sha": "a" * 40,
+    }
+    report = render_report(Proposal(
+        case=case, test_rel_path="tests/test_x.py",
+        test_source="def test_x():\n    assert False\n",
+        attempts=[{"round": 1, "verdict": "reproduced_assertion",
+                   "exception_type": "AssertionError", "reason": "r", "output": "o"}],
+        verdict="reproduced_assertion", located={}, usage={"calls": 2, "cost_usd": 0.001},
+    ))
+    assert "Not established" in report
+    assert "oracle" in report.lower() or "intended behaviour" in report.lower()
+    assert "Reviewer's checklist" in report
