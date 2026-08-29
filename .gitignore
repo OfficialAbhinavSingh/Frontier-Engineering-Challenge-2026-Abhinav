@@ -23,5 +23,9 @@ data/cases/mined_extra.json
 data/cases/mined_sqlglot.json
 data/cases/probe.json
 
+# Reviewable bundles emitted by `reprobot.demo --approve`. Derived output, and
+# regenerating one is the point of the demo.
+proposals/
+
 # Written by `uv run` when borrowing pytest for the harness tests.
 uv.lock

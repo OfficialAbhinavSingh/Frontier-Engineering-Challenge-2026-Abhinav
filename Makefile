@@ -5,7 +5,7 @@ REPOS := tobymao/sqlglot python-poetry/tomlkit pallets/click \
 MODEL ?= google/gemini-2.5-flash
 SPLIT ?= eval
 
-.PHONY: help repos images dataset validate demo baseline solution eval report replay test trajectories clean-results
+.PHONY: help repos images dataset validate demo baseline solution eval report replay replay-check verify-scores test trajectories clean-results
 
 help:
 	@echo "Repro-Bot — turn a bug report into a verified failing test"
@@ -13,7 +13,10 @@ help:
 	@echo "  make repos       clone the target repositories (~8 min, ~700 MB)"
 	@echo "  make dataset     mine candidate cases from merged bugfix commits"
 	@echo "  make validate    build sandbox images and keep only provable cases"
-	@echo "  make replay      reproduce every reported number from the shipped cache (no API key)"
+	@echo "  make verify-scores re-derive every reported score from the committed"
+	@echo "                   test sources -- no API key, no model, no cache"
+	@echo "  make replay      re-run the variants from the shipped cache (no API key)"
+	@echo "  make replay-check measure how exactly that replay reproduces the runs"
 	@echo "  make baseline    run both baselines live          (needs OPENROUTER_API_KEY)"
 	@echo "  make solution    run the final systems live       (needs OPENROUTER_API_KEY)"
 	@echo "  make eval        run every variant live           (needs OPENROUTER_API_KEY)"
@@ -58,6 +61,7 @@ baseline:
 	$(PY) -m reprobot.eval.run --variant b0 --variant b1 \
 		--split $(SPLIT) --model $(MODEL) --out-dir results
 
+# s5 is the shipped system; s6 is included because the report contrasts them.
 solution:
 	$(PY) -m reprobot.eval.run --variant s5 --variant s6 \
 		--split $(SPLIT) --model $(MODEL) --out-dir results
@@ -71,6 +75,19 @@ eval:
 
 report:
 	$(PY) -m reprobot.eval.report --split $(SPLIT) --out results/REPORT.md
+
+# The strongest reproducibility check, and the one that needs no API key and no
+# cache: re-run every committed test source in the sandbox and re-derive every
+# reported Fail-to-Pass flag. No model is involved at any point.
+verify-scores:
+	$(PY) scripts/verify_scores.py --split $(SPLIT) --out results/SCORE_VERIFICATION.md
+
+# How exactly the committed model-response cache reproduces the recorded runs.
+# This is measured rather than asserted; see REPRODUCTION.md for what it means.
+replay-check:
+	$(PY) scripts/replay_fidelity.py \
+		--variant b0 --variant b1 --variant s5 --variant s6 --variant x1 \
+		--split $(SPLIT) --out results/REPLAY_FIDELITY.md
 
 demo:
 	$(PY) -m reprobot.demo --model $(MODEL)
