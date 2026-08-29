@@ -125,7 +125,7 @@ def main() -> None:
 
     labels = {
         "s5": "Repro-Bot, the final system",
-        "x1": "the removed experiment — verification by model instead of traceback",
+        "x1": "the removed experiment — verification by model instead of traceback (it outscores the shipped system; removed for cost and determinism)",
         "b1": "the fair baseline — one general-purpose agent with the same tools",
         "s4": "Repro-Bot before minimal-claim authoring",
         "demo": "the narrated single-case run",

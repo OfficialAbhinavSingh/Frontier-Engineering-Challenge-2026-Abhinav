@@ -1,7 +1,7 @@
 # Trajectory — `click__3105`
 
 
-## [0.34s] agent `locator` — instructions
+## [0.298s] agent `locator` — instructions
 
 **System**
 
@@ -74,7 +74,7 @@ happy to submit a PR if this makes sense.  Rather not have to create a customcla
 … [1296 more chars]
 ````
 
-### [0.34s] model reply to `locator` (cache replay)
+### [0.298s] model reply to `locator` (cache replay)
 
 ````
 ```json
@@ -88,7 +88,7 @@ happy to submit a PR if this makes sense.  Rather not have to create a customcla
 ```
 ````
 
-## [0.354s] agent `author.round1` — instructions
+## [0.31s] agent `author.round1` — instructions
 
 **System**
 
@@ -177,7 +177,7 @@ happy to submit a PR if this makes sense.  Rather not have to create a customcla
 … [9596 more chars]
 ````
 
-### [2.481s] model reply to `author.round1` (live)
+### [0.311s] model reply to `author.round1` (cache replay)
 
 ````
 ```python
@@ -214,7 +214,7 @@ def test_func_param_type_value_error_message(runner):
 ```
 ````
 
-### [2.481s] tool call `run_test`
+### [0.311s] tool call `run_test`
 
 ````json
 {
@@ -223,18 +223,18 @@ def test_func_param_type_value_error_message(runner):
 }
 ````
 
-### [3.219s] tool result `run_test`
+### [0.974s] tool result `run_test`
 
 ````
 {
   "outcome": "infra_error",
   "exception_type": "AttributeError",
-  "duration_s": 0.74,
+  "duration_s": 0.66,
   "pytest_output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n___________________ test_func_param_type_value_error_message ___________________\ntests/test_reprobot_click__3105.py:25: in test_func_param_type_value_error_message\n    @click.argument(\"mydata\", type=click.FuncParamType(MyClass.from_str))\n                                   ^^^^^^^^^^^^^^^^^^^\nsrc/click/__init__.py:126: in __getattr__\n    raise AttributeError(name)\nE   AttributeError: FuncParamType. Did you mean: 'ParamType'?\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_click__3105.py::test_func_param_type_value_error_message\n1 failed in 0.02s\n"
 }
 ````
 
-### [3.219s] verifier verdict — round 1: **broken_test**
+### [0.974s] verifier verdict — round 1: **broken_test**
 
 ````json
 {
@@ -250,7 +250,7 @@ def test_func_param_type_value_error_message(runner):
 }
 ````
 
-## [3.231s] agent `author.round2` — instructions
+## [0.984s] agent `author.round2` — instructions
 
 **System**
 
@@ -339,7 +339,7 @@ happy to submit a PR if this makes sense.  Rather not have to create a customcla
 … [11772 more chars]
 ````
 
-### [5.012s] model reply to `author.round2` (live)
+### [0.985s] model reply to `author.round2` (cache replay)
 
 ````
 ```python
@@ -377,7 +377,7 @@ def test_func_param_type_value_error_message(runner):
 ```
 ````
 
-### [5.012s] tool call `run_test`
+### [0.985s] tool call `run_test`
 
 ````json
 {
@@ -386,18 +386,18 @@ def test_func_param_type_value_error_message(runner):
 }
 ````
 
-### [5.74s] tool result `run_test`
+### [1.646s] tool result `run_test`
 
 ````
 {
   "outcome": "failed",
   "exception_type": null,
-  "duration_s": 0.73,
+  "duration_s": 0.66,
   "pytest_output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n___________________ test_func_param_type_value_error_message ___________________\ntests/test_reprobot_click__3105.py:31: in test_func_param_type_value_error_message\n    assert \"Error: Invalid value for 'MYDATA': input was 'fails', should be 'works'\" in result.output\nE   assert \"Error: Invalid value for 'MYDATA': input was 'fails', should be 'works'\" in \"Usage: cli [OPTIONS] MYDATA\\nTry 'cli --help' for help.\\n\\nError: Invalid value for 'MYDATA': fails\\n\"\nE    +  where \"Usage: cli [OPTIONS] MYDATA\\nTry 'cli --help' for help.\\n\\nError: Invalid value for 'MYDATA': fails\\n\" = <Result SystemExit(2)>.output\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_click__3105.py::test_func_param_type_value_error_message\n1 failed in 0.02s\n"
 }
 ````
 
-### [5.741s] verifier verdict — round 2: **reproduced_assertion**
+### [1.647s] verifier verdict — round 2: **reproduced_assertion**
 
 ````json
 {
@@ -411,7 +411,7 @@ def test_func_param_type_value_error_message(runner):
 }
 ````
 
-### [7.655s] human checkpoint — `approval_required`
+### [1.647s] human checkpoint — `approval_required`
 
 ````json
 {
@@ -421,7 +421,7 @@ def test_func_param_type_value_error_message(runner):
 }
 ````
 
-## [9.093s] run finished (9.09s)
+## [2.976s] run finished (2.98s)
 
 ````json
 {
@@ -436,11 +436,11 @@ def test_func_param_type_value_error_message(runner):
   "usage": {
     "prompt_tokens": 8858,
     "completion_tokens": 761,
-    "cost_usd": 0.003966,
+    "cost_usd": 0.0,
     "calls": 4,
-    "cached_calls": 1
+    "cached_calls": 4
   },
-  "wall_clock_s": 9.1,
+  "wall_clock_s": 3.0,
   "error": null,
   "test_rel_path": "tests/test_reprobot_click__3105.py",
   "attempts": [
@@ -454,6 +454,6 @@ def test_func_param_type_value_error_message(runner):
     {
       "round": 2,
       "verdict": "reproduced_assertion",
-
-… [1175 more chars]
+     
+… [1170 more chars]
 ````
