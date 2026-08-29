@@ -22,14 +22,17 @@ from reprobot.trace import Trace
 
 RULE = "─" * 78
 
-# Mirrors variant s6 in reprobot/eval/run.py -- the final system.
+# Mirrors variant s5 in reprobot/eval/run.py -- the shipped system.
+#
+# Not s6. Signature grounding scored higher overall but lost on the held-out
+# subset (4.3/13 against s5's 4.7/13), which is the signature of a rule fitted to
+# the case that motivated it. The switch stays available in SolverConfig.
 FINAL_CONFIG = SolverConfig(
     use_map=True,
     use_examples=True,
     use_typed_repair=True,
     use_memory=True,
     use_minimal_claim=True,
-    use_signature_grounding=True,
 )
 
 

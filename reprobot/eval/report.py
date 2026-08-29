@@ -3,10 +3,11 @@
 Three things are reported beyond the headline rate, because without them the
 headline is not interpretable.
 
-**Range across repetitions.** Fourteen cases means one case is seven percentage
-points. A single run is one sample, and a variant has been observed moving by a
-full case from a harness change alone, so every repeated variant is reported as
-a mean with the range it actually spanned.
+**Range across repetitions.** Twenty-seven cases means one case is nearly four
+percentage points. A single run is one sample, and a variant has been observed
+moving by a full case from a harness change alone, so every repeated variant is
+reported as a mean with the range it actually spanned. Variants whose ranges
+overlap are not ranked against each other anywhere in the report.
 
 **Cost.** An improvement that costs three times as much is a trade, not a win.
 
@@ -31,10 +32,12 @@ TAG = re.compile(r"_r\d+$")
 
 # Anything a reader must be told rather than left to infer from a table.
 FOOTNOTES = {
-    "s6": "Post-hoc. The blind spot this fixes was found on the evaluation "
-          "split, so this row is not a clean held-out result and is reported "
-          "separately from the pre-registered comparison.",
-    "x1": "Removed. Kept switchable so the claim can be re-run.",
+    "s6": "Post-hoc and not shipped. The blind spot this fixes was found on the "
+          "evaluation split, so this row is not a clean held-out result. On the "
+          "cases added afterwards it scores below s5, so the rule did not "
+          "generalise and s5 remains the shipped system.",
+    "x1": "Removed for determinism and cost, not because it lost -- it leads "
+          "both overall and held out. Kept switchable so the claim can be re-run.",
 }
 
 
@@ -197,7 +200,7 @@ def build(results_dir: Path, split: str) -> str:
         return f"No results found in {results_dir} for split '{split}'."
 
     first = next(iter(runs.values()))[0]
-    final = runs.get("s6") or runs.get("s5") or list(runs.values())[-1]
+    final = runs.get("s5") or list(runs.values())[-1]
 
     return "\n".join([
         f"# Results — `{split}` split\n",
