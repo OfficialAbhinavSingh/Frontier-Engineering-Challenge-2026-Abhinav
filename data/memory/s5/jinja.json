@@ -1,0 +1,32 @@
+[
+  {
+    "text": "Asynchronous tests should use `pytest_asyncio.fixture` for fixtures and `pytest_asyncio.mark.asyncio` for test functions.",
+    "from_case": "jinja__1573",
+    "added_at": 1787994093.3303854
+  },
+  {
+    "text": "When testing asynchronous rendering, ensure that the test environment is configured with `enable_async=True`.",
+    "from_case": "jinja__1573",
+    "added_at": 1787994093.330387
+  },
+  {
+    "text": "When testing filters, import them from `jinja2.filters` to ensure you're getting the canonical object, not a local reference.",
+    "from_case": "jinja__1612",
+    "added_at": 1787994106.5575666
+  },
+  {
+    "text": "The `PicklingError: it's not the same object as X` message indicates that the object being pickled is not the one expected by the unpickler, often due to re-importing or referencing a function/class in a way that creates a new object in memory.",
+    "from_case": "jinja__1612",
+    "added_at": 1787994106.557569
+  },
+  {
+    "text": "When testing pickling behavior, ensure the object being pickled is directly importable from the module where it's defined, as `pickle` relies on this for deserialization.",
+    "from_case": "jinja__2027",
+    "added_at": 1787994124.8122876
+  },
+  {
+    "text": "Avoid importing internal utility objects directly from `jinja2.utils` if they are not part of the public API and might have specific, non-standard behaviors or limitations.",
+    "from_case": "jinja__2027",
+    "added_at": 1787994124.8122897
+  }
+]

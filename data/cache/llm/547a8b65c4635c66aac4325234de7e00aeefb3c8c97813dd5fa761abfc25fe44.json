@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"When testing rendering, prefer `rich.console.Console.export_text()` over `rich.console.Console.record()` for capturing output, as `export_text()` provides a direct string representation suitable for comparison.\",\n  \"When comparing rendered output, be mindful of trailing whitespace. Use `str.rstrip()` on both actual and expected strings if trailing whitespace is not significant to the test.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 489,
+    "completion_tokens": 92,
+    "cost_usd": 0.000377,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992371.4657784
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"When writing a regression test, ensure it fails on the buggy commit before attempting to fix the bug. This confirms the test accurately captures the reported behavior.\",\n  \"Tests in this repository often use `pytest.mark.skip` or similar mechanisms. Be mindful of skipped tests and ensure your regression test is actively run and fails as expected.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 349,
+    "completion_tokens": 79,
+    "cost_usd": 0.000302,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787991846.2964559
+}

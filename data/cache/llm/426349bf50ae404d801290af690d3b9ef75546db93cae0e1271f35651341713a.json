@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nfrom jinja2 import Environment\nfrom jinja2.nodes import Template\n\n\nclass TestHashing:\n    def test_template_hash(self, env):\n        template = env.parse(\"hash test\")\n        # The bug causes TypeError: unhashable type: 'list' when calling hash()\n        # We assert that calling hash() on the template node does not raise an exception.\n        assert hash(template) is not None\n```",
+  "usage": {
+    "prompt_tokens": 3342,
+    "completion_tokens": 101,
+    "cost_usd": 0.001255,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992257.3032224
+}

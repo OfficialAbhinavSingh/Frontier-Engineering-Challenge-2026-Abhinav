@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pickle\n\nimport jinja2.filters\n\n\ndef test_filters_decorated_with_async_variant_are_pickleable() -> None:\n    \"\"\"Filters decorated with @async_variant should be pickleable.\"\"\"\n    # The do_first filter is decorated with @async_variant\n    # and should therefore be pickleable.\n    # The bug report specifically mentions do_first as an example.\n    try:\n        pickle.dumps(jinja2.filters.do_first)\n    except Exception as e:\n        assert False, f\"jinja2.filters.do_first should be pickleable, but raised: {e}\"\n\n    # Additionally, verify that the __name__ and __qualname__ are correct\n    assert jinja2.filters.do_first.__name__ == \"do_first\"\n    assert jinja2.filters.do_first.__qualname__ == \"do_first\"\n\n```",
+  "usage": {
+    "prompt_tokens": 3674,
+    "completion_tokens": 206,
+    "cost_usd": 0.001617,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989788.9273436
+}

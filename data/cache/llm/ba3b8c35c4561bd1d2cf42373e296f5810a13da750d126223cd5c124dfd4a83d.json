@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\n\nfrom jinja2.nativetypes import NativeEnvironment\n\n\ndef test_issue_1701_nativetypes_block_loop_index_typeerror():\n    \"\"\"\n    This test reproduces the TypeError: sequence item 0: expected str instance, int found\n    when using NativeEnvironment with a block containing a loop that outputs loop.index\n    and the block is called using self.block_name().\n    \"\"\"\n    env = NativeEnvironment()\n    template = env.from_string(\n        '{% block test %}{% for i in range(1) %}{{ loop.index }}{% endfor %}{% endblock %}{{ self.test() }}'\n    )\n    with pytest.raises(TypeError) as excinfo:\n        template.render()\n    assert \"sequence item 0: expected str instance, int found\" in str(excinfo.value)\n\n```",
+  "usage": {
+    "prompt_tokens": 1019,
+    "completion_tokens": 202,
+    "cost_usd": 0.000811,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989130.9535613
+}

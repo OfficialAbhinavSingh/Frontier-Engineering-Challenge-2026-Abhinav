@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\"rich/live.py\", \"rich/live_render.py\"],\n  \"test_file\": \"tests/test_live.py\",\n  \"why\": \"The bug report describes an issue with `Live` leaving a spurious newline when its content is empty, directly implicating `rich/live.py` and its rendering logic in `rich/live_render.py`, and a regression test would naturally belong in `tests/test_live.py`.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 3388,
+    "completion_tokens": 115,
+    "cost_usd": 0.001304,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989819.0214415
+}

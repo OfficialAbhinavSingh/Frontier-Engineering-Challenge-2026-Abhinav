@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nfrom jinja2 import Environment\nfrom jinja2.nativetypes import NativeEnvironment\n\n\ndef test_issue_1510_macro_native_types():\n    env = NativeEnvironment()\n    template = env.from_string(\n        \"{%- macro x() -%}{{- [5,6] -}}{%- endmacro -%}{{- x()[0] -}}\"\n    )\n    result = template.render()\n    assert result == 5\n    assert isinstance(result, int)\n\n    template = env.from_string(\n        \"{%- macro x() -%}{{- {'foo': 'bar'} -}}{%- endmacro -%}{{- x() -}}\"\n    )\n    result = template.render()\n    assert result == {\"foo\": \"bar\"}\n    assert isinstance(result, dict)\n\n    template = env.from_string(\n        \"{%- macro x() -%}{{- 1 + 1 -}}{%- endmacro -%}{{- x() -}}\"\n    )\n    result = template.render()\n    assert result == 2\n    assert isinstance(result, int)\n\n    # Ensure it still works for strings\n    template = env.from_string(\n        \"{%- macro x() -%}{{- 'hello' -}}{%- endmacro -%}{{- x() -}}\"\n    )\n    result = template.render()\n    assert result == \"hello\"\n    assert isinstance(result, str)\n\n```",
+  "usage": {
+    "prompt_tokens": 3018,
+    "completion_tokens": 327,
+    "cost_usd": 0.001723,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989755.3584683
+}

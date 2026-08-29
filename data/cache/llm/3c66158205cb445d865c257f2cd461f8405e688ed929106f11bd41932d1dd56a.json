@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"My apologies again. I will be more careful with the JSON output.\n\nThe test I wrote aims to verify the width of the Nerd Font character `\\\\U000f024d`.\nI'm using `Console(width=80, _environ={})` to ensure a consistent environment for measurement, as `rich` can be sensitive to terminal capabilities.\nThe `console.measure(text)` method returns a `Measurement` object, from which I extract `maximum` width.\nThe expectation is that this character, being a single Unicode character, should have a width of 1. If the bug exists, it will report 2.\n\nLet's run this test and see the outcome.\", \"tool\": \"run_test\", \"args\": {\"source\": \"import pytest\\nfrom rich.console import Console\\nfrom rich.text import Text\\n\\ndef test_nerd_font_width():\\n    console = Console(width=80, _environ={})\\n    # The problematic Nerd Font character (f024d is a download folder icon)\\n    nerd_font_char = \\\"\\\\U000f024d\\\"\\n    text = Text(nerd_font_char)\\n\\n    # Measure the width of the text\\n    measurement = console.measure(text)\\n\\n    # The character should be single-width\\n    expected_width = 1\\n    actual_width = measurement.maximum\\n\\n    assert actual_width == expected_width, f\\\"Expected width {expected_width}, but got {actual_width} for character {nerd_font_char}\\\"\\n\"}}",
+  "usage": {
+    "prompt_tokens": 2413,
+    "completion_tokens": 365,
+    "cost_usd": 0.001636,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989569.0041194
+}

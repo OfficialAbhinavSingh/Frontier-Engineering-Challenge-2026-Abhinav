@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"When writing async tests, import `pytest_asyncio` and use its `pytest_asyncio.fixture` and `pytest_asyncio.mark.asyncio`.\",\n  \"Jinja2 templates are rendered by calling `render()` on a `Template` object, which can be created from an `Environment` instance. Async rendering is done via `render_async()`.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 784,
+    "completion_tokens": 90,
+    "cost_usd": 0.00046,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787991886.2759094
+}

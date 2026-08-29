@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"When testing pickling behavior, ensure the object being pickled is imported directly from the module where it's defined, not from a local alias or a re-export.\",\n  \"The `jinja2.filters` module contains both synchronous and asynchronous variants of filters; ensure you are referencing the correct variant when testing specific behaviors.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 1009,
+    "completion_tokens": 78,
+    "cost_usd": 0.000498,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787991901.4059765
+}

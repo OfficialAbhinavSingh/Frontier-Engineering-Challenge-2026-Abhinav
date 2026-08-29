@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport io\nimport pytest\nfrom rich.style import Style\nfrom rich.text import Text\nfrom rich.console import Console\nfrom rich.measure import Measurement\n\n\ndef test_from_ansi_trailing_newline():\n    \"\"\"\n    Test that Text.from_ansi() does not remove a trailing newline.\n    \"\"\"\n    # Test case 1: Single newline character\n    text_with_newline = Text.from_ansi(\"\\n\")\n    expected_text_with_newline = Text(\"\\n\")\n    assert text_with_newline == expected_text_with_newline, (\n        f\"Expected Text('{expected_text_with_newline.plain}') \"\n        f\"but got Text('{text_with_newline.plain}') for input '\\\\n'\"\n    )\n\n    # Test case 2: Text ending with a single newline\n    text_ending_with_newline = Text.from_ansi(\"hello\\n\")\n    expected_text_ending_with_newline = Text(\"hello\\n\")\n    assert text_ending_with_newline == expected_text_ending_with_newline, (\n        f\"Expected Text('{expected_text_ending_with_newline.plain}') \"\n        f\"but got Text('{text_ending_with_newline.plain}') for input 'hello\\\\n'\"\n    )\n\n    # Test case 3: Text ending with multiple newlines\n    text_ending_with_multiple_newlines = Text.from_ansi(\"world\\n\\n\")\n    expected_text_ending_with_multiple_newlines = Text(\"world\\n\\n\")\n    assert text_ending_with_multiple_newlines == expected_text_ending_with_multiple_newlines, (\n        f\"Expected Text('{expected_text_ending_with_multiple_newlines.plain}') \"\n        f\"but got Text('{text_ending_with_multiple_newlines.plain}') for input 'world\\\\n\\\\n'\"\n    )\n\n    # Test case 4: Text without a trailing newline (should remain unchanged)\n    text_no_newline = Text.from_ansi(\"plain text\")\n    expected_text_no_newline = Text(\"plain text\")\n    assert text_no_newline == expected_text_no_newline, (\n        f\"Expected Text('{expected_text_no_newline.plain}') \"\n        f\"but got Text('{text_no_newline.plain}') for input 'plain text'\"\n    )\n\n    # Test case 5: Empty string\n    empty_text = Text.from_ansi(\"\")\n    expected_empty_text = Text(\"\")\n    assert empty_text == expected_empty_text, (\n        f\"Expected Text('{expected_empty_text.plain}') \"\n        f\"but got Text('{empty_text.plain}') for input ''\"\n    )\n\n```",
+  "usage": {
+    "prompt_tokens": 4044,
+    "completion_tokens": 630,
+    "cost_usd": 0.002788,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787994685.7653034
+}

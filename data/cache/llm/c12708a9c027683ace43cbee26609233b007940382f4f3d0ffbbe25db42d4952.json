@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nfrom rich.style import Style\nfrom rich.text import Text\nfrom rich.text import Span\n\n\ndef test_assemble_meta():\n    text = Text.assemble(\"foo\", (\"bar\", \"bold\"), meta={\"foo\": \"bar\"})\n    # The bug report shows that the assertion fails because the Style object\n    # for the meta span is not considered equal, even though its contents appear\n    # to be the same. This suggests an issue with how Style objects are compared\n    # or how they are created internally, leading to a difference that isn't\n    # immediately obvious from the repr.\n    # The original assertion was:\n    # assert text._spans == [Span(3, 6, \"bold\"), Span(0, 6, Style(meta={\"foo\": \"bar\"}))]\n    # To trigger the bug, we need to assert the exact structure that the reporter\n    # saw failing. The failure message indicates that the Span objects themselves\n    # are not considered equal, specifically the Style object within the second Span.\n    # The bug is that the comparison of the Style objects within the Spans fails.\n    # We assert the exact list of spans as expected by the reporter.\n    assert text._spans == [\n        Span(3, 6, \"bold\"),\n        Span(0, 6, Style(meta={\"foo\": \"bar\"})),\n    ]\n```",
+  "usage": {
+    "prompt_tokens": 2812,
+    "completion_tokens": 309,
+    "cost_usd": 0.001616,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787994777.5426226
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"When testing `tomlkit.dumps`, be mindful of trailing newlines. The `tomlkit` API guarantees a trailing newline, so `expected_dump` should always end with `\\\\n`.\",\n  \"When constructing TOML documents for testing, prefer using `tomlkit.parse` on a string literal over manual construction with `tomlkit.document()` and `append()`/`add()`. This helps ensure the document structure accurately reflects how `tomlkit` would parse it from a file.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 480,
+    "completion_tokens": 114,
+    "cost_usd": 0.000429,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992033.5188437
+}

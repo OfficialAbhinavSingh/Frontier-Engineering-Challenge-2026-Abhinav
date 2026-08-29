@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The test was skipped because `sys.stdout.isatty()` returned `False` in the sandbox environment. This means the test environment is not a TTY, which is common in automated testing. To make the test reliable, I need to mock `sys.stdout` to ensure `isatty()` returns `True` for the original `stdout` object, so that the `FileProxy` *should* delegate to `True`. This will allow the assertion `assert sys.stdout.isatty() is True` inside the `Live` context to fail as expected.\", \"tool\": \"run_test\", \"args\": {\"source\": \"import sys\\nfrom unittest.mock import MagicMock\\nfrom rich.console import Console\\nfrom rich.live import Live\\n\\ndef test_fileproxy_isatty_delegation():\\n    # Mock sys.stdout to ensure isatty() returns True for the original stdout\\n    original_stdout = sys.stdout\\n    mock_stdout = MagicMock()\\n    mock_stdout.isatty.return_value = True\\n    mock_stdout.write = original_stdout.write # Ensure write still works for console output\\n    mock_stdout.flush = original_stdout.flush # Ensure flush still works\\n    mock_stdout.fileno.return_value = original_stdout.fileno() # Ensure fileno works\\n\\n    sys.stdout = mock_stdout\\n\\n    try:\\n        console = Console()\\n        with Live(\\\"hello\\\", console=console, redirect_stdout=True):\\n            # Inside Live, sys.stdout should be proxied. Its isatty() should delegate\\n            # to the mocked sys.stdout, which returns True.\\n            # The bug is that it returns False instead.\\n            assert sys.stdout.isatty() is True\\n    finally:\\n        sys.stdout = original_stdout\\n\"}}",
+  "usage": {
+    "prompt_tokens": 3787,
+    "completion_tokens": 424,
+    "cost_usd": 0.002196,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989596.1011753
+}

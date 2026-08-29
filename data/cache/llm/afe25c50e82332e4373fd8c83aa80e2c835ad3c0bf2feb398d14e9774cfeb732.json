@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pickle\nimport pytest\n\nfrom jinja2.utils import missing\n\n\ndef test_missing_pickle():\n    # This should not raise a PicklingError\n    loaded_missing = pickle.loads(pickle.dumps(missing))\n    assert loaded_missing is missing\n```",
+  "usage": {
+    "prompt_tokens": 2772,
+    "completion_tokens": 62,
+    "cost_usd": 0.000987,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992294.9710958
+}

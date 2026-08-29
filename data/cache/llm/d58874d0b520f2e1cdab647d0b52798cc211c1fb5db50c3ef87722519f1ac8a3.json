@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport io\nfrom unittest.mock import patch\n\nfrom rich.console import Console\nfrom rich.prompt import Confirm\n\n\ndef test_confirm_on_validate_error_markup_disabled():\n    \"\"\"\n    Tests that Confirm.ask's validation error message respects markup=True\n    even when the console has markup=False.\n    \"\"\"\n    output = io.StringIO()\n    console = Console(file=output, markup=False, force_terminal=True)\n\n    # Simulate user entering an invalid choice, then a valid one\n    with patch(\"builtins.input\", side_effect=[\"invalid\", \"y\"]):\n        Confirm.ask(\"Proceed?\", console=console)\n\n    # The expected error message should have markup applied,\n    # even though the console was created with markup=False.\n    # This means the style tags should be rendered, not printed literally.\n    expected_error_message_part = \"Please enter Y or N\"\n    actual_output = output.getvalue()\n\n    # Check that the styled error message appears and the markup is processed\n    # (i.e., we don't see the literal '[prompt.invalid]' tags).\n    # We're looking for the styled text, which implies markup was enabled for that print.\n    assert expected_error_message_part in actual_output\n    assert \"[prompt.invalid]\" not in actual_output\n    # The bug is that if console.markup is False, the error message\n    # \"[prompt.invalid]Please enter Y or N\" is printed literally with the tags.\n    # If the fix is applied, the tags are processed and not visible in the output.\n```",
+  "usage": {
+    "prompt_tokens": 1730,
+    "completion_tokens": 362,
+    "cost_usd": 0.001424,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989156.8924348
+}

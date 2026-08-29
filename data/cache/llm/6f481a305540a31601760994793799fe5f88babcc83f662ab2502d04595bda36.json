@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\"reproduced\": true, \"why\": \"The test failed because the actual output 'a.b = {}c = 3' did not match the expected output 'a.b = {}\\\\nc = 3', which directly reflects the missing newline after the inline table as described in the bug report.\"}\n```",
+  "usage": {
+    "prompt_tokens": 580,
+    "completion_tokens": 69,
+    "cost_usd": 0.000347,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992403.0940473
+}

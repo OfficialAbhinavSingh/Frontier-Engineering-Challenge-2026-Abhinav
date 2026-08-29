@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nimport io\nimport sys\nfrom rich.console import Console\nfrom rich.prompt import Confirm\nfrom unittest import mock\n\n\ndef test_confirm_on_validate_error_markup() -> None:\n    # Create a console with markup disabled\n    console = Console(markup=False, file=io.StringIO(), force_terminal=True)\n\n    # Mock stdin to simulate user input\n    # First, an invalid input, then a valid one to exit the prompt\n    with mock.patch(\"builtins.input\", side_effect=[\"invalid\", \"y\"]):\n        # Call Confirm.ask with the console\n        Confirm.ask(\"Continue\", console=console)\n\n    # Get the output from the console\n    output = console.file.getvalue()\n\n    # Assert that the error message contains the markup,\n    # indicating that markup was explicitly enabled for the error message.\n    # The bug is that it currently prints \"[prompt.invalid]Please enter Y or N\" literally.\n    # The fix should make it print \"Please enter Y or N\" with the style applied.\n    assert \"Please enter Y or N\" in output\n    assert \"[prompt.invalid]\" not in output\n```",
+  "usage": {
+    "prompt_tokens": 3067,
+    "completion_tokens": 261,
+    "cost_usd": 0.001573,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787991742.3529577
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nfrom jinja2 import Environment\n\n# No pytest.mark.asyncio needed, Jinja's async rendering is handled by render_async\n# and the test itself doesn't need to be an async function.\n\ndef test_custom_filter_with_slice_async_true():\n    jinja_env = Environment(enable_async=True)\n    jinja_env.filters.update({'add_two': lambda x, y: [i + y for i in x]})\n\n    template = jinja_env.from_string(\"{% for item in (a.b|add_two(5))[:1] %}{{ item }}{% endfor %}\")\n    data = dict(a=dict(b=[1, 2, 3]))\n\n    # This should render without error and produce the expected output\n    # The bug causes a TypeError here.\n    result = template.render(data) # Use render() for synchronous execution of async-enabled env\n    assert result == \"6\"\n\n    # Test the alternative syntax that currently raises a TemplateSyntaxError\n    # This is to ensure that the fix for the original issue doesn't break this case\n    # and that the syntax error remains if it's indeed invalid.\n    template_syntax_error = jinja_env.from_string(\"{% for item in a.b|add_two(5)[:1] %}{{ item }}{% endfor %}\")\n    with pytest.raises(\n        jinja_env.exceptions.TemplateSyntaxError,\n        match=\"expected token 'end of statement block', got '\\\\['\"\n    ):\n        template_syntax_error.render(data)\n```",
+  "usage": {
+    "prompt_tokens": 5465,
+    "completion_tokens": 369,
+    "cost_usd": 0.002562,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787991522.2096205
+}

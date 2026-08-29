@@ -1,0 +1,12 @@
+[
+  {
+    "text": "When testing new syntax, expect TemplateSyntaxError until the parser is updated. Focus initial tests on parser behavior, not rendering output.",
+    "from_case": "jinja__1430",
+    "added_at": 1787994745.623275
+  },
+  {
+    "text": "Tests for new features should start with minimal syntax validation before moving to complex rendering scenarios.",
+    "from_case": "jinja__1430",
+    "added_at": 1787994745.623277
+  }
+]

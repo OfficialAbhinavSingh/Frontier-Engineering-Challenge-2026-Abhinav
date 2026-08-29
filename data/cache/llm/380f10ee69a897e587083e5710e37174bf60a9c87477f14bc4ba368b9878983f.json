@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"When asserting on console output, be aware that Rich often adds ANSI escape codes for styling. Use `rich.console.Console.export_text()` or `rich.console.Console.file.getvalue()` with `plain=True` to get unstyled text, or assert against the styled output directly if the styling is part of the test.\",\n  \"Tests for `rich.prompt` and similar interactive components often require simulating user input. The `rich.console.Console` fixture or a similar mechanism should be used to capture output and provide input, rather than relying on direct `sys.stdout` or `sys.stdin` manipulation.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 902,
+    "completion_tokens": 142,
+    "cost_usd": 0.000626,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992319.35942
+}

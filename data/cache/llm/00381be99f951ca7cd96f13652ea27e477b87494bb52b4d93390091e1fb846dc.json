@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"My apologies. I will ensure to output a single JSON object.\n\nI've read `rich/measure.py` to understand how `rich` measures renderables. The `measure_renderables` function seems relevant. I can create a `Text` object with the problematic character and then measure its width using `Console().measure()`.\n\nThe character in question is `\\\\U000f024d`. This is a single-width character. The bug states that `rich` incorrectly treats it as double-width. So, my test should assert that the width of this character is 1. If the bug is present, the test will fail because it will report 2.\n\nHere's the plan:\n1. Import `Console` and `Text` from `rich`.\n2. Create a `Console` instance.\n3. Create a `Text` object containing the problematic character `\\\\U000f024d`.\n4. Use `console.measure()` to get the width of the `Text` object.\n5. Assert that the measured width is 1.\", \"tool\": \"run_test\", \"args\": {\"source\": \"import pytest\\nfrom rich.console import Console\\nfrom rich.text import Text\\n\\ndef test_nerd_font_width():\\n    console = Console(width=80, _environ={})\\n    # The problematic Nerd Font character (f024d is a download folder icon)\\n    nerd_font_char = \\\"\\\\U000f024d\\\"\\n    text = Text(nerd_font_char)\\n\\n    # Measure the width of the text\\n    measurement = console.measure(text)\\n\\n    # The character should be single-width\\n    expected_width = 1\\n    actual_width = measurement.maximum\\n\\n    assert actual_width == expected_width, f\\\"Expected width {expected_width}, but got {actual_width} for character {nerd_font_char}\\\"\\n\"}}",
+  "usage": {
+    "prompt_tokens": 1928,
+    "completion_tokens": 449,
+    "cost_usd": 0.001701,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989566.0125988
+}

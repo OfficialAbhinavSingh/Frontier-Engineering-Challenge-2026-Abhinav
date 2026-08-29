@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nfrom rich.live import Live\nfrom rich.console import Group\nfrom rich.text import Text\nfrom rich.console import Console\nimport io\n\ndef create_capture_console() -> Console:\n    \"\"\"Create a console that captures output.\"\"\"\n    console = Console(\n        file=io.StringIO(),\n        force_terminal=True,\n        width=80,\n        height=25,\n        color_system=\"truecolor\",\n        legacy_windows=False,\n    )\n    return console\n\ndef test_live_empty_group_no_spurious_newline() -> None:\n    console = create_capture_console()\n    console.begin_capture()\n    \n    list_renderables = []\n    live = Live(Group(*list_renderables), transient=True, console=console)\n    with live:\n        pass\n    \n    output = console.end_capture()\n    # The bug describes a spurious newline. If the bug is fixed, the output\n    # should be empty, as nothing was rendered and transient=True.\n    assert output == \"\"\n\n```",
+  "usage": {
+    "prompt_tokens": 5102,
+    "completion_tokens": 248,
+    "cost_usd": 0.002151,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787991922.477122
+}

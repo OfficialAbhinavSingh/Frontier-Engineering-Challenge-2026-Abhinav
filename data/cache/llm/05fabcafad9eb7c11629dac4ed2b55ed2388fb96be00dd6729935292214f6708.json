@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "[\n  \"When testing filters, be aware that `jinja2.filters.do_first` (and similar filter access patterns) might refer to the synchronous variant, even if an async variant exists. Explicitly access the async variant if that's what you intend to test.\",\n  \"The `jinja2.filters` module often exposes both synchronous and asynchronous versions of filters. Pay close attention to the exact function object being referenced, especially when dealing with introspection or serialization, as their names and identities can differ.\"\n]",
+  "usage": {
+    "prompt_tokens": 1246,
+    "completion_tokens": 110,
+    "cost_usd": 0.000649,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787991699.143688
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"rich/console.py\",\n    \"rich/table.py\"\n  ],\n  \"test_file\": \"tests/test_console.py\",\n  \"why\": \"The issue describes incorrect measurement of double-width characters, which is a core console rendering concern, and the MRE uses a DataTable, making rich/console.py and rich/table.py the most likely source files, with tests/test_console.py being the most relevant test file for character width issues.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 2836,
+    "completion_tokens": 123,
+    "cost_usd": 0.001158,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787990808.9011288
+}

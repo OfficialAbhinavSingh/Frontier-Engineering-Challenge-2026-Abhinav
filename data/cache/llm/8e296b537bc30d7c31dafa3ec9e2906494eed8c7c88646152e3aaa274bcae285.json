@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"src/jinja2/filters.py\"\n  ],\n  \"test_file\": \"tests/test_filters.py\",\n  \"why\": \"The issue describes adding a parameter to the `groupby()` filter, which is implemented in `src/jinja2/filters.py`, and the regression test should be added to `tests/test_filters.py` as it directly relates to filter behavior.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 974,
+    "completion_tokens": 107,
+    "cost_usd": 0.00056,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989954.7875533
+}

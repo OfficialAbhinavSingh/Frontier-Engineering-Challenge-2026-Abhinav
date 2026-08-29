@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"src/jinja2/parser.py\",\n    \"src/jinja2/ext.py\"\n  ],\n  \"test_file\": \"tests/test_ext.py\",\n  \"why\": \"The issue describes adding new block syntax for translation with context, which will require changes to the parser to recognize the new syntax and the extension system to handle the translation logic, and existing translation extension tests are in test_ext.py.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 943,
+    "completion_tokens": 114,
+    "cost_usd": 0.000568,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787994649.802868
+}

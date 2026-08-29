@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\"reproduced\": false, \"why\": \"The test asserts that '[prompt.invalid]' is present in the output, but the pytest output shows that the string is present, albeit with ANSI escape codes, which means the assertion failed because the string was found, not because it was missing.\"}\n```",
+  "usage": {
+    "prompt_tokens": 875,
+    "completion_tokens": 65,
+    "cost_usd": 0.000425,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992317.3029265
+}

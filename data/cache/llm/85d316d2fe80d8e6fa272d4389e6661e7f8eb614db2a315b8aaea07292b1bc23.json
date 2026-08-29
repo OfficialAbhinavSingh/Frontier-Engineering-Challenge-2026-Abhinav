@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"I've read `rich/live.py`. Now I need to look at `rich/file_proxy.py` to understand how `FileProxy` is implemented, especially regarding `isatty()` and `__getattr__`.\", \"tool\": \"read_file\", \"args\": {\"path\": \"rich/file_proxy.py\"}}",
+  "usage": {
+    "prompt_tokens": 2359,
+    "completion_tokens": 77,
+    "cost_usd": 0.0009,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989584.9659264
+}

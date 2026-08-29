@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nimport torch\n\nimport tomlkit\n\n\ndef test_array_of_floats_to_torch_tensor_conversion() -> None:\n    arr = tomlkit.loads(\n        \"\"\"\na = [1.0, 2.0, 3.0]\n\"\"\"\n    )\n\n    # The bug report indicates that directly passing tomlkit.items.Array\n    # containing tomlkit.items.Float objects to torch.tensor raises a TypeError.\n    # The expectation is that this operation should succeed, treating the\n    # tomlkit Array as a standard Python list of floats.\n    # We assert that the conversion to a torch.tensor does not raise an error.\n    # The specific assertion is that the resulting tensor has the expected values.\n    t = torch.tensor(arr[\"a\"], dtype=torch.float32)\n    assert t.tolist() == [1.0, 2.0, 3.0]\n```",
+  "usage": {
+    "prompt_tokens": 3196,
+    "completion_tokens": 217,
+    "cost_usd": 0.001501,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992047.7539086
+}

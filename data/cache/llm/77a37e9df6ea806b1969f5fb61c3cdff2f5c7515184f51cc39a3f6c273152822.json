@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nfrom tomlkit import aot\nfrom tomlkit import dumps\nfrom tomlkit import parse\nfrom tomlkit import table\n\n\ndef test_issue_542_aot_captures_too_many_keys() -> None:\n    doc = parse(\"a.b = 1\\nc.d = 2\\n\")\n    aot_obj = aot()\n    t = table()\n    t[\"x\"] = 9\n    aot_obj.append(t)\n    doc[\"a\"] = aot_obj\n    # The bug causes 'c.d = 2' to be captured inside the 'a' array of tables.\n    # The expected output should have 'c.d = 2' outside the 'a' array of tables.\n    expected_dump = \"a.b = 1\\n[[a]]\\nx = 9\\n\\nc.d = 2\\n\"\n    assert dumps(doc) == expected_dump\n```",
+  "usage": {
+    "prompt_tokens": 2909,
+    "completion_tokens": 224,
+    "cost_usd": 0.001433,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787991817.0027397
+}

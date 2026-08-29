@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport os\nimport sys\n\nimport pytest\n\nimport click\nfrom click.shell_completion import CompletionItem\nfrom click.shell_completion import ZshComplete\n\n\nclass Foo(click.ParamType):\n    def convert(self, value, param, ctx):\n        return value\n\n    def shell_complete(self, ctx, param, incomplete):\n        return [\n            CompletionItem(value=value, help=\"adsf\")\n            for value in [\"baz:quux\", \"spam:eggs\"]\n        ]\n\n\n@click.command()\n@click.argument(\"foo\", type=Foo())\ndef main(foo):\n    click.echo(foo)\n\n\ndef test_zsh_completion_colon_in_value():\n    \"\"\"\n    Test that zsh completion correctly handles values containing colons,\n    displaying them as a single item rather than splitting them.\n    \"\"\"\n    # Simulate the environment variables set by the Zsh completion script\n    # for the 'complete' instruction.\n    # The report shows `foo <Tab>` which means no args and empty incomplete.\n    os.environ[\"_FOO_COMPLETE\"] = \"zsh_complete\"\n    os.environ[\"COMP_WORDS\"] = \"foo\"\n    os.environ[\"COMP_CWORD\"] = \"1\"  # Index of the current word (empty string after foo)\n\n    # Create a ZshComplete instance and get completions\n    comp = ZshComplete(main, {}, \"foo\", \"_FOO_COMPLETE\")\n    actual_completions = comp.complete().splitlines()\n\n    # The expected output as per the bug report\n    expected_completions = [\"baz:quux -- adsf\", \"spam:eggs -- adsf\"]\n\n    # Clean up environment variables\n    del os.environ[\"_FOO_COMPLETE\"]\n    del os.environ[\"COMP_WORDS\"]\n    del os.environ[\"COMP_CWORD\"]\n\n    assert actual_completions == expected_completions\n\n```",
+  "usage": {
+    "prompt_tokens": 5640,
+    "completion_tokens": 440,
+    "cost_usd": 0.002792,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992177.2436903
+}

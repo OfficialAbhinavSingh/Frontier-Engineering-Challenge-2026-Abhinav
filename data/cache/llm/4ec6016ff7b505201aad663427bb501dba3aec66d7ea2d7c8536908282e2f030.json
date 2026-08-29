@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport jsonschema\nfrom jsonschema import ValidationError\n\n\ndef test_json_path_escapes_special_characters():\n    \"\"\"\n    The json_path property should correctly escape property names with special\n    characters or that are empty.\n    \"\"\"\n    keys = [\"\", \"[\", \".\", \"\\\\\", \"'\", \" \", \"\\\"\", \"a[0]\", \"foo-bar\"]\n    schema = {\n        \"properties\": {key: {\"type\": \"string\"} for key in keys},\n    }\n    instance = {\n        key: None for key in keys\n    }\n\n    validator = jsonschema.Draft7Validator(schema)\n    errors = sorted(validator.iter_errors(instance), key=lambda e: str(e.path[-1]))\n\n    expected_json_paths = {\n        \"\": \"$['']\",\n        \" \": \"$[' ']\",\n        \"'\": \"$[\\\"'\\\"]\",\n        \"\\\"\": \"$['\\\"']\",\n        \".\": \"$['.']\",\n        \"\\\\\": \"$['\\\\\\\\']\",\n        \"[\": \"$['[']\",\n        \"a[0]\": \"$['a[0]']\",\n        \"foo-bar\": \"$.foo-bar\",\n    }\n\n    for error in errors:\n        property_name = error.path[-1]\n        assert error.json_path == expected_json_paths[property_name], \\\n            f\"For property {property_name!r}, expected json_path {expected_json_paths[property_name]!r}, got {error.json_path!r}\"\n\n```",
+  "usage": {
+    "prompt_tokens": 4213,
+    "completion_tokens": 354,
+    "cost_usd": 0.002149,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787994664.573492
+}

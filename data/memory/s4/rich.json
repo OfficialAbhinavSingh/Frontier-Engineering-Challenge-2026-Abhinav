@@ -1,0 +1,12 @@
+[
+  {
+    "text": "Tests in this repository often require specific Python versions or environments to reproduce bugs. Ensure the test environment matches the bug report's context.",
+    "from_case": "rich__3740",
+    "added_at": 1787994702.4431045
+  },
+  {
+    "text": "When a test passes unexpectedly, it's crucial to verify that the test setup accurately reflects the conditions under which the bug was observed, including Python version and any relevant environment variables.",
+    "from_case": "rich__3740",
+    "added_at": 1787994702.4431083
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"When testing pickling behavior, ensure the class or object being pickled is directly importable from the module where it's defined, as `pickle` relies on this for reconstruction.\",\n  \"Avoid testing internal utility classes or types unless they are explicitly part of the public API or documented for external use, as their pickling behavior might not be guaranteed or stable.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 385,
+    "completion_tokens": 84,
+    "cost_usd": 0.000325,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992088.0233777
+}

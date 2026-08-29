@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\"reproduced\": true, \"why\": \"The test failed with a PicklingError, specifically 'Can't pickle <class 'jinja2.utils.MissingType'>: attribute lookup MissingType on jinja2.utils failed', which is the exact error described in the bug report when attempting to pickle `jinja2.utils.missing`.\"}\n```",
+  "usage": {
+    "prompt_tokens": 648,
+    "completion_tokens": 80,
+    "cost_usd": 0.000394,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992297.2274704
+}

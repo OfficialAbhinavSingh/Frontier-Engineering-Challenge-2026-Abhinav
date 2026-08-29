@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"Shell completion tests require specific environment variables to be set up correctly; `_get_completions` is the helper to use, but it needs the right `COMP_WORDS` and `COMP_CWORD` values.\",\n  \"The `_get_completions` helper function returns a list of strings, where each string is a potential completion. When asserting, ensure the expected completions are also formatted as individual strings in a list, not as a single string containing multiple space-separated items.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 787,
+    "completion_tokens": 114,
+    "cost_usd": 0.000521,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992181.1712723
+}

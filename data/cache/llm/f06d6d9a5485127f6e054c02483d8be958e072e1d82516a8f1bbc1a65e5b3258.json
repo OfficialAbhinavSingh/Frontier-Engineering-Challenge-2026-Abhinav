@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\"reproduced\": true, \"why\": \"The test failed because the `groupby` filter does not accept a `case_sensitive` argument, which is the core of the reported bug.\"}\n```",
+  "usage": {
+    "prompt_tokens": 1156,
+    "completion_tokens": 45,
+    "cost_usd": 0.000459,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992245.824429
+}

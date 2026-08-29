@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"When testing console output, ensure `Console(record=True)` is used to capture the output for assertion.\",\n  \"When asserting against console output, use `console.export_text(clear=False, styles=False)` to get plain text without ANSI escape codes.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 805,
+    "completion_tokens": 67,
+    "cost_usd": 0.000409,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992340.686221
+}

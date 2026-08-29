@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"When writing async tests, ensure `pytest-asyncio` is installed and properly configured in the test environment. The `@pytest.mark.asyncio` decorator will not function correctly otherwise, leading to `PytestUnknownMarkWarning`.\",\n  \"When testing asynchronous code, explicitly `await` coroutines to ensure they are executed. Failing to `await` a coroutine will result in `RuntimeWarning: coroutine ... was never awaited` and can mask the actual bug.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 1200,
+    "completion_tokens": 108,
+    "cost_usd": 0.00063,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992279.6146324
+}

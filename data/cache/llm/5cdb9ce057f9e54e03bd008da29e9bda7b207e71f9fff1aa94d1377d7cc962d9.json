@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\"reproduced\": false, \"why\": \"The test failed because the output contained ANSI escape codes for styling, which were not expected, rather than due to incorrect character width calculation leading to wrapping.\"}\n```",
+  "usage": {
+    "prompt_tokens": 2178,
+    "completion_tokens": 46,
+    "cost_usd": 0.000768,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992333.4743304
+}

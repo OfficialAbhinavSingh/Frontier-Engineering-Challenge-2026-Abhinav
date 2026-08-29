@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"When testing rendering issues, ensure the terminal width is explicitly set to a small value to trigger soft wrapping and other layout-dependent behaviors.\",\n  \"Use `rich.console.Console(record=True)` and `console.export_text()` or `console.export_html()` to capture the rendered output for assertion, as direct string comparisons of `__repr__` or `str()` might not reflect the visual rendering.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 354,
+    "completion_tokens": 98,
+    "cost_usd": 0.000351,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787991963.3818395
+}

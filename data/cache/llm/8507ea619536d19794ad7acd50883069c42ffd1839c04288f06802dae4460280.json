@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nfrom jinja2 import Environment\nimport pytest\n\n@pytest.mark.asyncio\nasync def test_custom_filter_with_slice_async_true():\n    jinja_env = Environment(enable_async=True)\n    jinja_env.filters.update({'add_two': lambda x, y: [i + y for i in x]})\n    template = jinja_env.from_string(\"{% for item in (a.b|add_two(5))[:1] %}{{ item }}{% endfor %}\")\n    data = {'a': {'b': [1, 2, 3]}}\n    result = await template.render_async(data)\n    assert result == \"6\"\n```",
+  "usage": {
+    "prompt_tokens": 4936,
+    "completion_tokens": 164,
+    "cost_usd": 0.001891,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787991880.253681
+}

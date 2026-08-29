@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The user is reporting a bug where background color carries over to the next line when `soft_wrap` is enabled. I need to create a pytest that reproduces this behavior. The key is to check the ANSI escape codes in the output. Specifically, I'm looking for a missing `\\\\x1b[0m` (reset) before a newline character when `soft_wrap=True` and a background color is applied.\n\nI'll start by looking at the `Console` class and its `print` method to understand how it handles styles and soft wrapping. I'll use `read_file` to inspect `rich/console.py`.\", \"tool\": \"read_file\", \"args\": {\"path\": \"rich/console.py\"}}",
+  "usage": {
+    "prompt_tokens": 1786,
+    "completion_tokens": 161,
+    "cost_usd": 0.000938,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989459.6287549
+}

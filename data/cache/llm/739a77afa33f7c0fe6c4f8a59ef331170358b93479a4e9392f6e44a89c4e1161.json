@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\"reproduced\": true, \"why\": \"The test failed because the actual output had more spaces after the double-width characters than expected, indicating that the double-width characters were indeed measured incorrectly, which aligns with the reported bug.\"}\n```",
+  "usage": {
+    "prompt_tokens": 3948,
+    "completion_tokens": 54,
+    "cost_usd": 0.001319,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992369.6742544
+}

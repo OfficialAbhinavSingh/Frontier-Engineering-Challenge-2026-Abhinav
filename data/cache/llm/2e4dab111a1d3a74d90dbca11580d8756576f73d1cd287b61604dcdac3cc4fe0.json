@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nfrom jinja2 import Environment\nfrom jinja2.nodes import Template\n\n\nclass TestHashing:\n    def test_template_hash(self, env: Environment) -> None:\n        template = env.parse(\"hash test\")\n        assert hash(template) is not None\n\n    def test_template_equality(self, env: Environment) -> None:\n        template1 = env.parse(\"hash test\")\n        template2 = env.parse(\"hash test\")\n        template3 = env.parse(\"another hash test\")\n\n        assert template1 == template2\n        assert template1 != template3\n\n    def test_template_in_set(self, env: Environment) -> None:\n        template1 = env.parse(\"hash test\")\n        template2 = env.parse(\"hash test\")\n        template3 = env.parse(\"another hash test\")\n\n        s = {template1, template2, template3}\n        assert len(s) == 2\n        assert template1 in s\n        assert template3 in s\n\n    def test_node_with_list_field_hash(self, env: Environment) -> None:\n        # Template has a 'body' field which is a list of nodes.\n        # This test ensures that hashing a Template node works.\n        node = env.parse(\"test\")\n        assert hash(node) is not None\n\n    def test_node_with_list_field_equality(self, env: Environment) -> None:\n        node1 = env.parse(\"test\")\n        node2 = env.parse(\"test\")\n        node3 = env.parse(\"another\")\n\n        assert node1 == node2\n        assert node1 != node3\n\n```",
+  "usage": {
+    "prompt_tokens": 2746,
+    "completion_tokens": 380,
+    "cost_usd": 0.001774,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989768.7985024
+}

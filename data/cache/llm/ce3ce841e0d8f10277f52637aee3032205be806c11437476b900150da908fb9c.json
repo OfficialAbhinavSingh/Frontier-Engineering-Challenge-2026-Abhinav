@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"When testing `sys.stdout` or `sys.stderr` behavior, ensure the test environment explicitly sets up a TTY if the expected behavior depends on `isatty()` returning `True`.\",\n  \"Tests for `FileProxy` behavior should directly instantiate `FileProxy` with a mock or real file-like object to control its internal state, rather than relying solely on `sys.stdout` or `sys.stderr` which might be wrapped by `FileProxy` implicitly.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 625,
+    "completion_tokens": 111,
+    "cost_usd": 0.000465,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787991989.7305775
+}

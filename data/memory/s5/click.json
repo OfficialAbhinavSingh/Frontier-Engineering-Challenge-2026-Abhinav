@@ -1,22 +1,32 @@
 [
   {
-    "text": "When adding new arguments to `CliRunner`, ensure they are passed to the `invoke` method, not the `CliRunner` constructor.",
+    "text": "When adding new functionality to `CliRunner`, the `__init__` method is not the primary place for configuration; look for methods like `make_env` or `invoke` for setting runtime options.",
     "from_case": "click__2817",
-    "added_at": 1787949055.551865
+    "added_at": 1787994036.8862307
   },
   {
-    "text": "Tests for `CliRunner` functionality should use the `runner` fixture provided by the test suite.",
+    "text": "New `CliRunner` configuration options are typically passed as keyword arguments to the `invoke` method, not the `CliRunner` constructor.",
     "from_case": "click__2817",
-    "added_at": 1787949055.55187
+    "added_at": 1787994036.8862333
   },
   {
-    "text": "When importing Click components, always use `click.foo` and not `click.Foo` unless it's a class name. The `__init__.py` uses `__getattr__` to provide helpful suggestions for common typos.",
-    "from_case": "click__3105",
-    "added_at": 1787949082.0293288
+    "text": "When decorating a function with `@Command()` or `@Group()`, always pass the command name as the first argument, e.g., `@Command(\"my-command\")`.",
+    "from_case": "click__3043",
+    "added_at": 1787994055.0578055
   },
   {
-    "text": "When testing CLI output, be aware that Click often wraps error messages with additional context like 'Error: Invalid value for 'MYDATA': ...'. The exact error message might be a substring of the full output.",
+    "text": "When using `Group()` as a decorator, ensure the decorated function is a valid command function, not a bare function, to avoid `TypeError: 'function' object is not iterable`.",
+    "from_case": "click__3043",
+    "added_at": 1787994055.0578082
+  },
+  {
+    "text": "When importing Click internals, prefer `from click.types import FuncParamType` over `import click; click.FuncParamType` to avoid `AttributeError` due to `__getattr__`.",
     "from_case": "click__3105",
-    "added_at": 1787949082.029331
+    "added_at": 1787994061.8670354
+  },
+  {
+    "text": "When testing CLI output, be aware that Click's default error messages for invalid parameter types might be more generic than expected, and the exact message might not contain the specific `self.fail(message)` content directly.",
+    "from_case": "click__3105",
+    "added_at": 1787994061.8670368
   }
 ]

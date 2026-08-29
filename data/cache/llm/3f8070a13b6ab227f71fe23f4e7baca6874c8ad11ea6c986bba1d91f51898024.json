@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"When testing output that involves Rich's console rendering, ensure the test environment explicitly sets `force_terminal=True` to guarantee consistent ANSI escape code generation, as this is often implicitly handled in interactive sessions but not in test runs.\",\n  \"When asserting on rendered output, be mindful that Rich's internal markup (e.g., `[prompt.invalid]`) is distinct from the ANSI escape codes it generates. Tests should either assert on the raw markup if the rendering engine is not under test, or on the fully rendered string including ANSI codes if the rendering itself is being validated. Mixing expectations can lead to confusing assertion failures.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 511,
+    "completion_tokens": 140,
+    "cost_usd": 0.000503,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992108.5654135
+}

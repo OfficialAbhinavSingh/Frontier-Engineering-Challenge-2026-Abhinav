@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"I apologize for the repeated formatting errors. I will ensure the response is a single JSON object.\n\nI've refined the test to use a custom `MockTTYStdout` class. This class correctly mocks `isatty()` to return `True` and delegates other necessary file operations (`write`, `flush`, `fileno`) to the original `sys.stdout`. This should prevent the `ValueError` and allow the test to correctly expose the `isatty()` bug.\n\nI will now run this test.\", \"tool\": \"run_test\", \"args\": {\"source\": \"import sys\\nfrom rich.console import Console\\nfrom rich.live import Live\\n\\nclass MockTTYStdout:\\n    \\\"\\\"\\\"A mock stdout that reports as a TTY and delegates writes.\\\"\\\"\\\"\\n    def __init__(self, original_stdout):\\n        self._original_stdout = original_stdout\\n\\n    def isatty(self):\\n        return True\\n\\n    def write(self, text):\\n        self._original_stdout.write(text)\\n\\n    def flush(self):\\n        self._original_stdout.flush()\\n\\n    def fileno(self):\\n        # FileProxy explicitly calls fileno(), so we need to provide it.\\n        # If original_stdout doesn't have fileno, this might still fail in some environments.\\n        # For a robust test, we assume original_stdout has fileno if it's a real file.\\n        return self._original_stdout.fileno()\\n\\ndef test_fileproxy_isatty_delegation():\\n    original_stdout = sys.stdout\\n    mock_stdout = MockTTYStdout(original_stdout)\\n    sys.stdout = mock_stdout\\n\\n    try:\\n        console = Console()\\n        with Live(\\\"hello\\\", console=console, redirect_stdout=True):\\n            # Inside Live, sys.stdout should be proxied. Its isatty() should delegate\\n            # to the mocked sys.stdout, which returns True.\\n            # The bug is that it returns False instead.\\n            assert sys.stdout.isatty() is True\\n    finally:\\n        sys.stdout = original_stdout\\n\"}}",
+  "usage": {
+    "prompt_tokens": 5675,
+    "completion_tokens": 496,
+    "cost_usd": 0.002942,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989609.0634973
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\"reproduced\": true, \"why\": \"The test failed because the error message in the output was 'Invalid value for 'MYDATA': fail' instead of the expected 'input was 'fail', should be 'works'', which directly matches the bug report's description of the incorrect error message.\"}\n```",
+  "usage": {
+    "prompt_tokens": 1077,
+    "completion_tokens": 67,
+    "cost_usd": 0.000491,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992232.7344642
+}

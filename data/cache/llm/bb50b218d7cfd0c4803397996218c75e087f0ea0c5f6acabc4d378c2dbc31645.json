@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The test ran and failed, which is the desired outcome for a bug reproduction test. However, the `AssertionError` message is `Expected width 1, but got 0 for character \\\\udb80\\\\ude4d`. This is different from what I expected (`got 2`).\n\nThe character `\\\\U000f024d` is a Unicode surrogate pair when represented in UTF-16, which Python handles internally. The `\\\\udb80\\\\ude4d` in the error message is the UTF-16 representation of `\\\\U000f024d`.\n\nThe fact that `actual_width` is `0` is even more problematic than `2`. It suggests that `rich` is not even recognizing the character as having any width, or perhaps it's being filtered out or misinterpreted in a way that results in zero width. This is still a clear failure and indicates a bug.\n\nThe test successfully demonstrates a failure at the current commit and would pass if the character was correctly measured as width 1. Therefore, the test is valid for the bug report.\", \"final_test\": \"import pytest\\nfrom rich.console import Console\\nfrom rich.text import Text\\n\\ndef test_nerd_font_width():\\n    console = Console(width=80, _environ={})\\n    # The problematic Nerd Font character (f024d is a download folder icon)\\n    nerd_font_char = \\\"\\\\U000f024d\\\"\\n    text = Text(nerd_font_char)\\n\\n    # Measure the width of the text\\n    measurement = console.measure(text)\\n\\n    # The character should be single-width\\n    expected_width = 1\\n    actual_width = measurement.maximum\\n\\n    assert actual_width == expected_width, f\\\"Expected width {expected_width}, but got {actual_width} for character {nerd_font_char}\\\"\\n\"}",
+  "usage": {
+    "prompt_tokens": 4006,
+    "completion_tokens": 440,
+    "cost_usd": 0.001486,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989580.3988736
+}

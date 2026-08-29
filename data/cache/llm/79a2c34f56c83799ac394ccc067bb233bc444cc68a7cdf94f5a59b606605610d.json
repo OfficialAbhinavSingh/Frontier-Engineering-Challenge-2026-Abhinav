@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The user wants a pytest file that fails because `jinja2.filters.do_first` is not pickleable. The issue description provides a clear example using `pickle.dumps` and points out that the `__name__` attribute is incorrect. I need to create a test that attempts to pickle `jinja2.filters.do_first` and asserts that it raises a `PicklingError`.\", \"tool\": \"read_file\", \"args\": {\"path\": \"src/jinja2/filters.py\"}}",
+  "usage": {
+    "prompt_tokens": 808,
+    "completion_tokens": 114,
+    "cost_usd": 0.000527,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989346.529124
+}

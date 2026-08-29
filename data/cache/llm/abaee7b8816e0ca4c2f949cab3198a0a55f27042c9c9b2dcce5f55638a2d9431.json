@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The test failed with a `PytestUnknownMarkWarning` for `pytest.mark.asyncio`. This indicates that `pytest-asyncio` is not installed or not available in the test environment. Since the goal is to reproduce the bug in Jinja2, and not necessarily to test `pytest-asyncio` itself, I should remove the `pytest.mark.asyncio` decorator and the `await` keyword, and revert to `template.render(data)`. The original issue description implies that the error occurs even with synchronous rendering, as long as `enable_async=True` is set on the environment. The `RuntimeWarning` I saw earlier might have been a red herring, or a symptom of the underlying issue. Let's try the original `template.render(data)` approach again, as the issue is about a synchronous filter being treated incorrectly when async is enabled.\", \"tool\": \"run_test\", \"args\": {\"source\": \"import pytest\\nimport jinja2\\n\\ndef add_two(x, y):\\n    return [i + y for i in x]\\n\\ndef test_async_filter_subscriptable_error():\\n    env = jinja2.Environment(enable_async=True)\\n    env.filters.update({'add_two': add_two})\\n    template = env.from_string(\\\"{% for item in (a.b|add_two(5))[:1] %}{{ item }}{% endfor %}\\\")\\n    \\n    data = {'a': {'b': [1, 2, 3]}}\\n    \\n    with pytest.raises(TypeError) as excinfo:\\n        template.render(data)\\n    \\n    assert \\\"'coroutine' object is not subscriptable\\\" in str(excinfo.value)\\n\"}}",
+  "usage": {
+    "prompt_tokens": 4215,
+    "completion_tokens": 396,
+    "cost_usd": 0.002254,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989325.8605287
+}

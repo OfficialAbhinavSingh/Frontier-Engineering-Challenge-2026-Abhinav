@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport sys\nimport io\nimport pytest\nfrom rich.console import Console\nfrom rich.live import Live\n\n\ndef test_fileproxy_isatty_delegation(capsys):\n    \"\"\"\n    Tests that FileProxy.isatty() correctly delegates to the underlying file,\n    especially when used with Live(redirect_stdout=True).\n    \"\"\"\n    # Create a mock terminal-like file object for testing\n    class MockTTY(io.StringIO):\n        def isatty(self):\n            return True\n\n    # Save original stdout and replace with our mock\n    original_stdout = sys.stdout\n    mock_stdout = MockTTY()\n    sys.stdout = mock_stdout\n\n    try:\n        console = Console(file=mock_stdout, force_terminal=True)\n\n        # Before Live: sys.stdout should report as a TTY\n        assert sys.stdout.isatty() is True\n\n        with Live(\"hello\", console=console, redirect_stdout=True):\n            # Inside Live: sys.stdout (which is now a FileProxy) should also report as a TTY\n            # This is the core of the bug: it should be True, but was False.\n            assert sys.stdout.isatty() is True\n\n        # After Live: sys.stdout should revert to our mock and report as a TTY\n        assert sys.stdout.isatty() is True\n\n    finally:\n        # Restore original stdout\n        sys.stdout = original_stdout\n\n```",
+  "usage": {
+    "prompt_tokens": 3171,
+    "completion_tokens": 332,
+    "cost_usd": 0.001781,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787991768.2142634
+}

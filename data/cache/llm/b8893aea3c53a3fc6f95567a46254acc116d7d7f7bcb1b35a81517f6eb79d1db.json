@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport sys\nfrom rich.console import Console\nfrom rich.live import Live\n\n\ndef test_live_redirect_stdout_isatty_delegation() -> None:\n    \"\"\"\n    Test that FileProxy.isatty() correctly delegates to the proxied file\n    when Live is used with redirect_stdout=True.\n    \"\"\"\n    console = Console()\n\n    # We need to ensure sys.stdout is a TTY for this test to be meaningful.\n    # If sys.stdout is not a TTY, then sys.stdout.isatty() will be False\n    # both before and inside the Live context, and the test would pass\n    # even with the bug.\n    # The bug report explicitly states \"print(\"Before Live:\", sys.stdout.isatty())  # True\"\n    # so we assume a TTY environment for this test.\n    # If running in a non-TTY environment, this test might not fail initially,\n    # but it will correctly pass once the bug is fixed.\n\n    # Capture the isatty status of the original sys.stdout\n    original_stdout_isatty = sys.stdout.isatty()\n\n    with Live(\"hello\", console=console, redirect_stdout=True):\n        # Inside the Live context with redirect_stdout=True, sys.stdout is replaced\n        # by a FileProxy instance.\n        # The bug states that sys.stdout.isatty() returns False here,\n        # but it *should* return the same value as the original sys.stdout.\n        # Therefore, we assert that the current sys.stdout.isatty()\n        # matches the original_stdout_isatty.\n        assert sys.stdout.isatty() == original_stdout_isatty\n```",
+  "usage": {
+    "prompt_tokens": 3642,
+    "completion_tokens": 393,
+    "cost_usd": 0.002075,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787991983.3074038
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport sys\nfrom rich.console import Console\nfrom rich.live import Live\nfrom unittest.mock import Mock\n\ndef test_fileproxy_isatty_delegation():\n    \"\"\"\n    Test that FileProxy.isatty() correctly delegates to the underlying file.\n    \"\"\"\n    # Create a mock file object that behaves like a TTY\n    mock_tty_file = Mock()\n    mock_tty_file.isatty.return_value = True\n    mock_tty_file.write.return_value = None # Mock write to prevent errors\n\n    # Create a mock file object that behaves like a non-TTY\n    mock_non_tty_file = Mock()\n    mock_non_tty_file.isatty.return_value = False\n    mock_non_tty_file.write.return_value = None # Mock write to prevent errors\n\n    # Temporarily replace sys.stdout with the mock TTY file\n    original_stdout = sys.stdout\n    sys.stdout = mock_tty_file\n\n    console = Console()\n\n    # Test with a TTY-like stdout\n    with Live(\"hello\", console=console, redirect_stdout=True):\n        # Inside Live, sys.stdout should be a FileProxy that delegates isatty()\n        # to the original (mocked) sys.stdout, which is a TTY.\n        assert sys.stdout.isatty() is True, \"FileProxy.isatty() should return True when underlying file is a TTY\"\n\n    # Restore original stdout\n    sys.stdout = original_stdout\n\n    # Temporarily replace sys.stdout with the mock non-TTY file\n    sys.stdout = mock_non_tty_file\n\n    # Test with a non-TTY-like stdout\n    with Live(\"hello\", console=console, redirect_stdout=True):\n        # Inside Live, sys.stdout should be a FileProxy that delegates isatty()\n        # to the original (mocked) sys.stdout, which is not a TTY.\n        assert sys.stdout.isatty() is False, \"FileProxy.isatty() should return False when underlying file is not a TTY\"\n\n    # Restore original stdout\n    sys.stdout = original_stdout\n\n    # The bug is that FileProxy.isatty() always returns False,\n    # so the first assertion (assert sys.stdout.isatty() is True)\n    # should fail if the bug is present.\n```",
+  "usage": {
+    "prompt_tokens": 2308,
+    "completion_tokens": 551,
+    "cost_usd": 0.00207,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989165.6986132
+}

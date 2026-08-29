@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport jsonschema\nfrom unittest import TestCase\n\n\nclass TestJsonPathEscaping(TestCase):\n    def test_json_path_for_special_characters(self):\n        keys = [\"\", \"[\", \".\", \"\\\\\", \"'\", \" \", \"\\\"\", \"a[0]\"]\n        schema = {\n            \"properties\": {key: {\"type\": \"string\"} for key in keys},\n        }\n        instance = {\n            key: None for key in keys\n        }\n\n        validator = jsonschema.Draft7Validator(schema)\n        errors = sorted(validator.iter_errors(instance), key=lambda e: str(e.path[-1]))\n\n        expected_json_paths = [\n            \"$['']\",\n            \"$[' ']\",\n            \"$['\\\"']\",\n            \"$['.']\",\n            \"$['\\\\']\",\n            \"$['[']\",\n            \"$['a[0]']\",\n            \"$['\\'']\",\n        ]\n\n        actual_json_paths = [error.json_path for error in errors]\n\n        self.assertEqual(actual_json_paths, expected_json_paths)\n```",
+  "usage": {
+    "prompt_tokens": 4358,
+    "completion_tokens": 254,
+    "cost_usd": 0.001942,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787994749.5403616
+}

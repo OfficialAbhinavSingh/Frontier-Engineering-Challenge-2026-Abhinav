@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nfrom rich.style import Style\nfrom rich.text import Text, Span\n\n\ndef test_assemble_meta_python_314_bug():\n    \"\"\"\n    Test for issue #3740 where the comparison of Style objects with meta\n    attributes was failing in Python 3.14.\n\n    The bug report shows that the assertion `assert text._spans == [...]`\n    fails, specifically complaining about the `Style(meta={\"foo\": \"bar\"})`\n    part, even though the `repr` of the expected and actual `Style` objects\n    look identical. This suggests an issue with `Style.__eq__` when `meta`\n    is present, particularly in Python 3.14.\n\n    This test asserts the exact list of spans that the Text object should\n    produce, including the Style object with its meta attribute.\n    \"\"\"\n    text = Text.assemble(\"foo\", (\"bar\", \"bold\"), meta={\"foo\": \"bar\"})\n    assert str(text) == \"foobar\"\n\n    # The bug is in the comparison of the Style object itself.\n    # We need to assert the full list of spans as the bug report does.\n    # The failure is expected to be on the second Span's style.\n    expected_spans = [Span(3, 6, \"bold\"), Span(0, 6, Style(meta={\"foo\": \"bar\"}))]\n    assert text._spans == expected_spans\n```",
+  "usage": {
+    "prompt_tokens": 2712,
+    "completion_tokens": 326,
+    "cost_usd": 0.001629,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787994699.818002
+}

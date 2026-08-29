@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nfrom rich.text import Text\n\ndef test_from_ansi_trailing_newline():\n    \"\"\"\n    Test that Text.from_ansi() does not remove a trailing newline.\n    \"\"\"\n    # The bug report states: Text(\"\\n\") != Text.from_ansi(\"\\n\")\n    # And the expected output for \"text\\n\" is <text 'text\\n' [] ''>\n    # So, we assert that Text.from_ansi(\"text\\n\") is equal to Text(\"text\\n\")\n    assert Text.from_ansi(\"text\\n\") == Text(\"text\\n\")\n```",
+  "usage": {
+    "prompt_tokens": 4274,
+    "completion_tokens": 141,
+    "cost_usd": 0.001635,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787994769.4232543
+}

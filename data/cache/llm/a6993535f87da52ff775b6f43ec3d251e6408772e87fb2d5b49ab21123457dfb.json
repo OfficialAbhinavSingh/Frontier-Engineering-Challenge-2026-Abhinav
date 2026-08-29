@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"src/jinja2/async_utils.py\",\n    \"src/jinja2/filters.py\"\n  ],\n  \"test_file\": \"tests/test_async_filters.py\",\n  \"why\": \"The issue explicitly states that the @async_variant decorator in async_utils.py is causing pickleability problems for filters, and the provided example uses jinja2.filters.do_first, making test_async_filters.py the most appropriate place for a regression test.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 1285,
+    "completion_tokens": 128,
+    "cost_usd": 0.000705,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989786.7005498
+}

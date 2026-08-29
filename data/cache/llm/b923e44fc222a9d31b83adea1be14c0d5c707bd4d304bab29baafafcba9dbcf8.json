@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nimport jinja2\n\n@pytest.mark.asyncio\nasync def test_issue_1573():\n    jinja_env = jinja2.Environment(enable_async=True)\n    jinja_env.filters.update({'add_two': lambda x, y: [i + y for i in x]})\n\n    template = jinja_env.from_string(\n        \"{% for item in (a.b|add_two(5))[:1] %}{{ item }}{% endfor %}\"\n    )\n    data = {\"a\": {\"b\": [1, 2, 3]}}\n\n    with pytest.raises(TypeError) as excinfo:\n        await template.render_async(data)\n\n    assert \"coroutine' object is not subscriptable\" in str(excinfo.value)\n\n    # Test the alternative syntax that causes a SyntaxError\n    template_syntax_error = jinja_env.from_string(\n        \"{% for item in a.b|add_two(5)[:1] %}{{ item }}{% endfor %}\"\n    )\n    with pytest.raises(jinja2.exceptions.TemplateSyntaxError) as excinfo:\n        # We need to compile the template to trigger the syntax error\n        template_syntax_error.render(data)\n    assert \"expected token 'end of statement block', got '['\" in str(excinfo.value)\n```",
+  "usage": {
+    "prompt_tokens": 1013,
+    "completion_tokens": 321,
+    "cost_usd": 0.001106,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989125.132428
+}

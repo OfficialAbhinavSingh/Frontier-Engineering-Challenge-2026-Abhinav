@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"The `pytest_asyncio` plugin is not installed or configured in this repository. Asynchronous tests should be run using `pytest.mark.filterwarnings(\\\"ignore:.*unclosed.*\\\")` and `async def` without an explicit `asyncio` mark.\",\n  \"Tests in this repository typically use `jinja2.Environment` and `jinja2.Template` for rendering, and `markupsafe.Markup` for expected safe strings. Ensure these are imported and used correctly.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 1037,
+    "completion_tokens": 114,
+    "cost_usd": 0.000596,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787991683.9978192
+}

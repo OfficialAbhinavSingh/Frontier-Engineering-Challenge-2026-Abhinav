@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pickle\nimport pytest\n\nimport jinja2.filters\n\n\ndef test_issue_1612_async_variant_pickleable():\n    \"\"\"\n    Filters decorated with @async_variant should be pickleable.\n    \"\"\"\n    # The do_first filter is decorated with @async_variant\n    # and was specifically mentioned in the bug report.\n    # The bug report states that do_first.__name__ is 'sync_do_first'\n    # when it should be 'do_first'. This incorrect __name__ prevents pickling.\n\n    # First, assert the incorrect __name__ as described in the bug report.\n    # This ensures we are testing the specific condition mentioned.\n    assert jinja2.filters.do_first.__name__ == \"sync_do_first\"\n\n    # Attempt to pickle the function.\n    # If the bug is present, this will raise a PicklingError.\n    # The test should fail here if the bug is present.\n    # Once the bug is fixed (i.e., __name__ is corrected), this should pass.\n    try:\n        pickle.dumps(jinja2.filters.do_first)\n    except pickle.PicklingError:\n        # This is the expected failure mode when the bug is present.\n        # We don't need to assert anything here, as the test failing\n        # due to the PicklingError is the desired outcome for the buggy state.\n        # If the fix is applied, this block should not be reached.\n        pass\n    else:\n        # If no PicklingError was raised, it means the function is pickleable.\n        # This indicates the bug is fixed, so the test should pass.\n        # We can add an explicit pass or just let the test finish.\n        pass\n\n    # The test should only reach this point if the bug is fixed and pickling succeeds.\n    # If the bug is fixed, the __name__ should also be corrected.\n    # This assertion will only be checked if the pickling attempt above passes.\n    # If the bug is fixed, do_first.__name__ should be \"do_first\".\n    # If the bug is still present, the test would have failed at the pickle.dumps call.\n    # Therefore, this assertion acts as a confirmation of the fix.\n    assert jinja2.filters.do_first.__name__ == \"do_first\"\n\n```",
+  "usage": {
+    "prompt_tokens": 4647,
+    "completion_tokens": 533,
+    "cost_usd": 0.002727,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787990689.1333334
+}

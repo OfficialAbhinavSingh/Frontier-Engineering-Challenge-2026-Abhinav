@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport io\nimport sys\n\nimport pytest\n\nfrom rich.console import Console\nfrom rich.text import Text\n\n\ndef test_nerd_font_width() -> None:\n    \"\"\"\n    Test that certain Nerd Fonts are not considered double width.\n    The bug report specifically mentions U+F024D (downloads folder icon).\n    \"\"\"\n    console = Console(\n        file=io.StringIO(),\n        width=10,  # Small width to trigger wrapping if character width is miscalculated\n        soft_wrap=True,\n        force_terminal=True,\n        color_system=\"truecolor\",\n    )\n\n    # The character U+F024D (nf-fa-folder_download) is a single-width character.\n    # If it's treated as double-width, it will cause incorrect wrapping.\n    # We expect \"A\" + icon + \"B\" to fit within 3 characters if the icon is single-width.\n    # With a width of 10, \"A\\uf024dB\" should render as \"A\\uf024dB\" on one line.\n    # If the icon is treated as double-width, it would be \"A\" + icon + \"B\" = 4 characters,\n    # which would cause wrapping or incorrect alignment.\n    test_string = \"A\\uf024dB\"\n    console.print(test_string, end=\"\")\n    output = console.file.getvalue()\n\n    # The expected output should be the string itself, indicating it fits on one line\n    # and the character is treated as single-width.\n    # If the character was treated as double-width, the output might be \"A\\uf024d\\nB\"\n    # or \"A\\uf024d B\" depending on internal rendering logic, but the key is that\n    # it would not be a direct representation of the input string on a single line\n    # if the total width exceeds the actual character count.\n    # For a width of 10, \"A\\uf024dB\" (3 characters) should fit.\n    assert output == \"A\\uf024dB\" + \"\\n\"  # Console.print adds a newline by default\n```",
+  "usage": {
+    "prompt_tokens": 4334,
+    "completion_tokens": 501,
+    "cost_usd": 0.002553,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787991974.3147612
+}

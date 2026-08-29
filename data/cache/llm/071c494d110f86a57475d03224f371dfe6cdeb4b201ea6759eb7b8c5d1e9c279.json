@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"My apologies. I will ensure to respond with a single JSON object.\n\nThe `grep` command returned a lot of results. I need to narrow down my search to functions that specifically deal with character width calculation, especially for double-width characters. I'll look for functions related to `console` and `measure` in `rich.console` or `rich.text`.\", \"tool\": \"grep\", \"args\": {\"pattern\": \"measure|get_console_width|cell_len\", \"glob\": \"rich/**/*.py\"}}",
+  "usage": {
+    "prompt_tokens": 2699,
+    "completion_tokens": 115,
+    "cost_usd": 0.000504,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989625.6374347
+}

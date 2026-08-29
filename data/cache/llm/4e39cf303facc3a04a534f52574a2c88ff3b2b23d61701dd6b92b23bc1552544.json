@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nfrom jinja2 import Environment\n\nclass TestHashing:\n    def test_template_hash(self):\n        env = Environment()\n        template = env.parse(\"hash test\")\n        # This assertion is expected to fail with TypeError due to the bug\n        with pytest.raises(TypeError, match=\"unhashable type: 'list'\"):\n            hash(template)\n\n```",
+  "usage": {
+    "prompt_tokens": 976,
+    "completion_tokens": 88,
+    "cost_usd": 0.000513,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989111.5013719
+}

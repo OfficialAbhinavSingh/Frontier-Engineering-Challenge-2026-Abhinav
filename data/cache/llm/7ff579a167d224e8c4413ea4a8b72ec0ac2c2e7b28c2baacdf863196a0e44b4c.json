@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport os\nimport sys\nfrom io import StringIO\n\nimport pytest\n\nimport click\n\n\n@pytest.mark.skipif(sys.platform == \"win32\", reason=\"Bug is Linux-specific\")\ndef test_prompt_backspace_linux(monkeypatch):\n    # Simulate a Linux terminal where readline is active\n    monkeypatch.setattr(sys.stdin, \"isatty\", lambda: True)\n    monkeypatch.setattr(sys.stdout, \"isatty\", lambda: True)\n\n    # Simulate user input: type \"hello\", then backspace once, then enter\n    # The bug causes backspace to remove two characters, so \"he\" would remain.\n    # The fix should result in \"hell\".\n    input_stream = StringIO(\"hello\\b\\n\")\n    monkeypatch.setattr(sys, \"stdin\", input_stream)\n\n    # Capture stdout to ensure no unexpected output, though the core of the bug\n    # is the returned value.\n    output_stream = StringIO()\n    monkeypatch.setattr(sys, \"stdout\", output_stream)\n\n    # The expected behavior is that one backspace removes one character.\n    # So, \"hello\" + backspace should yield \"hell\".\n    result = click.prompt(\"Enter something\")\n\n    assert result == \"hell\"\n```",
+  "usage": {
+    "prompt_tokens": 4474,
+    "completion_tokens": 294,
+    "cost_usd": 0.002077,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992192.6783626
+}

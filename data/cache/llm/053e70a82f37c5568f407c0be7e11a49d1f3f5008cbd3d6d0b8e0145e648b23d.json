@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "[\n  \"When testing pickling behavior, ensure the object being pickled is an instance, not the type itself, unless the type is specifically designed to be pickled.\",\n  \"Avoid testing internal utility types directly for behaviors like pickling unless the bug report explicitly states an issue with the utility type's behavior itself. Focus on how these utilities are used within the public API.\"\n]",
+  "usage": {
+    "prompt_tokens": 856,
+    "completion_tokens": 79,
+    "cost_usd": 0.000454,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787991713.751749
+}

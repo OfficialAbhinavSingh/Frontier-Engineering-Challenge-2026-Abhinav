@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nfrom jinja2 import Environment\nimport pytest\nfrom collections import namedtuple\nimport asyncio\n\n@pytest.fixture\ndef env():\n    return Environment()\n\ndef test_groupby_case_sensitive_sorting(env):\n    User = namedtuple(\"User\", [\"name\"])\n    users = [User(\"apple\"), User(\"Banana\"), User(\"cherry\"), User(\"Apple\")]\n\n    # The bug is that `groupby` always performs case-sensitive sorting.\n    # We want to assert that 'apple' and 'Apple' are treated as distinct groups\n    # by the current buggy implementation.\n    # Once the fix is applied (e.g., `case_sensitive=False` is added and used),\n    # these should be grouped together.\n\n    # Render the template using the current `groupby` filter.\n    # The current `groupby` implicitly sorts case-sensitively.\n    template = env.from_string(\n        '{% for name, items in users|groupby(\"name\") %}'\n        '{{ name }}:{% for item in items %}{{ item.name }},{% endfor %};'\n        '{% endfor %}'\n    )\n    result = template.render(users=users)\n\n    # With case-sensitive sorting, 'Apple' and 'apple' will form separate groups.\n    # The exact order of groups might vary based on the stable sort,\n    # but both 'Apple' and 'apple' should appear as group keys.\n    # Example expected buggy output: \"Apple:Apple,;Banana:Banana,;apple:apple,;cherry:cherry,;\"\n    # or \"apple:apple,;Apple:Apple,;Banana:Banana,;cherry:cherry,;\"\n\n    # We assert that both 'Apple' and 'apple' appear as distinct group headers in the output.\n    # This test will fail if the `groupby` filter starts treating 'Apple' and 'apple'\n    # as the same for grouping (e.g., by becoming case-insensitive by default or\n    # when `case_sensitive=False` is passed and works).\n    assert \"Apple:Apple,\" in result\n    assert \"apple:apple,\" in result\n    # Also ensure they are indeed separate groups, not just present in the output\n    # (e.g., if they were grouped, the key would be one or the other, not both distinct keys).\n    # This implicitly checks that they are separate groups.\n```",
+  "usage": {
+    "prompt_tokens": 5901,
+    "completion_tokens": 535,
+    "cost_usd": 0.003108,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787991647.1017382
+}

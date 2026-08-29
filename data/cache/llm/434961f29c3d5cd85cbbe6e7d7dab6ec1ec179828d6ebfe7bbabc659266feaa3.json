@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\n\nimport jinja2\n\n\n@pytest.mark.asyncio\nasync def test_issue_1573_custom_filter_async_true_subscriptable_error():\n    jinja_env = jinja2.Environment(enable_async=True)\n    jinja_env.filters.update({\"add_two\": lambda x, y: [i + y for i in x]})\n\n    template = jinja_env.from_string(\n        \"{% for item in (a.b|add_two(5))[:1] %}{{ item }}{% endfor %}\"\n    )\n    data = {\"a\": {\"b\": [1, 2, 3]}}\n\n    # The original bug causes a TypeError: 'coroutine' object is not subscriptable\n    # This test should pass once the bug is fixed, producing the expected output.\n    result = await template.render_async(data)\n    assert result == \"6\"\n\n    # This part of the test verifies the syntax error described in the report\n    # when parentheses are removed. This is not the primary bug, but a related\n    # observation.\n    with pytest.raises(jinja2.exceptions.TemplateSyntaxError):\n        jinja_env.from_string(\"{% for item in a.b|add_two(5)[:1] %}{{ item }}{% endfor %}\")\n\n```",
+  "usage": {
+    "prompt_tokens": 5111,
+    "completion_tokens": 310,
+    "cost_usd": 0.002308,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989779.3514638
+}

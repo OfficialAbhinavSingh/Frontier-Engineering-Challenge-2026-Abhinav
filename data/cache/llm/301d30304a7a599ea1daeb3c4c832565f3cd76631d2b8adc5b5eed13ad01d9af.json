@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nfrom rich.style import Style\nfrom rich.text import Text, Span\n\n\ndef test_assemble_meta():\n    \"\"\"\n    Test for issue #3740 where the comparison of Style objects with meta\n    attributes was failing in Python 3.14.\n    \"\"\"\n    text = Text.assemble(\"foo\", (\"bar\", \"bold\"), meta={\"foo\": \"bar\"})\n    assert str(text) == \"foobar\"\n    # The bug report indicates that the comparison of the Style object within\n    # the Span was failing, even though the repr looked identical.\n    # This test asserts the exact list of spans that the Text object should\n    # produce, including the Style object with its meta attribute.\n    # The failure is due to an incorrect __eq__ implementation for Style\n    # when meta is present, specifically in Python 3.14.\n    assert text._spans == [Span(3, 6, \"bold\"), Span(0, 6, Style(meta={\"foo\": \"bar\"}))]\n\n```",
+  "usage": {
+    "prompt_tokens": 2711,
+    "completion_tokens": 232,
+    "cost_usd": 0.001393,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787994696.3162274
+}

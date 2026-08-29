@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"src/jinja2/nodes.py\"\n  ],\n  \"test_file\": \"tests/test_regression.py\",\n  \"why\": \"The issue explicitly states that the `Node.__hash__` method is causing the problem, which is defined in `src/jinja2/nodes.py`, and the provided test case is a regression that should be added to `tests/test_regression.py`.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 1092,
+    "completion_tokens": 110,
+    "cost_usd": 0.000603,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989765.0795481
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nfrom jinja2 import Environment\nfrom jinja2.nodes import Template\n\n\nclass TestHashing:\n    def test_template_hash(self, env: Environment) -> None:\n        template = env.parse(\"hash test\")\n        # The bug causes a TypeError when hashing the template.\n        # This test asserts that hashing the template does not raise an exception.\n        # The actual hash value is not important, only that it's hashable.\n        assert hash(template) is not None\n\n    def test_template_with_list_field_hash(self, env: Environment) -> None:\n        # This test specifically targets a Node with a list field,\n        # which is the root cause of the TypeError.\n        # Template.body is a list of nodes.\n        template = env.parse(\"{% for item in [1, 2, 3] %}{{ item }}{% endfor %}\")\n        assert hash(template) is not None\n\n    def test_output_node_hash(self, env: Environment) -> None:\n        # Output node also has a list field (nodes)\n        template = env.parse(\"{{ 'hello' }}\")\n        output_node = template.body[0]  # Assuming the first node is an Output node\n        assert hash(output_node) is not None\n```",
+  "usage": {
+    "prompt_tokens": 3212,
+    "completion_tokens": 298,
+    "cost_usd": 0.001709,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787991670.110729
+}

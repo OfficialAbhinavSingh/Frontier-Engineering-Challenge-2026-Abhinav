@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"Helper functions and internal utilities are often imported from `click.testing` or directly from `click` (e.g., `click.get_current_context`), not from private modules like `click._utils`.\",\n  \"When testing shell completion, focus assertions on the specific completion behavior described in the bug report, rather than making broad assertions about all possible completions.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 778,
+    "completion_tokens": 87,
+    "cost_usd": 0.000451,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992221.9767845
+}

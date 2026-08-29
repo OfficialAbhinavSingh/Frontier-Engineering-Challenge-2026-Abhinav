@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"When testing rendering issues, always use `rich.console.Console(force_terminal=True)` to ensure styles are applied.\",\n  \"When testing rendering issues, always capture the output using `console.export_text(clear=False, styles=True)` to get the raw styled text for assertions.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 354,
+    "completion_tokens": 74,
+    "cost_usd": 0.000291,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992097.211007
+}

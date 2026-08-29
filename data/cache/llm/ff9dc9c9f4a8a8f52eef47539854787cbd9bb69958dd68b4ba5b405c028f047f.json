@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nfrom jinja2 import Environment\nfrom jinja2 import select_autoescape\n\n\ndef test_macro_native_types():\n    env = Environment(\n        enable_async=True,\n        autoescape=select_autoescape([\"html\", \"xml\"]),\n        extensions=[\"jinja2.ext.do\"],\n        trim_blocks=True,\n        lstrip_blocks=True,\n        optimized=False,\n        native=True,\n    )\n    template = env.from_string(\n        \"{%- macro x() -%}{{- [5,6] -}}{%- endmacro -%}{{- x()[0] -}}\"\n    )\n    result = template.render()\n    assert result == 5\n    assert isinstance(result, int)\n\n```",
+  "usage": {
+    "prompt_tokens": 821,
+    "completion_tokens": 172,
+    "cost_usd": 0.000676,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989108.5343363
+}

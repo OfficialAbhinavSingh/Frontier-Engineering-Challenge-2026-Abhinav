@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\"reproduced\": false, \"why\": \"The test failed due to an AssertionError because `record=True` was not set in the Console constructor, not because of the reported bug regarding Nerd Font character width.\"}\n```",
+  "usage": {
+    "prompt_tokens": 2204,
+    "completion_tokens": 49,
+    "cost_usd": 0.000784,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992339.1657872
+}

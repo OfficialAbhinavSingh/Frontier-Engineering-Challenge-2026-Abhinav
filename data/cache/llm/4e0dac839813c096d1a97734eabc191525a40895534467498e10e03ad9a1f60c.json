@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pickle\nimport pytest\n\nfrom jinja2.filters import do_first\n\n\ndef test_do_first_is_pickleable():\n    \"\"\"\n    Test that the do_first filter is pickleable.\n    \"\"\"\n    try:\n        pickle.dumps(do_first)\n    except pickle.PicklingError as e:\n        pytest.fail(f\"do_first filter is not pickleable: {e}\")\n\n```",
+  "usage": {
+    "prompt_tokens": 1169,
+    "completion_tokens": 98,
+    "cost_usd": 0.000596,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989127.4599078
+}

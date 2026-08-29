@@ -1,17 +1,32 @@
 [
   {
-    "text": "When testing `tomlkit.dumps`, be mindful of expected newline characters. The `tomlkit.dumps` function often adds an extra newline at the end of sections or documents, which can lead to subtle assertion failures if not accounted for in the expected string.",
+    "text": "When comparing `tomlkit` output, be aware that `tomlkit.dumps` may introduce or remove newlines in ways that are not semantically significant but will cause string comparison to fail. Use a TOML parser to compare the semantic content of the strings.",
     "from_case": "tomlkit__542",
-    "added_at": 1787949144.547161
+    "added_at": 1787994256.7897832
   },
   {
-    "text": "Do not import `torch` in tests; it is not a dependency of `tomlkit` and will cause `ModuleNotFoundError`.",
-    "from_case": "tomlkit__562",
-    "added_at": 1787949162.943333
+    "text": "Test files should be placed in `tests/` and named `test_*.py` or `*_test.py`. Helper functions and fixtures should be defined within these test files or in `conftest.py`.",
+    "from_case": "tomlkit__542",
+    "added_at": 1787994256.789785
   },
   {
-    "text": "Tests should be placed in `tomlkit/tests/` and follow the naming convention `test_*.py`.",
+    "text": "When asserting on the presence of a key in a TOML document, use `doc.value.get()` or `doc.value['key']` rather than `key in doc`.",
+    "from_case": "tomlkit__543",
+    "added_at": 1787994259.7453535
+  },
+  {
+    "text": "The `tomlkit.toml_document.TOMLDocument` object is not a `dict` and does not behave like one for membership checks.",
+    "from_case": "tomlkit__543",
+    "added_at": 1787994259.7453547
+  },
+  {
+    "text": "Avoid importing external libraries like `torch` in tests; the project's test suite is self-contained and does not have these dependencies.",
     "from_case": "tomlkit__562",
-    "added_at": 1787949162.9433358
+    "added_at": 1787994265.1685984
+  },
+  {
+    "text": "Tests should primarily interact with `tomlkit`'s public API and avoid internal module imports unless absolutely necessary for specific testing scenarios.",
+    "from_case": "tomlkit__562",
+    "added_at": 1787994265.168601
   }
 ]

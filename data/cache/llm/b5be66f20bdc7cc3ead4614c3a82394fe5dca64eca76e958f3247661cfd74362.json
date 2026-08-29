@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"rich/prompt.py\",\n    \"rich/console.py\"\n  ],\n  \"test_file\": \"tests/test_prompt.py\",\n  \"why\": \"The bug report explicitly mentions `PromptBase.on_validate_error()` and `Confirm.ask()`, both of which are defined in `rich/prompt.py`, and the suggested fix involves passing `markup=True` to `self.console.print()`, which is a method of `rich/console.py`.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 1977,
+    "completion_tokens": 127,
+    "cost_usd": 0.000911,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989859.868457
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "[\n  \"Click's internal components are often not directly exposed under the `click` top-level module; check `click.types` or other submodules for specific `ParamType` implementations.\",\n  \"When testing command-line output, be aware that Click often wraps or prepends its own messages (e.g., 'Error: Invalid value for...') to custom error messages provided by `ParamType`s.\"\n]",
+  "usage": {
+    "prompt_tokens": 831,
+    "completion_tokens": 90,
+    "cost_usd": 0.000474,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992234.4963303
+}

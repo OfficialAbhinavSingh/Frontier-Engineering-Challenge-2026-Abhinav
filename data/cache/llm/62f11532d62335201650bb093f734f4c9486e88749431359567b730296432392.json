@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nfrom rich.console import Console, Group\nfrom rich.live import Live\nfrom rich.text import Text\nfrom io import StringIO\n\n\ndef test_live_empty_render_leaves_newline():\n    \"\"\"\n    Test that Live with an empty Group and transient=True leaves a spurious newline.\n    \"\"\"\n    console = Console(file=StringIO(), record=True)\n\n    # Case 1: Live with an empty Group\n    list_empty = []\n    live_empty = Live(Group(*list_empty), transient=True, console=console)\n    with live_empty:\n        pass\n\n    output_empty = console.file.getvalue()\n    # Expecting a newline because of the bug\n    assert output_empty.endswith(\"\\n\")\n\n    console.file = StringIO() # Reset console output\n\n    # Case 2: Live with a Group containing an empty string\n    list_with_empty_string = [\"\"]\n    live_with_empty_string = Live(Group(*list_with_empty_string), transient=True, console=console)\n    with live_with_empty_string:\n        pass\n\n    output_with_empty_string = console.file.getvalue()\n    # Expecting no newline at the end when an empty string is present\n    assert not output_with_empty_string.endswith(\"\\n\")\n\n    # The bug is that output_empty.endswith(\"\\n\") is True, while it should be False\n    # if the behavior was consistent with output_with_empty_string.\n    # This test will fail if the bug is fixed and output_empty does not end with a newline.\n    # For the purpose of reproducing the bug, we assert the buggy behavior.\n    assert output_empty.endswith(\"\\n\")\n```",
+  "usage": {
+    "prompt_tokens": 3118,
+    "completion_tokens": 391,
+    "cost_usd": 0.001913,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989138.6570942
+}

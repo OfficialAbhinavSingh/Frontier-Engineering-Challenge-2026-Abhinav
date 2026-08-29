@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport io\nimport sys\n\nimport pytest\n\nfrom rich.console import Console\nfrom rich.text import Text\n\n\n@pytest.mark.parametrize(\n    \"nerd_font_char, expected_width\",\n    [\n        # This is the character specifically mentioned in the bug report\n        (\"\\U000f024d\", 1),  # nf-fa-folder_download\n        # Add a few more common Nerd Font icons that should be single width\n        (\"\\U000f0002\", 1),  # nf-fa-github\n        (\"\\U000e7ad\", 1),  # nf-dev-git\n        (\"\\U000e795\", 1),  # nf-dev-python\n        (\"\\U000e7b5\", 1),  # nf-dev-nodejs\n    ],\n)\ndef test_nerd_font_character_width(nerd_font_char: str, expected_width: int) -> None:\n    \"\"\"\n    Test that specific Nerd Font characters are correctly identified as single width.\n    \"\"\"\n    console = Console(\n        file=io.StringIO(),\n        width=80,\n        legacy_windows=False,  # Ensure non-legacy Windows rendering path\n        force_terminal=True,  # Force terminal rendering to get character width calculations\n    )\n    text = Text(nerd_font_char)\n    # Render the text and check the width of the rendered segments\n    # The bug is that rich.console.Console.renderable_width() (which is used internally\n    # by render() and other methods) incorrectly calculates the width of certain\n    # Nerd Font characters as 2 instead of 1.\n    # We can directly check the width calculation for the Text object.\n    calculated_width = text.__rich_measure__(\n        console, console.options\n    ).maximum  # Use maximum width for single character\n    \n    assert (\n        calculated_width == expected_width\n    ), f\"Nerd Font character '{nerd_font_char}' (U+{ord(nerd_font_char):x}) has unexpected width. Expected {expected_width}, got {calculated_width}.\"\n\n```",
+  "usage": {
+    "prompt_tokens": 5190,
+    "completion_tokens": 499,
+    "cost_usd": 0.002805,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787991574.2939463
+}

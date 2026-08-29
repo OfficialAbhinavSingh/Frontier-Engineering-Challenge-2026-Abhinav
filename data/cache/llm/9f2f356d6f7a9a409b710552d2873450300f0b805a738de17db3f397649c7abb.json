@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport sys\nfrom rich.console import Console\nfrom rich.live import Live\n\n\ndef test_live_redirect_stdout_isatty() -> None:\n    \"\"\"\n    Test that FileProxy.isatty() correctly delegates to the proxied file\n    when Live is used with redirect_stdout=True.\n    \"\"\"\n    console = Console()\n    # We need to ensure sys.stdout is a TTY for this test to be meaningful.\n    # If it's not, the test will still pass if the bug is fixed, but it won't\n    # truly test the delegation. For CI environments where stdout might not be a TTY,\n    # this test might not fail before the fix, but it will pass correctly after.\n    # The bug report implies sys.stdout.isatty() is True outside Live.\n\n    with Live(\"hello\", console=console, redirect_stdout=True):\n        # Inside the Live context with redirect_stdout=True, sys.stdout is replaced\n        # by a FileProxy instance. We expect its isatty() method to return\n        # the same value as the original sys.stdout.\n        assert sys.stdout.isatty() == console.file.isatty()\n\n```",
+  "usage": {
+    "prompt_tokens": 3216,
+    "completion_tokens": 274,
+    "cost_usd": 0.00165,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787991979.833551
+}

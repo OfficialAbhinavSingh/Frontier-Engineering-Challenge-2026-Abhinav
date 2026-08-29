@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"src/jinja2/runtime.py\",\n    \"src/jinja2/compiler.py\"\n  ],\n  \"test_file\": \"tests/test_core_tags.py\",\n  \"why\": \"The issue describes unexpected variable scoping behavior within an if-elif-else block, which is handled by the runtime and compiler, and tests for core tags are the most appropriate place for a regression test.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 1281,
+    "completion_tokens": 109,
+    "cost_usd": 0.000657,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787994631.9898038
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"When constructing a `Console` object, do not pass `encoding` as a keyword argument; it is not part of the public API.\",\n  \"When testing `Measurement` objects, remember that `minimum` and `maximum` are often the same value, and that `maximum` is the more common field to assert against for width calculations.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 576,
+    "completion_tokens": 81,
+    "cost_usd": 0.000375,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787991785.6002512
+}

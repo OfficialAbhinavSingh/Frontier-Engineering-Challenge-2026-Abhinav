@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nimport sqlglot\nfrom sqlglot import exp\n\n\ndef test_insert_replace_using():\n    sql = \"\"\"\nINSERT INTO TABLE students\n    REPLACE USING (country)\n    SELECT * FROM new_students;\n\"\"\"\n    # This should parse without error and produce a valid expression tree.\n    # The exact structure of the expression tree might evolve, but the key is that\n    # `REPLACE USING (country)` is recognized and associated with the INSERT statement.\n    with pytest.raises(exp.ParseError) as exc_info:\n        sqlglot.parse_one(sql, dialect=\"databricks\")\n\n    # Assert that the error message indicates an unexpected token related to \"REPLACE\"\n    assert \"Unexpected token\" in str(exc_info.value)\n    assert \"REPLACE\" in str(exc_info.value)\n\n    # Once fixed, the following assertion should pass:\n    # expression = sqlglot.parse_one(sql, dialect=\"databricks\")\n    # assert isinstance(expression, exp.Insert)\n    # assert expression.args.get(\"replace\") is not None\n    # assert expression.args[\"replace\"].sql() == \"USING (country)\"\n```",
+  "usage": {
+    "prompt_tokens": 3396,
+    "completion_tokens": 273,
+    "cost_usd": 0.001701,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989902.1692986
+}

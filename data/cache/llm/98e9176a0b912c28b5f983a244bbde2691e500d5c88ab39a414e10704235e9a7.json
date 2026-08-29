@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The user is reporting a bug where `PromptBase.on_validate_error` does not explicitly enable markup when printing error messages, even if the console was initialized with `markup=False`. This results in the markup tags like `[prompt.invalid]` being displayed literally instead of being rendered.\n\nI need to create a pytest file that demonstrates this behavior. The test should:\n1. Create a `Console` instance with `markup=False`.\n2. Create a `Confirm` prompt, passing the console to it.\n3. Simulate an invalid input to trigger `on_validate_error`.\n4. Assert that the error message printed to the console still contains the markup tags, indicating that markup was not enabled for the error message.\n\nLet's start by looking at the `rich.prompt` module to understand how `Confirm` and `PromptBase` work.\", \"tool\": \"read_file\", \"args\": {\"path\": \"rich/prompt.py\"}}",
+  "usage": {
+    "prompt_tokens": 546,
+    "completion_tokens": 206,
+    "cost_usd": 0.000679,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989518.5427153
+}

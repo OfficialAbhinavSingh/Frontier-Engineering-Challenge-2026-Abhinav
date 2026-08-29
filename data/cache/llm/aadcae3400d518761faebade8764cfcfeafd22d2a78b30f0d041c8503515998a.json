@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nfrom jinja2 import Environment\nimport asyncio\n\n@pytest.fixture\ndef env_async():\n    env = Environment(enable_async=True)\n    env.filters.update({'add_two': lambda x, y: [i + y for i in x]})\n    return env\n\n@pytest.mark.asyncio\nasync def test_custom_filter_with_slice_async_true(env_async):\n    template = env_async.from_string(\"{% for item in (a.b|add_two(5))[:1] %}{{ item }}{% endfor %}\")\n    data = {\"a\": {\"b\": [1, 2, 3]}}\n    result = await template.render_async(data)\n    assert result == \"6\"\n\n@pytest.mark.asyncio\nasync def test_custom_filter_with_slice_async_true_multiple_items(env_async):\n    template = env_async.from_string(\"{% for item in (a.b|add_two(5))[:2] %}{{ item }}{% endfor %}\")\n    data = {\"a\": {\"b\": [1, 2, 3]}}\n    result = await template.render_async(data)\n    assert result == \"67\"\n\n@pytest.mark.asyncio\nasync def test_custom_filter_with_slice_async_true_empty_slice(env_async):\n    template = env_async.from_string(\"{% for item in (a.b|add_two(5))[:0] %}{{ item }}{% endfor %}\")\n    data = {\"a\": {\"b\": [1, 2, 3]}}\n    result = await template.render_async(data)\n    assert result == \"\"\n```",
+  "usage": {
+    "prompt_tokens": 4890,
+    "completion_tokens": 404,
+    "cost_usd": 0.002477,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787991675.2448437
+}

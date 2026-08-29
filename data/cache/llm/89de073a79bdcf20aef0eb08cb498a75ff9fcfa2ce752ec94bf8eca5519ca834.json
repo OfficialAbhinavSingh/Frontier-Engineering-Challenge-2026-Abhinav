@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The user wants a pytest test file that demonstrates the bug where macros in a native environment always output strings, even when native types are expected. I need to create a Jinja2 environment with `native=True`, define a macro that returns a native type (like a list or an integer), and then assert that the output of the macro call is indeed a native type, not a string. The provided example `env.from_string(\\\"{%- macro x() -%}{{- [5,6] -}}{%- endmacro -%}{{- x()[0] -}}\\\").render()` should ideally return the integer 5, but currently returns the string '['. I will adapt this example for the test.\", \"tool\": \"read_file\", \"args\": {\"path\": \"src/jinja2/environment.py\"}}",
+  "usage": {
+    "prompt_tokens": 460,
+    "completion_tokens": 174,
+    "cost_usd": 0.000573,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989275.9415371
+}

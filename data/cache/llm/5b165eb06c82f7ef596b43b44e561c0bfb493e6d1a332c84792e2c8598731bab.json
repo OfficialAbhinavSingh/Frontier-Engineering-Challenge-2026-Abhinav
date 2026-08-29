@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport sys\nimport io\nimport pytest\nfrom rich.console import Console\nfrom rich.live import Live\n\n# This fixture is not provided in the example, but typically used for capturing console output.\n# We'll define a minimal one for this test.\n@pytest.fixture\ndef create_capture_console():\n    def _create_capture_console():\n        console = Console(file=io.StringIO(), force_terminal=True)\n        return console\n    return _create_capture_console\n\ndef test_live_redirect_stdout_isatty(create_capture_console):\n    \"\"\"\n    Tests that sys.stdout.isatty() correctly reflects the underlying terminal\n    when Live is redirecting stdout.\n    \"\"\"\n    console = create_capture_console()\n\n    # Ensure that the console's file is a TTY for this test\n    # (create_capture_console already sets force_terminal=True, but we want to be explicit)\n    assert console.file.isatty() is True\n\n    # Store the original sys.stdout to restore it later\n    original_stdout = sys.stdout\n\n    try:\n        # Check isatty() before Live context\n        assert original_stdout.isatty() is True\n\n        with Live(\"hello\", console=console, redirect_stdout=True):\n            # Inside the Live context, sys.stdout should be the FileProxy\n            # and its isatty() method should delegate to the underlying console.file\n            assert sys.stdout.isatty() is True\n            # Also check the FileProxy directly\n            assert isinstance(sys.stdout, console.file_proxy_class)\n            assert sys.stdout.rich_proxied_file.isatty() is True\n\n        # After Live context, sys.stdout should be restored\n        assert sys.stdout.isatty() is True\n\n    finally:\n        # Ensure sys.stdout is always restored\n        sys.stdout = original_stdout\n```",
+  "usage": {
+    "prompt_tokens": 2972,
+    "completion_tokens": 438,
+    "cost_usd": 0.001987,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787990802.7833056
+}

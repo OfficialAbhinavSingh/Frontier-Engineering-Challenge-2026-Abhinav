@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nfrom rich.console import Console\nfrom rich.text import Text\nfrom rich.cells import get_and_apply_character_cell_size_overrides\n\n# This is the Nerd Font character for a downloads folder, which was reported as\n# being incorrectly rendered as double-width.\nNERD_FONT_DOWNLOADS_ICON = \"\\U000f024d\"\n\ndef test_nerd_font_character_width():\n    \"\"\"\n    Test that a specific Nerd Font character is correctly identified as single-width.\n    \"\"\"\n    # Ensure the character width overrides are applied\n    get_and_apply_character_cell_size_overrides()\n\n    console = Console(width=80, record=True)\n    text = Text(NERD_FONT_DOWNLOADS_ICON)\n\n    # Render the text to get its cell width\n    with console:\n        console.print(text, end=\"\")\n    \n    # The rendered text should have a width of 1, as it's a single character\n    # that should be treated as single-width.\n    # If the bug is present, this will be 2.\n    rendered_width = console.measure(text).maximum\n\n    assert rendered_width == 1, (\n        f\"Nerd Font character '{NERD_FONT_DOWNLOADS_ICON}' \"\n        f\"was incorrectly measured as {rendered_width} cells wide, expected 1.\"\n    )\n\n```",
+  "usage": {
+    "prompt_tokens": 3136,
+    "completion_tokens": 324,
+    "cost_usd": 0.001751,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989161.229281
+}

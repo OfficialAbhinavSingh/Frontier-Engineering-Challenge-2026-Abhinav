@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nfrom rich.style import Style\nfrom rich.text import Text\nfrom rich.text import Span\n\n\ndef test_assemble_meta():\n    text = Text.assemble(\"foo\", (\"bar\", \"bold\"), meta={\"foo\": \"bar\"})\n    # The bug report shows an AssertionError where the two lists of Spans\n    # are reported as not equal, specifically at index 1.\n    # The diff shows:\n    # At index 1 diff: Span(0, 6, Style(meta={'foo': 'bar'})) != Span(0, 6, Style(meta={'foo': 'bar'}))\n    # This indicates that even though the repr of the Style objects look identical,\n    # their internal comparison fails.\n    # The test should assert the exact list of spans that the reporter expected,\n    # which currently fails due to the bug in Style comparison.\n    expected_spans = [\n        Span(3, 6, \"bold\"),\n        Span(0, 6, Style(meta={\"foo\": \"bar\"})),\n    ]\n    assert text._spans == expected_spans\n\n```",
+  "usage": {
+    "prompt_tokens": 3019,
+    "completion_tokens": 251,
+    "cost_usd": 0.001533,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787994780.9548793
+}

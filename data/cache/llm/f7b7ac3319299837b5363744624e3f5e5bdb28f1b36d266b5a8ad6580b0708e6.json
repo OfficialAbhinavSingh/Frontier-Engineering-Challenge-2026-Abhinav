@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\"reproduced\": false, \"why\": \"The test failed with a `pytest.PytestUnraisableExceptionWarning` and `RuntimeWarning: coroutine 'auto_await' was never awaited`, not the `TypeError: 'coroutine' object is not subscriptable` that the bug report describes and the test expects.\"}\n```",
+  "usage": {
+    "prompt_tokens": 1514,
+    "completion_tokens": 73,
+    "cost_usd": 0.000637,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992271.7229598
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pickle\n\nimport pytest\n\nfrom jinja2.utils import missing\n\n\ndef test_missing_pickle():\n    \"\"\"jinja2.utils.missing should be picklable.\"\"\"\n    # The bug is that pickle.dumps(missing) fails.\n    # We expect it to succeed and return a bytes object.\n    # Then, unpickling it should return the original singleton.\n    pickled_missing = pickle.dumps(missing)\n    loaded_missing = pickle.loads(pickled_missing)\n    assert loaded_missing is missing\n```",
+  "usage": {
+    "prompt_tokens": 2826,
+    "completion_tokens": 122,
+    "cost_usd": 0.001153,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787991540.3961256
+}

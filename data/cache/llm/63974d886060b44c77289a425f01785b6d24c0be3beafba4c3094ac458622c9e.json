@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The test run failed, but not with the expected `TypeError`. The output indicates `RuntimeWarning: coroutine 'add_two' was never awaited`. This means that the `add_two` function itself is not being treated as a coroutine, but the *result* of the filter application is. The original issue description states \\\"'coroutine' object is not subscriptable\\\", which implies that the filter *output* is being wrapped in a coroutine when `enable_async=True` is set, and then the slicing `[:1]` is attempted on this coroutine object.\n\nMy current test code is:\n```python\nimport pytest\nimport jinja2\n\ndef add_two(x, y):\n    return [i + y for i in x]\n\ndef test_async_filter_subscriptable_error():\n    env = jinja2.Environment(enable_async=True)\n    env.filters.update({'add_two': add_two})\n    template = env.from_string(\\\"{% for item in (a.b|add_two(5))[:1] %}{{ item }}{% endfor %}\\\")\n    \n    data = {'a': {'b': [1, 2, 3]}}\n    \n    with pytest.raises(TypeError) as excinfo:\n        template.render(data)\n    \n    assert \\\"'coroutine' object is not subscriptable\\\" in str(excinfo.value)\n```\n\nThe `RuntimeWarning` suggests that the `render` call itself might need to be awaited if `enable_async=True`. Let me try `template.render_async(data)` instead of `template.render(data)` and `pytest.mark.asyncio` for the test function.\", \"tool\": \"run_test\", \"args\": {\"source\": \"import pytest\nimport jinja2\nimport asyncio\n\ndef add_two(x, y):\n    return [i + y for i in x]\n\n@pytest.mark.asyncio\nasync def test_async_filter_subscriptable_error():\n    env = jinja2.Environment(enable_async=True)\n    env.filters.update({'add_two': add_two})\n    template = env.from_string(\\\"{% for item in (a.b|add_two(5))[:1] %}{{ item }}{% endfor %}\\\")\n    \n    data = {'a': {'b': [1, 2, 3]}}\n    \n    with pytest.raises(TypeError) as excinfo:\n        await template.render_async(data)\n    \n    assert \\\"'coroutine' object is not subscriptable\\\" in str(excinfo.value)\n\"}}",
+  "usage": {
+    "prompt_tokens": 2672,
+    "completion_tokens": 597,
+    "cost_usd": 0.001742,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989315.8505397
+}

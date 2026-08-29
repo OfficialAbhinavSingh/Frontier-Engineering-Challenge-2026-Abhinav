@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nimport tomlkit\nfrom tomlkit.items import Array\nfrom tomlkit.items import Float\n\n\ndef test_array_of_floats_can_be_converted_to_list() -> None:\n    # This test reproduces the TypeError: object of type 'Float' has no len()\n    # when trying to convert a tomlkit.items.Array of tomlkit.items.Float\n    # to a list of Python floats.\n    # The expected behavior is that the tomlkit.items.Array should behave\n    # like a standard Python list of floats, allowing direct conversion.\n\n    toml_str = \"\"\"\n    a = [1.0, 2.0, 3.0]\n    \"\"\"\n    arr = tomlkit.loads(toml_str)\n\n    assert isinstance(arr[\"a\"], Array)\n    assert isinstance(arr[\"a\"][0], Float)\n\n    # The bug manifests when trying to iterate over or convert the Array\n    # containing Float objects, as the underlying Float object does not\n    # correctly expose its value for such operations.\n    # We expect to be able to convert this to a standard Python list of floats.\n    expected_list = [1.0, 2.0, 3.0]\n    actual_list = list(arr[\"a\"])\n\n    assert actual_list == expected_list\n    assert all(isinstance(x, float) for x in actual_list)\n```",
+  "usage": {
+    "prompt_tokens": 2688,
+    "completion_tokens": 327,
+    "cost_usd": 0.001624,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787991832.0403259
+}

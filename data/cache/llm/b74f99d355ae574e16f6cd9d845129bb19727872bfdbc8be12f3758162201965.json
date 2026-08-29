@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The test now fails with `TypeError: 'async_generator' object is not iterable` inside `native_concat`. This indicates that `enable_async=True` is causing an issue with `NativeEnvironment`'s rendering process, specifically when it tries to concatenate values. Since the issue is about native types in macros and not about async rendering, I should disable `enable_async` to isolate the problem. The original issue example doesn't use async features.\", \"tool\": \"run_test\", \"args\": {\"source\": \"import pytest\\nfrom jinja2 import Environment\\nfrom jinja2.nativetypes import NativeEnvironment\\n\\ndef test_macro_native_types():\\n    env = NativeEnvironment(extensions=['jinja2.ext.do'], autoescape=False)\\n    template = env.from_string(\\\"{%- macro x() -%}{{- [5,6] -}}{%- endmacro -%}{{- x()[0] -}}\\\")\\n    result = template.render()\\n    # The bug is that it returns the string '[' instead of the integer 5\\n    assert result == 5\\n    assert isinstance(result, int)\\n\"}}",
+  "usage": {
+    "prompt_tokens": 4322,
+    "completion_tokens": 260,
+    "cost_usd": 0.001947,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989295.1477358
+}

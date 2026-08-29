@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The user is reporting a bug where a custom synchronous filter, when used with `enable_async=True`, causes a `TypeError: 'coroutine' object is not subscriptable`. The reproduction steps involve a `for` loop, a custom filter `add_two`, and slicing the result of the filter. I need to create a pytest file that sets up a Jinja2 environment with `enable_async=True`, defines the `add_two` filter, and then renders a template that triggers this error. The test should fail with the described `TypeError` at the current commit and pass once the bug is fixed.\", \"tool\": \"read_file\", \"args\": {\"path\": \"src/jinja2/environment.py\"}}",
+  "usage": {
+    "prompt_tokens": 644,
+    "completion_tokens": 156,
+    "cost_usd": 0.000583,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989309.1704512
+}

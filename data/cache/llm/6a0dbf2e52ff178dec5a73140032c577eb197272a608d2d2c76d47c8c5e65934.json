@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"When testing `tomlkit.toml_document.TOMLDocument.dumps`, be aware that the output order of keys is not guaranteed to match the input order. If order matters for the test, sort the expected and actual output strings before comparison.\",\n  \"When constructing TOML documents for tests, prefer using `tomlkit.toml_document.TOMLDocument.add` or `tomlkit.toml_document.TOMLDocument.append` to ensure correct handling of array of tables (AoT) and other complex structures, rather than direct dictionary-like assignment if the exact internal representation is important.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 507,
+    "completion_tokens": 135,
+    "cost_usd": 0.00049,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787991819.6519647
+}

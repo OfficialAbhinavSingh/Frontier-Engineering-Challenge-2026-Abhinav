@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\"reproduced\": true, \"why\": \"The test failed with a TypeError: sequence item 0: expected str instance, int found, which is the exact error reported in the bug report, and the traceback points to the same location in native_concat.\"}\n```",
+  "usage": {
+    "prompt_tokens": 978,
+    "completion_tokens": 59,
+    "cost_usd": 0.000441,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992291.703284
+}

@@ -1,0 +1,22 @@
+[
+  {
+    "text": "When asserting on terminal output, prefer `rich.console.Console.record_render` and `rich.test.get_rich_repr` over direct string matching of ANSI escape codes.",
+    "from_case": "rich__3569",
+    "added_at": 1787994765.000203
+  },
+  {
+    "text": "Avoid asserting on the exact sequence of ANSI escape codes; their order or presence can vary slightly between Rich versions or configurations while still producing the correct visual output.",
+    "from_case": "rich__3569",
+    "added_at": 1787994765.000205
+  },
+  {
+    "text": "Tests in this repository often require specific Python versions or environments to reproduce bugs. Ensure the test environment matches the bug report's context.",
+    "from_case": "rich__3740",
+    "added_at": 1787994781.667329
+  },
+  {
+    "text": "When a test passes unexpectedly, it's crucial to verify that the test setup accurately reflects the conditions under which the bug was observed, including Python version and any relevant environment variables.",
+    "from_case": "rich__3740",
+    "added_at": 1787994781.6673305
+  }
+]

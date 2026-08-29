@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nfrom jinja2 import Environment\nimport pytest\n\ndef test_custom_filter_with_slice_async_true():\n    jinja_env = Environment(enable_async=True)\n    jinja_env.filters.update({'add_two': lambda x, y: [i + y for i in x]})\n    template = jinja_env.from_string(\"{% for item in (a.b|add_two(5))[:1] %}{{ item }}{% endfor %}\")\n    data = {'a': {'b': [1, 2, 3]}}\n    # The bug causes a TypeError: 'coroutine' object is not subscriptable\n    # when enable_async=True and a filter result is sliced.\n    # The expected behavior is that the filter is applied, then sliced,\n    # and the loop iterates over the result.\n    result = jinja_env.from_string(\"{% for item in (a.b|add_two(5))[:1] %}{{ item }}{% endfor %}\").render(a=data['a'])\n    assert result == \"6\"\n\n```",
+  "usage": {
+    "prompt_tokens": 5451,
+    "completion_tokens": 251,
+    "cost_usd": 0.002263,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787991883.8606725
+}

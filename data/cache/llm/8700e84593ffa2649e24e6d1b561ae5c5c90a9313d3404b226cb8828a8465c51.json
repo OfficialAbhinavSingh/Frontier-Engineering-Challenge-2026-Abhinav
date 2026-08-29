@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\"reproduced\": false, \"why\": \"The test failed due to an ImportError, indicating a problem with the test setup or environment rather than the reported bug itself. The test did not execute the code path that would expose the bug.\"}\n```",
+  "usage": {
+    "prompt_tokens": 2785,
+    "completion_tokens": 54,
+    "cost_usd": 0.000971,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992205.213422
+}

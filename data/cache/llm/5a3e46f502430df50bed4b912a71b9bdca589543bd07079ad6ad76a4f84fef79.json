@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"My apologies again. I will ensure to output valid JSON.\n\nThe previous test run failed because I was using `_CLICK_COMPLETE=fish_source` which generates the completion script, and that script generation itself might have failed. The issue description, however, shows the raw completion output from `_LLM_COMPLETE=fish_complete` which *does* contain the multi-line help.\n\nI've updated the test to use `_CLICK_COMPLETE=fish_complete` and expect `exit_code == 0`, as the raw completion output itself is not an error from Click's perspective, but rather a malformed string that the fish shell script then fails to parse. I'm now running this updated test.\", \"tool\": \"run_test\", \"args\": {\"source\": \"import click\\nfrom click.testing import CliRunner\\n\\ndef test_fish_completion_multiline_help_bug():\\n    @click.group()\\n    def cli():\\n        pass\\n\\n    @cli.command()\\n    @click.option(\\n        \\\"--test-option\\\",\\n        help=\\\"This is the first line.\\\\nThis is the second line of help.\\\",\\n    )\\n    def hello(test_option):\\n        click.echo(f\\\"Hello {test_option}\\\")\\n\\n    runner = CliRunner()\\n    result = runner.invoke(\\n        cli,\\n        [],\\n        env={\\n            \\\"_CLICK_COMPLETE\\\": \\\"fish_complete\\\", # Changed to fish_complete\\n            \\\"_CLICK_CLI_NAME\\\": \\\"cli\\\",\\n            \\\"COMP_WORDS\\\": \\\"cli --\\\",\\n            \\\"COMP_CWORD\\\": \\\"1\\\",\\n        },\\n    )\\n\\n    # According to the issue, the raw completion output itself does not error out Click,\\n    # but the fish shell script fails to parse it. So, exit_code should be 0.\\n    assert result.exit_code == 0, f\\\"Expected exit code 0, got {result.exit_code}. Output: {result.output}\\\"\\n    \\n    # The bug is that the multi-line help text is not escaped/handled correctly\\n    # and appears directly in the completion output, which would break fish.\\n    # We expect to see the raw multi-line help text in the output.\\n    expected_output_part = \\\"plain,--test-option\\\\nThis is the first line.\\\\nThis is the second line of help.\\\"\\n    assert expected_output_part in result.output\\n\"}}",
+  "usage": {
+    "prompt_tokens": 4476,
+    "completion_tokens": 567,
+    "cost_usd": 0.00276,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989212.9515479
+}

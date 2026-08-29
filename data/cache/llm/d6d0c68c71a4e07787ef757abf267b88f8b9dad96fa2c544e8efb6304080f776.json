@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nimport io\nfrom rich.console import Console\nfrom rich.table import Table\nfrom rich.text import Text\n\n\ndef test_double_width_character_in_background_of_modal():\n    \"\"\"\n    Test that double-width characters are measured correctly even when\n    they appear in the background of a modal screen.\n    \"\"\"\n    console = Console(\n        file=io.StringIO(),\n        force_terminal=True,\n        width=80,\n        height=25,\n        record=True,\n    )\n\n    table = Table(show_header=False, show_footer=False, box=None, padding=0)\n    table.add_column(width=10)\n    table.add_column(width=10)\n    table.add_row(\"\u65e5\u672c\u8a9e\", \"Text\")  # \"\u65e5\u672c\u8a9e\" is 6 cells wide\n\n    # Render the table, simulating it being in the background\n    console.print(table)\n\n    # The bug causes the double-width character to be measured as single-width,\n    # leading to incorrect alignment and truncation.\n    # We expect the output to correctly account for the 6-cell width of \"\u65e5\u672c\u8a9e\".\n    # With a column width of 10, \"\u65e5\u672c\u8a9e\" should fit, followed by \"Text\".\n    # The exact rendering might vary slightly, but the key is that \"\u65e5\u672c\u8a9e\"\n    # should not be truncated and \"Text\" should appear after it,\n    # respecting the column widths.\n\n    # The first column is 10 wide, \"\u65e5\u672c\u8a9e\" is 6 wide.\n    # The second column is 10 wide, \"Text\" is 4 wide.\n    # Expected output should show \"\u65e5\u672c\u8a9e\" followed by 4 spaces, then \"Text\" followed by 6 spaces.\n    expected_line = \"\u65e5\u672c\u8a9e    Text      \"\n    output = console.export_text(clear=False, styles=False).splitlines()[0]\n\n    assert output == expected_line\n\n```",
+  "usage": {
+    "prompt_tokens": 6258,
+    "completion_tokens": 445,
+    "cost_usd": 0.00299,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992357.0086074
+}

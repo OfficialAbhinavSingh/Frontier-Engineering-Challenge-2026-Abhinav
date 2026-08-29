@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport sys\nfrom rich.console import Console\nfrom rich.live import Live\n\n\ndef test_live_redirect_stdout_isatty_delegation() -> None:\n    \"\"\"\n    Test that FileProxy.isatty() correctly delegates to the proxied file\n    when Live is used with redirect_stdout=True.\n    \"\"\"\n    console = Console()\n\n    # The bug report states that sys.stdout.isatty() returns False inside Live\n    # when it should return True (assuming sys.stdout is a TTY).\n    # We need to simulate a TTY environment for this test to fail as expected.\n    # If sys.stdout is not a TTY, the bug won't manifest as a change from True to False.\n\n    # Temporarily replace sys.stdout with a mock that reports as a TTY\n    # This ensures the test fails when the bug is present, regardless of the\n    # actual execution environment.\n    class MockTTYStdout:\n        def isatty(self) -> bool:\n            return True\n\n        def write(self, text: str) -> int:\n            return len(text)\n\n        def flush(self) -> None:\n            pass\n\n        def fileno(self) -> int:\n            return 1  # Standard output fileno\n\n    original_stdout = sys.stdout\n    sys.stdout = MockTTYStdout()\n\n    try:\n        with Live(\"hello\", console=console, redirect_stdout=True):\n            # Inside the Live context, sys.stdout is replaced by a FileProxy.\n            # The bug is that FileProxy.isatty() always returns False,\n            # even if the underlying file (our MockTTYStdout) reports True.\n            # We assert that it *should* return True.\n            assert sys.stdout.isatty() is True\n    finally:\n        sys.stdout = original_stdout\n\n```",
+  "usage": {
+    "prompt_tokens": 3761,
+    "completion_tokens": 421,
+    "cost_usd": 0.002181,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787991987.1522734
+}

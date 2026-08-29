@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"When asserting on terminal output, prefer `rich.console.Console.record_render` and `rich.test.get_rich_repr` over direct string matching of ANSI escape codes.\",\n  \"Avoid asserting on the exact sequence of ANSI escape codes; their order or presence can vary slightly between Rich versions or configurations while still producing the correct visual output.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 929,
+    "completion_tokens": 84,
+    "cost_usd": 0.000489,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787994765.00002
+}

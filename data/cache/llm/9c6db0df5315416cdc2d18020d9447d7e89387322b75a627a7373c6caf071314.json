@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport tomlkit\n\n\ndef test_scalar_not_captured_by_dictionary():\n    doc = tomlkit.loads(\"a.b = 1\\n\")\n    doc[\"a\"][\"c\"] = {}\n    doc[\"z\"] = 2\n\n    expected_output = \"\"\"a.b = 1\n\n[a.c]\nz = 2\n\"\"\"\n    # The bug report shows the incorrect output.\n    # The expected output should have 'z' as a top-level key.\n    # The order of 'a.b' and 'z' might vary, but 'z' should not be inside 'a.c'.\n    # Since the bug is about 'z' being wrongly captured, we assert its top-level presence.\n    # We can't directly assert the string because the order of top-level keys might change.\n    # Instead, we parse the dumped string and check the structure.\n\n    dumped_doc = tomlkit.dumps(doc)\n    parsed_dumped_doc = tomlkit.loads(dumped_doc)\n\n    assert \"z\" in parsed_dumped_doc\n    assert parsed_dumped_doc[\"z\"] == 2\n    assert \"a\" in parsed_dumped_doc\n    assert \"b\" in parsed_dumped_doc[\"a\"]\n    assert parsed_dumped_doc[\"a\"][\"b\"] == 1\n    assert \"c\" in parsed_dumped_doc[\"a\"]\n    assert isinstance(parsed_dumped_doc[\"a\"][\"c\"], tomlkit.toml_document.TOMLDocument)\n    assert \"z\" not in parsed_dumped_doc[\"a\"][\"c\"]\n\n    # A more direct string comparison, assuming a specific order for this test case\n    # (which might be brittle if tomlkit changes its default ordering behavior).\n    # However, for this specific bug, the key 'z' moving is the core issue.\n    # The original report implies the order of 'a.b' and 'z' is preserved,\n    # but 'z' gets nested.\n    # The correct output should be:\n    # a.b = 1\n    # z = 2\n    #\n    # [a.c]\n    #\n    # Or:\n    # z = 2\n    # a.b = 1\n    #\n    # [a.c]\n    #\n    # The key is that 'z' is not under 'a.c'.\n    # Let's construct the expected string based on the most likely correct output order.\n    expected_string = \"\"\"a.b = 1\nz = 2\n\n[a.c]\n\"\"\"\n    assert dumped_doc == expected_string\n\n```",
+  "usage": {
+    "prompt_tokens": 2060,
+    "completion_tokens": 614,
+    "cost_usd": 0.002153,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787991827.2863836
+}

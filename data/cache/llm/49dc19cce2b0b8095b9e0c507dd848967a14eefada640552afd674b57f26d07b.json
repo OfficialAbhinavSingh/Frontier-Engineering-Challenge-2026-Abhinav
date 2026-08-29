@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"When testing `jinja2.utils` objects, ensure the test environment correctly imports and exposes the `jinja2.utils` module at the top level for pickling/unpickling to work as expected.\",\n  \"Be aware that `jinja2.utils` contains singleton-like objects (e.g., `missing`) that might have specific serialization requirements or limitations not immediately obvious from their API.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 867,
+    "completion_tokens": 96,
+    "cost_usd": 0.0005,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787991917.618847
+}

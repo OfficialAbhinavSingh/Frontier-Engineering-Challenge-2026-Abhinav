@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\"reproduced\": true, \"why\": \"The test failed with a TypeError: unhashable type: 'list' when calling hash() on the template, which directly matches the bug report's description and traceback.\"}\n```",
+  "usage": {
+    "prompt_tokens": 720,
+    "completion_tokens": 51,
+    "cost_usd": 0.000344,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992259.4520588
+}

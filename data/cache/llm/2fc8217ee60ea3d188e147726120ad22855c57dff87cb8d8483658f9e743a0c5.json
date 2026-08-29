@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport io\nimport sys\nimport pytest\nfrom rich.console import Console\nfrom rich.text import Text\n\n\ndef test_nerd_font_width_issue_3943() -> None:\n    \"\"\"\n    Test that a specific Nerd Font character (\\U000f024d) is rendered with a width of 1,\n    not 2, as reported in issue #3943.\n    \"\"\"\n    console = Console(\n        file=io.StringIO(),\n        force_terminal=True,\n        width=5,  # Small width to easily detect incorrect wrapping/width calculation\n        legacy_windows=False,  # Ensure modern rendering path is used\n        soft_wrap=True,  # Allow soft wrapping to see if it breaks\n    )\n\n    # The problematic character: F024D (downloads folder icon)\n    nerd_font_char = \"\\U000f024d\"\n    # A string that should fit on one line if the nerd font char is single width\n    # but will wrap if it's double width.\n    test_string = f\"123{nerd_font_char}5\"\n\n    # Print the string. We expect it to fit on one line.\n    console.print(test_string, end=\"\")\n\n    # If the character is treated as single width, the output should be \"123<char>5\"\n    # If it's treated as double width, it will cause a wrap.\n    # For a width of 5, \"123<char>5\" (5 characters) should fit on one line.\n    # If <char> is treated as 2-width, then \"123<char>\" would be 5 characters,\n    # forcing \"5\" to wrap to the next line.\n    # The bug report shows the character causing misalignment, implying it's taking\n    # up too much space.\n    # We expect the entire string to be on a single line.\n    output = console.file.getvalue()\n\n    # The expected output should be the string followed by a newline,\n    # indicating it fit on one line.\n    # If the bug is present, the '5' would wrap, resulting in two lines.\n    # We use export_text(plain=True) to strip ANSI codes for a clean comparison\n    # of the character layout.\n    expected_output = f\"{test_string}\\n\"\n    assert console.export_text(clear=False, styles=False) == expected_output\n\n```",
+  "usage": {
+    "prompt_tokens": 5344,
+    "completion_tokens": 569,
+    "cost_usd": 0.003026,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992336.9344141
+}

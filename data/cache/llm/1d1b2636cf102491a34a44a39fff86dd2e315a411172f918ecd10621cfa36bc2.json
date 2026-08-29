@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"rich/text.py\",\n    \"rich/console.py\"\n  ],\n  \"test_file\": \"tests/test_text.py\",\n  \"why\": \"The bug report explicitly states that the issue is with `Text.from_ansi()`, which is defined in `rich/text.py`, and the provided example directly uses this method, making `tests/test_text.py` the most appropriate place for a regression test.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 1826,
+    "completion_tokens": 116,
+    "cost_usd": 0.000838,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787994681.5736437
+}

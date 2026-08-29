@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nfrom jinja2.nativetypes import NativeEnvironment\n\ndef test_loop_index_in_block_native_env():\n    env = NativeEnvironment()\n    template = env.from_string('{% block test %}{% for i in range(1) %}{{ loop.index }}{% endfor %}{% endblock %}{{ self.test() }}')\n    # The original bug caused a TypeError because loop.index (an int) was passed to native_concat\n    # without being converted to a string first when rendered inside a block and then called.\n    # The expected output is the integer 1, as native_concat should handle single integer results.\n    assert template.render() == 1\n\ndef test_loop_index_in_block_native_env_multiple_iterations():\n    env = NativeEnvironment()\n    template = env.from_string('{% block test %}{% for i in range(3) %}{{ loop.index }}{% endfor %}{% endblock %}{{ self.test() }}')\n    # With multiple iterations, the result should be a concatenated string \"123\"\n    assert template.render() == \"123\"\n\ndef test_loop_index_directly_native_env():\n    env = NativeEnvironment()\n    template = env.from_string('{% for i in range(1) %}{{ loop.index }}{% endfor %}')\n    # Directly rendering loop.index should also work and return the integer 1\n    assert template.render() == 1\n\ndef test_loop_index_directly_native_env_multiple_iterations():\n    env = NativeEnvironment()\n    template = env.from_string('{% for i in range(3) %}{{ loop.index }}{% endfor %}')\n    # Directly rendering multiple loop.index should return the concatenated string \"123\"\n    assert template.render() == \"123\"\n```",
+  "usage": {
+    "prompt_tokens": 3396,
+    "completion_tokens": 429,
+    "cost_usd": 0.002091,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787990697.361872
+}

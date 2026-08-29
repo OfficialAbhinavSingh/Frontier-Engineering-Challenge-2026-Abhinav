@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pickle\nimport pytest\n\nimport jinja2.filters\n\n\ndef test_async_variant_filter_pickleable():\n    \"\"\"Filters decorated with @async_variant should be pickleable.\"\"\"\n    # The bug report specifically mentions do_first, but any filter decorated\n    # with @async_variant would exhibit the same issue.\n    # We assert that pickling and unpickling does not raise an exception.\n    # The original bug was that the wrapper created by async_variant had the\n    # wrong __module__, __name__, and __qualname__, which prevented pickling.\n    # The fix should ensure these attributes are correctly set, allowing pickling.\n    pickled_filter = pickle.dumps(jinja2.filters.do_first)\n    unpickled_filter = pickle.loads(pickled_filter)\n    # We don't assert identity because pickling/unpickling creates a new object.\n    # We assert that the unpickled function is callable and has the correct name.\n    assert callable(unpickled_filter)\n    assert unpickled_filter.__name__ == \"do_first\"\n\n\ndef test_async_variant_filter_name_and_qualname():\n    \"\"\"Filters decorated with @async_variant should have correct __name__ and __qualname__.\"\"\"\n    # The bug report states that the decorator puts the wrong __name__ and __qualname__.\n    # This test asserts the correct values.\n    assert jinja2.filters.do_first.__name__ == \"do_first\"\n    assert jinja2.filters.do_first.__qualname__ == \"jinja2.filters.do_first\"\n\n```",
+  "usage": {
+    "prompt_tokens": 4993,
+    "completion_tokens": 372,
+    "cost_usd": 0.002428,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787991692.5439703
+}

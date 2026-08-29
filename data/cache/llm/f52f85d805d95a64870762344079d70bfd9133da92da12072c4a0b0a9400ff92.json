@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"My previous assumption was incorrect. The `sqlglot.parse_one` *does* raise a `ParseError` for this specific SQL. The test I wrote with `pytest.raises(sqlglot.errors.ParseError)` is actually the correct way to test this. The previous run showed a `ParseError` being raised, which means the test *should* pass if it's expecting that error.\n\nLet me re-evaluate the output. The test failed because `sqlglot.errors.ParseError` was raised, but the test was asserting `parsed is None`. I need to revert to the original test that expects a `ParseError`.\", \"final_test\": \"\\nimport pytest\\nimport sqlglot\\n\\ndef test_databricks_insert_replace_using():\\n    sql = \\\"\\\"\\\"\\nINSERT INTO TABLE students\\n    REPLACE USING (country)\\n    SELECT * FROM new_students;\\n\\\"\\\"\\\"\\n    with pytest.raises(sqlglot.errors.ParseError):\\n        sqlglot.parse_one(sql, dialect=\\\"databricks\\\")\\n\"}",
+  "usage": {
+    "prompt_tokens": 3314,
+    "completion_tokens": 245,
+    "cost_usd": 0.001607,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989649.8643696
+}

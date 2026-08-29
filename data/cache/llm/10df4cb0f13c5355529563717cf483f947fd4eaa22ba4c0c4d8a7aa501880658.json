@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nfrom jinja2 import Environment\nimport pytest\nfrom collections import namedtuple\n\ndef test_groupby_case_sensitive(env):\n    # Data with mixed case 'city' attributes\n    User = namedtuple(\"User\", \"name city\")\n    users = [\n        User(\"Alice\", \"new york\"),\n        User(\"Bob\", \"New York\"),\n        User(\"Charlie\", \"london\"),\n        User(\"David\", \"London\"),\n    ]\n\n    # Current groupby always sorts case-sensitively\n    # The bug is that there's no way to make it case-insensitive\n    # We expect 'New York' and 'new york' to be grouped separately\n    # and 'London' and 'london' to be grouped separately.\n    # The order of groups might vary, but the distinct groups should be there.\n\n    # This test will fail if groupby is modified to be case-insensitive by default\n    # or if a case_sensitive parameter is added and defaults to False.\n    # It will pass once a case_sensitive=False parameter is added and used.\n\n    # Simulate the current buggy behavior (case-sensitive grouping)\n    # We expect 4 distinct groups if it's case-sensitive\n    template = env.from_string(\n        \"\"\"\n        {% for city, items in users|groupby('city') %}\n            {{ city }}: {{ items|map(attribute='name')|join(', ') }}|\n        {% endfor %}\n        \"\"\"\n    )\n    result = template.render(users=users)\n\n    # The exact order of groups might not be stable across Python versions\n    # or even runs, but the distinct groups should be present.\n    # We check for the presence of all four distinct groups.\n    expected_groups = [\n        \"new york: Alice\",\n        \"New York: Bob\",\n        \"london: Charlie\",\n        \"London: David\",\n    ]\n\n    for group_str in expected_groups:\n        assert group_str in result\n\n    # To make the test more robust against sorting order,\n    # we can count the number of distinct groups.\n    # With case-sensitive grouping, there should be 4 distinct groups.\n    # If the bug were fixed and case_sensitive=False was available and used,\n    # there would be 2 distinct groups (\"new york\" and \"london\").\n    grouped_data = env.call_filter(\"groupby\", users, \"city\")\n    assert len(grouped_data) == 4\n```",
+  "usage": {
+    "prompt_tokens": 3151,
+    "completion_tokens": 553,
+    "cost_usd": 0.002328,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787991867.5431654
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The test failed because `Environment.__init__()` does not accept a `native` keyword argument. This means the `native` feature is likely implemented through a different mechanism, probably an extension or a specific `Environment` subclass. I need to find out how to enable native types. I'll search for 'native' in the `jinja2` directory to see how it's used.\", \"tool\": \"grep\", \"args\": {\"pattern\": \"native\", \"glob\": \"src/jinja2/**/*.py\"}}",
+  "usage": {
+    "prompt_tokens": 2621,
+    "completion_tokens": 112,
+    "cost_usd": 0.001066,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989281.6057942
+}

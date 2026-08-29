@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nfrom jinja2 import Environment\nfrom jinja2.nodes import Template, Output, TemplateData\n\n\nclass TestHashing:\n    def test_template_hash(self, env):\n        template = env.parse(\"hash test\")\n        # The bug causes TypeError: unhashable type: 'list'\n        # This test asserts that the hash operation completes without error.\n        assert hash(template) is not None\n\n    def test_template_with_multiple_nodes_hash(self, env):\n        template = env.parse(\"hash test {{ var }} another test\")\n        assert hash(template) is not None\n\n    def test_template_with_list_field_hash(self, env):\n        # This test specifically targets a node type that has a list field\n        # to ensure the fix handles nested lists within the node structure.\n        # Template has a 'body' field which is a list of nodes.\n        # Output has a 'nodes' field which is a list of nodes.\n        # TemplateData has a 'data' field which is a string.\n        # The original bug was that iter_fields returned lists directly,\n        # making the tuple unhashable.\n        # This test ensures that even with nested list fields, the hash works.\n        template = Template(\n            [\n                Output(\n                    [\n                        TemplateData(\"foo\"),\n                        TemplateData(\"bar\")\n                    ]\n                )\n            ]\n        )\n        assert hash(template) is not None\n```",
+  "usage": {
+    "prompt_tokens": 3113,
+    "completion_tokens": 335,
+    "cost_usd": 0.001771,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787990012.0562143
+}

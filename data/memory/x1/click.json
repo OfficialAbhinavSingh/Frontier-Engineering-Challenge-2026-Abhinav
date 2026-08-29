@@ -2,31 +2,31 @@
   {
     "text": "When testing completion scripts, ensure the `_CLICK_COMPLETE` environment variable is set correctly for the shell being tested (e.g., `_CLICK_COMPLETE=zsh_source`).",
     "from_case": "click__2703",
-    "added_at": 1787949179.5051038
+    "added_at": 1787994422.826034
   },
   {
     "text": "Completion script tests often require setting specific environment variables like `_CLICK_COMPLETE_COMMAND` and `_CLICK_COMPLETE_ARGS` to simulate the shell's completion request.",
     "from_case": "click__2703",
-    "added_at": 1787949179.505106
+    "added_at": 1787994422.8260374
   },
   {
     "text": "The `CliRunner` constructor does not accept a `catch_exceptions` argument. This configuration is likely handled through a different method or attribute after instantiation, or it's not intended to be configurable at the runner level.",
     "from_case": "click__2817",
-    "added_at": 1787949190.418522
+    "added_at": 1787994426.0530112
   },
   {
     "text": "When testing `CliRunner` behavior, avoid passing arguments to its constructor that are not explicitly documented or present in its `__init__` signature. Instead, look for methods or attributes on the `CliRunner` instance to modify its behavior.",
     "from_case": "click__2817",
-    "added_at": 1787949190.4185238
+    "added_at": 1787994426.0530128
   },
   {
     "text": "When testing shell completion, ensure the `_CLICK_COMPLETE` environment variable is set to the correct shell name (e.g., 'fish') and `_CLICK_COMPLETION_VAR` is set to the command name.",
     "from_case": "click__3043",
-    "added_at": 1787949218.5381222
+    "added_at": 1787994432.8357482
   },
   {
     "text": "Use the `runner.invoke` fixture with `env` parameter to set environment variables for shell completion tests.",
     "from_case": "click__3043",
-    "added_at": 1787949218.5381246
+    "added_at": 1787994432.8357496
   }
 ]

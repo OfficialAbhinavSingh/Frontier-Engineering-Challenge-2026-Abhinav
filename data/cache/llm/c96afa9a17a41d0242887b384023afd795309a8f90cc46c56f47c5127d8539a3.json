@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"When testing filter behavior, prefer rendering a template with the filter applied over directly calling `env.call_filter` to ensure the correct argument passing convention is used.\",\n  \"When adding new arguments to existing filters, expect `TypeError: got an unexpected keyword argument` if the filter's underlying function signature has not been updated to accept the new argument.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 790,
+    "completion_tokens": 83,
+    "cost_usd": 0.000445,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992247.5716648
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The test run with the modified source code. The output shows that the test *failed* with a `ParseError`, which is exactly what is required: \\\"a pytest test file that FAILS at the current commit because of the bug described in the issue\\\".\n\nNow, once the bug is fixed, `sqlglot.parse_one(sql, read=\\\"mysql\\\")` will execute without raising an exception, and the test will *pass*. This fulfills the second condition: \\\"and that would PASS once the bug is fixed.\\\"\n\nTherefore, the current test is correct.\", \"final_test\": \"\\nimport pytest\\nimport sqlglot\\n\\ndef test_mysql_create_table_auto_increment():\\n    sql = \\\"\\\"\\\"CREATE TABLE t1(id INT KEY AUTO_INCREMENT);\\\"\\\"\\\"\\n    # This test expects parsing to succeed. At the buggy commit, it will raise a ParseError, causing the test to fail.\\n    # Once the bug is fixed, parsing will succeed, and the test will pass.\\n    sqlglot.parse_one(sql, read=\\\"mysql\\\")\\n\\n\"}",
+  "usage": {
+    "prompt_tokens": 3512,
+    "completion_tokens": 243,
+    "cost_usd": 0.001661,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989657.3473575
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nimport click\n\n\nclass MyClass:\n    def __init__(self, myvalue: str) -> None:\n        self.myvalue = myvalue\n\n    @staticmethod\n    def from_str(input_str: str) -> \"MyClass\":\n        if input_str != \"works\":\n            raise ValueError(f\"input was {input_str!r}, should be 'works'\")\n        return MyClass(input_str)\n\n\n@pytest.mark.parametrize(\n    (\"input_value\", \"expected_error_message\"),\n    [\n        (\"fail\", \"input was 'fail', should be 'works'\"),\n        (\"nope\", \"input was 'nope', should be 'works'\"),\n    ],\n)\ndef test_func_param_type_value_error_message(runner, input_value, expected_error_message):\n    @click.command()\n    @click.argument(\"mydata\", type=click.FuncParamType(MyClass.from_str))\n    def cli(mydata):\n        pass\n\n    result = runner.invoke(cli, [input_value])\n\n    assert expected_error_message in result.output\n```",
+  "usage": {
+    "prompt_tokens": 3193,
+    "completion_tokens": 265,
+    "cost_usd": 0.00162,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992225.216228
+}

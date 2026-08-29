@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport tomlkit\n\n\ndef test_scalar_not_captured_by_dictionary():\n    doc = tomlkit.loads(\"a.b = 1\\n\")\n    doc[\"a\"][\"c\"] = {}\n    doc[\"z\"] = 2\n\n    expected_dump = \"\"\"a.b = 1\n\n[a.c]\n\nz = 2\n\"\"\"\n    assert tomlkit.dumps(doc) == expected_dump\n```",
+  "usage": {
+    "prompt_tokens": 2256,
+    "completion_tokens": 102,
+    "cost_usd": 0.000932,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992036.6609905
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"rich/prompt.py\",\n    \"rich/console.py\"\n  ],\n  \"test_file\": \"tests/test_console.py\",\n  \"why\": \"The bug report explicitly mentions PromptBase.on_validate_error and the interaction with Console(markup=False), making rich/prompt.py the primary source and tests/test_console.py the most relevant test file for console behavior.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 874,
+    "completion_tokens": 108,
+    "cost_usd": 0.000532,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787990771.2851307
+}

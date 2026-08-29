@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nimport tomlkit\nfrom tomlkit.items import Array\nfrom tomlkit.items import Float\n\n\ndef test_array_of_floats_can_be_converted_to_torch_tensor() -> None:\n    # This test reproduces the TypeError: object of type 'Float' has no len()\n    # when trying to convert a tomlkit.items.Array of tomlkit.items.Float\n    # to a torch.tensor.\n    # The expected behavior is that the tomlkit.items.Array should behave\n    # like a standard Python list of floats, allowing direct conversion.\n\n    toml_str = \"\"\"\n    a = [1.0, 2.0, 3.0]\n    \"\"\"\n    arr = tomlkit.loads(toml_str)\n\n    assert isinstance(arr[\"a\"], Array)\n    assert isinstance(arr[\"a\"][0], Float)\n\n    # The bug manifests when trying to pass the tomlkit.items.Array directly\n    # to torch.tensor, as torch tries to iterate over the elements and\n    # encounters the TypeError because tomlkit.items.Float does not have len().\n    # We expect this operation to succeed, producing a tensor with the correct values.\n    try:\n        import torch\n    except ImportError:\n        pytest.skip(\"PyTorch not installed, cannot test torch.tensor conversion\")\n\n    # This line is expected to raise TypeError: object of type 'Float' has no len()\n    # with the buggy code. Once fixed, it should pass.\n    t = torch.tensor(arr[\"a\"], dtype=torch.float32)\n\n    expected_tensor = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float32)\n    assert torch.equal(t, expected_tensor)\n```",
+  "usage": {
+    "prompt_tokens": 3167,
+    "completion_tokens": 412,
+    "cost_usd": 0.00198,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787991835.735533
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nfrom jinja2 import Environment\nfrom jinja2 import DictLoader\nfrom jinja2.ext import InternationalizationExtension\n\n\nclass TestI18nBlockPGettext:\n    def test_block_pgettext_syntax(self):\n        env = Environment(\n            extensions=[InternationalizationExtension],\n            loader=DictLoader(\n                {\n                    \"test.html\": \"\"\"\n                        {% pgettext \"context\" %}Hello{% endpgettext %}\n                    \"\"\"\n                }\n            ),\n        )\n        # The bug is that the parser does not recognize `pgettext` as a block.\n        # This test asserts that the template can be parsed without syntax errors.\n        # We don't care about the rendering result here, just that it parses.\n        env.get_template(\"test.html\")\n        assert True # If we reach here, parsing succeeded, and the bug is fixed.\n\n```",
+  "usage": {
+    "prompt_tokens": 4114,
+    "completion_tokens": 208,
+    "cost_usd": 0.001754,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787994742.4729013
+}

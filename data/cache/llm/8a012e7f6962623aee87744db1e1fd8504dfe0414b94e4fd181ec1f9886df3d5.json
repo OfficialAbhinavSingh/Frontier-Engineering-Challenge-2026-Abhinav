@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nfrom rich.cells import cached_cell_len\n\ndef test_nerd_font_double_width_bug():\n    \"\"\"\n    Test for issue #3943: Certain Nerd Fonts are considered as double characters.\n    The specific character reported is U+F024D (Nerd Font: nf-fa-folder_download).\n    This character should have a cell width of 1, not 2.\n    \"\"\"\n    nerd_font_char = \"\\U000f024d\"\n    expected_cell_len = 1\n    actual_cell_len = cached_cell_len(nerd_font_char)\n    assert actual_cell_len == expected_cell_len, (\n        f\"Expected cell length for '{nerd_font_char}' (U+F024D) to be {expected_cell_len}, \"\n        f\"but got {actual_cell_len}. This indicates the character is incorrectly \"\n        f\"treated as double-width.\"\n    )\n\n```",
+  "usage": {
+    "prompt_tokens": 3947,
+    "completion_tokens": 235,
+    "cost_usd": 0.001772,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989875.8868802
+}

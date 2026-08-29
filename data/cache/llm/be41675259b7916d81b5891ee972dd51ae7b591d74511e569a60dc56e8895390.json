@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\"reproduced\": true, \"why\": \"The test failed because the output contained control characters and a newline, specifically '\\\\n', when it was expected to be empty, which directly matches the bug report's description of a 'spurious newline' left behind by an empty Live render.\"}\n```",
+  "usage": {
+    "prompt_tokens": 1856,
+    "completion_tokens": 65,
+    "cost_usd": 0.000719,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992302.1704254
+}

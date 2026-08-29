@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"I have read the `environment.py` file. I need to import `Environment` from `jinja2` and then create an environment with `native=True`. I will then use `env.from_string` to load the template with the macro and assert the type and value of the result. I will use the example provided in the issue description.\", \"tool\": \"run_test\", \"args\": {\"source\": \"import pytest\\nfrom jinja2 import Environment\\n\\ndef test_macro_native_types():\\n    env = Environment(extensions=['jinja2.ext.do'], enable_async=True, autoescape=False, native=True)\\n    template = env.from_string(\\\"{%- macro x() -%}{{- [5,6] -}}{%- endmacro -%}{{- x()[0] -}}\\\")\\n    result = template.render()\\n    # The bug is that it returns the string '[' instead of the integer 5\\n    assert result == 5\\n    assert isinstance(result, int)\\n\"}}",
+  "usage": {
+    "prompt_tokens": 2126,
+    "completion_tokens": 234,
+    "cost_usd": 0.001223,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989279.0574498
+}

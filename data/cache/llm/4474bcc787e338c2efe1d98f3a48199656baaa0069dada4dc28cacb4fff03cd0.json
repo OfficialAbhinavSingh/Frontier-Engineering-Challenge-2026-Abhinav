@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\"reproduced\": true, \"why\": \"The test failed with a PicklingError when trying to pickle `jinja2.filters.do_first`, which directly matches the bug report's description and traceback.\"}\n```",
+  "usage": {
+    "prompt_tokens": 1131,
+    "completion_tokens": 51,
+    "cost_usd": 0.000467,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992285.5795255
+}

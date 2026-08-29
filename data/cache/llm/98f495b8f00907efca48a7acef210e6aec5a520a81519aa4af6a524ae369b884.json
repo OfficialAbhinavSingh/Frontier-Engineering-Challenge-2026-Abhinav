@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"rich/panel.py\",\n    \"rich/style.py\"\n  ],\n  \"test_file\": \"tests/test_panel.py\",\n  \"why\": \"The issue specifically concerns the rendering of the title within a Panel, suggesting changes in how Panel applies styles or how Style objects are interpreted for titles.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 842,
+    "completion_tokens": 88,
+    "cost_usd": 0.000473,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787994669.469671
+}

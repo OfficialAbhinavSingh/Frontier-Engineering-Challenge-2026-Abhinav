@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport io\nimport sys\n\nimport pytest\n\nfrom rich.console import Console\nfrom rich.text import Text\n\n\ndef test_nerd_font_width() -> None:\n    \"\"\"\n    Test that certain Nerd Fonts are correctly identified as single-width characters.\n    The bug report specifically mentions U+F024D (downloads folder icon) being\n    incorrectly treated as double-width.\n    \"\"\"\n    console = Console(\n        file=io.StringIO(),\n        force_terminal=True,\n        width=10,  # A small width to easily detect incorrect wrapping\n        legacy_windows=False,  # Ensure modern rendering path is used\n    )\n\n    # The character U+F024D (nf-fa-folder_download) is a single-width character.\n    # If it's treated as double-width, it will cause incorrect wrapping.\n    # We expect \"A\\uf024dB\" to take 3 character cells.\n    # With a width of 10, \"A\\uf024dB\" should fit on one line.\n    # If it's treated as double-width, it would be \"A<double-width-char>B\",\n    # which would be 4 cells, still fitting.\n    # Let's try with a string that would wrap if the character was double-width.\n    # \"1234567890\" is 10 chars.\n    # \"1234\\uf024d6789\" should be 9 chars.\n    # If \\uf024d is double-width, it would be 10 chars, causing a wrap.\n    test_string = \"1234\\uf024d6789\"\n    console.print(test_string, end=\"\")\n    output = console.file.getvalue()\n\n    # The expected output should be the string itself, followed by a newline.\n    # If the character was incorrectly treated as double-width, it would cause\n    # the string to wrap, or at least the width calculation would be off.\n    # We are asserting that the string fits on a single line as a single-width character.\n    # The `export_text` method is not suitable here as it doesn't reflect wrapping.\n    # We need to check the raw output from `file.getvalue()`.\n    expected_output = test_string + \"\\n\"\n    assert output == expected_output\n\n```",
+  "usage": {
+    "prompt_tokens": 4359,
+    "completion_tokens": 556,
+    "cost_usd": 0.002698,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992114.9612153
+}

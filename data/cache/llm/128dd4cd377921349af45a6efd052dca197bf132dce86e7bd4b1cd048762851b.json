@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\"reproduced\": false, \"why\": \"The test failed with a PytestUnraisableExceptionWarning and a RuntimeWarning about an unawaited coroutine, not the expected TypeError: 'coroutine' object is not subscriptable.\"}\n```",
+  "usage": {
+    "prompt_tokens": 1513,
+    "completion_tokens": 54,
+    "cost_usd": 0.000589,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992277.1872828
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\"src/jinja2/utils.py\", \"src/jinja2/runtime.py\"],\n  \"test_file\": \"tests/test_pickle.py\",\n  \"why\": \"The issue explicitly states that `jinja2.utils.missing` cannot be pickled, pointing directly to `src/jinja2/utils.py` as the source of the `MissingType` definition, and `tests/test_pickle.py` is the dedicated file for pickle-related tests.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 1075,
+    "completion_tokens": 122,
+    "cost_usd": 0.000628,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989806.6365244
+}

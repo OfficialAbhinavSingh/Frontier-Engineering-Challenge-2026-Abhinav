@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pickle\n\nfrom jinja2.utils import missing\n\n\ndef test_missing_pickle():\n    \"\"\"jinja2.utils.missing can be pickled.\"\"\"\n    # The bug is that MissingType is not directly accessible from jinja2.utils,\n    # which pickle needs to reconstruct the object.\n    # The fix would involve making MissingType importable or using a custom\n    # pickling mechanism.\n    # This test will fail with a PicklingError until that is addressed.\n    # Once fixed, it should successfully pickle and unpickle, and the\n    # unpickled object should be the same singleton instance.\n    pickled_missing = pickle.dumps(missing)\n    unpickled_missing = pickle.loads(pickled_missing)\n    assert unpickled_missing is missing\n```",
+  "usage": {
+    "prompt_tokens": 4543,
+    "completion_tokens": 179,
+    "cost_usd": 0.00181,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989813.8559048
+}

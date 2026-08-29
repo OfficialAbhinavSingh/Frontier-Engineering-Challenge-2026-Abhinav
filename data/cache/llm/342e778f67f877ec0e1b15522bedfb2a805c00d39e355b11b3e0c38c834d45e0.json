@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nfrom jinja2 import Environment\nfrom jinja2.nativetypes import NativeEnvironment\nfrom jinja2 import Undefined\n\n\ndef test_macro_native_return():\n    env = NativeEnvironment()\n    template = env.from_string(\"{%- macro x() -%}{{- [5,6] -}}{%- endmacro -%}{{- x()[0] -}}\")\n    result = template.render()\n    assert result == 5\n```",
+  "usage": {
+    "prompt_tokens": 3393,
+    "completion_tokens": 106,
+    "cost_usd": 0.001283,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992251.9563768
+}

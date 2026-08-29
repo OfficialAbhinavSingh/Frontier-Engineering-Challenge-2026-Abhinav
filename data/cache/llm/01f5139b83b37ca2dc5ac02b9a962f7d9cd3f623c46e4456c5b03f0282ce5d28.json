@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"When testing new syntax, expect TemplateSyntaxError until the parser is updated. Focus initial tests on parser behavior, not rendering output.\",\n  \"Tests for new features should start with minimal syntax validation before moving to complex rendering scenarios.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 829,
+    "completion_tokens": 57,
+    "cost_usd": 0.000391,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787994745.623115
+}

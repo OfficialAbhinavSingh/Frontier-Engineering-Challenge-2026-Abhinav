@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"My apologies for the repeated formatting errors. I will ensure this response is a valid JSON object.\n\nThe test I just drafted should now fail as required. Let's run it to confirm.\", \"tool\": \"run_test\", \"args\": {\"source\": \"import pytest\\nfrom io import StringIO\\nfrom rich.console import Console\\nfrom rich.prompt import Confirm\\nimport sys\\n\\ndef test_on_validate_error_markup_bug():\\n    # Create a console with markup disabled\\n    stdout_capture = StringIO()\\n    console = Console(markup=False, file=stdout_capture)\\n\\n    # Simulate invalid input followed by valid input\\n    stdin_simulate = StringIO(\\\"x\\\\ny\\\\n\\\")\\n    original_stdin = sys.stdin\\n    sys.stdin = stdin_simulate\\n\\n    try:\\n        # Call Confirm.ask, which will trigger on_validate_error\\n        Confirm.ask(\\\"Proceed?\\\", console=console)\\n    finally:\\n        sys.stdin = original_stdin\\n\\n    output = stdout_capture.getvalue()\\n\\n    # The bug is that markup is NOT rendered when console.markup is False.\\n    # So, the literal string '[prompt.invalid]Please enter Y or N' IS present.\\n    # To make the test FAIL at the current commit (buggy state),\\n    # we assert that the literal string is NOT present.\\n    # When the bug is fixed, markup will be explicitly enabled for the error,\\n    # so the literal string will NOT be present (it will be rendered),\\n    # and this assertion will PASS.\\n    assert \\\"[prompt.invalid]Please enter Y or N\\\" not in output\\n    assert \\\"Proceed?\\\" in output\\n\\n\"}}",
+  "usage": {
+    "prompt_tokens": 5628,
+    "completion_tokens": 398,
+    "cost_usd": 0.002683,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989552.3603735
+}

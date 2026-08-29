@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"src/jinja2/nativetypes.py\",\n    \"src/jinja2/runtime.py\"\n  ],\n  \"test_file\": \"tests/test_nativetypes.py\",\n  \"why\": \"The issue specifically mentions native types and macros, so the nativetypes module is the most likely source of the behavior, and the existing test_nativetypes.py file is the appropriate place for a regression test.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 937,
+    "completion_tokens": 118,
+    "cost_usd": 0.000576,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989753.025236
+}

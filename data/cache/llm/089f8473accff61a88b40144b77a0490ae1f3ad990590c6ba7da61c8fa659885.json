@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"rich/live.py\",\n    \"rich/console.py\"\n  ],\n  \"test_file\": \"tests/test_live.py\",\n  \"why\": \"The bug report specifically concerns the `Live` class and its interaction with rendering empty content, making `rich/live.py` the most likely source of the issue, and `tests/test_live.py` the appropriate place for a regression test.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 1915,
+    "completion_tokens": 111,
+    "cost_usd": 0.000852,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787990716.1563075
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"I apologize for the repeated error. I will ensure my response is a valid JSON object this time. I have run the test with `pytest.mark.asyncio` and `await template.render_async(data)`. Now I will analyze the output to confirm it fails as expected.\", \"tool\": \"run_test\", \"args\": {\"source\": \"import pytest\\nimport jinja2\\nimport asyncio\\n\\ndef add_two(x, y):\\n    return [i + y for i in x]\\n\\n@pytest.mark.asyncio\\nasync def test_async_filter_subscriptable_error():\\n    env = jinja2.Environment(enable_async=True)\\n    env.filters.update({'add_two': add_two})\\n    template = env.from_string(\\\"{% for item in (a.b|add_two(5))[:1] %}{{ item }}{% endfor %}\\\")\\n    \\n    data = {'a': {'b': [1, 2, 3]}}\\n    \\n    with pytest.raises(TypeError) as excinfo:\\n        await template.render_async(data)\\n    \\n    assert \\\"'coroutine' object is not subscriptable\\\" in str(excinfo.value)\\n\"}}",
+  "usage": {
+    "prompt_tokens": 3604,
+    "completion_tokens": 290,
+    "cost_usd": 0.000982,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989321.2325299
+}

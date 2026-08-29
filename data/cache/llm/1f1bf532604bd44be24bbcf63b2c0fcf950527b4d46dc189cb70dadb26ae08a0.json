@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"When testing output, be aware that Rich renders console markup (e.g., `[prompt.invalid]`) into ANSI escape codes. Assertions should check for the rendered ANSI codes or use Rich's rendering utilities to compare against expected plain text.\",\n  \"Tests often involve capturing console output. Ensure that the test setup correctly captures the `Console` output, as Rich's `print` and `log` methods write to a `Console` instance, not directly to `sys.stdout`.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 511,
+    "completion_tokens": 114,
+    "cost_usd": 0.000438,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787991749.273427
+}

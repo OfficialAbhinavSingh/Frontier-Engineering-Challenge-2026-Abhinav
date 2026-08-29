@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport io\nfrom unittest import mock\n\nfrom rich.console import Console\nfrom rich.prompt import Confirm\n\n\ndef test_confirm_markup_on_validate_error() -> None:\n    console = Console(markup=False, file=io.StringIO(), force_terminal=True)\n    with mock.patch(\"builtins.input\", side_effect=[\"invalid\", \"n\"]):\n        Confirm.ask(\"Continue\", console=console)\n    output = console.file.getvalue()\n    # The bug is that \"[prompt.invalid]\" is printed literally because markup is off.\n    # The fix should enable markup for the error message, so it's styled and not literal.\n    # We assert that the literal string is NOT present, implying it was interpreted as markup.\n    assert \"[prompt.invalid]Please enter Y or N\" not in output\n```",
+  "usage": {
+    "prompt_tokens": 3191,
+    "completion_tokens": 187,
+    "cost_usd": 0.001425,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992101.2244859
+}

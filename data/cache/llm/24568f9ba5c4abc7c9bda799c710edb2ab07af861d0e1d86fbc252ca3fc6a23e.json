@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"src/jinja2/nativetypes.py\",\n    \"src/jinja2/runtime.py\"\n  ],\n  \"test_file\": \"tests/test_nativetypes.py\",\n  \"why\": \"The traceback clearly points to `jinja2.nativetypes.py` as the source of the TypeError, and the issue specifically involves `NativeEnvironment`, making `tests/test_nativetypes.py` the most appropriate place for a regression test.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 1135,
+    "completion_tokens": 128,
+    "cost_usd": 0.00066,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989798.7900012
+}

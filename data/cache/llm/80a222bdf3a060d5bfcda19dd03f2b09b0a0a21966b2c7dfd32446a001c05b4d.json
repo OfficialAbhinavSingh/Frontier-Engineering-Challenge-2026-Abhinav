@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport io\nimport sys\nimport pytest\nfrom rich.console import Console\nfrom rich.text import Text\n\n\ndef test_nerd_font_width() -> None:\n    \"\"\"\n    Test that a specific Nerd Font character is rendered with a width of 1,\n    not 2, as reported in issue #3943.\n    \"\"\"\n    console = Console(\n        file=io.StringIO(),\n        force_terminal=True,\n        width=10,  # Small width to easily detect incorrect wrapping\n        legacy_windows=False,  # Ensure modern rendering path is used\n    )\n\n    # The problematic character: F024D (downloads folder icon)\n    nerd_font_char = \"\\U000f024d\"\n    test_string = f\"A{nerd_font_char}B\"\n\n    console.print(test_string, end=\"\")\n\n    # We expect the character to take up 1 cell, so the output should be \"A<char>B\"\n    # If it's treated as double-width, it might wrap or cause incorrect alignment.\n    # For a simple print, we can check the length of the rendered string.\n    # The export_text method with styles=False will give us the plain text.\n    output = console.file.getvalue()\n\n    # The character should occupy a single column.\n    # If it's treated as double-width, the output might be truncated or wrapped\n    # in unexpected ways depending on the console width.\n    # For this specific test, we'll assert the length of the plain text output\n    # to ensure the character is counted as single width.\n    # A string \"A<char>B\" should have a length of 3 if <char> is single width.\n    assert len(output.strip()) == 3\n\n```",
+  "usage": {
+    "prompt_tokens": 4442,
+    "completion_tokens": 414,
+    "cost_usd": 0.002368,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992326.5533369
+}

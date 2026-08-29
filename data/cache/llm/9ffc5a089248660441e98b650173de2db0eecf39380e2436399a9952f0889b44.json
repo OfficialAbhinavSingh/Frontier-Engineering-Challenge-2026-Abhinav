@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\"reproduced\": true, \"why\": \"The test failed with a ParseError, specifically complaining about an 'Unexpected token' at 'REPLACE', which directly corresponds to the bug report's claim that the parser does not handle 'REPLACE USING' for INSERT statements.\"}\n```",
+  "usage": {
+    "prompt_tokens": 1072,
+    "completion_tokens": 62,
+    "cost_usd": 0.000477,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992379.317825
+}

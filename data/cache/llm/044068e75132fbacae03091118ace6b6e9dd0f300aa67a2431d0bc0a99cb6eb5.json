@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\n\nimport tomlkit\n\n\ndef test_array_of_floats_to_list_conversion() -> None:\n    arr = tomlkit.loads(\n        \"\"\"\na = [1.0, 2.0, 3.0]\n\"\"\"\n    )\n\n    # The bug causes a TypeError when iterating over arr['a'] if its elements\n    # are tomlkit.items.Float. The expectation is that arr['a'] behaves like\n    # a standard Python list of floats.\n    # We assert that it can be converted to a list of native floats.\n    assert list(arr[\"a\"]) == [1.0, 2.0, 3.0]\n```",
+  "usage": {
+    "prompt_tokens": 3354,
+    "completion_tokens": 160,
+    "cost_usd": 0.001406,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992044.8242273
+}

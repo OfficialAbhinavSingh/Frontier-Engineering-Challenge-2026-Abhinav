@@ -1,0 +1,42 @@
+[
+  {
+    "text": "When testing output, be aware that Rich often inserts reset codes (`\\x1b[0m`) at line breaks, which can affect how background colors are rendered and how assertions should be written.",
+    "from_case": "rich__3838",
+    "added_at": 1787994157.0507793
+  },
+  {
+    "text": "Tests for Rich's rendering behavior often need to assert against specific ANSI escape codes. Ensure the expected output string includes the correct escape sequences for colors, styles, and resets.",
+    "from_case": "rich__3838",
+    "added_at": 1787994157.050781
+  },
+  {
+    "text": "When testing output, be mindful of ANSI escape codes. The `rich` library often adds these for styling, and they can cause unexpected mismatches if not handled (e.g., stripped or explicitly included in the expected output).",
+    "from_case": "rich__3943",
+    "added_at": 1787994189.4811254
+  },
+  {
+    "text": "Tests in this repository often involve comparing string outputs. Ensure that expected outputs precisely match the actual output, including any invisible characters or styling codes that `rich` might introduce.",
+    "from_case": "rich__3943",
+    "added_at": 1787994189.4811275
+  },
+  {
+    "text": "When testing `sys.stdout` or `sys.stderr` behavior, use the `capsys` fixture to capture output and `monkeypatch` to replace the streams with mock objects that can be controlled and inspected.",
+    "from_case": "rich__4041",
+    "added_at": 1787994201.6547422
+  },
+  {
+    "text": "Avoid making assumptions about the test environment's TTY status; instead, mock `isatty()` to control its return value for consistent testing.",
+    "from_case": "rich__4041",
+    "added_at": 1787994201.6547449
+  },
+  {
+    "text": "When calling `Console` or other core Rich objects, consult the `rich.console` module for available keyword arguments and their types.",
+    "from_case": "rich__5090",
+    "added_at": 1787994230.780637
+  },
+  {
+    "text": "When using helper functions for `Segment` manipulation, import them from `rich.segment` and verify their exact names and signatures.",
+    "from_case": "rich__5090",
+    "added_at": 1787994230.7806392
+  }
+]

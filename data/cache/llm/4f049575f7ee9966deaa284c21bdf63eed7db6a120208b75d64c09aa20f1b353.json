@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport sys\nfrom rich.console import Console\nfrom rich.live import Live\n\n\ndef test_live_redirect_stdout_isatty() -> None:\n    \"\"\"\n    Test that FileProxy.isatty() correctly delegates to the proxied file\n    when Live is used with redirect_stdout=True.\n    \"\"\"\n    console = Console()\n    # We need to ensure sys.stdout is a TTY for this test to be meaningful.\n    # If it's not, the test will still pass if the bug is fixed, but it won't\n    # truly test the delegation. For CI environments where stdout might not be a TTY,\n    # we can mock sys.stdout to be a TTY.\n    # For now, we assume a TTY environment for local development.\n\n    # Store original sys.stdout\n    original_stdout = sys.stdout\n\n    # Create a mock TTY file-like object if sys.stdout is not a TTY\n    class MockTTY:\n        def isatty(self):\n            return True\n\n        def write(self, text):\n            original_stdout.write(text)\n\n        def fileno(self):\n            return original_stdout.fileno()\n\n        def flush(self):\n            original_stdout.flush()\n\n    if not original_stdout.isatty():\n        sys.stdout = MockTTY()\n\n    try:\n        with Live(\"hello\", console=console, redirect_stdout=True):\n            # Inside Live context, sys.stdout should be the FileProxy\n            # and its isatty() should return True, delegating to the real (or mocked) sys.stdout\n            assert sys.stdout.isatty() is True\n    finally:\n        # Restore original sys.stdout\n        sys.stdout = original_stdout\n```",
+  "usage": {
+    "prompt_tokens": 3381,
+    "completion_tokens": 403,
+    "cost_usd": 0.002022,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992348.093858
+}

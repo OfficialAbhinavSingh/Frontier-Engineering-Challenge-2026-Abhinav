@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nfrom jinja2 import Environment\nfrom jinja2 import TemplateSyntaxError\n\n\ndef test_namespace_multi_variable_assignment(env):\n    template = \"\"\"\n        {% set full = namespace(id=\"\", prev_id=\"\") -%}\n        {% for id in endpoints recursive %}\n          {% set full.prev_id, full.id = full.id, full.id + \"/\" + id -%}\n        {% endfor -%}\n        {{ full.id }}\n    \"\"\"\n    env = Environment()\n    tmpl = env.from_string(template)\n    # The bug causes a TemplateSyntaxError during compilation.\n    # If the bug is fixed, this should render correctly.\n    assert tmpl.render(endpoints=[\"a\", \"b\"]) == \"/a/b\"\n\n```",
+  "usage": {
+    "prompt_tokens": 3900,
+    "completion_tokens": 177,
+    "cost_usd": 0.001613,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787994644.5811899
+}

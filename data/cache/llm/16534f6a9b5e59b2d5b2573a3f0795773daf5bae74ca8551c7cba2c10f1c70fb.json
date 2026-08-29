@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nfrom jinja2 import Environment\n\ndef test_custom_filter_coroutine_subscriptable_error():\n    jinja_env = Environment(enable_async=True)\n    jinja_env.filters.update({'add_two': lambda x, y: [i + y for i in x]})\n\n    template = jinja_env.from_string(\n        \"{% for item in (a.b|add_two(5))[:1] %}{{ item }}{% endfor %}\"\n    )\n    data = {'a': {'b': [1, 2, 3]}}\n\n    # The bug causes a TypeError: 'coroutine' object is not subscriptable\n    # when enable_async=True and a synchronous custom filter is used\n    # in a specific way with slicing.\n    # The fix should allow this to render correctly.\n    # We expect the template to render \"6\" (the first item of [1+5, 2+5, 3+5]).\n    # The current bug prevents this from happening.\n    with pytest.raises(TypeError, match=\"'coroutine' object is not subscriptable\"):\n        template.render(data)\n\n```",
+  "usage": {
+    "prompt_tokens": 5647,
+    "completion_tokens": 268,
+    "cost_usd": 0.002364,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992269.3124528
+}

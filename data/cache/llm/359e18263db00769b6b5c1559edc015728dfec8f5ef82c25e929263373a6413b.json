@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\"reproduced\": false, \"why\": \"The test asserts that '[prompt.invalid]Please enter Y or N' is present in the output, but the pytest output shows that the actual output contains styled text like '\\\\u001b[1m[\\\\u001b[0mprompt.invalid\\\\u001b[1m]\\\\u001b[0mPlease enter Y or N', which means the literal string was not found, causing the assertion to fail for the wrong reason.\"}\n```",
+  "usage": {
+    "prompt_tokens": 851,
+    "completion_tokens": 116,
+    "cost_usd": 0.000545,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992311.7469752
+}

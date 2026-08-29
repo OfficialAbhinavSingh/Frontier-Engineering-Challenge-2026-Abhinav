@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nfrom jinja2 import Environment\nfrom jinja2.nativetypes import NativeEnvironment\n\ndef test_macro_native_output(env):\n    # Use NativeEnvironment to ensure native type handling\n    native_env = NativeEnvironment()\n    template = native_env.from_string(\n        \"{%- macro x() -%}{{- [5,6] -}}{%- endmacro -%}{{- x()[0] -}}\"\n    )\n    # The bug causes this to return the string \"[\", but it should return the integer 5\n    assert template.render() == 5\n\ndef test_macro_native_output_nested_list(env):\n    native_env = NativeEnvironment()\n    template = native_env.from_string(\n        \"{%- macro x() -%}{{- [[1,2],[3,4]] -}}{%- endmacro -%}{{- x()[0][1] -}}\"\n    )\n    assert template.render() == 2\n\ndef test_macro_native_output_dict(env):\n    native_env = NativeEnvironment()\n    template = native_env.from_string(\n        \"{%- macro x() -%}{{- {'a': 1, 'b': 2} -}}{%- endmacro -%}{{- x()['b'] -}}\"\n    )\n    assert template.render() == 2\n\ndef test_macro_native_output_string_in_list(env):\n    native_env = NativeEnvironment()\n    template = native_env.from_string(\n        \"{%- macro x() -%}{{- ['hello', 'world'] -}}{%- endmacro -%}{{- x()[0] -}}\"\n    )\n    assert template.render() == \"hello\"\n\n```",
+  "usage": {
+    "prompt_tokens": 3164,
+    "completion_tokens": 394,
+    "cost_usd": 0.001934,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787990004.5745494
+}

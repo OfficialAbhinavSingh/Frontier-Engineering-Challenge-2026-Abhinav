@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\"reproduced\": true, \"why\": \"The test fails because CliRunner does not accept a 'catch_exceptions' argument during initialization, which is precisely the missing feature described in the bug report.\"}\n```",
+  "usage": {
+    "prompt_tokens": 834,
+    "completion_tokens": 47,
+    "cost_usd": 0.000368,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992187.4217806
+}

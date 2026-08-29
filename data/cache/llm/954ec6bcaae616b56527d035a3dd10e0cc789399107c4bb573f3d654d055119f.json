@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nfrom rich.console import Console\nfrom rich.measure import Measurement\nfrom rich.text import Text\n\n\n@pytest.mark.parametrize(\n    \"text,expected_min,expected_max\",\n    [\n        (\"Hello\", 5, 5),\n        (\"\u4f60\u597d\", 4, 4),  # Two double-width characters\n        (\"Hello\u4f60\u597d\", 9, 9),  # Five single-width, two double-width\n        (\"H\u4f60\u597do\", 7, 7),  # One single, two double, one single\n        (\"\", 0, 0),\n        (\" \", 1, 1),\n        (\"\ud83d\ude3d\", 2, 2),  # Emoji, double-width\n        (\"Hello\ud83d\ude3d\", 7, 7),\n    ],\n)\ndef test_double_width_character_measurement(text, expected_min, expected_max):\n    \"\"\"\n    Test that Measurement.get correctly calculates the width of text containing\n    double-width characters.\n    \"\"\"\n    console = Console(width=100)  # Arbitrary width, should not affect intrinsic measurement\n    options = console.options\n    measurement = Measurement.get(console, options, Text(text))\n\n    assert measurement.minimum == expected_min\n    assert measurement.maximum == expected_max\n\n```",
+  "usage": {
+    "prompt_tokens": 5160,
+    "completion_tokens": 296,
+    "cost_usd": 0.002288,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989892.7444062
+}

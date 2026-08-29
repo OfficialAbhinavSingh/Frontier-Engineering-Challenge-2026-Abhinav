@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nfrom rich.style import Style\nfrom rich.text import Text\nfrom rich.text import Span\n\n\ndef test_assemble_meta():\n    text = Text.assemble(\"foo\", (\"bar\", \"bold\"), meta={\"foo\": \"bar\"})\n    assert text._spans == [\n        Span(3, 6, \"bold\"),\n        Span(0, 6, Style(meta={\"foo\": \"bar\"})),\n    ]\n```",
+  "usage": {
+    "prompt_tokens": 2558,
+    "completion_tokens": 102,
+    "cost_usd": 0.001022,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787994774.078445
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"rich/file_proxy.py\",\n    \"rich/live.py\"\n  ],\n  \"test_file\": \"tests/test_live.py\",\n  \"why\": \"The issue explicitly states that `FileProxy.isatty()` is the problem, and `Live` uses `FileProxy`, so the test should be in `test_live.py`.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 1124,
+    "completion_tokens": 101,
+    "cost_usd": 0.00059,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787990797.8399875
+}

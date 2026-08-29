@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nfrom jinja2 import Environment\nimport pytest\nfrom collections import namedtuple\n\ndef test_groupby_case_sensitive_option(env):\n    User = namedtuple(\"User\", \"name city\")\n    users = [\n        User(\"Alice\", \"new york\"),\n        User(\"Bob\", \"New York\"),\n        User(\"Charlie\", \"london\"),\n        User(\"David\", \"London\"),\n    ]\n\n    # The bug is that `groupby` implicitly sorts case-sensitively and\n    # does not provide an option to change this behavior.\n    # The expected behavior, once fixed, is that `groupby` will accept\n    # a `case_sensitive=False` parameter to perform case-insensitive grouping.\n\n    # This test asserts what the output *should* be when the bug is fixed\n    # and `case_sensitive=False` is passed.\n    # Currently, this will fail because `groupby` does not accept `case_sensitive`\n    # and performs case-sensitive grouping by default.\n\n    # We expect two groups: \"new york\" (containing Alice and Bob) and\n    # \"london\" (containing Charlie and David) when case_sensitive=False.\n    template = env.from_string(\n        \"\"\"\n        {% for city, items in users|groupby('city', case_sensitive=False) %}\n            {{ city|lower }}: {{ items|map(attribute='name')|join(', ') }}|\n        {% endfor %}\n        \"\"\"\n    )\n    # The expected output assumes that the first encountered case (e.g., \"new york\")\n    # will be used as the group key when case_sensitive=False.\n    # The reporter implies that `groupby` should behave like `sort` which is\n    # case-insensitive by default, so \"new york\" and \"New York\" should group together.\n    # The exact key chosen for the group (e.g., \"new york\" vs \"New York\")\n    # is less important than the fact that they are grouped together.\n    # We normalize to lower case for the assertion to be robust.\n    expected_output = \"new york: Alice, Bob|london: Charlie, David|\"\n    assert template.render(users=users) == expected_output\n```",
+  "usage": {
+    "prompt_tokens": 4148,
+    "completion_tokens": 498,
+    "cost_usd": 0.002489,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787992242.9804134
+}

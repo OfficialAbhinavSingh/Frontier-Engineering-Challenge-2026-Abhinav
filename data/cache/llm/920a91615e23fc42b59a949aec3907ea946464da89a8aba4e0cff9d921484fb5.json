@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"src/jinja2/filters.py\",\n    \"src/jinja2/async_utils.py\"\n  ],\n  \"test_file\": \"tests/test_filters.py\",\n  \"why\": \"The issue specifically mentions `jinja2.filters.do_first` and the `async_variant` decorator, indicating that `filters.py` is where the affected functions reside and `async_utils.py` is where the decorator's implementation lies, while `test_filters.py` is the appropriate place for a regression test related to filters.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 1204,
+    "completion_tokens": 143,
+    "cost_usd": 0.000719,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787990031.5464544
+}

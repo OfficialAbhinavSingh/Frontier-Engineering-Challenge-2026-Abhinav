@@ -1,0 +1,22 @@
+[
+  {
+    "text": "When testing filter functions, use `env.get_filter(\"filter_name\")` to retrieve the filter function and call it directly, rather than `env.call_filter(\"filter_name\", ...)`.",
+    "from_case": "jinja__1463",
+    "added_at": 1787994447.880338
+  },
+  {
+    "text": "When adding new parameters to existing filters, ensure the filter's underlying implementation (e.g., `sync_do_groupby`) is updated to accept the new keyword arguments, as `TypeError: got an unexpected keyword argument` indicates the function signature does not match the call.",
+    "from_case": "jinja__1463",
+    "added_at": 1787994447.8803391
+  },
+  {
+    "text": "Asynchronous tests in this repository use `pytest_asyncio.fixture` for async fixtures and `pytest_asyncio.mark.asyncio` for async test functions. The `pytest.mark.asyncio` marker is not recognized.",
+    "from_case": "jinja__1573",
+    "added_at": 1787994471.6630669
+  },
+  {
+    "text": "When writing tests that involve asynchronous operations, ensure that the `pytest_asyncio` plugin is correctly imported and its markers/fixtures are used, rather than generic `pytest.mark`.",
+    "from_case": "jinja__1573",
+    "added_at": 1787994471.6630688
+  }
+]

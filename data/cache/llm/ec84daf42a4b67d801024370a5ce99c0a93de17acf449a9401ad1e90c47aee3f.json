@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"You are absolutely correct. I need to run the test to confirm its behavior at the current commit. I will run the test I just drafted.\", \"tool\": \"run_test\", \"args\": {\"source\": \"import pytest\\nfrom io import StringIO\\nfrom rich.console import Console\\nfrom rich.prompt import Confirm\\nimport sys\\n\\ndef test_on_validate_error_markup_bug():\\n    # Create a console with markup disabled\\n    stdout_capture = StringIO()\\n    console = Console(markup=False, file=stdout_capture, force_terminal=True)\\n\\n    # Simulate invalid input followed by valid input\\n    stdin_simulate = StringIO(\\\"x\\\\ny\\\\n\\\")\\n    original_stdin = sys.stdin\\n    sys.stdin = stdin_simulate\\n\\n    try:\\n        # Call Confirm.ask, which will trigger on_validate_error\\n        Confirm.ask(\\\"Proceed?\\\", console=console)\\n    finally:\\n        sys.stdin = original_stdin\\n\\n    output = stdout_capture.getvalue()\\n\\n    # Assert that the error message contains the unrendered markup tags\\n    # because the console's markup was False and on_validate_error didn't override it.\\n    assert \\\"[prompt.invalid]Please enter Y or N\\\" in output\\n    assert \\\"Proceed?\\\" in output\\n\\n\"}}",
+  "usage": {
+    "prompt_tokens": 1488,
+    "completion_tokens": 317,
+    "cost_usd": 0.001239,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989526.1073546
+}

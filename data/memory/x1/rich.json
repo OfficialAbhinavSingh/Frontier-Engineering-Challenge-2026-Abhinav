@@ -1,0 +1,42 @@
+[
+  {
+    "text": "When testing rendering issues, ensure the terminal width is explicitly set to a small value to trigger soft wrapping and other layout-dependent behaviors.",
+    "from_case": "rich__3838",
+    "added_at": 1787994501.1926959
+  },
+  {
+    "text": "Use `rich.console.Console(record=True)` and `console.export_text()` or `console.export_html()` to capture the rendered output for assertion, as direct string comparison of `__repr__` or `str()` might not reflect visual rendering.",
+    "from_case": "rich__3838",
+    "added_at": 1787994501.192698
+  },
+  {
+    "text": "When testing character width issues, ensure the test environment's terminal width is explicitly controlled or mocked, as `rich`'s rendering is highly dependent on it.",
+    "from_case": "rich__3943",
+    "added_at": 1787994525.5277472
+  },
+  {
+    "text": "Avoid relying on default terminal rendering for character width assertions; instead, use `rich.console.Console.measure_segment_width` or similar internal utilities to directly query character widths.",
+    "from_case": "rich__3943",
+    "added_at": 1787994525.5277486
+  },
+  {
+    "text": "When testing a method of a class, ensure the test explicitly calls that method rather than relying on indirect usage.",
+    "from_case": "rich__4041",
+    "added_at": 1787994539.9033968
+  },
+  {
+    "text": "When testing a proxy object, ensure the test verifies the proxy's behavior with respect to its proxied object, especially for methods that should delegate.",
+    "from_case": "rich__4041",
+    "added_at": 1787994539.9033995
+  },
+  {
+    "text": "Tests for `rich` should not import `textual` components directly; `textual` is a separate project that depends on `rich`, not the other way around.",
+    "from_case": "rich__5090",
+    "added_at": 1787994578.5909157
+  },
+  {
+    "text": "When testing `rich` features that might be used by `textual`, consider using `rich.console.Console` for rendering and inspecting the output, rather than attempting to run a `textual` app.",
+    "from_case": "rich__5090",
+    "added_at": 1787994578.5909176
+  }
+]

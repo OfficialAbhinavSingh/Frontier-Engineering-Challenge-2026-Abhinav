@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport sys\nfrom io import StringIO\nfrom unittest.mock import patch\n\nimport pytest\n\nfrom rich.console import Console\nfrom rich.live import Live\n\n\n@pytest.fixture\ndef mock_stdout_isatty():\n    \"\"\"\n    Mocks sys.stdout to be a StringIO object that reports itself as a TTY.\n    This allows testing isatty() behavior in a controlled environment.\n    \"\"\"\n    original_stdout = sys.stdout\n\n    class MockStringIO(StringIO):\n        def isatty(self):\n            return True\n\n    mock_output = MockStringIO()\n    with patch(\"sys.stdout\", mock_output):\n        yield mock_output\n\n\ndef test_live_redirect_stdout_isatty(mock_stdout_isatty):\n    \"\"\"\n    Tests that FileProxy.isatty() correctly delegates to the underlying file\n    when redirect_stdout=True in Live.\n    \"\"\"\n    console = Console(file=mock_stdout_isatty)\n\n    # Ensure that the initial sys.stdout is considered a TTY by our mock\n    assert sys.stdout.isatty() is True\n\n    with Live(\"hello\", console=console, redirect_stdout=True):\n        # Inside the Live context, sys.stdout should still report as a TTY\n        # because FileProxy should delegate the call.\n        assert sys.stdout.isatty() is True\n\n    # After the Live context, sys.stdout should revert to its original state,\n    # which is our mock TTY.\n    assert sys.stdout.isatty() is True\n```",
+  "usage": {
+    "prompt_tokens": 1502,
+    "completion_tokens": 353,
+    "cost_usd": 0.001333,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989884.9735126
+}

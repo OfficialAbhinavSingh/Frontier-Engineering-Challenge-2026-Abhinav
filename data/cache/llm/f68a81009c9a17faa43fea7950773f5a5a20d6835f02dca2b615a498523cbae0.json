@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The test *passed* when run against the buggy commit. This means my understanding of `pytest.raises` was incorrect for the problem statement. The problem asks for a test that *FAILS* at the current commit and *PASSES* once the bug is fixed.\n\nMy current test passes because `pytest.raises(ParseError)` successfully caught the `ParseError`. To make the test *fail* at the current commit, I should *not* expect a `ParseError`. Instead, I should expect the parsing to succeed. Since it will fail with a `ParseError` at the buggy commit, the test will fail. Once the bug is fixed, the parsing will succeed, and the test will pass.\n\nI need to modify the test to remove `pytest.raises` and simply call `sqlglot.parse_one`. This way, if `parse_one` raises an error, the test will fail.\", \"tool\": \"run_test\", \"args\": {\"source\": \"\\nimport pytest\\nimport sqlglot\\n\\ndef test_mysql_create_table_auto_increment():\\n    sql = \\\"\\\"\\\"CREATE TABLE t1(id INT KEY AUTO_INCREMENT);\\\"\\\"\\\"\\n    # This test expects parsing to succeed. At the buggy commit, it will raise a ParseError, causing the test to fail.\\n    # Once the bug is fixed, parsing will succeed, and the test will pass.\\n    sqlglot.parse_one(sql, read=\\\"mysql\\\")\\n\\n\"}}",
+  "usage": {
+    "prompt_tokens": 3151,
+    "completion_tokens": 325,
+    "cost_usd": 0.001758,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989655.2574928
+}

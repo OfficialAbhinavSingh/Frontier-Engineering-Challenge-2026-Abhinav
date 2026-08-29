@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport io\n\nfrom rich.console import Console\nfrom rich.panel import Panel\nfrom rich.style import Style\n\n\ndef test_panel_title_background_color():\n    console = Console(file=io.StringIO(), force_terminal=True, color_system=\"truecolor\")\n    panel = Panel(\"content\", title='[bold white]Title[/bold white]', style=Style(color=\"white\", bgcolor=\"blue\"))\n    console.print(panel)\n    output = console.file.getvalue()\n\n    # The bug is that the title's background color is not applied.\n    # The report states \"Title unpainted\", meaning the background color of the panel\n    # is not applied to the title area.\n    # We expect the blue background color (ANSI code 44) to be present around the title.\n    # The current output shows `\\x1b[1;37mTitle\\x1b[0m` for the title,\n    # meaning bold white foreground, but no blue background.\n    # A correct output would include `44m` (blue background) in the style applied to the title.\n    # We are looking for the blue background color code (44) to be applied to the title.\n    # The exact sequence might be `\\x1b[44m...Title...` or `\\x1b[...;44mTitle...`.\n    # The key is that `44m` should be part of the style applied to \"Title\".\n    assert \"44mTitle\" in output\n```",
+  "usage": {
+    "prompt_tokens": 2587,
+    "completion_tokens": 345,
+    "cost_usd": 0.001639,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787994762.54102
+}

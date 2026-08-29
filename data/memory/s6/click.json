@@ -1,22 +1,12 @@
 [
   {
-    "text": "When adding new parameters to decorators like `click.option`, ensure the underlying `Parameter` class (or its relevant superclass) also accepts the new keyword argument. The decorator's `attrs` are passed directly to the parameter's constructor.",
+    "text": "When adding new parameters to decorators like `click.option`, ensure the underlying `Param` class (or its relevant subclass) also accepts the new parameter in its `__init__` method.",
     "from_case": "click__2263",
-    "added_at": 1787949517.0068805
+    "added_at": 1787994719.954534
   },
   {
-    "text": "The `_param_memo` helper function in `src/click/decorators.py` is a common point where decorator arguments are passed to parameter constructors. If a `TypeError` originates from there, it's likely an argument mismatch between the decorator and the parameter class.",
+    "text": "New features or parameters should be added to the lowest-level class that represents them (e.g., `Param` for parameters, `Command` for commands) before being exposed through decorators or higher-level APIs.",
     "from_case": "click__2263",
-    "added_at": 1787949517.006884
-  },
-  {
-    "text": "When testing shell completion, use `CliRunner.run(..., env={'_CLICK_COMPLETE': '...'})` to simulate the completion environment.",
-    "from_case": "click__2644",
-    "added_at": 1787949532.5251005
-  },
-  {
-    "text": "To assert that a file is closed, check `file.closed` after the command execution.",
-    "from_case": "click__2644",
-    "added_at": 1787949532.5251021
+    "added_at": 1787994719.954536
   }
 ]

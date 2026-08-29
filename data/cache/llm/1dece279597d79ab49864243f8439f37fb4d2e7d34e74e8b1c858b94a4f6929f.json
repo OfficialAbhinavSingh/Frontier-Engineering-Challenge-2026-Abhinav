@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "{\"thought\": \"The test passed, which means `pickle.dumps(jinja2.filters.do_first)` *did* raise a `PicklingError` as expected. This is good, it confirms the bug. The test also asserts that the error message contains specific strings, which helps ensure it's the *right* `PicklingError`. This test correctly captures the buggy behavior and will fail if the bug is fixed (i.e., if `do_first` becomes pickleable).\", \"final_test\": \"import pytest\\nimport pickle\\nimport jinja2.filters\\n\\ndef test_do_first_not_pickleable():\\n    \\\"\\\"\\\"Test that jinja2.filters.do_first is not pickleable due to the bug.\\n\\n    This test should FAIL at the current commit and PASS once the bug\\n    (incorrect __name__/__qualname__ on async_variant decorated functions)\\n    is fixed, allowing the function to be pickled.\\n    \\\"\\\"\\\"\\n    with pytest.raises(pickle.PicklingError) as excinfo:\\n        pickle.dumps(jinja2.filters.do_first)\\n    # The error message should indicate that the function cannot be pickled\\n    # and specifically mention 'jinja2.filters.sync_do_first' as the unpickleable object.\\n    assert \\\"Can't pickle\\\" in str(excinfo.value)\\n    assert \\\"jinja2.filters.sync_do_first\\\" in str(excinfo.value)\\n\"}",
+  "usage": {
+    "prompt_tokens": 2965,
+    "completion_tokens": 336,
+    "cost_usd": 0.001174,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989353.3644314
+}

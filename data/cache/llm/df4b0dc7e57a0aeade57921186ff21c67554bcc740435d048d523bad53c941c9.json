@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\n\nfrom jinja2 import Environment\nfrom jinja2 import FileSystemLoader\n\n\n@pytest.fixture\ndef env():\n    return Environment(loader=FileSystemLoader(\"tests/res\"))\n\n\n@pytest.mark.parametrize(\n    (\"case_sensitive\", \"expected\"),\n    [\n        (\n            True,\n            \"\"\"\n<dl>\n    <dt>a</dt>\n    \n        <dd>a</dd>\n    \n    <dt>A</dt>\n    \n        <dd>A</dd>\n    \n    <dt>b</dt>\n    \n        <dd>b</dd>\n    \n</dl>\n\"\"\",\n        ),\n        (\n            False,\n            \"\"\"\n<dl>\n    <dt>a</    dt>\n    \n        <dd>a</dd>\n    \n        <dd>A</dd>\n    \n    <dt>b</dt>\n    \n        <dd>b</dd>\n    \n</dl>\n\"\"\",\n        ),\n    ],\n)\ndef test_groupby_case_sensitivity(env, case_sensitive, expected):\n    template = env.from_string(\n        \"\"\"\n<dl>\n    {% for grouper, list in ['a', 'A', 'b']|groupby(case_sensitive=case_sensitive) %}\n    <dt>{{ grouper }}</dt>\n    {% for item in list %}\n        <dd>{{ item }}</dd>\n    {% endfor %}\n    {% endfor %}\n</dl>\n\"\"\"\n    )\n    # The groupby filter expects an attribute to group by. When grouping a list of\n    # strings, the \"self\" attribute can be used to group by the string itself.\n    # This is not directly supported by the current `groupby` filter, which\n    # expects an attribute name.\n    #\n    # To work around this, we'll pass a list of dictionaries, where each dict\n    # has a 'value' key.\n    data = [{\"value\": \"a\"}, {\"value\": \"A\"}, {\"value\": \"b\"}]\n    template = env.from_string(\n        \"\"\"\n<dl>\n    {% for grouper, list in data|groupby('value', case_sensitive=case_sensitive) %}\n    <dt>{{ grouper }}</dt>\n    {% for item in list %}\n        <dd>{{ item.value }}</dd>\n    {% endfor %}\n    {% endfor %}\n</dl>\n\"\"\"\n    )\n    result = template.render(data=data, case_sensitive=case_sensitive)\n    assert result == expected.replace(\"    \", \"  \")\n\n```",
+  "usage": {
+    "prompt_tokens": 4556,
+    "completion_tokens": 601,
+    "cost_usd": 0.002869,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989748.6435294
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport io\nimport os\nfrom unittest.mock import patch\n\nimport pytest\n\nfrom rich.console import Console\nfrom rich.panel import Panel\nfrom rich.style import Style\n\n\ndef test_panel_title_background_color():\n    console = Console(file=io.StringIO(), force_terminal=True, color_system=\"truecolor\")\n    panel = Panel(\"content\", title='[bold white]Title[/bold white]', style=Style(color=\"white\", bgcolor=\"blue\"))\n    \n    # Render the panel and capture the output\n    with patch.dict(os.environ, {\"TERM\": \"xterm-256color\"}):\n        console.print(panel)\n    output = console.file.getvalue()\n\n    # The bug is that the title's background color is not applied.\n    # We expect to see the ANSI escape code for blue background (44) applied to the title.\n    # The title text itself is \"[bold white]Title[/bold white]\", which translates to\n    # SGR codes for bold (1) and white foreground (37).\n    # The panel's style applies blue background (44) and white foreground (37).\n    # The title should inherit the background from the panel style.\n    # The expected sequence for the title \"Title\" with blue background and white foreground (bold)\n    # would involve the blue background color code.\n    # Specifically, we are looking for the sequence that sets the background to blue (44)\n    # and then the foreground to white (37) and bold (1).\n    # The exact sequence might vary slightly depending on how Rich composes styles,\n    # but the presence of '44' (blue background) around the title text is key.\n    \n    # A simpler check: ensure the blue background color code is present in the title line.\n    # The title line typically starts with a box character, then the title.\n    # We're looking for the blue background color code (44) to be active when \"Title\" is printed.\n    \n    # This assertion checks for the presence of the blue background color code (44)\n    # immediately before the word \"Title\" in the output.\n    # The exact sequence might be `\\x1b[44m\\x1b[1m\\x1b[37mTitle` or similar.\n    # We are looking for the `44m` part to be applied to the title.\n    assert \"\\x1b[44m\\x1b[1m\\x1b[37mTitle\" in output or \"\\x1b[1;37;44mTitle\" in output\n```",
+  "usage": {
+    "prompt_tokens": 1379,
+    "completion_tokens": 594,
+    "cost_usd": 0.001899,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787994758.7259724
+}

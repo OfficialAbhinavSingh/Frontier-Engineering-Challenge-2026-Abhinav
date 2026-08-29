@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "[\n  \"When testing terminal output, always use `rich.console.Console(force_terminal=True)` to ensure escape codes are generated, even when outputting to a file or pipe.\",\n  \"When testing soft wrapping behavior, ensure the `width` parameter of `rich.console.Console` is set to a value that will trigger the wrap, and that the input text is long enough to exceed this width.\"\n]",
+  "usage": {
+    "prompt_tokens": 520,
+    "completion_tokens": 90,
+    "cost_usd": 0.000381,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787991737.6577988
+}

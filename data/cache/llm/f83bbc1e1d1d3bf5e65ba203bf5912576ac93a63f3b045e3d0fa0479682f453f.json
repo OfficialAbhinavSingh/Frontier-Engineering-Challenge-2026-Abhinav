@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"rich/console.py\",\n    \"rich/segment.py\"\n  ],\n  \"test_file\": \"tests/test_console.py\",\n  \"why\": \"The issue describes incorrect background color rendering when soft wrapping is enabled, which points to the console's rendering logic and how segments are handled during wrapping.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 3587,
+    "completion_tokens": 89,
+    "cost_usd": 0.001299,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989830.627782
+}

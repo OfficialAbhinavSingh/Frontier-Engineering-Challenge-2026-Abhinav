@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"The `asyncio.run` helper is for coroutines, not for already-computed values. If a helper function returns a value directly, do not wrap it in `asyncio.run`.\",\n  \"When testing output that involves ordering, be mindful of potential variations in order that are still correct. If the order is not strictly defined or can vary, assert for the presence of expected elements rather than an exact string match.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 804,
+    "completion_tokens": 99,
+    "cost_usd": 0.000489,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787991660.6530042
+}

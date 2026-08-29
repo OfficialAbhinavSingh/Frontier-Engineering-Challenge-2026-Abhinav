@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"src/jinja2/utils.py\"\n  ],\n  \"test_file\": \"tests/test_pickle.py\",\n  \"why\": \"The issue directly concerns the `jinja2.utils.missing` object and its type `MissingType`, making `src/jinja2/utils.py` the most relevant source file, and `tests/test_pickle.py` is the appropriate place for a regression test given the nature of the bug.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 995,
+    "completion_tokens": 119,
+    "cost_usd": 0.000596,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787990702.9826658
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n{\n  \"source_files\": [\n    \"rich/console.py\",\n    \"rich/_windows_renderer.py\"\n  ],\n  \"test_file\": \"tests/test_console.py\",\n  \"why\": \"The issue describes incorrect character width calculation for Nerd Fonts, which is a core console rendering concern, and the problem specifically appeared after a version update, suggesting a change in how characters are measured or rendered, especially on Windows as indicated by the diagnose output.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 1936,
+    "completion_tokens": 111,
+    "cost_usd": 0.000858,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787990780.111716
+}

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport pytest\nfrom rich.console import Console\nfrom rich.prompt import Confirm\nfrom rich.text import Text\nfrom io import StringIO\n\ndef test_prompt_validate_error_markup():\n    \"\"\"\n    Test that PromptBase.on_validate_error explicitly enables markup\n    even when the console is created with markup=False.\n    \"\"\"\n    output = StringIO()\n    console = Console(file=output, markup=False, force_terminal=True)\n\n    # Simulate user input \"X\" which is an invalid choice for Confirm\n    # followed by \"n\" to exit the prompt.\n    # We need to patch sys.stdin for the prompt to read from our StringIO\n    import sys\n    original_stdin = sys.stdin\n    sys.stdin = StringIO(\"X\\nn\\n\")\n\n    try:\n        # Confirm.ask will call on_validate_error when \"X\" is entered\n        Confirm.ask(\"Continue?\", console=console)\n    finally:\n        sys.stdin = original_stdin\n\n    # Get the output from the console\n    console_output = output.getvalue()\n\n    # The expected error message should have the style applied,\n    # which means markup was processed.\n    # The default style for prompt.invalid is red.\n    # We expect to see the ANSI escape codes for red text.\n    # The exact ANSI codes might vary slightly depending on the terminal\n    # capabilities Rich detects, but for force_terminal=True, we expect them.\n    # We'll look for the start of a red color code and the reset code.\n    expected_error_message_part = \"\\x1b[31mPlease enter Y or N\\x1b[0m\"\n\n    assert expected_error_message_part in console_output\n    # Also assert the plain text is present to ensure we're looking at the right part\n    assert \"Please enter Y or N\" in console_output\n```",
+  "usage": {
+    "prompt_tokens": 3297,
+    "completion_tokens": 428,
+    "cost_usd": 0.002059,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787989867.9110265
+}

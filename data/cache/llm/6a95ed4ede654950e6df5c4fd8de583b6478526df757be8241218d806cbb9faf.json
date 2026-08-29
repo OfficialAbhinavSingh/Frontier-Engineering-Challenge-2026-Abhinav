@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```python\nimport io\nimport sys\n\nimport pytest\n\nfrom rich.console import Console\nfrom rich.text import Text\n\n\n@pytest.mark.parametrize(\n    \"nerd_font_char, expected_width\",\n    [\n        # This is the character specifically mentioned in the bug report\n        (\"\\U000f024d\", 1),  # nf-fa-folder_download\n        # Add a few more common Nerd Font icons that should be single width\n        (\"git\", 1),  # nf-dev-git (U+E7AD)\n        (\"\uf815\", 1),  # nf-dev-python (U+E795)\n        (\"\uf892\", 1),  # nf-dev-nodejs (U+E7B2) - corrected from E7B5 which is nf-dev-npm\n        (\"\uf113\", 1),  # nf-fa-github (U+F0002)\n    ],\n)\ndef test_nerd_font_character_width(nerd_font_char: str, expected_width: int) -> None:\n    \"\"\"\n    Test that specific Nerd Font characters are correctly identified as single width.\n    \"\"\"\n    console = Console(\n        file=io.StringIO(),\n        width=80,\n        legacy_windows=False,  # Ensure non-legacy Windows rendering path\n        force_terminal=True,  # Force terminal rendering to get character width calculations\n    )\n    text = Text(nerd_font_char)\n    # Render the text and check the width of the rendered segments\n    # The bug causes the character to be rendered as two cells wide,\n    # so we check the total cell length of the rendered segments.\n    segments = list(console.render(text, console.options))\n    total_width = sum(segment.cell_length for segment in segments)\n\n    assert (\n        total_width == expected_width\n    ), f\"Nerd Font character '{nerd_font_char}' (U+{ord(nerd_font_char):x}) has unexpected width. Expected {expected_width}, got {total_width}.\"\n\n```",
+  "usage": {
+    "prompt_tokens": 5112,
+    "completion_tokens": 487,
+    "cost_usd": 0.002751,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1787990791.873931
+}
