@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-2.5-flash",
+  "text": "```json\n[\n  \"When importing Click components, be mindful of the exact names. `FuncParamType` is not a public API and the correct class is `ParamType`.\",\n  \"When asserting on CLI output, remember that Click's error messages often include the command usage string before the actual error message. Account for this extra text or use more targeted assertions.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 709,
+    "completion_tokens": 82,
+    "cost_usd": 0.000418,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788029953.526224
+}
