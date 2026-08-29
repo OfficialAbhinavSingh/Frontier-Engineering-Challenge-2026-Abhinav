@@ -48,15 +48,39 @@ Repro-Bot produces the artifact that makes the rest checkable.
 ## What it does
 
 ```
-bug report (natural language)   →   Repro-Bot   →   a new test file
-                                                    + the evidence it reproduces
-                                                    + a human approval gate
+bug report (natural language)   →   Repro-Bot   →   reviewable bundle
+                                                      ├── the test
+                                                      ├── a git-applyable patch
+                                                      ├── the verifier's evidence
+                                                      ├── the attempts rejected
+                                                      └── what is NOT established
 ```
 
 Repro-Bot sees the repository **at the commit where the bug is still present**.
 It never sees the fix. It writes a test, runs it in a sandbox, reads *where* it
-failed, and repairs it under an instruction chosen by that verdict. It proposes;
-it never commits.
+failed, and repairs it under an instruction chosen by that verdict.
+
+### What the maintainer actually receives
+
+Approving a proposal writes a bundle, not a printout:
+
+- **`add-test.patch`** — a unified diff that adds one new file and modifies
+  nothing. Verified to pass `git apply --check` against the upstream repository
+  at the reported commit, so a reviewer can see at a glance that no existing test
+  or source file is touched.
+- **`REPRODUCTION.md`** — the test, the verifier's verdict with the traceback it
+  was read from, the exact commands to reproduce the run, and **the attempts that
+  were rejected**. Those are included on purpose: they are the difference between
+  a reviewer trusting the result and a reviewer redoing the work.
+- **`trajectory.jsonl`** — every prompt, tool call and verdict, in order.
+
+The report states its own limits. It separates what was established *by
+execution* — the test fails at the reported commit, and the verdict says where —
+from what was not: that the asserted value is the one a fix will produce. That
+needs an oracle the pipeline does not have, and it is the most common way a
+generated reproduction is wrong, so the reviewer's checklist starts there.
+
+Nothing is written without `--approve`. Repro-Bot proposes; it never commits.
 
 ---
 
