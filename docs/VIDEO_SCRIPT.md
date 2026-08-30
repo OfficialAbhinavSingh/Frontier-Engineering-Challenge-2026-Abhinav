@@ -365,6 +365,69 @@ Expect `APPLIES`. Do not skip the `git checkout main` at the end.
 | `results/SCORE_VERIFICATION.md` | every number re-derivable with no model and no API key |
 | `CHANGELOG_IMPROVEMENT.md` | the results that went against me, with the evidence |
 
+## Actually recording it
+
+Hyprland is Wayland, so `wf-recorder` is the tool. Verified on this machine:
+1920×1080 h264 video with 48 kHz stereo AAC audio.
+
+**Check the microphone first.** The default input here is a Bluetooth headset, and
+Bluetooth mics switch the headset into HFP/HSP mode, which is narrow-band and
+sounds noticeably worse than the built-in mic. List the options and pick
+deliberately:
+
+```bash
+pactl list short sources
+pactl get-default-source
+```
+
+Prefer the built-in analog input over `bluez_input.*`, or use a wired mic:
+
+```
+alsa_input.pci-0000_05_00.6.analog-stereo     # built-in, 48 kHz
+```
+
+**Twenty-second mic test, then listen back.** Speak normally, `Ctrl+C` to stop:
+
+```bash
+cd ~/Videos
+wf-recorder -o eDP-2 --audio=alsa_input.pci-0000_05_00.6.analog-stereo -f miccheck.mp4
+ffmpeg -i miccheck.mp4 -af volumedetect -f null - 2>&1 | grep -E "mean_volume|max_volume"
+```
+
+`mean_volume` around **-25 to -15 dB** is right. Below -40 dB means the mic is not
+picking you up. Above -6 dB will clip.
+
+**The real take.** Put the terminal fullscreen on the monitor you name with `-o`
+(`hyprctl monitors` lists them; `eDP-2` is the laptop panel, `HDMI-A-1` the
+external). Recording one output keeps the other screen out of frame:
+
+```bash
+cd ~/Videos
+wf-recorder -o eDP-2 --audio=alsa_input.pci-0000_05_00.6.analog-stereo \
+  -c libx264 -p crf=20 -p preset=veryfast -f ratchat-demo.mp4
+```
+
+`Ctrl+C` in that terminal stops the recording and finalises the file. Run it in a
+*second* terminal on the other monitor, or the stop keystroke lands in the shot.
+
+**Check the take before you trust it:**
+
+```bash
+ffprobe -v error -show_entries format=duration -of csv=p=0 ratchat-demo.mp4   # < 300
+ffprobe -v error -show_entries stream=codec_type -of csv=p=0 ratchat-demo.mp4 # video + audio
+```
+
+If it is over 5:00, cut the pipeline walk-through first — see the note at the
+bottom of this file.
+
+**If you would rather have scenes, webcam or a pause key**, OBS is installed and
+works on Hyprland through PipeWire; pick "Screen Capture (PipeWire)" as the
+source. `wf-recorder` is the faster path if you are recording one straight take.
+
+**The form wants a URL, not a file.** Upload to YouTube (unlisted is fine) or
+Google Drive with link sharing on, and check the link in a private window before
+submitting.
+
 ## Checklist before recording
 
 - [ ] `make report` run, `results/REPORT.md` current
