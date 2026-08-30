@@ -63,6 +63,10 @@ whose answers are known in advance and calls no model:
 | `c_sabotage` — a test that always fails | 0/27 | **0/27** |
 | `c_vacuous` — a test that always passes | 0/27 | **0/27** |
 
+This is also what CI runs on every push, on a machine with no secrets, so you can
+read the result rather than take the claim: the `checks` badge at the top of the
+README is this table, re-derived in about a minute from a fresh clone.
+
 The two floors must score zero for *different* reasons — `did_not_pass_at_fix`
 and `did_not_fail_at_parent` — because Fail-to-Pass is a conjunction and each
 floor tests one half of it. `make test` asserts all of this, so a control that

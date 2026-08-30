@@ -2,6 +2,14 @@
 
 **Turns a bug report into a failing test that is proven to reproduce the bug.**
 
+[![checks](https://github.com/OfficialAbhinavSingh/Frontier-Engineering-Challenge-2026-Abhinav/actions/workflows/checks.yml/badge.svg)](https://github.com/OfficialAbhinavSingh/Frontier-Engineering-Challenge-2026-Abhinav/actions/workflows/checks.yml)
+
+That badge is the metric's controls, not a test suite. On every push a runner
+with no secrets rebuilds the sandbox from the pinned base image and re-checks
+that a test which always fails and a test which always passes both score zero,
+while the maintainer's own regression test scores every case. The central claim
+is therefore verified on a machine that is not mine.
+
 Built for the micro1 Frontier Engineering Challenge 2026 (Agentic Workflows).
 Everything in this repository was written during the competition; see
 [What existed before](#what-existed-before) for the dependency and data
@@ -116,6 +124,14 @@ test — which is what shows both conditions are load-bearing rather than one
 carrying the other. If either floor scored above zero, agreement with a single
 condition would be counting as evidence, and every number in this README would be
 inflated.
+
+These three run on every push in GitHub Actions, on a runner with no secrets and
+no committed cache — it clones the repository, rebuilds the sandbox image from
+the pinned base and re-derives the table above in about a minute. It has already
+paid for itself: it caught a pin mismatch between `dataset.validate` and
+`scripts/build_images.py` that made `c_gold` score 0/5 on the runner while
+scoring 5/5 locally, because the two were installing different dependency
+generations. The pin is now one function used by both.
 
 `c_gold` is the ceiling, and its value is that it measures the scorer instead of
 trusting it. A case is admitted to the dataset only after `dataset.validate`
