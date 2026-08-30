@@ -21,6 +21,7 @@ data/cache/llm_r3/
 data/cases/mined.json
 data/cases/mined_extra.json
 data/cases/mined_sqlglot.json
+data/cases/mined_wave2.json
 data/cases/probe.json
 
 # Reviewable bundles emitted by `ratchat.demo --approve`. Derived output, and
