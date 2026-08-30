@@ -24,15 +24,15 @@ import time
 from collections import defaultdict
 from pathlib import Path
 
-from reprobot.agents.baselines import run_b0, run_b1
-from reprobot.agents.common import Budget
-from reprobot.agents.memory import RepoMemory
-from reprobot.agents.solver import SolverConfig, solve
-from reprobot.agents.verifier import verify
-from reprobot.llm.client import LLMClient
-from reprobot.repo import RepoView
-from reprobot.sandbox.run import run_test
-from reprobot.trace import Trace
+from ratchat.agents.baselines import run_b0, run_b1
+from ratchat.agents.common import Budget
+from ratchat.agents.memory import RepoMemory
+from ratchat.agents.solver import SolverConfig, solve
+from ratchat.agents.verifier import verify
+from ratchat.llm.client import LLMClient
+from ratchat.repo import RepoView
+from ratchat.sandbox.run import run_test
+from ratchat.trace import Trace
 
 DEFAULT_MODEL = "google/gemini-2.5-flash"
 
@@ -58,12 +58,12 @@ VARIANTS: dict[str, dict] = {
     },
     "s4": {
         "kind": "solver",
-        "desc": "adds cross-case repository memory (full Repro-Bot)",
+        "desc": "adds cross-case repository memory (full Ratchat)",
         "cfg": dict(use_map=True, use_examples=True, use_typed_repair=True, use_memory=True),
     },
     "s5": {
         "kind": "solver",
-        "desc": "adds minimal-claim authoring and over-specification repair (full Repro-Bot)",
+        "desc": "adds minimal-claim authoring and over-specification repair (full Ratchat)",
         "cfg": dict(use_map=True, use_examples=True, use_typed_repair=True,
                     use_memory=True, use_minimal_claim=True),
     },
@@ -179,7 +179,7 @@ def run_variant(variant: str, cases: list[dict], repos_dir: Path, model: str,
             error = f"{type(exc).__name__}: {exc}"
             trace.event("variant_error", error=error)
 
-        scored = score_case(case, produced.get("test_rel_path") or "tests/test_reprobot.py",
+        scored = score_case(case, produced.get("test_rel_path") or "tests/test_ratchat.py",
                             produced.get("test_source", ""), timeout_s)
         trace.event("scored", **{k: v for k, v in scored.items()
                                  if k in ("f2p", "reason", "verdict")})

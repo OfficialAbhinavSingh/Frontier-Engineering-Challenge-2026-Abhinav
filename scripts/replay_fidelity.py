@@ -23,12 +23,12 @@ from pathlib import Path
 def replay(variant: str, split: str, model: str, workdir: Path) -> dict:
     tag = "fidelity"
     cmd = [
-        sys.executable, "-m", "reprobot.eval.run",
+        sys.executable, "-m", "ratchat.eval.run",
         "--variant", variant, "--split", split, "--model", model,
         "--out-dir", str(workdir), "--traces-dir", str(workdir / "traces"),
         "--memory-dir", str(workdir / "memory"), "--tag", tag,
     ]
-    env = {**dict(__import__("os").environ), "REPROBOT_OFFLINE": "1"}
+    env = {**dict(__import__("os").environ), "RATCHAT_OFFLINE": "1"}
     subprocess.run(cmd, check=True, env=env,
                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     return json.loads((workdir / f"{split}_{variant}{tag}.json").read_text())

@@ -22,7 +22,7 @@ import json
 import time
 from pathlib import Path
 
-from reprobot.llm.client import LLMClient
+from ratchat.llm.client import LLMClient
 
 MAX_LESSONS = 10
 
@@ -43,8 +43,15 @@ Reply with a JSON array of strings. Reply with [] if there is no durable lesson.
 class RepoMemory:
     """Lessons about one repository, persisted between cases."""
 
-    def __init__(self, root: Path | str, repo_name: str, enabled: bool = True) -> None:
+    def __init__(self, root: Path | str, repo_name: str, enabled: bool = True,
+                 persist: bool = True) -> None:
         self.enabled = enabled
+        # A single-case run still learns within itself, but must not leave lessons
+        # behind. What memory saves is injected into the author's prompt, so saving
+        # changes the prompt the next run builds and invalidates any cached replay
+        # of this one. The evaluation harness carries lessons across cases and so
+        # keeps the default.
+        self.persist = persist
         self.repo_name = repo_name
         self.path = Path(root) / f"{repo_name}.json"
         self.path.parent.mkdir(parents=True, exist_ok=True)
@@ -57,7 +64,7 @@ class RepoMemory:
 
     def reset(self) -> None:
         self.lessons = []
-        if self.path.exists():
+        if self.persist and self.path.exists():
             self.path.unlink()
 
     def brief(self) -> str:
@@ -70,6 +77,8 @@ class RepoMemory:
         )
 
     def _save(self) -> None:
+        if not self.persist:
+            return
         self.path.write_text(json.dumps(self.lessons, indent=2))
 
     def add(self, texts: list[str], case_id: str) -> list[str]:

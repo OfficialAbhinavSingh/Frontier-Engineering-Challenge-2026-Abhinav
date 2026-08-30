@@ -12,7 +12,7 @@ command and its output on screen together.
 
 ## 0:00–0:40 — The problem
 
-**On screen:** `python3 -m reprobot.demo --case-id click__3105` — stop after the
+**On screen:** `python3 -m ratchat.demo --case-id click__3105` — stop after the
 bug report prints, before the run gets going.
 
 > This is a real bug report on a real Python library. Prose, written by a user.
@@ -185,12 +185,16 @@ reproduction that goes on to pass Fail-to-Pass.
 - [ ] `make verify-scores` run clean, `results/SCORE_VERIFICATION.md` current
 - [ ] Every number above cross-checked against that file
 - [ ] `click__3105` demo rehearsed once — it repairs, which shows more than a
-      first-try success. Backup case if it drifts: `jinja__1573` (also two
-      rounds, `broken_test` then `reproduced_exception`)
-- [ ] Demo run once *before* recording so its prompts are in `data/cache/llm` —
-      the demo uses its own memory directory, so its prompts are not the ones the
-      evaluation cached, and a cold demo makes live API calls on camera
-- [ ] `data/cache/llm` populated so the demo replays fast on camera
+      first-try success: round 1 `broken_test`, round 2 `reproduced_assertion`,
+      Fail-to-Pass YES, `$0.0000`, every call served `from_cache`
+- [ ] Record `click__3105` and nothing else. It is the only case whose demo run
+      is cached end to end. `tomlkit__291` replays for free but ends
+      Fail-to-Pass NO, `click__2817` misses the cache and spends, and
+      `jinja__1573` has no recorded demo run at all — any of the three would
+      make live API calls or show a failure on camera
+- [ ] No rehearsal run is *needed* to warm anything: the demo's prompts are
+      committed under `data/cache/llm` and it writes no memory, so the first run
+      on a fresh clone replays exactly like the tenth
 - [ ] Terminal cleared, font enlarged
 - [ ] Runtime under 5:00
 

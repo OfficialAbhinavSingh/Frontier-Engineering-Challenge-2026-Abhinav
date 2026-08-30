@@ -12,17 +12,24 @@ import json
 import textwrap
 from pathlib import Path
 
-from reprobot.agents.memory import RepoMemory
-from reprobot.artifact import Proposal, render_report, write_proposal
-from reprobot.agents.solver import SolverConfig, solve
-from reprobot.eval.run import DEFAULT_MODEL, score_case
-from reprobot.llm.client import LLMClient
-from reprobot.repo import RepoView
-from reprobot.trace import Trace
+from ratchat.agents.memory import RepoMemory
+from ratchat.artifact import Proposal, render_report, write_proposal
+from ratchat.agents.solver import SolverConfig, solve
+from ratchat.eval.run import DEFAULT_MODEL, score_case
+from ratchat.llm.client import LLMClient
+from ratchat.repo import RepoView
+from ratchat.trace import Trace
 
 RULE = "─" * 78
 
-# Mirrors variant s5 in reprobot/eval/run.py -- the shipped system.
+# The demo defaults to the one case whose whole run is in the committed cache, so
+# `make demo` costs nothing and shows the same thing every time -- including on a
+# clone with no API key at all. It is also a case worth watching: the first attempt
+# comes back broken_test and the repair loop turns it into a real reproduction.
+# Any other case is a live run; pass --case-id deliberately.
+DEFAULT_CASE = "click__3105"
+
+# Mirrors variant s5 in ratchat/eval/run.py -- the shipped system.
 #
 # Not s6. Signature grounding scored higher overall but lost on the held-out
 # subset (4.3/13 against s5's 4.7/13), which is the signature of a rule fitted to
@@ -51,7 +58,8 @@ def wrap(text: str, width: int = 76, indent: str = "  ") -> str:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--cases", default="data/cases/validated.json")
-    ap.add_argument("--case-id", help="default: the first case in the eval split")
+    ap.add_argument("--case-id",
+                    help=f"default: {DEFAULT_CASE}, the case whose run is cached")
     ap.add_argument("--model", default=DEFAULT_MODEL)
     ap.add_argument("--repos-dir", default="data/repos")
     ap.add_argument("--approve", action="store_true",
@@ -65,9 +73,12 @@ def main() -> None:
         if case is None:
             raise SystemExit(f"no such case: {args.case_id}")
     else:
-        from reprobot.eval.run import split_cases
-        _, evaluation = split_cases(cases)
-        case = sorted(evaluation, key=lambda c: (c["repo_name"], c["case_id"]))[0]
+        case = next((c for c in cases if c["case_id"] == DEFAULT_CASE), None)
+        if case is None:
+            from ratchat.eval.run import split_cases
+            _, evaluation = split_cases(cases)
+            case = sorted(evaluation,
+                          key=lambda c: (c["repo_name"], c["case_id"]))[0]
 
     header(f"THE BUG REPORT — {case['repo']} issue #{case['issue_number']}")
     print(f"  {case['issue_title']}\n")
@@ -80,9 +91,13 @@ def main() -> None:
     view = RepoView(Path(args.repos_dir) / case["repo_name"], case["parent_sha"])
     trace = Trace("traces", "demo", case["case_id"])
     client = LLMClient(model=args.model)
-    memory = RepoMemory(Path("data/memory/demo"), case["repo_name"], enabled=True)
+    # The demo runs a single case, so there is nothing for saved lessons to carry
+    # forward -- but saving them would change the author's prompt and break the
+    # cached replay this run ships with. Learn within the run, write nothing out.
+    memory = RepoMemory(Path("data/memory/demo"), case["repo_name"],
+                        enabled=True, persist=False)
 
-    header("REPRO-BOT RUNNING")
+    header("RATCHAT RUNNING")
     print("  cartographer → locator → author → sandbox → verifier → repair\n")
     # The narrated run uses the final configuration, not the library default,
     # so what a reader sees here is the system the results describe.
@@ -132,7 +147,9 @@ def main() -> None:
         print("\n  Apply it with:")
         print(f"    git apply {target}/add-test.patch")
     else:
-        print("  Not approved, so nothing was written. Repro-Bot never commits.")
+        print("  Not approved, so no proposal was written and no lesson was saved.")
+        print("  The trajectory above is the only file this run touched.")
+        print("  Ratchat never commits.")
         print("  Re-run with --approve to emit the reviewable bundle:")
         print("    the test, a git-applyable patch, the verifier's evidence,")
         print("    the attempts that were rejected, and what is still unverified.\n")

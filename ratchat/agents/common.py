@@ -15,9 +15,9 @@ from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from reprobot.repo import RepoView
-from reprobot.sandbox.run import RunResult, run_test
-from reprobot.trace import Trace
+from ratchat.repo import RepoView
+from ratchat.sandbox.run import RunResult, run_test
+from ratchat.trace import Trace
 
 CODE_FENCE = re.compile(r"```(?:python|py)?\s*\n(.*?)```", re.S)
 
@@ -71,10 +71,21 @@ def default_test_dir(view: RepoView) -> str:
     return dirs.most_common(1)[0][0]
 
 
+# Frozen at the project's former name, deliberately. This filename is quoted into
+# every author prompt ("Your file will be saved as ..."), and the model cache is
+# content-addressed on the prompt text, so renaming it changes all 885 committed
+# cache keys at once. That would cost more to regenerate than the project's
+# remaining budget and would break the $0 demo replay, in exchange for a cosmetic
+# change to a generated filename. Measured before deciding: the string appears in
+# 1425 recorded prompts. See "The rename that stopped at the cache" in
+# CHANGELOG_IMPROVEMENT.md.
+LEGACY_TEST_PREFIX = "test_reprobot_"
+
+
 def test_path_for(view: RepoView, case_id: str) -> str:
     """A new, previously non-existent path, so the diff can only ever add a file."""
     safe = re.sub(r"[^A-Za-z0-9_]", "_", case_id)
-    return f"{default_test_dir(view)}/test_reprobot_{safe}.py"
+    return f"{default_test_dir(view)}/{LEGACY_TEST_PREFIX}{safe}.py"
 
 
 @dataclass

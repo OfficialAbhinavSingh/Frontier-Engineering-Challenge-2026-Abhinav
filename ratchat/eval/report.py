@@ -25,6 +25,10 @@ import re
 from collections import Counter, defaultdict
 from pathlib import Path
 
+from ratchat.eval.run import VARIANTS
+
+CURRENT_DESCRIPTIONS = {name: spec["desc"] for name, spec in VARIANTS.items()}
+
 ORDER = {"b0": 0, "b1": 1, "s1": 2, "s2": 3, "s3": 4, "s4": 5, "s5": 6,
          "s6": 7, "x1": 8}
 
@@ -70,7 +74,12 @@ def _stats(entries: list[dict]) -> dict:
         "mean_rounds": sum(rounds) / len(rounds) if rounds else 0,
         "calls_per_case": calls / cases if cases else 0,
         "cached_share": cached / calls if calls else 0,
-        "desc": entries[0]["description"],
+        # The description is a display label, not a measurement, so it comes from
+        # the current variant definition rather than from what a months-old result
+        # file happened to record. Recorded results are never rewritten; only the
+        # label used to present them is refreshed.
+        "desc": CURRENT_DESCRIPTIONS.get(
+            entries[0]["variant"], entries[0]["description"]),
     }
 
 

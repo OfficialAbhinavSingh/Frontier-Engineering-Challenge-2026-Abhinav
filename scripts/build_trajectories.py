@@ -19,13 +19,13 @@ from pathlib import Path
 # Run as a script from anywhere in the project without an install step.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from reprobot.trace import render_markdown  # noqa: E402
+from ratchat.trace import render_markdown  # noqa: E402
 
 INDEX_HEADER = """# Agent trajectories
 
 Two kinds of agent were used, and both are represented here.
 
-**Repro-Bot's own agents** — the locator, the author, the memory writer, and the
+**Ratchat's own agents** — the locator, the author, the memory writer, and the
 model-judged verifier in the removed experiment. Each run writes its trajectory
 as it happens, in order, to `traces/<variant>/<case>.jsonl`: every prompt, every
 model reply, every tool call and its response, every verdict, and the human
@@ -124,10 +124,10 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     labels = {
-        "s5": "Repro-Bot, the final system",
+        "s5": "Ratchat, the final system",
         "x1": "the removed experiment — verification by model instead of traceback (it outscores the shipped system; removed for cost and determinism)",
         "b1": "the fair baseline — one general-purpose agent with the same tools",
-        "s4": "Repro-Bot before minimal-claim authoring",
+        "s4": "Ratchat before minimal-claim authoring",
         "demo": "the narrated single-case run",
     }
 

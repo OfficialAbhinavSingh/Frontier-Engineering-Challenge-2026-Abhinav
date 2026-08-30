@@ -28,7 +28,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
-from reprobot.sandbox.run import RunResult
+from ratchat.sandbox.run import RunResult
 
 # "tomlkit/items.py:44: in __len__" -- a frame line in pytest's short traceback.
 FRAME = re.compile(r"^(?P<path>[^\s:]+\.py):(?P<line>\d+): in (?P<func>\S+)", re.M)
@@ -244,7 +244,7 @@ def verify_with_model(run: RunResult, test_rel_path: str, issue_text: str,
     fact in the traceback, and asking a model to infer it introduces an opinion
     where a fact was already available.
     """
-    from reprobot.agents.common import parse_json_object
+    from ratchat.agents.common import parse_json_object
 
     if run.outcome == "passed":
         return verify(run, test_rel_path)

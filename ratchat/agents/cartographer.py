@@ -19,7 +19,7 @@ import re
 from collections import Counter
 from dataclasses import dataclass, field
 
-from reprobot.repo import RepoView
+from ratchat.repo import RepoView
 
 WORD = re.compile(r"[A-Za-z_][A-Za-z0-9_]{2,}")
 

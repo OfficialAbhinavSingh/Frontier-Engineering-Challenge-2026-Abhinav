@@ -7,10 +7,10 @@ runs.
 
 from __future__ import annotations
 
-from reprobot.agents.common import extract_code, parse_json_object, recover_final_test
-from reprobot.dataset.mine import body_is_usable, is_python_source, is_test_file
-from reprobot.dataset.validate import added_test_names
-from reprobot.eval.run import split_cases
+from ratchat.agents.common import extract_code, parse_json_object, recover_final_test
+from ratchat.dataset.mine import body_is_usable, is_python_source, is_test_file
+from ratchat.dataset.validate import added_test_names
+from ratchat.eval.run import split_cases
 
 
 def test_issue_bodies_containing_a_patch_are_rejected():

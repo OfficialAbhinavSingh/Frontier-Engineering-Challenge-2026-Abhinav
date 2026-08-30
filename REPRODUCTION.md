@@ -176,15 +176,29 @@ command is free.
 The run recorded in the solution video:
 
 ```bash
-make demo                                   # first case of the eval split
-python3 -m reprobot.demo --case-id click__2817
-python3 -m reprobot.demo --case-id click__2817 --approve
+make demo                                   # click__3105, served from the cache
+python3 -m ratchat.demo --case-id click__3105 --approve
 ```
 
 It prints the bug report, each repair round with the verifier's verdict, the
 proposed test, and the Fail-to-Pass check against the real fix commit. Without
 `--approve` nothing is written anywhere; with it, the test is written under
-`proposals/`. Repro-Bot never commits to a repository.
+`proposals/`. Ratchat never commits to a repository.
+
+**`make demo` needs no API key and costs nothing.** Every model call in that run
+is in `data/cache/llm/`, so it replays identically on a fresh clone: two rounds,
+`broken_test` then `reproduced_assertion`, Fail-to-Pass **YES**, `$0.0000`.
+
+That is true only of `click__3105`, which is why it is the default. Any other
+`--case-id` is a **live run** that needs a key and costs a fraction of a cent —
+including the other cases with recorded traces, which either miss the cache
+partway (`click__2817`) or replay for free but end Fail-to-Pass NO
+(`tomlkit__291`).
+
+The demo deliberately does not save what it learns. Repository memory is injected
+into the author's prompt, so a demo that wrote a lesson would change its own next
+prompt, miss its own cache, and stop replaying — which is exactly what it used to
+do. `tests/test_memory.py` guards this, `data/memory/demo/` must stay empty.
 
 ---
 
@@ -218,7 +232,8 @@ Measured on an 8-core Linux host, Docker 29.7.2, from a cold start.
 | `make replay` (every variant) | 25–40 min | **$0** |
 | `make replay-check` (five variants) | 25–40 min | **$0** |
 | `make eval` live (every variant) | 60–90 min | see `results/REPORT.md` |
-| `make demo` (one case) | 30–90 s | fractions of a cent |
+| `make demo` (`click__3105`, cached) | 30–90 s | **$0.00, no key needed** |
+| `--case-id` anything else (live) | 30–90 s | fractions of a cent |
 
 Almost all of the wall clock is Docker, not the model: every attempt and every
 score is a container start plus a pytest run, and the solver runs up to three
@@ -230,7 +245,7 @@ returns the dollar cost of each generation and it is recorded per call.
 ## 6. Layout
 
 ```
-reprobot/
+ratchat/
   dataset/mine.py       find candidate cases in merged bugfix commits
   dataset/validate.py   keep only cases whose human test provably reproduces
   sandbox/run.py        offline Docker execution, typed outcomes
@@ -263,11 +278,11 @@ it, log out and back in, or run the make targets with a Docker context you own.
 
 **Every case fails validation.** Check `data/cases/dropped.json`. If the reason is
 `gold_test_not_passing_at_fix`, the repository's dependency set has moved since
-the images were built — rebuild them with `docker rmi reprobot-env:<repo>` and
+the images were built — rebuild them with `docker rmi ratchat-env:<repo>` and
 re-run `make validate`.
 
 **Replay raises `OfflineCacheMiss`.** The request is not in the cache. Confirm you
 have not edited a prompt or changed `MODEL`, then re-run; otherwise run live.
 
 **A case reports `timeout`.** The default per-run limit is 300 s. Slower machines
-may need `--timeout 600` on `reprobot.eval.run`.
+may need `--timeout 600` on `ratchat.eval.run`.

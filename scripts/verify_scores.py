@@ -24,7 +24,7 @@ from pathlib import Path
 # scripts/ on the path rather than the project, so add the project explicitly.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from reprobot.eval.run import score_case  # noqa: E402
+from ratchat.eval.run import score_case  # noqa: E402
 
 
 def main() -> None:
@@ -51,7 +51,7 @@ def main() -> None:
                 continue
             scored = score_case(
                 case,
-                record.get("test_rel_path") or "tests/test_reprobot.py",
+                record.get("test_rel_path") or "tests/test_ratchat.py",
                 record.get("test_source", ""),
                 args.timeout,
             )

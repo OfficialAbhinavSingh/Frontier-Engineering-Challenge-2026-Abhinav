@@ -23,9 +23,13 @@ import uuid
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
-IMAGE_PREFIX = "reprobot-env"
+IMAGE_PREFIX = "ratchat-env"
 
 # Printed inside the container once checkout and injection have both succeeded.
+# Frozen at the project's former name for the same reason as LEGACY_TEST_PREFIX in
+# ratchat/agents/common.py: this sentinel is part of the captured stdout that gets
+# quoted back into repair prompts (981 recorded occurrences), and the model cache
+# is keyed on prompt text. Renaming it would invalidate the committed cache.
 CHECKOUT_OK = "__REPROBOT_SANDBOX_READY__"
 DEFAULT_TIMEOUT = 180
 
@@ -162,7 +166,7 @@ def run_test(
     # checkout. Mounting it directly over a tracked path makes git treat it as a
     # local modification and abort the checkout, which silently invalidates the
     # run -- a bug that costs you correct-looking results for the wrong commit.
-    inject_path = "/tmp/reprobot_inject.py"
+    inject_path = "/tmp/ratchat_inject.py"
     quoted_rel = shlex.quote(test_rel_path)
     inner = (
         f"git checkout -q {shlex.quote(sha)} && "
@@ -176,7 +180,7 @@ def run_test(
     # Named, so a run that outlives its client can still be cleaned up. Killing
     # the docker CLI does not stop the container it started, and an orphan keeps
     # burning CPU and distorting every timing measured after it.
-    container = f"reprobot-{uuid.uuid4().hex[:12]}"
+    container = f"ratchat-{uuid.uuid4().hex[:12]}"
     cmd = [
         "docker", "run", "--rm",
         "--name", container,
@@ -235,7 +239,7 @@ def run_suite(repo_name: str, sha: str, timeout_s: int = 900) -> RunResult:
         f"git checkout -q {shlex.quote(sha)} && "
         "python -m pytest -q --no-header -p no:cacheprovider --tb=no"
     )
-    container = f"reprobot-suite-{uuid.uuid4().hex[:12]}"
+    container = f"ratchat-suite-{uuid.uuid4().hex[:12]}"
     cmd = [
         "docker", "run", "--rm", "--name", container, "--network", "none",
         "--memory", "2g", "--cpus", "2",

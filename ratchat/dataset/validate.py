@@ -1,6 +1,6 @@
 """Validate mined cases by replaying the human's own regression test.
 
-This is the load-bearing step of the whole project. Before Repro-Bot is allowed
+This is the load-bearing step of the whole project. Before Ratchat is allowed
 to attempt a case, the *maintainer's* test for that case must demonstrate
 Fail-to-Pass in our sandbox: fail at the parent commit, pass at the fix commit.
 
@@ -17,7 +17,7 @@ import re
 import subprocess
 from pathlib import Path
 
-from reprobot.sandbox.run import build_image, image_exists, run_test
+from ratchat.sandbox.run import build_image, image_exists, run_test
 
 ADDED_TEST_DEF = re.compile(r"^\+\s*(?:async )?def (test_[A-Za-z0-9_]+)\s*\(", re.M)
 # Not every project adds a new test function. Table-driven suites extend an

@@ -8,7 +8,7 @@ SPLIT ?= eval
 .PHONY: help repos images dataset validate demo baseline solution eval report replay replay-check verify-scores test trajectories clean-results
 
 help:
-	@echo "Repro-Bot — turn a bug report into a verified failing test"
+	@echo "Ratchat — turn a bug report into a verified failing test"
 	@echo ""
 	@echo "  make repos       clone the target repositories (~8 min, ~700 MB)"
 	@echo "  make dataset     mine candidate cases from merged bugfix commits"
@@ -22,6 +22,7 @@ help:
 	@echo "  make eval        run every variant live           (needs OPENROUTER_API_KEY)"
 	@echo "  make report      rebuild results/REPORT.md from results/"
 	@echo "  make demo        run one case end to end, printing the trajectory"
+	@echo "                   cached: no API key, \$$0.00, same result every run"
 	@echo "  make test        run the harness unit tests (needs uv)"
 	@echo "  make trajectories rebuild the agent-trajectories deliverable"
 	@echo ""
@@ -37,12 +38,12 @@ repos:
 	done
 
 dataset: repos
-	$(PY) -m reprobot.dataset.mine \
+	$(PY) -m ratchat.dataset.mine \
 		$(foreach r,$(REPOS),--repo $(r)) \
 		--limit 4000 --want 26 --max-lookups 200 --out data/cases/mined_all.json
 
 validate:
-	$(PY) -m reprobot.dataset.validate \
+	$(PY) -m ratchat.dataset.validate \
 		--cases data/cases/mined_all.json \
 		--out data/cases/validated.json \
 		--build-missing --timeout 300
@@ -51,30 +52,30 @@ validate:
 # want to spend anything: are the numbers in the report real? Every model call
 # is served from the committed cache, so this reproduces them exactly, offline.
 replay:
-	REPROBOT_OFFLINE=1 $(PY) -m reprobot.eval.run \
+	RATCHAT_OFFLINE=1 $(PY) -m ratchat.eval.run \
 		--variant b0 --variant b1 --variant s1 --variant s2 --variant s3 \
 		--variant s4 --variant s5 --variant s6 --variant x1 \
 		--split $(SPLIT) --model $(MODEL) --out-dir results
 	$(MAKE) report
 
 baseline:
-	$(PY) -m reprobot.eval.run --variant b0 --variant b1 \
+	$(PY) -m ratchat.eval.run --variant b0 --variant b1 \
 		--split $(SPLIT) --model $(MODEL) --out-dir results
 
 # s5 is the shipped system; s6 is included because the report contrasts them.
 solution:
-	$(PY) -m reprobot.eval.run --variant s5 --variant s6 \
+	$(PY) -m ratchat.eval.run --variant s5 --variant s6 \
 		--split $(SPLIT) --model $(MODEL) --out-dir results
 
 eval:
-	$(PY) -m reprobot.eval.run \
+	$(PY) -m ratchat.eval.run \
 		--variant b0 --variant b1 --variant s1 --variant s2 --variant s3 \
 		--variant s4 --variant s5 --variant s6 --variant x1 \
 		--split $(SPLIT) --model $(MODEL) --out-dir results
 	$(MAKE) report
 
 report:
-	$(PY) -m reprobot.eval.report --split $(SPLIT) --out results/REPORT.md
+	$(PY) -m ratchat.eval.report --split $(SPLIT) --out results/REPORT.md
 
 # The strongest reproducibility check, and the one that needs no API key and no
 # cache: re-run every committed test source in the sandbox and re-derive every
@@ -90,7 +91,7 @@ replay-check:
 		--split $(SPLIT) --out results/REPLAY_FIDELITY.md
 
 demo:
-	$(PY) -m reprobot.demo --model $(MODEL)
+	$(PY) -m ratchat.demo --model $(MODEL)
 
 trajectories:
 	$(PY) scripts/build_trajectories.py

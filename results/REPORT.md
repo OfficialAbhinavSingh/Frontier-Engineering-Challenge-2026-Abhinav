@@ -11,8 +11,8 @@ Model: `google/gemini-2.5-flash`. Cases: 27. Primary metric: Fail-to-Pass, measu
 | `s1` | structured pipeline with sandbox verification and a repair loop | 1 | 8/27 | 30% | 2.7 | $0.0650 |
 | `s2` | adds the deterministic repo map and in-repo example tests | 1 | 7/27 | 26% | 2.6 | $0.0979 |
 | `s3` | adds failure-class-specific repair instructions | 1 | 8/27 | 30% | 2.6 | $0.0366 |
-| `s4` | adds cross-case repository memory (full Repro-Bot) | 1 | 9/27 | 33% | 2.9 | $0.0668 |
-| `s5` | adds minimal-claim authoring and over-specification repair (full Repro-Bot) | 3 | 8.7/27 (range 8-9) | 32% | 3.1 | $0.0770 |
+| `s4` | adds cross-case repository memory (full Ratchat) | 1 | 9/27 | 33% | 2.9 | $0.0668 |
+| `s5` | adds minimal-claim authoring and over-specification repair (full Ratchat) | 3 | 8.7/27 (range 8-9) | 32% | 3.1 | $0.0770 |
 | `s6` + | adds signature grounding: a missing API the report names is a reproduction | 3 | 9.3/27 (range 8-11) | 35% | 2.9 | $0.0264 |
 | `x1` + | REMOVED: model-judged verification instead of traceback analysis | 3 | 10.3/27 (range 9-12) | 38% | 4.3 | $0.0678 |
 

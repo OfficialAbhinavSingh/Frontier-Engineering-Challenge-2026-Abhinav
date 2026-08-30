@@ -8,8 +8,8 @@ giving the opposite advice and the numbers stop meaning anything.
 
 from __future__ import annotations
 
-from reprobot.agents.verifier import repair_instruction, verify
-from reprobot.sandbox.run import RunResult, classify
+from ratchat.agents.verifier import repair_instruction, verify
+from ratchat.sandbox.run import RunResult, classify
 
 TEST_PATH = "tests/test_reprobot_case.py"
 
@@ -164,7 +164,7 @@ def test_the_proposed_patch_adds_one_file_and_touches_nothing_else():
     Add-only is what makes the proposal safe to review at a glance: no existing
     test or source file can be modified by it.
     """
-    from reprobot.artifact import build_patch
+    from ratchat.artifact import build_patch
 
     source = "import pytest\n\n\ndef test_thing():\n    assert 1 == 2\n"
     patch = build_patch("tests/test_reprobot_case.py", source)
@@ -181,7 +181,7 @@ def test_the_proposed_patch_adds_one_file_and_touches_nothing_else():
 
 def test_a_report_states_what_it_has_not_established():
     """A proposal that hides its own limit is worse than useless to a reviewer."""
-    from reprobot.artifact import Proposal, render_report
+    from ratchat.artifact import Proposal, render_report
 
     case = {
         "case_id": "demo__1", "repo": "o/demo", "repo_name": "demo",

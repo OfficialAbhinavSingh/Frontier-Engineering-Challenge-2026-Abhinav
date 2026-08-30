@@ -1,4 +1,4 @@
-"""Repro-Bot: the full solution.
+"""Ratchat: the full solution.
 
 The pipeline is deliberately narrow at each step, because the failure this
 project is built around -- a test that fails for the wrong reason -- is caused by
@@ -26,8 +26,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from reprobot.agents.cartographer import build_map, focused_excerpt, sample_tests
-from reprobot.agents.common import (
+from ratchat.agents.cartographer import build_map, focused_excerpt, sample_tests
+from ratchat.agents.common import (
     Budget,
     default_test_dir,
     extract_code,
@@ -36,17 +36,17 @@ from reprobot.agents.common import (
     run_candidate,
     test_path_for,
 )
-from reprobot.agents.memory import RepoMemory
-from reprobot.agents.verifier import (
+from ratchat.agents.memory import RepoMemory
+from ratchat.agents.verifier import (
     Verdict,
     overspecification,
     repair_instruction,
     verify,
     verify_with_model,
 )
-from reprobot.llm.client import LLMClient
-from reprobot.repo import RepoView
-from reprobot.trace import Trace
+from ratchat.llm.client import LLMClient
+from ratchat.repo import RepoView
+from ratchat.trace import Trace
 
 LOCATOR_SYSTEM = """You are triaging a bug report in a Python repository.
 

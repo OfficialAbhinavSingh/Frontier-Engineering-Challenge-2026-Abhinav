@@ -1,12 +1,1 @@
-[
-  {
-    "text": "When importing Click components, be mindful of the exact names. `FuncParamType` is not a public API and the correct class is `ParamType`.",
-    "from_case": "click__3105",
-    "added_at": 1788029953.5263875
-  },
-  {
-    "text": "When asserting on CLI output, remember that Click's error messages often include the command usage string before the actual error message. Account for this extra text or use more targeted assertions.",
-    "from_case": "click__3105",
-    "added_at": 1788029953.5263925
-  }
-]
+[]

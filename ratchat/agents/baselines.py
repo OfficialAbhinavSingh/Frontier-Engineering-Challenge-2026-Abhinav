@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import json
 
-from reprobot.agents.common import (
+from ratchat.agents.common import (
     Budget,
     ToolBox,
     extract_code,
@@ -24,9 +24,9 @@ from reprobot.agents.common import (
     recover_final_test,
     test_path_for,
 )
-from reprobot.llm.client import LLMClient
-from reprobot.repo import RepoView
-from reprobot.trace import Trace
+from ratchat.llm.client import LLMClient
+from ratchat.repo import RepoView
+from ratchat.trace import Trace
 
 B0_SYSTEM = """You are helping a maintainer reproduce a reported bug.
 Write a single pytest test file that fails because of the bug described in the issue.

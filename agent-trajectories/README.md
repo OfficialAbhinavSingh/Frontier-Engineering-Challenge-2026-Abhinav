@@ -2,7 +2,7 @@
 
 Two kinds of agent were used, and both are represented here.
 
-**Repro-Bot's own agents** — the locator, the author, the memory writer, and the
+**Ratchat's own agents** — the locator, the author, the memory writer, and the
 model-judged verifier in the removed experiment. Each run writes its trajectory
 as it happens, in order, to `traces/<variant>/<case>.jsonl`: every prompt, every
 model reply, every tool call and its response, every verdict, and the human
@@ -19,7 +19,7 @@ scored result. Nothing is summarised or reordered.
 ## What to read, and why
 
 
-### `s5` — Repro-Bot, the final system
+### `s5` — Ratchat, the final system
 
 - [`click__3105`](s5/click__3105.md) — solved, but only after verification rejected the first attempt and the typed repair instruction sent it back.  
   3 model calls, 2 tool calls, verdicts: broken_test → reproduced_assertion. Result: Fail-to-Pass.

@@ -1,6 +1,6 @@
 """Export the Claude Code session that built this project, redacted.
 
-Repro-Bot's own agents write their trajectories as they run. This script covers
+Ratchat's own agents write their trajectories as they run. This script covers
 the other agent involved: the coding agent that wrote the project itself.
 
 A raw Claude Code session log is not safe to publish. It contains the operator's
@@ -26,7 +26,15 @@ SESSIONS_DIR = Path.home() / ".claude" / "projects"
 # The operator's other project names must not be hardcoded here: writing them
 # into this file would put them in the published repository, which is the thing
 # the redaction exists to prevent.
-DEFAULT_REDACT_FILE = Path.home() / ".config" / "reprobot" / "redact.txt"
+# The project was renamed to Ratchat; the pre-rename location is still honoured so
+# an existing redaction list keeps working. Silently losing it would weaken the
+# scrubbing rather than announce itself.
+_CONFIG_HOME = Path.home() / ".config"
+DEFAULT_REDACT_FILE = next(
+    (p for p in (_CONFIG_HOME / "ratchat" / "redact.txt",
+                 _CONFIG_HOME / "reprobot" / "redact.txt") if p.exists()),
+    _CONFIG_HOME / "ratchat" / "redact.txt",
+)
 
 # Harness-injected content. None of it is part of the trajectory and some of it
 # is private, so it is removed rather than summarised.
@@ -145,11 +153,15 @@ def render(turns: list[dict], max_chars: int) -> str:
         return text[:max_chars] + f"\n… [{len(text) - max_chars} more chars]"
 
     out = [
-        "# Coding-agent trajectory — building Repro-Bot\n",
+        "# Coding-agent trajectory — building Ratchat\n",
         "The agent that wrote this project was Claude Code. This is its session, "
         "with harness-injected context and anything credential-shaped removed, and "
         "home paths rewritten. Tool calls and their results are kept in order so "
         "the feedback that shaped each next step is visible.\n",
+        "The project was called Repro-Bot for most of this session and was renamed "
+        "to Ratchat near the end, so the commands and paths below use the old name. "
+        "They are left exactly as they were run rather than rewritten, because a "
+        "trajectory that has been edited after the fact is not a trajectory.\n",
     ]
     step = 0
     for turn in turns:
@@ -174,7 +186,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--session", help="path to a .jsonl session log")
     ap.add_argument("--session-id", help="session id to look up under ~/.claude/projects")
-    ap.add_argument("--keep-marker", default="repro-bot",
+    ap.add_argument("--keep-marker", default="ratchat",
                     help="only export sessions mentioning this string")
     ap.add_argument("--out", default="agent-trajectories/claude-code-build.md")
     ap.add_argument("--max-chars", type=int, default=2000)

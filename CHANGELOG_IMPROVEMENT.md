@@ -183,12 +183,12 @@ split. That is fitting to the test set, and the fix is to test on data the rule
 has never influenced. Five repositories were added to the dataset afterwards,
 contributing 13 evaluation cases that did not exist when the rule was written.
 
-`held_out_subset()` in `reprobot/eval/report.py` reports every variant restricted
+`held_out_subset()` in `ratchat/eval/report.py` reports every variant restricted
 to those cases. On them **s6 scores 4.3/13 against s5's 4.7/13** — the gain does
 not merely shrink, it inverts.
 
 So s6 is not shipped. `s5` is the final system, in the README, in
-`reprobot/demo.py`, and in `make solution`.
+`ratchat/demo.py`, and in `make solution`.
 
 **Learning:** the honest version of "I found a blind spot and fixed it" is
 indistinguishable from "I tuned a rule until one case passed" *until you test on
@@ -257,6 +257,88 @@ I had been shipping for days.
 that text quotes. Anything a tool prints that varies between runs — a timing, a
 temporary path, an address — becomes part of the key.
 
+### The rename that stopped at the cache
+
+The project was called Repro-Bot and is now **Ratchat**. Renaming it turned out to
+be a third instance of the same lesson, so it is recorded here rather than done
+silently.
+
+A content-addressed cache makes some strings expensive to rename. Two internal
+identifiers are quoted into prompts: the generated test's filename
+(`test_reprobot_<case>.py`, which the author prompt states verbatim) and the
+sandbox's readiness sentinel (`__REPROBOT_SANDBOX_READY__`, which appears in the
+pytest output quoted back into repair prompts). Renaming either changes every
+affected prompt, therefore every cache key.
+
+Rather than guess at the blast radius, it was measured — scanning all 530 recorded
+trace files for what the models actually saw:
+
+| String | Recorded prompt occurrences | Decision |
+| --- | ---: | --- |
+| `test_reprobot_` | 1425 | **frozen** |
+| `__REPROBOT_SANDBOX_READY__` | 981 | **frozen** |
+| the display name "Repro-Bot" | 0 | renamed |
+| `reprobot.` (package) | 0 | renamed |
+| `reprobot-env` (image prefix) | 0 | renamed |
+| `reprobot_inject`, container names | 0 | renamed |
+
+So the rename covers everything a reader, judge or user sees — the package, the
+Docker images, the CLI banner, every document — and stops at the two strings that
+are load-bearing for the cache. Freezing them costs a cosmetic inconsistency in a
+generated filename. Renaming them would have cost the entire committed cache: the
+`$0` demo replay, the partial run replay, and more than the remaining budget to
+regenerate.
+
+The images were retagged rather than rebuilt (`docker tag`), so nothing had to be
+rebuilt to match the new name. `make verify-scores` is unaffected either way — it
+never touches the cache.
+
+**Learning:** in a system that hashes its own inputs, a rename is a schema
+migration, not a find-and-replace. The cheap way to find out which strings are
+load-bearing is to ask the recorded data instead of reasoning about the code.
+
+### The demo destroyed its own recording, and said it hadn't
+
+The same lesson had one more layer, and I found it by re-running the demo during a
+final check rather than trusting that it still worked.
+
+`make demo` ships a committed cache so the narrated run replays for free and shows
+the same thing every time. It came back **Fail-to-Pass NO**, on one attempt instead
+of two, having spent real money. The committed trace said `from_cache=False` on
+both author calls, so the recording had never actually replayed — not once.
+
+The cause is the feature two sections above. Repository memory is injected into the
+author's prompt. At the end of the recorded run, memory distilled two lessons about
+Click and *saved them*, and those lessons were committed alongside the cache. Every
+later run — mine, and a judge's on a fresh clone — rebuilt the author prompt with a
+`Notes from earlier bugs in this same repository:` block that was absent when the
+cache was recorded. Different prompt, different key, guaranteed miss. The artifact
+of the run invalidated the replay of that same run, deterministically and forever.
+
+Two things made it worse than a stale cache. A judge without an API key gets a hard
+`OfflineCacheMiss` rather than a demo. And the run ends by printing *"Not approved,
+so nothing was written. Ratchat never commits."* while it had just written to
+`data/memory/demo/click.json` — the one sentence in the program that promises
+restraint was false.
+
+The fix is that the demo learns within its run and persists nothing
+(`RepoMemory(..., persist=False)`); the evaluation harness, which genuinely does
+carry lessons from case to case, keeps the saving default. `tests/test_memory.py`
+pins both halves, including a guard asserting `data/memory/demo/` stays empty,
+because a single committed lesson silently breaks the replay again. The demo now
+runs twice in a row at **$0.0000**, every call `from_cache`, `broken_test` then
+`reproduced_assertion`, Fail-to-Pass **YES**.
+
+**Learning:** a component that both reads and writes the same state cannot be
+recorded by capturing its inputs alone — replaying it re-runs the write, and the
+write is an input to the next replay. Memory made the system better at its task and
+silently non-reproducible at the same time, which is exactly the trade this project
+claims to measure rather than assume.
+
+**Learning:** "it worked when I recorded it" decays. This was caught only because
+the last thing I did before submitting was run the demo again instead of trusting
+the commit message that said it was cached.
+
 ## What the numbers say about the central problem
 
 The agent's own judgement of whether it reproduced the bug, checked against
@@ -317,5 +399,5 @@ What I would tell someone building the next agent: make your verifier return a
 typed signal rather than a boolean, push everything you can into the part that
 evidence can settle — it is more than you expect, and it is usually already in
 the output you are throwing away — then put the human checkpoint exactly on the
-part that is left. Repro-Bot proposes and stops for review because the last
+part that is left. Ratchat proposes and stops for review because the last
 question is the one it cannot answer for itself.

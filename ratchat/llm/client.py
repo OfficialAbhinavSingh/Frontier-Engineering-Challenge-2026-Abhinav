@@ -98,7 +98,7 @@ class LLMClient:
         self.offline = (
             offline
             if offline is not None
-            else os.environ.get("REPROBOT_OFFLINE", "0") == "1"
+            else os.environ.get("RATCHAT_OFFLINE", "0") == "1"
         )
         self.total = Usage()
 
@@ -149,7 +149,7 @@ class LLMClient:
         if self.offline:
             raise OfflineCacheMiss(
                 f"No cached response for {self.model} (key {key[:12]}). "
-                "Replay mode cannot invent one. Unset REPROBOT_OFFLINE to run live."
+                "Replay mode cannot invent one. Unset RATCHAT_OFFLINE to run live."
             )
 
         api_key = load_api_key()
@@ -203,7 +203,7 @@ class LLMClient:
                     "Authorization": f"Bearer {api_key}",
                     "Content-Type": "application/json",
                     "HTTP-Referer": "https://github.com/OfficialAbhinavSingh/Frontier-Engineering-Challenge-2026-Abhinav",
-                    "X-Title": "Repro-Bot",
+                    "X-Title": "Ratchat",
                 },
                 method="POST",
             )

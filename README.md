@@ -1,4 +1,4 @@
-# Repro-Bot
+# Ratchat
 
 **Turns a bug report into a failing test that is proven to reproduce the bug.**
 
@@ -41,14 +41,14 @@ construction time, by people building a benchmark about exactly this.
 report into a well-posed task, and it does so for a human and for a coding agent
 equally. It is the precondition for safe autonomous bug fixing: without a test
 that is known to fail for the right reason, "the agent fixed it" is unfalsifiable.
-Repro-Bot produces the artifact that makes the rest checkable.
+Ratchat produces the artifact that makes the rest checkable.
 
 ---
 
 ## What it does
 
 ```
-bug report (natural language)   →   Repro-Bot   →   reviewable bundle
+bug report (natural language)   →   Ratchat   →   reviewable bundle
                                                       ├── the test
                                                       ├── a git-applyable patch
                                                       ├── the verifier's evidence
@@ -56,7 +56,7 @@ bug report (natural language)   →   Repro-Bot   →   reviewable bundle
                                                       └── what is NOT established
 ```
 
-Repro-Bot sees the repository **at the commit where the bug is still present**.
+Ratchat sees the repository **at the commit where the bug is still present**.
 It never sees the fix. It writes a test, runs it in a sandbox, reads *where* it
 failed, and repairs it under an instruction chosen by that verdict.
 
@@ -80,7 +80,7 @@ from what was not: that the asserted value is the one a fix will produce. That
 needs an oracle the pipeline does not have, and it is the most common way a
 generated reproduction is wrong, so the reviewer's checklist starts there.
 
-Nothing is written without `--approve`. Repro-Bot proposes; it never commits.
+Nothing is written without `--approve`. Ratchat proposes; it never commits.
 
 ---
 
@@ -209,7 +209,7 @@ order, so two runs of the same variant stay comparable.
 
 ### The human gate
 
-Repro-Bot never writes to a repository. It emits a proposal, the trajectory, and
+Ratchat never writes to a repository. It emits a proposal, the trajectory, and
 the verifier's evidence; `--approve` is required before a file is written even
 locally. Test execution runs with `--network none`, memory and CPU capped, in a
 container built from a digest-pinned base image.
@@ -241,6 +241,31 @@ prompts, so those prompts are not byte-stable between runs and their cache
 lookups miss. `make replay-check` measures it, and
 [REPRODUCTION.md](REPRODUCTION.md) explains why fixing it would invalidate the
 entire cache for more than this project's remaining budget.
+
+`make demo` is the exception that does replay exactly: its one case
+(`click__3105`) is cached end to end, so it runs at **$0.00 with no API key**,
+always showing the same two rounds and the same Fail-to-Pass YES.
+
+Getting there required fixing a bug worth naming, because it is the same bug the
+cache section above describes, one layer deeper. The demo used repository memory,
+memory is injected into the author's prompt, and the demo *saved* what it learned.
+The saved lesson changed the next run's prompt, which changed its cache key, so the
+recorded demo missed its own cache on the first replay — while printing "nothing
+was written". The demo now learns within a run and persists nothing;
+`tests/test_memory.py` pins it, including a guard that `data/memory/demo/` stays
+empty. A component that both reads and writes the same state cannot be recorded by
+capturing its inputs alone.
+
+**Why generated tests are still named `test_reprobot_<case>.py`.** The project was
+renamed from Repro-Bot to Ratchat late, and that filename is quoted verbatim into
+every author prompt, so it is part of the cache key — as is the sandbox sentinel
+`__REPROBOT_SANDBOX_READY__`, which reaches prompts through captured pytest output.
+Measured across the 530 recorded traces, those two strings appear in 1425 and 981
+prompts; the display name appears in none. Renaming them would invalidate all 885
+committed cache entries to change a cosmetic detail, so they are frozen and
+everything else was renamed. `make verify-scores` is unaffected — it never reads
+the cache. The full accounting is in
+[CHANGELOG_IMPROVEMENT.md](CHANGELOG_IMPROVEMENT.md).
 
 Live runs will not match exactly either — the model is not deterministic across
 time and the repair loop amplifies small differences. That is why the scores, not
@@ -370,14 +395,14 @@ model-judged verifier still outscores the deterministic one I shipped.
 So: build verification that returns a typed signal rather than a boolean, and
 push everything you can into the part that evidence can settle. Then be honest
 that what is left needs an oracle, and design the human checkpoint around exactly
-that. Repro-Bot proposes and stops for review precisely because the last question
+that. Ratchat proposes and stops for review precisely because the last question
 is the one it cannot answer for itself.
 
 ---
 
 ## What existed before
 
-Written during the competition: everything under `reprobot/`, `scripts/`,
+Written during the competition: everything under `ratchat/`, `scripts/`,
 `envs/`, `Makefile`, and all documentation.
 
 Not written by me, and used under their own licences:
@@ -405,5 +430,5 @@ Disclosed as required. See [agent-trajectories/](agent-trajectories/).
 
 - **Claude Code (Claude Opus 5)** — wrote this project. Session exported with
   harness-injected context removed and credential-shaped strings redacted.
-- **Repro-Bot's own agents** (locator, author, memory) — every run writes its own
+- **Ratchat's own agents** (locator, author, memory) — every run writes its own
   JSONL trajectory as it happens, under `traces/`.

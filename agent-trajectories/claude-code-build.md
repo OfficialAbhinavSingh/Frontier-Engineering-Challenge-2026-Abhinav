@@ -1,6 +1,8 @@
-# Coding-agent trajectory — building Repro-Bot
+# Coding-agent trajectory — building Ratchat
 
 The agent that wrote this project was Claude Code. This is its session, with harness-injected context and anything credential-shaped removed, and home paths rewritten. Tool calls and their results are kept in order so the feedback that shaped each next step is visible.
+
+The project was called Repro-Bot for most of this session and was renamed to Ratchat near the end, so the commands and paths below use the old name. They are left exactly as they were run rather than rewritten, because a trajectory that has been edited after the fact is not a trajectory.
 
 
 ---
