@@ -51,11 +51,18 @@ injects the test and runs pytest, and the Fail-to-Pass check runs the test twice
 more, at the buggy commit and at the real fix. Four real container runs in that
 three seconds.
 
-**Prove it on camera.** Split the terminal. Left pane runs the demo, right pane
-runs:
+**Prove it on camera.** The containers run with `--rm`, so they exist only while
+the demo is running — there is nothing to list afterwards. Give them a thin strip
+along the bottom of the screen:
 
 ```bash
-watch -n 0.3 'docker ps --format "{{.Image}}  {{.Names}}"'
+tmux new -s rec                 # then, inside tmux:
+#   Ctrl+B  then  "             -> split
+#   Ctrl+B  then  :resize-pane -y 6
+#   in the bottom pane:
+watch -n 0.3 'docker ps --format "{{.Names}}  {{.Image}}"'
+#   Ctrl+B  then  Up            -> back to the big pane
+tmux set -g status off          # hides the tmux bar
 ```
 
 Containers named `ratchat-<hex>` on image `ratchat-env:click` appear and vanish
@@ -204,8 +211,8 @@ you talk.
 **On screen:** scroll from the bug report down into `RATCHAT RUNNING` and stop on
 the two round lines. The run took two rounds: the first attempt comes back
 `broken_test`, the repair fixes it, and the second is a reproduction that goes on
-to pass Fail-to-Pass. If you are using the split pane, this is where the
-`docker ps` side already showed containers appearing.
+to pass Fail-to-Pass. This is where the bottom `docker ps`
+strip already showed containers appearing and vanishing.
 
 > Cartographer first — deterministic, no model. It ranks modules against the
 > report and reads this project's real fixtures and import conventions out of its
@@ -370,7 +377,7 @@ python3 -m ratchat.demo --case-id click__3105
 ```
 
 Expect: 137 lines in ~3 seconds, `Fail-to-Pass: YES  (ok)`, `$0.0000`, and
-containers flashing in the right pane. Scroll to the top and walk down through
+containers flashing in the strip along the bottom. Scroll to the top and walk down through
 the five screens.
 
 **Shot 2 — the tables.** `-l md` gives syntax colouring; plain `cat` is fine too:
@@ -443,18 +450,36 @@ ffmpeg -i miccheck.mp4 -af volumedetect -f null - 2>&1 | grep -E "mean_volume|ma
 `mean_volume` around **-25 to -15 dB** is right. Below -40 dB means the mic is not
 picking you up. Above -6 dB will clip.
 
-**The real take.** Put the terminal fullscreen on the monitor you name with `-o`
-(`hyprctl monitors` lists them; `eDP-2` is the laptop panel, `HDMI-A-1` the
-external). Recording one output keeps the other screen out of frame:
+**The real take.** `-o` names the output to capture; `hyprctl monitors` lists what
+is currently connected. On the laptop alone that is `eDP-2`, and `wf-recorder`
+captures the whole of it, so clear anything private off the screen first.
+
+Start it with a delay and a hard stop. The delay keeps the launch command out of
+frame — run it, `clear`, then wait for the pause before you speak. The `timeout`
+means a forgotten recorder cannot run away:
 
 ```bash
 cd ~/Videos
-wf-recorder -o eDP-2 --audio=alsa_input.pci-0000_05_00.6.analog-stereo \
-  -c libx264 -p crf=20 -p preset=veryfast -f ratchat-demo.mp4
+( sleep 5; timeout 330 wf-recorder -o eDP-2 \
+    --audio=alsa_input.pci-0000_05_00.6.analog-stereo \
+    -c libx264 -p crf=20 -p preset=veryfast \
+    -f ratchat-demo.mp4 ) & disown
+clear
 ```
 
-`Ctrl+C` in that terminal stops the recording and finalises the file. Run it in a
-*second* terminal on the other monitor, or the stop keystroke lands in the shot.
+**Stopping, on a single screen.** There is no off-camera terminal to press
+`Ctrl+C` in, so send the signal instead and trim the evidence afterwards:
+
+```bash
+pkill -INT wf-recorder
+
+ffprobe -v error -show_entries format=duration -of csv=p=0 ratchat-demo.mp4
+ffmpeg -i ratchat-demo.mp4 -t <secs-just-before-you-typed> -c copy ratchat-final.mp4
+```
+
+`SIGINT` finalises the file exactly as `Ctrl+C` would — verified. A Hyprland
+keybind would avoid the visible command, but `hyprctl keyword` is rejected by the
+Lua config parser on this machine, so the trim is the reliable path.
 
 **Check the take before you trust it:**
 
@@ -492,9 +517,12 @@ submitting.
       on a fresh clone replays exactly like the tenth
 - [ ] Terminal cleared, font enlarged
 - [ ] Scrollback long enough to hold 137 lines (the demo prints it all at once)
-- [ ] Optional split pane running
-      `watch -n 0.3 'docker ps --format "{{.Image}}  {{.Names}}"'` — the strongest
-      single shot in the recording, because it shows the sandbox is real
+- [ ] Bottom tmux strip running
+      `watch -n 0.3 'docker ps --format "{{.Names}}  {{.Image}}"'` — the strongest
+      single shot in the recording, because it shows the sandbox is real, and the
+      containers are `--rm` so there is nothing to show after the fact
+- [ ] `tmux set -g status off`, notifications silenced, nothing private on screen —
+      `wf-recorder` captures the entire display
 - [ ] Runtime under 5:00
 
 ## Notes on what to keep if you run long
