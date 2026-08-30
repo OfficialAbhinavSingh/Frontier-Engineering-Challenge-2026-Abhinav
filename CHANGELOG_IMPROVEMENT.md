@@ -4,8 +4,8 @@ Each row is a measured run, not a story. Every variant is the same code with a
 different set of switches, so the same evaluation can be re-run with one thing
 changed and the difference attributed to that thing.
 
-Iteration happened on the **development split** (6 cases). The **evaluation
-split** (14 cases) was run at the end and was never used to choose anything.
+Iteration happened on the **development split** (13 cases). The **evaluation
+split** (27 cases) was run at the end and was never used to choose anything.
 
 Numbers below are filled from `results/REPORT.md`; nothing is quoted here that
 does not appear in a result file in this repository.
@@ -16,19 +16,26 @@ does not appear in a result file in this repository.
 
 | Stage | What changed, and why | Evidence | Decision |
 | --- | --- | --- | --- |
-| **B0** | One prompt, the report plus a file listing, no tools, no execution. The thing people actually do. | 2/14 (14%), 1.0 calls/case | Kept as the floor. |
-| **B1** | One general-purpose agent: same model, same budget, same tools *including the sandbox*. | 2.7/14 (19%), range 2–3, 7.2 calls/case | Kept as the baseline every later claim is measured against. |
-| **s1** | Structured pipeline: locate, author, run in the sandbox, repair. No repo map, no examples, generic repair text. | 3/14 (21%), 2.7 calls/case | Kept. |
-| **s2** | Deterministic repo map, plus two of the project's own tests as examples. | 3/14 (21%), 2.4 calls/case | Kept — see the note on separability below. |
-| **s3** | Repair instruction chosen by the failure class instead of one generic message. | 3/14 (21%), 2.4 calls/case | Kept. |
-| **s4** | Per-repository memory carried across cases. | 3/14 (21%), 2.6 calls/case | Kept. |
-| **s5** | Minimal-claim authoring and the `overspecified` verdict. | **4.3/14 (31%)**, range 4–5, 2.9 calls/case | Kept — pre-registered final system. |
-| **s6** | Signature grounding: a missing API the report itself names is a reproduction, not a misused call. | 5.0/14 (36%), range 4–6, 2.8 calls/case | Kept, but reported as post-hoc. |
-| **x1** | *Removed.* Deterministic verifier replaced by a model asked "did this reproduce the bug?" | 5.0/14 (36%), range 4–6, **4.2 calls/case** | Removed — matched by s6 at a third fewer calls. |
+| **B0** | One prompt, the report plus a file listing, no tools, no execution. The thing people actually do. | 5/27 (19%), 1.0 calls/case | Kept as the floor. |
+| **B1** | One general-purpose agent: same model, same budget, same tools *including the sandbox*. | 6.0/27 (22%), range 6–6, 7.3 calls/case | Kept as the baseline every later claim is measured against. |
+| **s1** | Structured pipeline: locate, author, run in the sandbox, repair. No repo map, no examples, generic repair text. | 8/27 (30%), 2.7 calls/case | Kept. |
+| **s2** | Deterministic repo map, plus two of the project's own tests as examples. | 7/27 (26%), 2.6 calls/case | Kept — see the note on separability below. |
+| **s3** | Repair instruction chosen by the failure class instead of one generic message. | 8/27 (30%), 2.6 calls/case | Kept. |
+| **s4** | Per-repository memory carried across cases. | 9/27 (33%), 2.9 calls/case | Kept. |
+| **s5** | Minimal-claim authoring and the `overspecified` verdict. | **8.7/27 (32%)**, range 8–9, 3.1 calls/case | Kept — pre-registered final system, and the shipped one. |
+| **s6** | Signature grounding: a missing API the report itself names is a reproduction, not a misused call. | 9.3/27 (35%), range 8–11, 2.9 calls/case | **Not shipped.** Beat s5 overall but *lost* on the clean held-out subset. |
+| **x1** | *Removed.* Deterministic verifier replaced by a model asked "did this reproduce the bug?" | **10.3/27 (38%)**, range 9–12, **4.3 calls/case** | Removed for cost and determinism, **not** because it lost. |
 
-Headline claim, and the only one that is a clean held-out result:
-**s5 beats B1 by 4.3 cases to 2.7, a 59% relative improvement, using 2.9 model
-calls per case instead of 7.2.**
+Headline claim, and the only comparison this sample size resolves:
+**s5 beats B1 by 8.7 cases to 6.0, a 45% relative improvement, using 3.1 model
+calls per case instead of 7.3.** Three runs each, ranges 8–9 against 6–6 — they
+do not overlap.
+
+Everything else in that table is a single run or has overlapping ranges. `s1`–`s4`
+sit inside or beside `s5`'s range and **cannot be ranked against each other on 27
+cases**, where one case is nearly four points. The ladder shows that the
+structured pipeline as a whole clears the baseline; it does not show which rung
+did the work.
 
 ---
 
@@ -90,10 +97,11 @@ the second one helps the baseline more than it helps the solver.
 
 ### The finding that produced s5
 
-On the development split, **every case self-verified as reproduced on the first
-attempt, and half of them still failed Fail-to-Pass.** The repair loop never
-fired, which is why s2, s3 and s4 were byte-identical — two of them cost
-literally $0.00, because every prompt was a cache hit.
+On the development split as it stood then (6 cases; it is 13 now), **every case
+self-verified as reproduced on the first attempt, and half of them still failed
+Fail-to-Pass.** The repair loop never fired, which is why s2, s3 and s4 were
+byte-identical — two of them cost literally $0.00, because every prompt was a
+cache hit.
 
 Reading the failing tests showed the cause was not missing the bug:
 
@@ -122,74 +130,128 @@ which *lowered* the detector's hit rate on the development split from 2 of 3 to
 about. Accepting "the test failed" as "the bug was reproduced" is easy to write
 and produces a plausible-looking 100% self-reported success rate.
 
-### The experiment that was removed
+### The experiment that was removed, and the story about it that did not survive
 
 The obvious way to build the verifier is to hand the pytest output to a model and
 ask whether the bug was reproduced. That is `x1`, identical to s5 apart from the
 verifier. It is kept in the tree, switchable, so the claim can be re-run.
 
-**It won, and that was the most useful result of the project.**
+**It won, and it is still winning.** That is the most useful result of the
+project, and the section it replaced is worth recording because it was wrong.
 
-On the evaluation split x1 scored 5.0/14 against s5's 4.3/14. The entire gap was
-a single case, `click__2817`, and diagnosing it found a bug in my verifier rather
-than a virtue in x1.
-
+On a 14-case evaluation split x1 scored 5.0 against s5's 4.3. The entire gap was
+a single case, `click__2817`, and diagnosing it found a real bug in my verifier.
 That issue asks for `CliRunner` to accept `catch_exceptions`. The fix *adds* the
 parameter, so the correct reproduction is `CliRunner(catch_exceptions=False)`
 raising `TypeError` at the parent commit. `shallow_fail` rejected it, because no
 traceback frame entered project code — and then the repair loop turned a correct
-test into two worse ones. The rule had conflated two different things: when the
-bug *is* a missing signature, the exception legitimately occurs at the call site
-with no project frames, which by frames alone is indistinguishable from an agent
-inventing an API.
+test into two worse ones. The rule had conflated two things: when the bug *is* a
+missing signature, the exception legitimately occurs at the call site with no
+project frames, which by frames alone is indistinguishable from an agent
+inventing an API. The report separates them, and s6 uses the same grounding idea
+as the over-specification check run in the opposite direction.
 
-The report separates them, and s6 uses the same grounding idea as the
-over-specification check, run in the opposite direction. With that fixed
-deterministically, **s6 matched x1 exactly — 5.0/14, range 4–6 for both — using
-2.8 model calls per case against x1's 4.2.**
+With that fixed, s6 matched x1 exactly on 14 cases — same mean, same range, a
+third fewer calls. The conclusion written at the time was that x1's whole
+advantage had been one blind spot, and that a rule could buy it back for free.
 
-So x1 is removed on the evidence rather than on principle. It was paying a model,
-on every attempt, to notice one thing a rule can notice for free. The structural
-argument stands behind that: whether a frame entered project code is **already a
-fact in the output**, and asking a model to infer it substitutes an opinion for a
-fact at the exact point the pipeline depends on being right.
+**Doubling the dataset falsified that.** On 27 cases:
+
+| | s5 | s6 | x1 |
+| --- | ---: | ---: | ---: |
+| Overall | 8.7/27 | 9.3/27 | **10.3/27** |
+| Held-out (13 later cases) | 4.7/13 | 4.3/13 | **5.3/13** |
+| Calls/case | 3.1 | 2.9 | 4.3 |
+
+x1 leads on both, and s6 does not reproduce its own gain on cases it was not
+derived from. The tidy story was an artefact of a 14-case sample where one case is
+seven points.
+
+**What remains true is narrower and is what is claimed now:** removing x1 is a
+trade, not a win. It costs roughly one case in 27 and buys back 28% fewer model
+calls (3.1 per case against 4.3) and a verifier whose verdicts are identical across runs. The structural
+argument stands on its own terms — whether a frame entered project code is
+**already a fact in the output**, and asking a model to infer it substitutes an
+opinion for a fact at the point the pipeline depends on being right — but it is a
+principled choice made against the measurement, not vindicated by it, and the
+switch stays in the tree so anyone can disagree by re-running it.
+
+### The check that caught me overfitting
+
+s6's rule was designed in response to `click__2817`, a case on the evaluation
+split. That is fitting to the test set, and the fix is to test on data the rule
+has never influenced. Five repositories were added to the dataset afterwards,
+contributing 13 evaluation cases that did not exist when the rule was written.
+
+`held_out_subset()` in `reprobot/eval/report.py` reports every variant restricted
+to those cases. On them **s6 scores 4.3/13 against s5's 4.7/13** — the gain does
+not merely shrink, it inverts.
+
+So s6 is not shipped. `s5` is the final system, in the README, in
+`reprobot/demo.py`, and in `make solution`.
+
+**Learning:** the honest version of "I found a blind spot and fixed it" is
+indistinguishable from "I tuned a rule until one case passed" *until you test on
+data the rule never touched*. Building that check before it was needed is the
+only reason this was caught rather than shipped as the headline. The dataset split
+is a pure function of the case id, so adding repositories could only add cases to
+each side — every earlier evaluation case stays an evaluation case, which is what
+makes the before-and-after comparable at all.
 
 ---
 
 ## On separability, stated plainly
 
-The ladder steps s1 through s5 are **not separable on the development split**. At
-6 cases one case is 17 percentage points, and a variant was observed moving by a
-full case from a harness change alone. What the development split supports is
-that the structured pipeline beats both baselines; it does not support ranking
-s2 against s3.
+The ladder steps s1 through s5 are **not separable**, on either split. At 27
+cases one case is 3.7 percentage points, and a variant was observed moving by a
+full case from a harness change alone. s1 through s4 were run once each and land
+inside or beside s5's range. What the data supports is that the structured
+pipeline beats both baselines; it does not support ranking s2 against s3, and no
+such ranking is claimed.
 
 This is why the evaluation split is reported with repeated runs and a range
-rather than a single number. Over three independent runs each: B1 spanned 2–3
-cases, s5 spanned 4–5, and s6 and x1 both spanned 4–6. **s5 and x1's ranges
-overlap**, which is exactly the claim a single run would have let me overstate.
+rather than a single number. Over three independent runs each: **B1 spanned 6–6,
+s5 spanned 8–9** — no overlap, which is the one comparison here that survives
+repetition. s6 spanned 8–11 and x1 spanned 9–12, both overlapping s5, so neither
+is claimed to beat it on the strength of a mean.
 
 The gap that survives repetition is the one between the structured pipeline and
 the baselines, not the gaps inside the ladder.
 
 ---
 
-### A limitation found by testing the reproducibility claim itself
+### The reproducibility claim was wrong, and the check I wrote for it said so
 
-Replaying the final system offline reproduces all fourteen Fail-to-Pass verdicts
-exactly, at zero cost, with every model call served from the committed cache.
-One case reached that same verdict by a different route.
+I claimed offline replay reproduced the reported runs exactly. Building a check
+for it — `scripts/replay_fidelity.py`, `make replay-check` — showed it does not,
+and by a wide margin. Measured over the 27 evaluation cases: **`b0` 27/27,
+`s6` 17/27, `s5` 15/27, `b1` 8/27** reproduced byte-identically.
 
-pytest prints its own runtime into its output, and that output is quoted into
-repair prompts, so a repair prompt can differ by a few characters between runs.
-A different prompt is a different cache key, and that lookup misses.
+pytest prints its own runtime into its output (`1 failed in 0.02s`), that output
+is quoted verbatim into repair prompts, and in `b1`'s case into the agent's whole
+running conversation. A prompt that differs by a few characters is a different
+cache key, so that lookup misses and the run ends there. `b0` is perfect because
+it never sees pytest output — one call, no loop. It then compounds through
+repository memory: a case that ends early writes no lesson, so every later case in
+that repository gets a different prompt and misses in turn.
 
-Normalising timings out of prompt text fixes it and was not shipped, on purpose:
-changing prompt text changes every cache key, which would invalidate the whole
-committed cache and break the offline replay it was meant to protect.
-Regenerating the cache would have cost roughly another dollar and taken the
-project past its budget. Shipping a working replay with a documented edge is the
-better trade, and the edge is documented rather than left for a reader to find.
+Normalising timings out of prompt text fixes it and is deliberately not shipped:
+it changes every prompt, therefore every cache key, therefore invalidates the
+entire committed cache, and regenerating it means re-running every variant live
+for more than the budget left. So the claim was replaced rather than repaired.
+
+**The claim that replaced it is stronger.** Scoring a test source is pure — run it
+at the parent commit, run it at the fix commit, compare — and every result file
+records the exact source its run produced. So `make verify-scores` re-derives
+every reported Fail-to-Pass flag from committed data with **no model, no cache and
+no API key**, and prints any disagreement by case. Measured over everything
+reported: **17 result files, 459 case-scores, 0 mismatches**. The reproducibility
+of the results never depended on the cache; only the convenience of watching the
+agents work for free did.
+
+**Learning:** a reproducibility claim that is asserted rather than checked is just
+a sentence. The check took an hour to write and immediately falsified the sentence
+I had been shipping for days.
 
 **Learning:** a cache keyed on prompt text inherits the determinism of everything
 that text quotes. Anything a tool prints that varies between runs — a timing, a
@@ -202,22 +264,36 @@ ground truth:
 
 | | `s1` | `s4` | `s5` | `s6` | `x1` |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| False-confidence rate | 75% | 77% | 63% | 61% | 55% |
+| False-confidence rate | 70% | 65% | 68% | 62% | **48%** |
 
-Every one of those attempts reported success. The minimal-claim rules and the
-typed verdicts moved that from 77% to 61%; they did not solve it.
+Every one of those attempts reported success. **The deterministic variants sit in
+a band between 62% and 70% and do not clearly separate from one another; the
+model-judged verifier is the only thing that moves the number materially, to
+48%.**
+
+An earlier, smaller run showed the minimal-claim rules driving this down a ladder
+from 77% to 61%. That ordering did not hold at 27 cases either, and it is not
+claimed any more. What the deterministic checks demonstrably do is change *which*
+errors survive — they eliminate the structurally-detectable ones, and the residue
+is concentrated in the single class no rule can see.
 
 ## Main failure mode
 
-**The test asserts the wrong expected value.** 55% of the final system's
+**The test asserts the wrong expected value.** 57% of the final system's
 case-runs failed as `did_not_pass_at_fix` — failing at the buggy commit *and* at
-the fixed one. Only 7% failed the opposite way by not failing at the buggy commit.
+the fixed one. Only 10% failed the opposite way by not failing at the buggy
+commit, and 1% produced no test at all.
 
 These tests reach the bug and then assert something the fixed code does not
 produce either. The verifier's most common verdict on them is
-`reproduced_assertion` (38% of all attempts), which is precisely the verdict
+`reproduced_assertion` (30% of all attempts), which is precisely the verdict
 whose correctness cannot be checked structurally: an assertion that fails at the
 buggy commit looks identical whether its expected value is right or wrong.
+
+This is also the cleanest explanation of why x1 still leads. The class the
+deterministic verifier is blind to by construction is the majority of what is
+left, and a model reading the report can form a partial opinion about it where a
+rule reading the traceback has nothing to work with.
 
 ## Hot take
 
@@ -233,8 +309,9 @@ into an instruction for what to do next.
 
 The residue does not yield to that treatment. Whether the asserted expected value
 is what the fixed code will produce is an oracle question, and the only oracle
-available is a paragraph of prose written by a stranger. That is 55% of the
-remaining failures, and it is not a prompting problem.
+available is a paragraph of prose written by a stranger. That is 57% of the
+remaining failures, it is not a prompting problem, and it is the reason the
+verifier I removed on principle still outscores the one I shipped.
 
 What I would tell someone building the next agent: make your verifier return a
 typed signal rather than a boolean, push everything you can into the part that

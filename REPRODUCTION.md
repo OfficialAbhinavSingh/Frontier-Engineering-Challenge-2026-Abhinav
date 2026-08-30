@@ -1,9 +1,9 @@
 # Reproduction guide
 
 Written for someone starting from an empty machine who has never seen this
-project. There are two paths. The first costs nothing and needs no account; take
-it first, because it answers the question that matters — are the reported numbers
-real. The second re-runs everything live against your own key.
+project. Take section 1 first: it costs nothing, needs no account and no model,
+and it answers the question that matters — are the reported numbers real. Section
+2 re-runs everything live against your own key.
 
 ---
 
@@ -33,45 +33,89 @@ library on the host; everything else lives inside the sandbox images.
 
 ---
 
-## 1. Replay — reproduce every number, offline, for $0
+## 1. Verify the numbers, offline, for $0
 
-Every model response behind every number in the report is committed to
-`data/cache/llm/`, keyed by a hash of the exact request. Replay mode serves all
-of them from that cache and refuses to invent one it does not have.
+There are two offline checks and they answer different questions. Take the first
+one: it is exact, it needs no API key, and no model is involved in it at any
+point.
+
+### 1a. Re-derive every reported score yourself (exact)
+
+Every result file records the exact `test_source` that run produced. Scoring a
+test source is a *pure* operation — check out the parent commit, run the test,
+check out the fix commit, run it again — so it can be repeated by anyone with
+Docker, with no model, no key and no cache.
 
 ```bash
-make repos      # clone the target repositories        (~5 min, ~400 MB)
-make validate   # build sandbox images, re-verify cases (~25 min first time)
-make replay     # re-run every variant from cache        (see timings below)
+make repos          # clone the target repositories        (~8 min, ~700 MB)
+make validate       # build sandbox images, re-verify cases (~25 min first time)
+make verify-scores  # re-derive every Fail-to-Pass flag in results/
 ```
 
-`make replay` writes `results/eval_*.json` and regenerates `results/REPORT.md`.
-Compare that file to the one committed in the repository.
+This writes `results/SCORE_VERIFICATION.md`, re-deriving the flag for every case
+in every result file and printing any disagreement by case. The measured result,
+committed alongside this guide:
 
-**What replay guarantees, precisely.** Verified on the final system over the
-fourteen evaluation cases: **14 of 14 Fail-to-Pass verdicts reproduce
-identically, at $0.00, with no API key**, and 43 of 43 model calls are served
-from the committed cache.
+**17 result files, 459 case-scores, 0 mismatches.** Every Fail-to-Pass number in
+the report was re-derived exactly from the committed test sources, with no model
+and no API key. If your run does not come back clean, a number in the report is
+wrong and should not be believed.
 
-**What it does not guarantee.** One case in fourteen took a different internal
-path on replay while reaching the same verdict. The cause is worth stating
-because it is a genuine limitation rather than flakiness: pytest prints its own
-runtime into its output (`1 failed in 0.02s`), that output is quoted verbatim
-into repair prompts, and so a repair prompt can differ by a few characters
-between two runs. A different prompt is a different cache key, so that one
-lookup misses; in replay mode the run then ends early for that case rather than
-inventing a response.
+`make validate` is worth running for its own sake: before any case is allowed
+into the dataset, the *maintainer's own* regression test has to demonstrate
+Fail-to-Pass in your Docker, on your machine. That is the ground truth the whole
+result rests on, and it is independently checkable.
 
-The obvious fix is to normalise timings out of the text before it enters a
-prompt. That is deliberately **not** applied here: it would change every prompt,
-therefore every cache key, therefore invalidate the entire committed cache and
-break the offline replay this section is about. Regenerating the cache costs
-real money and would have exceeded this project's budget. The honest trade is to
-ship a working replay with a documented edge, and to say which is which.
+### 1b. Replay the runs from the committed model cache (partial — measured)
+
+Every model response behind every reported number is committed to
+`data/cache/llm/`, keyed by a hash of the exact request. Replay mode serves them
+from that cache and refuses to invent one it does not have.
+
+```bash
+make replay        # re-run the variants from cache
+make replay-check  # measure how exactly that reproduced the recorded runs
+```
+
+**This does not reproduce every run, and the extent is measured rather than
+claimed.** `make replay-check` writes `results/REPLAY_FIDELITY.md`; the measured
+result on the 27 evaluation cases is:
+
+| Variant | Runs reproduced byte-identically |
+| --- | ---: |
+| `b0` — one prompt, no tools | **27/27** |
+| `s5` — the shipped system | 15/27 |
+| `b1` — the general-purpose agent baseline | 8/27 |
+
+**Why, precisely.** pytest prints its own runtime into its output
+(`1 failed in 0.02s`). That output is quoted verbatim into repair prompts, and in
+`b1`'s case into the agent's whole running conversation. A prompt that differs by
+a few characters is a different cache key, so that lookup misses, and in replay
+mode the run ends there rather than inventing a response. `b0` reproduces
+perfectly because it never sees pytest output at all — it makes one call and
+stops.
+
+It compounds through repository memory: a case that ends early writes no lesson,
+so every later case in that repository gets a different prompt too, and misses in
+turn. That is why `b1`, which quotes the most execution output, degrades the
+furthest.
+
+**Why it is not fixed.** The fix is to normalise timings out of the text before it
+enters a prompt. That changes every prompt, therefore every cache key, therefore
+invalidates the entire committed cache — and regenerating it means re-running
+every variant live, which costs more than this project's remaining budget. The
+honest options were to ship a partial replay described accurately, or to quietly
+drop the claim. This is the first.
+
+**What that means for trusting the numbers.** Nothing, because 1a does not depend
+on the cache. The reported scores are re-derivable exactly, by re-running the
+committed test sources in your own sandbox. The cache replay is a convenience for
+watching the agents work without paying, and it is honest about how far it goes.
 
 What each step does, and what you should see:
 
-- **`make repos`** clones sqlglot, tomlkit, click and arrow into `data/repos/`.
+- **`make repos`** clones sqlglot, tomlkit, click, jinja, rich and jsonschema
+  into `data/repos/`.
   These are ordinary public repositories at full history; nothing is modified.
 - **`make validate`** builds one Docker image per repository, then replays each
   case's *human-written* regression test to confirm it fails at the parent commit
@@ -83,9 +127,14 @@ What each step does, and what you should see:
 - **`make replay`** runs every variant over the evaluation split, scoring each
   generated test against the real fix commit.
 
+- **`make verify-scores`** re-runs every committed test source against both
+  commits and compares the outcome with what `results/` reports. No model, no
+  cache, no key.
+
 If replay stops with `OfflineCacheMiss`, the cache does not contain that exact
-request. That happens if you changed a prompt, the model name or the case set.
-Restore those, or run live instead.
+request. Expect this: section 1b measures how often it happens and explains why.
+It also happens if you changed a prompt, the model name or the case set. Use
+`make verify-scores` for an exact check, or run live.
 
 ---
 
@@ -165,7 +214,9 @@ Measured on an 8-core Linux host, Docker 29.7.2, from a cold start.
 | `make repos` | 4–6 min | free |
 | `make validate` (first run, includes image builds) | 25–40 min | free |
 | `make validate` (images already built) | 10–20 min | free |
+| `make verify-scores` (every recorded run, 18 result files) | 45–70 min | **$0** |
 | `make replay` (every variant) | 25–40 min | **$0** |
+| `make replay-check` (five variants) | 25–40 min | **$0** |
 | `make eval` live (every variant) | 60–90 min | see `results/REPORT.md` |
 | `make demo` (one case) | 30–90 s | fractions of a cent |
 
@@ -189,14 +240,18 @@ reprobot/
   agents/memory.py      per-repository lessons carried across cases
   agents/solver.py      the full pipeline
   agents/baselines.py   B0 and B1
-  agents/memory.py      per-repository lessons carried across cases
+  artifact.py           the reviewable bundle: patch, report, evidence
   eval/run.py           runs a variant and scores it against the fix commit
   eval/report.py        builds results/REPORT.md
   demo.py               one case, narrated
+scripts/verify_scores.py    re-derives every reported score, no model involved
+scripts/replay_fidelity.py  measures how exactly the cache reproduces the runs
+scripts/build_trajectories.py  renders traces into the trajectory deliverable
 data/cases/             mined and validated case sets
-data/cache/llm/         committed model-response cache — this is what makes replay free
+data/cache/llm/         committed model-response cache — what makes replay free
 traces/                 one JSONL trajectory per case per variant
-results/                per-variant results and the generated report
+results/                per-variant results, the generated report, and the two
+                        verification outputs
 ```
 
 ---

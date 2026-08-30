@@ -4,14 +4,14 @@
   "temperature": 0.0,
   "description": "adds failure-class-specific repair instructions",
   "model": "google/gemini-2.5-flash",
-  "n_cases": 14,
-  "f2p_solved": 3,
-  "f2p_rate": 0.2143,
-  "total_cost_usd": 0.0091,
-  "total_llm_calls": 33,
-  "cached_llm_calls": 28,
-  "mean_wall_clock_s": 4.8,
-  "wall_clock_total_s": 67.0,
+  "n_cases": 27,
+  "f2p_solved": 8,
+  "f2p_rate": 0.2963,
+  "total_cost_usd": 0.0366,
+  "total_llm_calls": 71,
+  "cached_llm_calls": 59,
+  "mean_wall_clock_s": 5.4,
+  "wall_clock_total_s": 145.4,
   "results": [
     {
       "case_id": "click__2703",
@@ -29,7 +29,7 @@
         "calls": 2,
         "cached_calls": 2
       },
-      "wall_clock_s": 2.6,
+      "wall_clock_s": 4.5,
       "error": null,
       "test_source": "import os\nimport sys\n\nimport pytest\n\nimport click\nfrom click.shell_completion import CompletionItem\n\n\nclass Foo(click.ParamType):\n    def convert(self, value, param, ctx):\n        return value\n\n    def shell_complete(self, ctx, param, incomplete):\n        return [\n            CompletionItem(value=value, help=\"adsf\")\n            for value in [\"baz:quux\", \"spam:eggs\"]\n        ]\n\n\n@click.command()\n@click.argument(\"foo\", type=Foo())\ndef main(foo):\n    click.echo(foo)\n\n\ndef _get_completion_items(cli, args, incomplete, prog_name=\"test-cli\"):\n    \"\"\"Simulate shell completion and return a list of CompletionItem objects.\"\"\"\n    # This is a simplified version of what the shell completion script does.\n    # It directly calls the shell_complete method of the ZshComplete class.\n    # We need to mock the environment variables that ZshComplete expects.\n\n    # Set up environment variables for Zsh completion\n    os.environ[\"_TEST_CLI_COMPLETE\"] = \"zsh_complete\"\n    os.environ[\"_TEST_CLI_COMPLETE_ARGS\"] = \" \".join(args)\n    os.environ[\"_TEST_CLI_COMPLETE_WORD\"] = incomplete\n    os.environ[\"_TEST_CLI_COMPLETE_CWORD\"] = str(len(args))\n\n    from click.shell_completion import ZshComplete\n\n    comp = ZshComplete(cli, {}, prog_name, \"_TEST_CLI_COMPLETE\")\n    \n    # ZshComplete's get_completion_args parses the environment variables\n    # we just set.\n    parsed_args, parsed_incomplete = comp.get_completion_args()\n    \n    # Then it calls get_completions which in turn calls the ParamType's shell_complete\n    completions = comp.get_completions(parsed_args, parsed_incomplete)\n\n    # Clean up environment variables\n    del os.environ[\"_TEST_CLI_COMPLETE\"]\n    del os.environ[\"_TEST_CLI_COMPLETE_ARGS\"]\n    del os.environ[\"_TEST_CLI_COMPLETE_WORD\"]\n    del os.environ[\"_TEST_CLI_COMPLETE_CWORD\"]\n\n    return completions\n\n\ndef test_zsh_completion_with_colon_in_value():\n    \"\"\"\n    Test that Zsh completion correctly handles values with colons,\n    displaying them as a single item rather than splitting them.\n    \"\"\"\n    # Simulate `foo <Tab>`\n    completions = _get_completion_items(main, [], \"\")\n\n    # The bug causes \"baz:quux\" to be split into \"baz\" and \"quux\"\n    # and \"spam:eggs\" into \"spam\" and \"eggs\" with \"adsf\" as help for both.\n    # We expect the full value with the help text.\n    expected_completions = [\n        CompletionItem(value=\"baz:quux\", help=\"adsf\"),\n        CompletionItem(value=\"spam:eggs\", help=\"adsf\"),\n    ]\n\n    assert completions == expected_completions\n",
       "test_rel_path": "tests/test_reprobot_click__2703.py",
@@ -39,7 +39,7 @@
           "verdict": "reproduced_exception",
           "exception_type": "KeyError",
           "reason": "KeyError was raised from inside the project's own code (src/click/shell_completion.py:364 in get_completion_args)",
-          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n___________________ test_zsh_completion_with_colon_in_value ____________________\ntests/test_reprobot_click__2703.py:65: in test_zsh_completion_with_colon_in_value\n    completions = _get_completion_items(main, [], \"\")\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/test_reprobot_click__2703.py:45: in _get_completion_items\n    parsed_args, parsed_incomplete = comp.get_completion_args()\n                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^\nsrc/click/shell_completion.py:364: in get_completion_args\n    cwords = split_arg_string(os.environ[\"COMP_WORDS\"])\n                              ^^^^^^^^^^^^^^^^^^^^^^^^\n<frozen os>:714: in __getitem__\n    ???\nE   KeyError: 'COMP_WORDS'\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_click__2703.py::test_zsh_completion_with_colon_in_value\n1 failed in 0.03s\n"
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n___________________ test_zsh_completion_with_colon_in_value ____________________\ntests/test_reprobot_click__2703.py:65: in test_zsh_completion_with_colon_in_value\n    completions = _get_completion_items(main, [], \"\")\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/test_reprobot_click__2703.py:45: in _get_completion_items\n    parsed_args, parsed_incomplete = comp.get_completion_args()\n                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^\nsrc/click/shell_completion.py:364: in get_completion_args\n    cwords = split_arg_string(os.environ[\"COMP_WORDS\"])\n                              ^^^^^^^^^^^^^^^^^^^^^^^^\n<frozen os>:714: in __getitem__\n    ???\nE   KeyError: 'COMP_WORDS'\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_click__2703.py::test_zsh_completion_with_colon_in_value\n1 failed in 0.02s\n"
         }
       ]
     },
@@ -89,7 +89,7 @@
         "calls": 2,
         "cached_calls": 2
       },
-      "wall_clock_s": 2.6,
+      "wall_clock_s": 2.5,
       "error": null,
       "test_source": "import pytest\nimport sys\nimport os\nimport tempfile\nfrom click._utils import UNSET\nimport click\n\ndef test_prompt_backspace_linux(runner, monkeypatch):\n    if sys.platform.startswith(\"win\"):\n        pytest.skip(\"This bug is specific to Linux.\")\n\n    # Simulate a user typing \"hello\" then backspacing once to get \"hell\"\n    # and then pressing enter.\n    # The bug causes backspace to remove two characters or the entire line.\n    # We expect \"hell\" as the output.\n    input_data = \"hello\\x7f\\n\"  # \\x7f is the ASCII code for backspace\n\n    @click.command()\n    def cli():\n        name = click.prompt(\"Enter your name\")\n        click.echo(f\"You entered: {name}\")\n\n    result = runner.invoke(cli, input=input_data)\n\n    assert not result.exception\n    assert \"You entered: hell\" in result.output\n\n    # Simulate a user typing \"world\" then backspacing multiple times to get \"\"\n    # and then pressing enter.\n    input_data_full_backspace = \"world\\x7f\\x7f\\x7f\\x7f\\x7f\\n\"\n\n    result_full_backspace = runner.invoke(cli, input=input_data_full_backspace)\n\n    assert not result_full_backspace.exception\n    assert \"You entered: \" in result_full_backspace.output # Expecting an empty string after \"You entered: \"\n    assert \"You entered: \\n\" in result_full_backspace.output # Ensure it's an empty string, not something else\n",
       "test_rel_path": "tests/test_reprobot_click__2968.py",
@@ -119,7 +119,7 @@
         "calls": 2,
         "cached_calls": 2
       },
-      "wall_clock_s": 2.7,
+      "wall_clock_s": 2.5,
       "error": null,
       "test_source": "import pytest\nimport click\nfrom click.shell_completion import FishComplete\nfrom click.shell_completion import CompletionItem\n\n\ndef test_fish_completion_multiline_help_text():\n    @click.command()\n    @click.option(\n        \"--at\",\n        help=\"\\b\\nAttachment with explicit mimetype,\\n--at image.jpg image/jpeg\",\n    )\n    def cli(at):\n        pass\n\n    comp = FishComplete(cli, {}, \"cli\", \"_CLI_COMPLETE\")\n    completions = comp.get_completions([], \"--at\")\n\n    # The expected behavior is that the multiline help text is escaped\n    # or otherwise handled so that it doesn't break the fish completion script.\n    # For now, we'll assert that the help text is present and correctly formatted\n    # as a single line with the description and the example.\n    # The actual fix will involve escaping the newlines in the shell_completion.py\n    # file, but this test will fail until that happens because the raw multiline\n    # text will be passed.\n    assert len(completions) == 1\n    assert completions[0].value == \"--at\"\n    # The description should be a single line, with newlines replaced by spaces\n    # or removed, and the example should be part of it.\n    # The current buggy behavior would include actual newlines, which this\n    # assertion implicitly checks against by expecting a single string.\n    assert (\n        completions[0].help\n        == \"Attachment with explicit mimetype, --at image.jpg image/jpeg\"\n    )\n",
       "test_rel_path": "tests/test_reprobot_click__3043.py",
@@ -145,11 +145,11 @@
       "usage": {
         "prompt_tokens": 7328,
         "completion_tokens": 529,
-        "cost_usd": 0.001545,
+        "cost_usd": 0.0,
         "calls": 3,
-        "cached_calls": 2
+        "cached_calls": 3
       },
-      "wall_clock_s": 5.1,
+      "wall_clock_s": 3.2,
       "error": null,
       "test_source": "import pytest\nimport click\n\n\ndef test_func_param_type_value_error_message(runner):\n    class MyClass:\n        def __init__(self, value):\n            self.value = value\n\n        @staticmethod\n        def from_str(input_value):\n            if input_value != \"works\":\n                raise ValueError(f\"input was {input_value!r}, should be 'works'\")\n            return MyClass(input_value)\n\n    @click.command()\n    @click.argument(\"mydata\", type=click.types.FuncParamType(MyClass.from_str))\n    def cli(mydata):\n        click.echo(f\"Success: {mydata.value}\")\n\n    result = runner.invoke(cli, [\"fails\"])\n    assert result.exit_code == 2\n    assert \"Error: Invalid value: input was 'fails', should be 'works'\" in result.output\n",
       "test_rel_path": "tests/test_reprobot_click__3105.py",
@@ -171,6 +171,480 @@
       ]
     },
     {
+      "case_id": "jinja__1463",
+      "repo": "pallets/jinja",
+      "variant": "s3",
+      "f2p": false,
+      "score_reason": "did_not_pass_at_fix:failed",
+      "verdict_at_parent": "shallow_fail",
+      "self_reproduces": false,
+      "rounds": 3,
+      "usage": {
+        "prompt_tokens": 14307,
+        "completion_tokens": 4275,
+        "cost_usd": 0.007378,
+        "calls": 4,
+        "cached_calls": 2
+      },
+      "wall_clock_s": 14.7,
+      "error": null,
+      "test_source": "from jinja2 import Environment\nimport pytest\nfrom collections import namedtuple\nimport asyncio\n\n@pytest.fixture\ndef env():\n    return Environment()\n\ndef test_groupby_case_sensitive_sorting(env):\n    # Data with mixed case for the 'name' attribute\n    User = namedtuple(\"User\", [\"name\"])\n    users = [User(\"apple\"), User(\"Banana\"), User(\"cherry\"), User(\"Apple\")]\n\n    # The do_groupby function is async, so we need to run it in an event loop.\n    # It also expects an iterable that can be converted to a list, not an awaitable.\n    async def run_test():\n        from jinja2.filters import do_groupby\n        # The current do_groupby does not have a case_sensitive parameter.\n        # It implicitly sorts case-sensitively.\n        return await do_groupby(env, users, \"name\")\n\n    actual_groups_buggy = asyncio.run(run_test())\n\n    # Convert the _GroupTuple objects to plain tuples for comparison\n    # and sort the items within each group for stable comparison.\n    actual_groups_buggy_plain = []\n    for g in actual_groups_buggy:\n        # The g.list is a list of User objects. We need to sort them by their 'name' attribute.\n        sorted_items = sorted(list(g.list), key=lambda u: u.name)\n        actual_groups_buggy_plain.append((g.grouper, sorted_items))\n\n    # Sort the groups themselves by their grouper (key) for stable comparison.\n    actual_groups_buggy_plain.sort(key=lambda x: str(x[0]))\n\n    # The bug is that 'apple' and 'Apple' are in separate groups due to case-sensitive sorting.\n    # If the fix were applied and `groupby` supported case-insensitive sorting (e.g., by default\n    # or with a parameter), then 'apple' and 'Apple' would be in the same group.\n\n    # We assert that the current (buggy) output contains separate groups for 'apple' and 'Apple'.\n    # This test will fail if the bug is fixed and they are grouped together.\n    found_apple_lower_group = False\n    found_apple_upper_group = False\n    for grouper, items in actual_groups_buggy_plain:\n        if grouper == \"apple\":\n            found_apple_lower_group = True\n            assert len(items) == 1 and items[0].name == \"apple\"\n        if grouper == \"Apple\":\n            found_apple_upper_group = True\n            assert len(items) == 1 and items[0].name == \"Apple\"\n\n    # This assertion checks that both 'apple' and 'Apple' appear as distinct group keys.\n    # This is the manifestation of the bug (always case-sensitive sorting).\n    # If the bug is fixed and `groupby` becomes case-insensitive (or has a parameter for it),\n    # then only one of these flags would be True (e.g., 'apple' group containing both 'apple' and 'Apple').\n    assert found_apple_lower_group and found_apple_upper_group, \\\n        \"The 'groupby' filter currently performs case-sensitive sorting, \" \\\n        \"resulting in separate groups for 'apple' and 'Apple'. \" \\\n        \"This test fails if they are grouped together (i.e., the bug is fixed).\"\n",
+      "test_rel_path": "tests/test_reprobot_jinja__1463.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "shallow_fail",
+          "exception_type": "ValueError",
+          "reason": "ValueError was raised in the test body without any frame entering the project's code, so the test is most likely misusing the API rather than exercising the bug",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n_____________________ test_groupby_case_sensitive_sorting ______________________\ntests/test_reprobot_jinja__1463.py:137: in test_groupby_case_sensitive_sorting\n    actual_groups_buggy = asyncio.run(do_groupby(env, users, \"name\"))\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/usr/local/lib/python3.12/asyncio/runners.py:195: in run\n    return runner.run(main)\n           ^^^^^^^^^^^^^^^^\n/usr/local/lib/python3.12/asyncio/runners.py:89: in run\n    raise ValueError(\"a coroutine was expected, got {!r}\".format(coro))\nE   ValueError: a coroutine was expected, got [('Apple', [User(name='Apple')]), ('Banana', [User(name='Banana')]), ('apple', [User(name='apple')]), ('cherry', [User(name='cherry')])]\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_jinja__1463.py::test_groupby_case_sensitive_sorting\n1 failed in 0.09s\n"
+        },
+        {
+          "round": 2,
+          "verdict": "shallow_fail",
+          "exception_type": "TypeError",
+          "reason": "TypeError was raised in the test body without any frame entering the project's code, so the test is most likely misusing the API rather than exercising the bug",
+          "output": "                                                              [100%]\n=================================== FAILURES ===================================\n_____________________ test_groupby_case_sensitive_sorting ______________________\ntests/test_reprobot_jinja__1463.py:27: in test_groupby_case_sensitive_sorting\n    actual_groups_buggy = asyncio.run(run_groupby())\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^\n/usr/local/lib/python3.12/asyncio/runners.py:195: in run\n    return runner.run(main)\n           ^^^^^^^^^^^^^^^^\n/usr/local/lib/python3.12/asyncio/runners.py:118: in run\n    return self._loop.run_until_complete(task)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/usr/local/lib/python3.12/asyncio/base_events.py:691: in run_until_complete\n    return future.result()\n           ^^^^^^^^^^^^^^^\ntests/test_reprobot_jinja__1463.py:25: in run_groupby\n    return await do_groupby(env, users, \"name\")\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   TypeError: object list can't be used in 'await' expression\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_jinja__1463.py::test_groupby_case_sensitive_sorting\n1 failed in 0.10s\n"
+        },
+        {
+          "round": 3,
+          "verdict": "shallow_fail",
+          "exception_type": "TypeError",
+          "reason": "TypeError was raised in the test body without any frame entering the project's code, so the test is most likely misusing the API rather than exercising the bug",
+          "output": "                                                                       [100%]\n=================================== FAILURES ===================================\n_____________________ test_groupby_case_sensitive_sorting ______________________\ntests/test_reprobot_jinja__1463.py:23: in test_groupby_case_sensitive_sorting\n    actual_groups_buggy = asyncio.run(run_test())\n                          ^^^^^^^^^^^^^^^^^^^^^^^\n/usr/local/lib/python3.12/asyncio/runners.py:195: in run\n    return runner.run(main)\n           ^^^^^^^^^^^^^^^^\n/usr/local/lib/python3.12/asyncio/runners.py:118: in run\n    return self._loop.run_until_complete(task)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/usr/local/lib/python3.12/asyncio/base_events.py:691: in run_until_complete\n    return future.result()\n           ^^^^^^^^^^^^^^^\ntests/test_reprobot_jinja__1463.py:21: in run_test\n    return await do_groupby(env, users, \"name\")\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   TypeError: object list can't be used in 'await' expression\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_jinja__1463.py::test_groupby_case_sensitive_sorting\n1 failed in 0.09s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "jinja__1510",
+      "repo": "pallets/jinja",
+      "variant": "s3",
+      "f2p": true,
+      "score_reason": "ok",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": true,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 4022,
+        "completion_tokens": 538,
+        "cost_usd": 0.0,
+        "calls": 2,
+        "cached_calls": 2
+      },
+      "wall_clock_s": 2.4,
+      "error": null,
+      "test_source": "import pytest\nfrom jinja2 import Environment\nfrom jinja2.nativetypes import NativeEnvironment\n\ndef test_macro_native_output(env):\n    # Use NativeEnvironment to ensure native type handling\n    native_env = NativeEnvironment()\n    template = native_env.from_string(\n        \"{%- macro x() -%}{{- [5,6] -}}{%- endmacro -%}{{- x()[0] -}}\"\n    )\n    # The bug causes this to return the string \"[\", but it should return the integer 5\n    assert template.render() == 5\n\ndef test_macro_native_output_nested_list(env):\n    native_env = NativeEnvironment()\n    template = native_env.from_string(\n        \"{%- macro x() -%}{{- [[1,2],[3,4]] -}}{%- endmacro -%}{{- x()[0][1] -}}\"\n    )\n    assert template.render() == 2\n\ndef test_macro_native_output_dict(env):\n    native_env = NativeEnvironment()\n    template = native_env.from_string(\n        \"{%- macro x() -%}{{- {'a': 1, 'b': 2} -}}{%- endmacro -%}{{- x()['b'] -}}\"\n    )\n    assert template.render() == 2\n\ndef test_macro_native_output_string_in_list(env):\n    native_env = NativeEnvironment()\n    template = native_env.from_string(\n        \"{%- macro x() -%}{{- ['hello', 'world'] -}}{%- endmacro -%}{{- x()[0] -}}\"\n    )\n    assert template.render() == \"hello\"\n",
+      "test_rel_path": "tests/test_reprobot_jinja__1510.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "reproduced_assertion",
+          "exception_type": "AssertionError",
+          "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
+          "output": "output_nested_list\n    assert template.render() == 2\nE   assert Undefined == 2\nE    +  where Undefined = render()\nE    +    where render = <NativeTemplate memory:7f9cc6cfdca0>.render\n________________________ test_macro_native_output_dict _________________________\ntests/test_reprobot_jinja__1510.py:26: in test_macro_native_output_dict\n    assert template.render() == 2\nE   assert Undefined == 2\nE    +  where Undefined = render()\nE    +    where render = <NativeTemplate memory:7f9cc664d0a0>.render\n___________________ test_macro_native_output_string_in_list ____________________\ntests/test_reprobot_jinja__1510.py:33: in test_macro_native_output_string_in_list\n    assert template.render() == \"hello\"\nE   AssertionError: assert '[' == 'hello'\nE     \nE     - hello\nE     + [\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_jinja__1510.py::test_macro_native_output - Asserti...\nFAILED tests/test_reprobot_jinja__1510.py::test_macro_native_output_nested_list\nFAILED tests/test_reprobot_jinja__1510.py::test_macro_native_output_dict - as...\nFAILED tests/test_reprobot_jinja__1510.py::test_macro_native_output_string_in_list\n4 failed in 0.03s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "jinja__1521",
+      "repo": "pallets/jinja",
+      "variant": "s3",
+      "f2p": true,
+      "score_reason": "ok",
+      "verdict_at_parent": "reproduced_exception",
+      "self_reproduces": true,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 4125,
+        "completion_tokens": 454,
+        "cost_usd": 0.0,
+        "calls": 2,
+        "cached_calls": 2
+      },
+      "wall_clock_s": 2.5,
+      "error": null,
+      "test_source": "import pytest\nfrom jinja2 import Environment\nfrom jinja2.nodes import Template, Output, TemplateData\n\n\nclass TestHashing:\n    def test_template_hash(self, env):\n        template = env.parse(\"hash test\")\n        # The bug causes TypeError: unhashable type: 'list'\n        # This test asserts that the hash operation completes without error.\n        assert hash(template) is not None\n\n    def test_template_with_multiple_nodes_hash(self, env):\n        template = env.parse(\"hash test {{ var }} another test\")\n        assert hash(template) is not None\n\n    def test_template_with_list_field_hash(self, env):\n        # This test specifically targets a node type that has a list field\n        # to ensure the fix handles nested lists within the node structure.\n        # Template has a 'body' field which is a list of nodes.\n        # Output has a 'nodes' field which is a list of nodes.\n        # TemplateData has a 'data' field which is a string.\n        # The original bug was that iter_fields returned lists directly,\n        # making the tuple unhashable.\n        # This test ensures that even with nested list fields, the hash works.\n        template = Template(\n            [\n                Output(\n                    [\n                        TemplateData(\"foo\"),\n                        TemplateData(\"bar\")\n                    ]\n                )\n            ]\n        )\n        assert hash(template) is not None\n",
+      "test_rel_path": "tests/test_reprobot_jinja__1521.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "reproduced_exception",
+          "exception_type": "TypeError",
+          "reason": "TypeError was raised from inside the project's own code (src/jinja2/nodes.py:245 in __hash__)",
+          "output": "^^^^^^^^^^^^^^^^^^^^^^\nE   TypeError: unhashable type: 'list'\n______________ TestHashing.test_template_with_multiple_nodes_hash ______________\ntests/test_reprobot_jinja__1521.py:15: in test_template_with_multiple_nodes_hash\n    assert hash(template) is not None\n           ^^^^^^^^^^^^^^\nsrc/jinja2/nodes.py:245: in __hash__\n    return hash(tuple(self.iter_fields()))\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   TypeError: unhashable type: 'list'\n________________ TestHashing.test_template_with_list_field_hash ________________\ntests/test_reprobot_jinja__1521.py:36: in test_template_with_list_field_hash\n    assert hash(template) is not None\n           ^^^^^^^^^^^^^^\nsrc/jinja2/nodes.py:245: in __hash__\n    return hash(tuple(self.iter_fields()))\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   TypeError: unhashable type: 'list'\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_jinja__1521.py::TestHashing::test_template_hash - ...\nFAILED tests/test_reprobot_jinja__1521.py::TestHashing::test_template_with_multiple_nodes_hash\nFAILED tests/test_reprobot_jinja__1521.py::TestHashing::test_template_with_list_field_hash\n3 failed in 0.05s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "jinja__1573",
+      "repo": "pallets/jinja",
+      "variant": "s3",
+      "f2p": false,
+      "score_reason": "did_not_pass_at_fix:failed",
+      "verdict_at_parent": "reproduced_exception",
+      "self_reproduces": true,
+      "rounds": 2,
+      "usage": {
+        "prompt_tokens": 11302,
+        "completion_tokens": 830,
+        "cost_usd": 0.002562,
+        "calls": 3,
+        "cached_calls": 2
+      },
+      "wall_clock_s": 6.6,
+      "error": null,
+      "test_source": "import pytest\nfrom jinja2 import Environment\n\n# No pytest.mark.asyncio needed, Jinja's async rendering is handled by render_async\n# and the test itself doesn't need to be an async function.\n\ndef test_custom_filter_with_slice_async_true():\n    jinja_env = Environment(enable_async=True)\n    jinja_env.filters.update({'add_two': lambda x, y: [i + y for i in x]})\n\n    template = jinja_env.from_string(\"{% for item in (a.b|add_two(5))[:1] %}{{ item }}{% endfor %}\")\n    data = dict(a=dict(b=[1, 2, 3]))\n\n    # This should render without error and produce the expected output\n    # The bug causes a TypeError here.\n    result = template.render(data) # Use render() for synchronous execution of async-enabled env\n    assert result == \"6\"\n\n    # Test the alternative syntax that currently raises a TemplateSyntaxError\n    # This is to ensure that the fix for the original issue doesn't break this case\n    # and that the syntax error remains if it's indeed invalid.\n    template_syntax_error = jinja_env.from_string(\"{% for item in a.b|add_two(5)[:1] %}{{ item }}{% endfor %}\")\n    with pytest.raises(\n        jinja_env.exceptions.TemplateSyntaxError,\n        match=\"expected token 'end of statement block', got '\\\\['\"\n    ):\n        template_syntax_error.render(data)\n",
+      "test_rel_path": "tests/test_reprobot_jinja__1573.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "broken_test",
+          "exception_type": "PytestUnknownMarkWarning",
+          "reason": "the test could not be collected or ran into an import, syntax or fixture problem before exercising the reported behaviour",
+          "output": "__REPROBOT_SANDBOX_READY__\n\n==================================== ERRORS ====================================\n_____________ ERROR collecting tests/test_reprobot_jinja__1573.py ______________\ntests/test_reprobot_jinja__1573.py:4: in <module>\n    @pytest.mark.asyncio\n     ^^^^^^^^^^^^^^^^^^^\n/usr/local/lib/python3.12/site-packages/_pytest/mark/structures.py:628: in __getattr__\n    warnings.warn(\nE   pytest.PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n=========================== short test summary info ============================\nERROR tests/test_reprobot_jinja__1573.py - pytest.PytestUnknownMarkWarning: U...\n!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!\n1 error in 0.08s\n"
+        },
+        {
+          "round": 2,
+          "verdict": "reproduced_exception",
+          "exception_type": "RuntimeWarning",
+          "reason": "RuntimeWarning was raised from inside the project's own code (src/jinja2/environment.py:1281 in render)",
+          "output": "_filter_with_slice_async_true ___________________\ntests/test_reprobot_jinja__1573.py:16: in test_custom_filter_with_slice_async_true\n    result = template.render(data) # Use render() for synchronous execution of async-enabled env\n             ^^^^^^^^^^^^^^^^^^^^^\nsrc/jinja2/environment.py:1281: in render\n    return loop.run_until_complete(self.render_async(*args, **kwargs))\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/usr/local/lib/python3.12/asyncio/base_events.py:691: in run_until_complete\n    return future.result()\n           ^^^^^^^^^^^^^^^\nsrc/jinja2/environment.py:1314: in render_async\n    return self.environment.handle_exception()\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsrc/jinja2/environment.py:926: in handle_exception\n    raise rewrite_traceback_stack(source=source)\n<template>:1: in top-level template code\n    ???\nE   TypeError: 'coroutine' object is not subscriptable\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_jinja__1573.py::test_custom_filter_with_slice_async_true\nERROR tests/test_reprobot_jinja__1573.py::test_custom_filter_with_slice_async_true\n1 failed, 1 error in 0.16s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "jinja__1612",
+      "repo": "pallets/jinja",
+      "variant": "s3",
+      "f2p": true,
+      "score_reason": "ok",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": true,
+      "rounds": 3,
+      "usage": {
+        "prompt_tokens": 14270,
+        "completion_tokens": 1084,
+        "cost_usd": 0.004557,
+        "calls": 4,
+        "cached_calls": 2
+      },
+      "wall_clock_s": 10.7,
+      "error": null,
+      "test_source": "import pickle\nimport pytest\n\nimport jinja2.filters\n\n\ndef test_issue_1612_async_variant_pickleable():\n    \"\"\"\n    Filters decorated with @async_variant should be pickleable.\n    \"\"\"\n    # The do_first filter is decorated with @async_variant\n    # and was specifically mentioned in the bug report.\n    # The bug report states that jinja2.filters.do_first.__name__\n    # is 'sync_do_first' instead of 'do_first'.\n    # This incorrect __name__ prevents pickling.\n\n    # This assertion directly checks the __name__ attribute, which is\n    # the root cause described in the bug report.\n    # The test should fail if the __name__ is 'sync_do_first'\n    # and pass if it's correctly 'do_first'.\n    assert jinja2.filters.do_first.__name__ == \"do_first\"\n\n    # If the __name__ is correct, then pickling should succeed.\n    # This part of the test will only be reached if the above assertion passes.\n    # If the bug is fixed, this should now work without PicklingError.\n    pickled_filter = pickle.dumps(jinja2.filters.do_first)\n    unpickled_filter = pickle.loads(pickled_filter)\n\n    assert unpickled_filter.__name__ == \"do_first\"\n    assert unpickled_filter.__qualname__ == \"do_first\"\n    assert unpickled_filter.__module__ == jinja2.filters.do_first.__module__\n",
+      "test_rel_path": "tests/test_reprobot_jinja__1612.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "shallow_fail",
+          "exception_type": "PicklingError",
+          "reason": "PicklingError was raised in the test body without any frame entering the project's code, so the test is most likely misusing the API rather than exercising the bug",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n___________________ test_issue_1612_async_variant_pickleable ___________________\ntests/test_reprobot_jinja__1612.py:15: in test_issue_1612_async_variant_pickleable\n    pickle.dumps(jinja2.filters.do_first)\nE   _pickle.PicklingError: Can't pickle <function sync_do_first at 0x7f96aad4a3e0>: it's not the same object as jinja2.filters.sync_do_first\n\nDuring handling of the above exception, another exception occurred:\ntests/test_reprobot_jinja__1612.py:17: in test_issue_1612_async_variant_pickleable\n    pytest.fail(f\"PicklingError: {e}\\n\"\nE   Failed: PicklingError: Can't pickle <function sync_do_first at 0x7f96aad4a3e0>: it's not the same object as jinja2.filters.sync_do_first\nE   This indicates that filters decorated with @async_variant are not pickleable. The __name__ and __qualname__ attributes might be incorrectly set.\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_jinja__1612.py::test_issue_1612_async_variant_pickleable\n1 failed in 0.02s\n"
+        },
+        {
+          "round": 2,
+          "verdict": "shallow_fail",
+          "exception_type": "PicklingError",
+          "reason": "PicklingError was raised in the test body without any frame entering the project's code, so the test is most likely misusing the API rather than exercising the bug",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n___________________ test_issue_1612_async_variant_pickleable ___________________\ntests/test_reprobot_jinja__1612.py:15: in test_issue_1612_async_variant_pickleable\n    pickled_filter = pickle.dumps(jinja2.filters.do_first)\n                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   _pickle.PicklingError: Can't pickle <function sync_do_first at 0x7f18305223e0>: it's not the same object as jinja2.filters.sync_do_first\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_jinja__1612.py::test_issue_1612_async_variant_pickleable\n1 failed in 0.02s\n"
+        },
+        {
+          "round": 3,
+          "verdict": "reproduced_assertion",
+          "exception_type": "AssertionError",
+          "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n___________________ test_issue_1612_async_variant_pickleable ___________________\ntests/test_reprobot_jinja__1612.py:21: in test_issue_1612_async_variant_pickleable\n    assert jinja2.filters.do_first.__name__ == \"do_first\"\nE   AssertionError: assert 'sync_do_first' == 'do_first'\nE     \nE     - do_first\nE     + sync_do_first\nE     ? +++++\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_jinja__1612.py::test_issue_1612_async_variant_pickleable\n1 failed in 0.02s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "jinja__1701",
+      "repo": "pallets/jinja",
+      "variant": "s3",
+      "f2p": false,
+      "score_reason": "did_not_pass_at_fix:failed",
+      "verdict_at_parent": "reproduced_exception",
+      "self_reproduces": true,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 4470,
+        "completion_tokens": 538,
+        "cost_usd": 0.0,
+        "calls": 2,
+        "cached_calls": 2
+      },
+      "wall_clock_s": 2.5,
+      "error": null,
+      "test_source": "import pytest\nfrom jinja2.nativetypes import NativeEnvironment\n\ndef test_loop_index_in_block_native_env():\n    env = NativeEnvironment()\n    template = env.from_string('{% block test %}{% for i in range(1) %}{{ loop.index }}{% endfor %}{% endblock %}{{ self.test() }}')\n    # The original bug caused a TypeError because loop.index (an int) was passed to native_concat\n    # without being converted to a string first when rendered inside a block and then called.\n    # The expected output is the integer 1, as native_concat should handle single integer results.\n    assert template.render() == 1\n\ndef test_loop_index_in_block_native_env_multiple_iterations():\n    env = NativeEnvironment()\n    template = env.from_string('{% block test %}{% for i in range(3) %}{{ loop.index }}{% endfor %}{% endblock %}{{ self.test() }}')\n    # With multiple iterations, the result should be a concatenated string \"123\"\n    assert template.render() == \"123\"\n\ndef test_loop_index_directly_native_env():\n    env = NativeEnvironment()\n    template = env.from_string('{% for i in range(1) %}{{ loop.index }}{% endfor %}')\n    # Directly rendering loop.index should also work and return the integer 1\n    assert template.render() == 1\n\ndef test_loop_index_directly_native_env_multiple_iterations():\n    env = NativeEnvironment()\n    template = env.from_string('{% for i in range(3) %}{{ loop.index }}{% endfor %}')\n    # Directly rendering multiple loop.index should return the concatenated string \"123\"\n    assert template.render() == \"123\"\n",
+      "test_rel_path": "tests/test_reprobot_jinja__1701.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "reproduced_exception",
+          "exception_type": "TypeError",
+          "reason": "TypeError was raised from inside the project's own code (src/jinja2/nativetypes.py:112 in render)",
+          "output": "py:112: in render\n    return self.environment.handle_exception()\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsrc/jinja2/environment.py:939: in handle_exception\n    raise rewrite_traceback_stack(source=source)\nsrc/jinja2/nativetypes.py:37: in native_concat\n    raw = \"\".join([str(v) for v in values])\n                                   ^^^^^^\n<template>:1: in top-level template code\n    ???\nE   TypeError: sequence item 0: expected str instance, int found\n___________ test_loop_index_directly_native_env_multiple_iterations ____________\ntests/test_reprobot_jinja__1701.py:28: in test_loop_index_directly_native_env_multiple_iterations\n    assert template.render() == \"123\"\nE   AssertionError: assert 123 == '123'\nE    +  where 123 = render()\nE    +    where render = <NativeTemplate memory:7fe93da12c90>.render\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_jinja__1701.py::test_loop_index_in_block_native_env\nFAILED tests/test_reprobot_jinja__1701.py::test_loop_index_in_block_native_env_multiple_iterations\nFAILED tests/test_reprobot_jinja__1701.py::test_loop_index_directly_native_env_multiple_iterations\n3 failed, 1 passed in 0.05s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "jinja__2027",
+      "repo": "pallets/jinja",
+      "variant": "s3",
+      "f2p": true,
+      "score_reason": "ok",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": true,
+      "rounds": 3,
+      "usage": {
+        "prompt_tokens": 9145,
+        "completion_tokens": 466,
+        "cost_usd": 0.002414,
+        "calls": 4,
+        "cached_calls": 2
+      },
+      "wall_clock_s": 8.7,
+      "error": null,
+      "test_source": "import pickle\n\nimport pytest\n\nfrom jinja2.utils import missing\n\n\ndef test_missing_pickle():\n    \"\"\"jinja2.utils.missing should be picklable.\"\"\"\n    # The bug is that pickle.dumps(missing) fails.\n    # We expect it to succeed and return a bytes object.\n    # Then, unpickling it should return the original singleton.\n    try:\n        pickled_missing = pickle.dumps(missing)\n    except pickle.PicklingError as e:\n        pytest.fail(f\"Pickling jinja2.utils.missing failed: {e}\")\n\n    loaded_missing = pickle.loads(pickled_missing)\n    assert loaded_missing is missing\n",
+      "test_rel_path": "tests/test_reprobot_jinja__2027.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "shallow_fail",
+          "exception_type": "PicklingError",
+          "reason": "PicklingError was raised in the test body without any frame entering the project's code, so the test is most likely misusing the API rather than exercising the bug",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n_____________________________ test_missing_pickle ______________________________\ntests/test_reprobot_jinja__2027.py:10: in test_missing_pickle\n    loaded_missing = pickle.loads(pickle.dumps(missing))\n                                  ^^^^^^^^^^^^^^^^^^^^^\nE   _pickle.PicklingError: Can't pickle <class 'jinja2.utils.MissingType'>: attribute lookup MissingType on jinja2.utils failed\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_jinja__2027.py::test_missing_pickle - _pickle.Pick...\n1 failed in 0.02s\n"
+        },
+        {
+          "round": 2,
+          "verdict": "shallow_fail",
+          "exception_type": "PicklingError",
+          "reason": "PicklingError was raised in the test body without any frame entering the project's code, so the test is most likely misusing the API rather than exercising the bug",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n_____________________________ test_missing_pickle ______________________________\ntests/test_reprobot_jinja__2027.py:13: in test_missing_pickle\n    pickled_missing = pickle.dumps(missing)\n                      ^^^^^^^^^^^^^^^^^^^^^\nE   _pickle.PicklingError: Can't pickle <class 'jinja2.utils.MissingType'>: attribute lookup MissingType on jinja2.utils failed\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_jinja__2027.py::test_missing_pickle - _pickle.Pick...\n1 failed in 0.02s\n"
+        },
+        {
+          "round": 3,
+          "verdict": "reproduced_assertion",
+          "exception_type": "Failed",
+          "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n_____________________________ test_missing_pickle ______________________________\ntests/test_reprobot_jinja__2027.py:14: in test_missing_pickle\n    pickled_missing = pickle.dumps(missing)\n                      ^^^^^^^^^^^^^^^^^^^^^\nE   _pickle.PicklingError: Can't pickle <class 'jinja2.utils.MissingType'>: attribute lookup MissingType on jinja2.utils failed\n\nDuring handling of the above exception, another exception occurred:\ntests/test_reprobot_jinja__2027.py:16: in test_missing_pickle\n    pytest.fail(f\"Pickling jinja2.utils.missing failed: {e}\")\nE   Failed: Pickling jinja2.utils.missing failed: Can't pickle <class 'jinja2.utils.MissingType'>: attribute lookup MissingType on jinja2.utils failed\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_jinja__2027.py::test_missing_pickle - Failed: Pick...\n1 failed in 0.02s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "rich__3796",
+      "repo": "Textualize/rich",
+      "variant": "s3",
+      "f2p": false,
+      "score_reason": "did_not_pass_at_fix:failed",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": true,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 6872,
+        "completion_tokens": 711,
+        "cost_usd": 0.0,
+        "calls": 2,
+        "cached_calls": 2
+      },
+      "wall_clock_s": 3.5,
+      "error": null,
+      "test_source": "import pytest\nfrom rich.console import Console, Group, RenderableType\nfrom rich.live import Live\nfrom rich.text import Text\nimport io\n\n@pytest.fixture\ndef capture_console():\n    \"\"\"Fixture to capture console output.\"\"\"\n    console = Console(file=io.StringIO(), force_terminal=True, width=80)\n    return console\n\ndef test_live_empty_render_no_spurious_newline(capture_console):\n    \"\"\"\n    Test that Live with an empty renderable and transient=True does not leave\n    behind a spurious newline.\n    \"\"\"\n    console = capture_console\n    list_renderables: list[RenderableType] = []\n    live = Live(Group(*list_renderables), transient=True, console=console)\n    with live:\n        pass\n    \n    output = console.file.getvalue()\n    # The expected output should be an empty string, as transient=True should\n    # remove all output from the Live context manager.\n    assert output == \"\"\n\ndef test_live_empty_string_render_no_spurious_newline(capture_console):\n    \"\"\"\n    Test that Live with a single empty string renderable and transient=True\n    does not leave behind a spurious newline (this is the current workaround).\n    \"\"\"\n    console = capture_console\n    list_renderables: list[RenderableType] = [\"\"]\n    live = Live(Group(*list_renderables), transient=True, console=console)\n    with live:\n        pass\n    \n    output = console.file.getvalue()\n    # The expected output should be an empty string, as transient=True should\n    # remove all output from the Live context manager.\n    assert output == \"\"\n\ndef test_live_empty_render_with_text_then_empty_no_spurious_newline(capture_console):\n    \"\"\"\n    Test that Live, which initially renders text and then becomes empty,\n    does not leave behind a spurious newline when transient=True.\n    \"\"\"\n    console = capture_console\n    list_renderables: list[RenderableType] = [Text(\"Hello\")]\n    live = Live(Group(*list_renderables), transient=True, console=console, auto_refresh=False)\n    with live:\n        live.refresh() # Render \"Hello\"\n        list_renderables.clear() # Make the renderable empty\n        live.refresh() # Update with empty renderable\n    \n    output = console.file.getvalue()\n    # The expected output should be an empty string, as transient=True should\n    # remove all output from the Live context manager.\n    assert output == \"\"\n",
+      "test_rel_path": "tests/test_reprobot_rich__3796.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "reproduced_assertion",
+          "exception_type": "AssertionError",
+          "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
+          "output": "ionError: assert '\\x1b[?25l\\r\\...\\n\\x1b[?25h\\r' == ''\nE     \nE     + \u001b[?25l\nE     + \u001b[2K\nE     + \u001b[?25h\n______________ test_live_empty_string_render_no_spurious_newline _______________\ntests/test_reprobot_rich__3796.py:43: in test_live_empty_string_render_no_spurious_newline\n    assert output == \"\"\nE   AssertionError: assert '\\x1b[?25l\\r\\...x1b[1A\\x1b[2K' == ''\nE     \nE     + \u001b[?25l\nE     + \u001b[2K\nE     + \u001b[?25h\nE     + \u001b[1A\u001b[2K\n_______ test_live_empty_render_with_text_then_empty_no_spurious_newline ________\ntests/test_reprobot_rich__3796.py:61: in test_live_empty_render_with_text_then_empty_no_spurious_newline\n    assert output == \"\"\nE   AssertionError: assert '\\x1b[?25lHel...x1b[1A\\x1b[2K' == ''\nE     \nE     + \u001b[?25lHello\nE     + \u001b[2KHello\nE     + \u001b[2KHello\nE     + \u001b[2KHello\nE     + \u001b[?25h\nE     + \u001b[1A\u001b[2K\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_rich__3796.py::test_live_empty_render_no_spurious_newline\nFAILED tests/test_reprobot_rich__3796.py::test_live_empty_string_render_no_spurious_newline\nFAILED tests/test_reprobot_rich__3796.py::test_live_empty_render_with_text_then_empty_no_spurious_newline\n3 failed in 0.14s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "rich__3838",
+      "repo": "Textualize/rich",
+      "variant": "s3",
+      "f2p": false,
+      "score_reason": "did_not_pass_at_fix:failed",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": true,
+      "rounds": 2,
+      "usage": {
+        "prompt_tokens": 14267,
+        "completion_tokens": 4819,
+        "cost_usd": 0.005621,
+        "calls": 3,
+        "cached_calls": 2
+      },
+      "wall_clock_s": 11.9,
+      "error": null,
+      "test_source": "import io\nfrom rich.console import Console\nfrom rich.style import Style\n\n\ndef test_soft_wrap_background_color_reset():\n    \"\"\"\n    Test that background color is reset on new lines when soft wrapping is enabled.\n    The bug is that the background color carries over onto the following line\n    when soft wrapping causes a line break, and the style is not reset before the newline.\n    \"\"\"\n    # Set a small width to force soft wrapping\n    console = Console(file=io.StringIO(), width=10, soft_wrap=True, color_system=\"truecolor\")\n\n    # Print text with a background color that will soft wrap\n    # \"longtext\" will be split into \"long\" and \"text\" due to width=10\n    # The style \"on white\" should apply to both \"long\" and \"text\"\n    # The crucial part is that the style should be reset *after* \"text\" and *before* the newline\n    # that separates it from the next console.print output.\n    console.print(\"longtext\", style=\"on white\")\n    # Print a second line without any explicit style\n    console.print(\"next line\")\n\n    output = console.file.getvalue()\n\n    # The bug states that the background color carries over onto the following line.\n    # This means that after the soft-wrapped \"longtext\", the style \"on white\"\n    # is still active when the implicit newline from the first console.print is added,\n    # and thus when \"next line\" is printed, it inherits the \"on white\" style.\n\n    # Expected output structure (simplified, ignoring exact escape codes for wrapping within \"longtext\"):\n    # \\x1b[47mlong\\x1b[0m\\n  <-- This \\x1b[0m is the key. It should be there after each wrapped segment.\n    # \\x1b[47mtext\\x1b[0m\\n  <-- And here.\n    # \\x1b[0m\\n             <-- This \\x1b[0m is the reset after the first console.print call.\n    # next line\\n\n\n    # Buggy output structure (simplified):\n    # \\x1b[47mlong\\n       <-- Missing \\x1b[0m here\n    # \\x1b[47mtext\\n       <-- Missing \\x1b[0m here\n    # \\x1b[0m\\n             <-- This \\x1b[0m might be present, but it's too late.\n    # next line\\n\n\n    # The most direct way to check for the bug is to see if the \"next line\" text\n    # is preceded by the background color escape code without an intervening reset.\n    # The `console.print(\"next line\")` itself is unstyled, so it should not introduce `\\x1b[47m`.\n    # If `\\x1b[47m` appears before \"next line\", it's a carry-over.\n\n    # Find the start of \"next line\" in the output.\n    # The `console.print` adds a newline at the end.\n    # So the output will look like:\n    # <output from \"longtext\" with style>\\n\n    # next line\\n\n\n    # The bug implies that the `\\n` after the \"longtext\" output is not preceded by a reset,\n    # or that the style is not reset before the `\\n` that `console.print` adds.\n    # This means the style `on white` would still be active when `next line` is printed.\n\n    # We need to check that the actual text \"next line\" does not have the background color applied.\n    # The background color escape code for 'on white' is typically '\\x1b[47m'.\n    # The reset code is '\\x1b[0m'.\n\n    # If the bug is present, the output will contain `\\x1b[47m` immediately before `next line`\n    # (or at least, the style will be active, and `next line` will be printed with it).\n    # If the bug is fixed, there should be a `\\x1b[0m` before `next line` (or the style should simply not be active).\n\n    # Let's look for the sequence `\\x1b[47m` followed by \"next line\" in the output.\n    # This would indicate the bug.\n    assert \"\\x1b[47m\" not in output.split(\"next line\")[0], \\\n        \"Background color escape code found before 'next line', indicating carry-over.\"\n\n    # More robustly, let's check the line containing \"next line\".\n    # It should not start with the background color code.\n    lines = output.split('\\n')\n    found_next_line = False\n    for line in lines:\n        if \"next line\" in line:\n            # This is the line we care about. It should not start with the background color code.\n            # It might start with a reset code, or just the text.\n            assert not line.strip().startswith(\"\\x1b[47m\"), \\\n                \"The line 'next line' incorrectly starts with background color, indicating carry-over.\"\n            found_next_line = True\n            break\n    assert found_next_line, \"Could not find 'next line' in the output\"\n\n    # Additionally, let's check that the output from the first print *does* contain the style.\n    # This ensures our test setup is correct.\n    assert \"\\x1b[47m\" in output.split('\\n')[0], \\\n        \"The first line of 'longtext' did not receive the expected background color.\"\n",
+      "test_rel_path": "tests/test_reprobot_rich__3838.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "no_fail",
+          "exception_type": null,
+          "reason": "the test passed at the buggy commit, so it does not demonstrate the reported behaviour",
+          "output": "__REPROBOT_SANDBOX_READY__\n.                                                                        [100%]\n1 passed in 0.11s\n"
+        },
+        {
+          "round": 2,
+          "verdict": "reproduced_assertion",
+          "exception_type": "AssertionError",
+          "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n____________________ test_soft_wrap_background_color_reset _____________________\ntests/test_reprobot_rich__3838.py:68: in test_soft_wrap_background_color_reset\n    assert \"\\x1b[47m\" not in output.split(\"next line\")[0], \\\nE   AssertionError: Background color escape code found before 'next line', indicating carry-over.\nE   assert '\\x1b[47m' not in '\\x1b[47mlon...47m\\n\\x1b[0m'\nE     \nE     '\\x1b[47m' is contained here:\nE       \u001b[47mlongtext\u001b[0m\u001b[47m\nE     ? +++++\nE       \u001b[0m\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_rich__3838.py::test_soft_wrap_background_color_reset\n1 failed in 0.12s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "rich__3881",
+      "repo": "Textualize/rich",
+      "variant": "s3",
+      "f2p": true,
+      "score_reason": "ok",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": true,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 3845,
+        "completion_tokens": 344,
+        "cost_usd": 0.0,
+        "calls": 2,
+        "cached_calls": 2
+      },
+      "wall_clock_s": 3.4,
+      "error": null,
+      "test_source": "import pytest\nimport io\nimport sys\nfrom rich.console import Console\nfrom rich.prompt import Confirm\nfrom unittest import mock\n\n\ndef test_confirm_on_validate_error_markup() -> None:\n    # Create a console with markup disabled\n    console = Console(markup=False, file=io.StringIO())\n\n    # Mock stdin to simulate user input\n    # First, an invalid input, then a valid one\n    with mock.patch(\"builtins.input\", side_effect=[\"invalid\", \"y\"]):\n        # Call Confirm.ask with the console\n        Confirm.ask(\"Continue?\", console=console)\n\n    # Get the output from the console\n    output = console.file.getvalue()\n\n    # Assert that the error message contains the markup,\n    # indicating that markup was explicitly enabled for the error message.\n    # The bug is that it currently prints \"[prompt.invalid]Please enter Y or N\" literally.\n    assert \"[prompt.invalid]Please enter Y or N\" not in output\n    assert \"Please enter Y or N\" in output\n",
+      "test_rel_path": "tests/test_reprobot_rich__3881.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "reproduced_assertion",
+          "exception_type": "AssertionError",
+          "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n____________________ test_confirm_on_validate_error_markup _____________________\ntests/test_reprobot_rich__3881.py:25: in test_confirm_on_validate_error_markup\n    assert \"[prompt.invalid]Please enter Y or N\" not in output\nE   AssertionError: assert '[prompt.inv...enter Y or N' not in 'Continue? [...nue? [y/n]: '\nE     \nE     '[prompt.invalid]Please enter Y or N' is contained here:\nE       Continue? [y/n]: [prompt.invalid]Please enter Y or N\nE       Continue? [y/n]:\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_rich__3881.py::test_confirm_on_validate_error_markup\n1 failed in 0.19s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "rich__3943",
+      "repo": "Textualize/rich",
+      "variant": "s3",
+      "f2p": false,
+      "score_reason": "did_not_fail_at_parent:collection_error",
+      "verdict_at_parent": "broken_test",
+      "self_reproduces": false,
+      "rounds": 3,
+      "usage": {
+        "prompt_tokens": 16339,
+        "completion_tokens": 1541,
+        "cost_usd": 0.005589,
+        "calls": 4,
+        "cached_calls": 2
+      },
+      "wall_clock_s": 10.6,
+      "error": null,
+      "test_source": "import io\nimport sys\n\nimport pytest\n\nfrom rich.console import Console\nfrom rich.text import Text\n\n\n@pytest.mark.parametrize(\n    \"nerd_font_char, expected_width\",\n    [\n        # This is the character specifically mentioned in the bug report\n        (\"\\U000f024d\", 1),  # nf-fa-folder_download\n        # Add a few more common Nerd Font icons that should be single width\n        (\"\\U000f0002\", 1),  # nf-fa-github\n        (\"\\U000e7ad\", 1),  # nf-dev-git\n        (\"\\U000e795\", 1),  # nf-dev-python\n        (\"\\U000e7b5\", 1),  # nf-dev-nodejs\n    ],\n)\ndef test_nerd_font_character_width(nerd_font_char: str, expected_width: int) -> None:\n    \"\"\"\n    Test that specific Nerd Font characters are correctly identified as single width.\n    \"\"\"\n    console = Console(\n        file=io.StringIO(),\n        width=80,\n        legacy_windows=False,  # Ensure non-legacy Windows rendering path\n        force_terminal=True,  # Force terminal rendering to get character width calculations\n    )\n    text = Text(nerd_font_char)\n    # Render the text and check the width of the rendered segments\n    # The bug is that rich.console.Console.renderable_width() (which is used internally\n    # by render() and other methods) incorrectly calculates the width of certain\n    # Nerd Font characters as 2 instead of 1.\n    # We can directly check the width calculation for the Text object.\n    calculated_width = text.__rich_measure__(\n        console, console.options\n    ).maximum  # Use maximum width for single character\n    \n    assert (\n        calculated_width == expected_width\n    ), f\"Nerd Font character '{nerd_font_char}' (U+{ord(nerd_font_char):x}) has unexpected width. Expected {expected_width}, got {calculated_width}.\"\n",
+      "test_rel_path": "tests/test_reprobot_rich__3943.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "broken_test",
+          "exception_type": "SyntaxError",
+          "reason": "the test could not be collected or ran into an import, syntax or fixture problem before exercising the reported behaviour",
+          "output": "^^^^^^^^\n<frozen importlib._bootstrap>:1387: in _gcd_import\n    ???\n<frozen importlib._bootstrap>:1360: in _find_and_load\n    ???\n<frozen importlib._bootstrap>:1331: in _find_and_load_unlocked\n    ???\n<frozen importlib._bootstrap>:935: in _load_unlocked\n    ???\n/usr/local/lib/python3.12/site-packages/_pytest/assertion/rewrite.py:179: in exec_module\n    source_stat, co = _rewrite_test(fn, self.config)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/usr/local/lib/python3.12/site-packages/_pytest/assertion/rewrite.py:348: in _rewrite_test\n    tree = ast.parse(source, filename=strfn)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/usr/local/lib/python3.12/ast.py:52: in parse\n    return compile(source, filename, mode, flags,\nE     File \"/work/repo/tests/test_reprobot_rich__3943.py\", line 17\nE       (\"\\U000e7ad\", 1),  # nf-dev-git\nE        ^^^^^^^^^^^\nE   SyntaxError: (unicode error) 'unicodeescape' codec can't decode bytes in position 0-8: truncated \\UXXXXXXXX escape\n=========================== short test summary info ============================\nERROR tests/test_reprobot_rich__3943.py\n!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!\n1 error in 0.13s\n"
+        },
+        {
+          "round": 2,
+          "verdict": "broken_test",
+          "exception_type": "SyntaxError",
+          "reason": "the test could not be collected or ran into an import, syntax or fixture problem before exercising the reported behaviour",
+          "output": "^^^^^^^^\n<frozen importlib._bootstrap>:1387: in _gcd_import\n    ???\n<frozen importlib._bootstrap>:1360: in _find_and_load\n    ???\n<frozen importlib._bootstrap>:1331: in _find_and_load_unlocked\n    ???\n<frozen importlib._bootstrap>:935: in _load_unlocked\n    ???\n/usr/local/lib/python3.12/site-packages/_pytest/assertion/rewrite.py:179: in exec_module\n    source_stat, co = _rewrite_test(fn, self.config)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/usr/local/lib/python3.12/site-packages/_pytest/assertion/rewrite.py:348: in _rewrite_test\n    tree = ast.parse(source, filename=strfn)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/usr/local/lib/python3.12/ast.py:52: in parse\n    return compile(source, filename, mode, flags,\nE     File \"/work/repo/tests/test_reprobot_rich__3943.py\", line 17\nE       (\"\\U000e7ad\", 1),  # nf-dev-git\nE        ^^^^^^^^^^^\nE   SyntaxError: (unicode error) 'unicodeescape' codec can't decode bytes in position 0-8: truncated \\UXXXXXXXX escape\n=========================== short test summary info ============================\nERROR tests/test_reprobot_rich__3943.py\n!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!\n1 error in 0.13s\n"
+        },
+        {
+          "round": 3,
+          "verdict": "broken_test",
+          "exception_type": "SyntaxError",
+          "reason": "the test could not be collected or ran into an import, syntax or fixture problem before exercising the reported behaviour",
+          "output": "^^^^^^^^\n<frozen importlib._bootstrap>:1387: in _gcd_import\n    ???\n<frozen importlib._bootstrap>:1360: in _find_and_load\n    ???\n<frozen importlib._bootstrap>:1331: in _find_and_load_unlocked\n    ???\n<frozen importlib._bootstrap>:935: in _load_unlocked\n    ???\n/usr/local/lib/python3.12/site-packages/_pytest/assertion/rewrite.py:179: in exec_module\n    source_stat, co = _rewrite_test(fn, self.config)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/usr/local/lib/python3.12/site-packages/_pytest/assertion/rewrite.py:348: in _rewrite_test\n    tree = ast.parse(source, filename=strfn)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/usr/local/lib/python3.12/ast.py:52: in parse\n    return compile(source, filename, mode, flags,\nE     File \"/work/repo/tests/test_reprobot_rich__3943.py\", line 17\nE       (\"\\U000e7ad\", 1),  # nf-dev-git\nE        ^^^^^^^^^^^\nE   SyntaxError: (unicode error) 'unicodeescape' codec can't decode bytes in position 0-8: truncated \\UXXXXXXXX escape\n=========================== short test summary info ============================\nERROR tests/test_reprobot_rich__3943.py\n!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!\n1 error in 0.14s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "rich__4041",
+      "repo": "Textualize/rich",
+      "variant": "s3",
+      "f2p": false,
+      "score_reason": "did_not_pass_at_fix:failed",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": true,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 4096,
+        "completion_tokens": 539,
+        "cost_usd": 0.0,
+        "calls": 2,
+        "cached_calls": 2
+      },
+      "wall_clock_s": 3.1,
+      "error": null,
+      "test_source": "import sys\nimport io\nimport pytest\nfrom rich.console import Console\nfrom rich.live import Live\n\n# This fixture is not provided in the example, but typically used for capturing console output.\n# We'll define a minimal one for this test.\n@pytest.fixture\ndef create_capture_console():\n    def _create_capture_console():\n        console = Console(file=io.StringIO(), force_terminal=True)\n        return console\n    return _create_capture_console\n\ndef test_live_redirect_stdout_isatty(create_capture_console):\n    \"\"\"\n    Tests that sys.stdout.isatty() correctly reflects the underlying terminal\n    when Live is redirecting stdout.\n    \"\"\"\n    console = create_capture_console()\n\n    # Ensure that the console's file is a TTY for this test\n    # (create_capture_console already sets force_terminal=True, but we want to be explicit)\n    assert console.file.isatty() is True\n\n    # Store the original sys.stdout to restore it later\n    original_stdout = sys.stdout\n\n    try:\n        # Check isatty() before Live context\n        assert original_stdout.isatty() is True\n\n        with Live(\"hello\", console=console, redirect_stdout=True):\n            # Inside the Live context, sys.stdout should be the FileProxy\n            # and its isatty() method should delegate to the underlying console.file\n            assert sys.stdout.isatty() is True\n            # Also check the FileProxy directly\n            assert isinstance(sys.stdout, console.file_proxy_class)\n            assert sys.stdout.rich_proxied_file.isatty() is True\n\n        # After Live context, sys.stdout should be restored\n        assert sys.stdout.isatty() is True\n\n    finally:\n        # Ensure sys.stdout is always restored\n        sys.stdout = original_stdout\n",
+      "test_rel_path": "tests/test_reprobot_rich__4041.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "reproduced_assertion",
+          "exception_type": null,
+          "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n_______________________ test_live_redirect_stdout_isatty _______________________\ntests/test_reprobot_rich__4041.py:25: in test_live_redirect_stdout_isatty\n    assert console.file.isatty() is True\nE   assert False is True\nE    +  where False = <built-in method isatty of _io.StringIO object at 0x7ff1a7948f40>()\nE    +    where <built-in method isatty of _io.StringIO object at 0x7ff1a7948f40> = <_io.StringIO object at 0x7ff1a7948f40>.isatty\nE    +      where <_io.StringIO object at 0x7ff1a7948f40> = <console width=80 ColorSystem.STANDARD>.file\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_rich__4041.py::test_live_redirect_stdout_isatty - ...\n1 failed in 0.09s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "rich__5090",
+      "repo": "Textualize/rich",
+      "variant": "s3",
+      "f2p": false,
+      "score_reason": "did_not_fail_at_parent:passed",
+      "verdict_at_parent": "no_fail",
+      "self_reproduces": false,
+      "rounds": 3,
+      "usage": {
+        "prompt_tokens": 23296,
+        "completion_tokens": 3391,
+        "cost_usd": 0.008478,
+        "calls": 4,
+        "cached_calls": 2
+      },
+      "wall_clock_s": 13.6,
+      "error": null,
+      "test_source": "import pytest\nimport io\nfrom rich.console import Console\nfrom rich.table import Table\nfrom rich.text import Text\nfrom rich.measure import Measurement\n\ndef test_double_width_character_in_background_of_modal():\n    \"\"\"\n    Test that double-width characters are measured correctly when rendered\n    in a DataTable, specifically when the column width is constrained\n    and the character width is critical for correct rendering.\n\n    The bug describes incorrect measurement of double-width characters,\n    leading to truncation or incorrect layout, especially when in the\n    background of a modal. While we can't simulate a modal directly\n    in a unit test for `rich.console`, we can simulate the conditions\n    where `rich`'s internal measurement of character width would be\n    critical for correct rendering within a constrained space, such as a table column.\n\n    If double-width characters are measured as single-width, a column\n    explicitly sized to fit a double-width string will truncate it.\n    \"\"\"\n    console = Console(file=io.StringIO(), width=80, height=25, legacy_windows=False)\n\n    # The string \"\u9752\u6625\u30b5\u30c4\u30d0\u30c4\u8ad6\" consists of 7 CJK characters, each typically\n    # occupying 2 display cells. Total display width = 7 * 2 = 14.\n    double_width_text = \"\u9752\u6625\u30b5\u30c4\u30d0\u30c4\u8ad6\"\n    expected_display_width = 14\n\n    # Create a table with a single column, explicitly setting its width\n    # to exactly accommodate the double-width text.\n    # If the double-width characters are incorrectly measured as single-width,\n    # the column will effectively be half the required width, leading to truncation.\n    table = Table(show_header=False, show_edge=False, show_lines=False, padding=0)\n    table.add_column(\"Content\", width=expected_display_width, no_wrap=True)\n    table.add_row(double_width_text)\n\n    console.print(table)\n    output = console.file.getvalue()\n\n    # The output should contain exactly one line of content (excluding potential newlines\n    # added by console.print itself, which we strip).\n    # This line should be exactly `expected_display_width` characters wide,\n    # and contain the full `double_width_text`.\n    # If the bug is present, the string will be truncated because the column\n    # was internally calculated to be only 7 cells wide, not 14.\n    # For example, it might render as \"\u9752\u6625\u30b5\u30c4\u30d0\" (first 5 chars * 2 = 10 cells,\n    # then 4 cells of padding/truncation).\n\n    # Strip any trailing newlines from the console output to get the raw rendered line.\n    rendered_line = output.strip()\n\n    # Assert that the rendered line contains the full double-width text.\n    # If the bug is present, the string will be truncated.\n    assert double_width_text in rendered_line\n\n    # Assert that the actual display width of the rendered line is correct.\n    # This is the most direct way to check if the character width was correctly measured.\n    # `Text.cell_len` is a property, not a method.\n    assert Text(rendered_line).cell_len == expected_display_width\n\n    # If the bug is present, `Text(rendered_line).cell_len` would likely be less than 14,\n    # because the `rich` rendering engine would have truncated the string to fit\n    # into a column it *thought* was 7 cells wide.\n",
+      "test_rel_path": "tests/test_reprobot_rich__5090.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "no_fail",
+          "exception_type": null,
+          "reason": "the test passed at the buggy commit, so it does not demonstrate the reported behaviour",
+          "output": "__REPROBOT_SANDBOX_READY__\n.                                                                        [100%]\n1 passed in 0.10s\n"
+        },
+        {
+          "round": 2,
+          "verdict": "shallow_fail",
+          "exception_type": "TypeError",
+          "reason": "TypeError was raised in the test body without any frame entering the project's code, so the test is most likely misusing the API rather than exercising the bug",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n______________ test_double_width_character_in_background_of_modal ______________\ntests/test_reprobot_rich__5090.py:61: in test_double_width_character_in_background_of_modal\n    assert Text.cell_len(rendered_line) == expected_display_width\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   TypeError: 'property' object is not callable\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_rich__5090.py::test_double_width_character_in_background_of_modal\n1 failed in 0.10s\n"
+        },
+        {
+          "round": 3,
+          "verdict": "no_fail",
+          "exception_type": null,
+          "reason": "the test passed at the buggy commit, so it does not demonstrate the reported behaviour",
+          "output": "__REPROBOT_SANDBOX_READY__\n.                                                                        [100%]\n1 passed in 0.09s\n"
+        }
+      ]
+    },
+    {
       "case_id": "sqlglot__7949",
       "repo": "tobymao/sqlglot",
       "variant": "s3",
@@ -186,7 +660,7 @@
         "calls": 2,
         "cached_calls": 2
       },
-      "wall_clock_s": 7.3,
+      "wall_clock_s": 6.7,
       "error": null,
       "test_source": "import unittest\n\nfrom sqlglot import parse_one\nfrom sqlglot.errors import ParseError\n\n\nclass TestDatabricks(unittest.TestCase):\n    def test_insert_replace_using(self):\n        sql = \"\"\"\n        INSERT INTO TABLE students\n            REPLACE USING (country)\n            SELECT * FROM new_students;\n        \"\"\"\n        try:\n            expression = parse_one(sql, dialect=\"databricks\")\n            self.assertIsNotNone(expression)\n            self.assertEqual(\n                expression.sql(dialect=\"databricks\"),\n                \"INSERT INTO TABLE students REPLACE USING (country) SELECT * FROM new_students\",\n            )\n        except ParseError as e:\n            self.fail(f\"Parsing failed with ParseError: {e}\")\n",
       "test_rel_path": "tests/dialects/test_reprobot_sqlglot__7949.py",
@@ -196,7 +670,7 @@
           "verdict": "reproduced_exception",
           "exception_type": "ParseError",
           "reason": "ParseError was raised from inside the project's own code (sqlglot/__init__.py:160 in parse_one)",
-          "output": "atch_statements(parse_method=parse_method, sep_first_statement=False)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:2177: in _parse_batch_statements\n    self.raise_error(\"Invalid expression / Unexpected token\")\nsqlglot/parser.py:2044: in raise_error\n    raise error\nE   sqlglot.errors.ParseError: Invalid expression / Unexpected token. Line 3, Col: 19.\nE     \nE           INSERT INTO TABLE students\nE               \u001b[4mREPLACE\u001b[0m USING (country)\nE               SELECT * FROM new_students;\n\nDuring handling of the above exception, another exception occurred:\ntests/dialects/test_reprobot_sqlglot__7949.py:22: in test_insert_replace_using\n    self.fail(f\"Parsing failed with ParseError: {e}\")\nE   AssertionError: Parsing failed with ParseError: Invalid expression / Unexpected token. Line 3, Col: 19.\nE     \nE           INSERT INTO TABLE students\nE               \u001b[4mREPLACE\u001b[0m USING (country)\nE               SELECT * FROM new_students;\n=========================== short test summary info ============================\nFAILED tests/dialects/test_reprobot_sqlglot__7949.py::TestDatabricks::test_insert_replace_using\n1 failed in 0.62s\n"
+          "output": "atch_statements(parse_method=parse_method, sep_first_statement=False)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:2177: in _parse_batch_statements\n    self.raise_error(\"Invalid expression / Unexpected token\")\nsqlglot/parser.py:2044: in raise_error\n    raise error\nE   sqlglot.errors.ParseError: Invalid expression / Unexpected token. Line 3, Col: 19.\nE     \nE           INSERT INTO TABLE students\nE               \u001b[4mREPLACE\u001b[0m USING (country)\nE               SELECT * FROM new_students;\n\nDuring handling of the above exception, another exception occurred:\ntests/dialects/test_reprobot_sqlglot__7949.py:22: in test_insert_replace_using\n    self.fail(f\"Parsing failed with ParseError: {e}\")\nE   AssertionError: Parsing failed with ParseError: Invalid expression / Unexpected token. Line 3, Col: 19.\nE     \nE           INSERT INTO TABLE students\nE               \u001b[4mREPLACE\u001b[0m USING (country)\nE               SELECT * FROM new_students;\n=========================== short test summary info ============================\nFAILED tests/dialects/test_reprobot_sqlglot__7949.py::TestDatabricks::test_insert_replace_using\n1 failed in 0.57s\n"
         }
       ]
     },
@@ -216,7 +690,7 @@
         "calls": 2,
         "cached_calls": 2
       },
-      "wall_clock_s": 8.5,
+      "wall_clock_s": 7.7,
       "error": null,
       "test_source": "import unittest\n\nfrom sqlglot import parse_one, exp\nfrom sqlglot.errors import ParseError\n\n\nclass TestIssue8225(unittest.TestCase):\n    def test_create_table_auto_increment(self):\n        sql = \"\"\"CREATE TABLE t1(id INT KEY AUTO_INCREMENT);\"\"\"\n        try:\n            ast = parse_one(sql, read=\"mysql\")\n            self.assertIsInstance(ast, exp.Create)\n            self.assertEqual(\n                ast.sql(dialect=\"mysql\"), \"CREATE TABLE t1 (id INT PRIMARY KEY AUTO_INCREMENT)\"\n            )\n        except ParseError as e:\n            self.fail(f\"Parsing failed with ParseError: {e}\")\n\n    def test_create_table_auto_increment_with_primary_key(self):\n        sql = \"\"\"CREATE TABLE t1(id INT PRIMARY KEY AUTO_INCREMENT);\"\"\"\n        try:\n            ast = parse_one(sql, read=\"mysql\")\n            self.assertIsInstance(ast, exp.Create)\n            self.assertEqual(\n                ast.sql(dialect=\"mysql\"), \"CREATE TABLE t1 (id INT PRIMARY KEY AUTO_INCREMENT)\"\n            )\n        except ParseError as e:\n            self.fail(f\"Parsing failed with ParseError: {e}\")\n",
       "test_rel_path": "tests/dialects/test_reprobot_sqlglot__8225.py",
@@ -226,7 +700,7 @@
           "verdict": "reproduced_exception",
           "exception_type": "ParseError",
           "reason": "ParseError was raised from inside the project's own code (sqlglot/__init__.py:160 in parse_one)",
-          "output": "44: in <lambda>\n    \"KEY\": lambda self: self._parse_index_constraint(),\n                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/parsers/mysql.py:390: in _parse_index_constraint\n    expressions = self._parse_wrapped_csv(self._parse_ordered)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:8942: in _parse_wrapped_csv\n    return self._parse_wrapped(\nsqlglot/parser.py:8949: in _parse_wrapped\n    self.raise_error(\"Expecting (\")\nsqlglot/parser.py:2102: in raise_error\n    raise error\nE   sqlglot.errors.ParseError: Expecting (. Line 1, Col: 42.\nE     CREATE TABLE t1(id INT KEY AUTO_INCREMENT\u001b[4m)\u001b[0m;\n\nDuring handling of the above exception, another exception occurred:\ntests/dialects/test_reprobot_sqlglot__8225.py:17: in test_create_table_auto_increment\n    self.fail(f\"Parsing failed with ParseError: {e}\")\nE   AssertionError: Parsing failed with ParseError: Expecting (. Line 1, Col: 42.\nE     CREATE TABLE t1(id INT KEY AUTO_INCREMENT\u001b[4m)\u001b[0m;\n=========================== short test summary info ============================\nFAILED tests/dialects/test_reprobot_sqlglot__8225.py::TestIssue8225::test_create_table_auto_increment\n1 failed, 1 passed in 1.28s\n"
+          "output": "44: in <lambda>\n    \"KEY\": lambda self: self._parse_index_constraint(),\n                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/parsers/mysql.py:390: in _parse_index_constraint\n    expressions = self._parse_wrapped_csv(self._parse_ordered)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:8942: in _parse_wrapped_csv\n    return self._parse_wrapped(\nsqlglot/parser.py:8949: in _parse_wrapped\n    self.raise_error(\"Expecting (\")\nsqlglot/parser.py:2102: in raise_error\n    raise error\nE   sqlglot.errors.ParseError: Expecting (. Line 1, Col: 42.\nE     CREATE TABLE t1(id INT KEY AUTO_INCREMENT\u001b[4m)\u001b[0m;\n\nDuring handling of the above exception, another exception occurred:\ntests/dialects/test_reprobot_sqlglot__8225.py:17: in test_create_table_auto_increment\n    self.fail(f\"Parsing failed with ParseError: {e}\")\nE   AssertionError: Parsing failed with ParseError: Expecting (. Line 1, Col: 42.\nE     CREATE TABLE t1(id INT KEY AUTO_INCREMENT\u001b[4m)\u001b[0m;\n=========================== short test summary info ============================\nFAILED tests/dialects/test_reprobot_sqlglot__8225.py::TestIssue8225::test_create_table_auto_increment\n1 failed, 1 passed in 1.18s\n"
         }
       ]
     },
@@ -246,7 +720,7 @@
         "calls": 2,
         "cached_calls": 2
       },
-      "wall_clock_s": 6.6,
+      "wall_clock_s": 6.1,
       "error": null,
       "test_source": "import unittest\nfrom sqlglot import parse, Dialect, exp\nfrom sqlglot.dialects.dialect import NormalizationStrategy\nfrom sqlglot.lineage import lineage\nfrom sqlglot.schema import MappingSchema\nfrom sqlglot.errors import OptimizeError\n\n\nclass TestIssue8244(unittest.TestCase):\n    def test_starrocks_table_valued_function_qualify_columns(self):\n        sql = \"\"\"\n        WITH t AS (\n          SELECT p.user_id, gs.n AS to_deposit_days\n          FROM tbl1 p\n          CROSS JOIN (\n            SELECT generate_series AS n FROM TABLE(generate_series(0, 8000))\n          ) gs\n        ),\n        t2 AS (\n          SELECT t.* FROM t\n        )\n        SELECT user_id, to_deposit_days FROM t2\n        \"\"\"\n\n        dialect = Dialect.get_or_raise('starrocks')\n        dialect.normalization_strategy = NormalizationStrategy.CASE_INSENSITIVE\n        expression = parse(sql, read='starrocks')[0]\n\n        schema = MappingSchema(dialect=dialect)\n        schema.add_table(\"default.tbl1\", column_mapping={\"user_id\": \"BIGINT\"}, match_depth=False)\n\n        # This test should pass without raising OptimizeError\n        try:\n            lineage(column=None, sql=expression, schema=schema, dialect=dialect,\n                    expand_stars=True, validate_qualify_columns=True)\n        except OptimizeError as e:\n            self.fail(f\"lineage() raised OptimizeError unexpectedly: {e}\")\n",
       "test_rel_path": "tests/dialects/test_reprobot_sqlglot__8244.py",
@@ -256,7 +730,7 @@
           "verdict": "reproduced_exception",
           "exception_type": "OptimizeError",
           "reason": "OptimizeError was raised from inside the project's own code (sqlglot/lineage.py:140 in lineage)",
-          "output": "starrocks_table_valued_function_qualify_columns ______\ntests/dialects/test_reprobot_sqlglot__8244.py:34: in test_starrocks_table_valued_function_qualify_columns\n    lineage(column=None, sql=expression, schema=schema, dialect=dialect,\nsqlglot/lineage.py:140: in lineage\n    expression = qualify.qualify(\nsqlglot/optimizer/qualify.py:111: in qualify\n    validate_qualify_columns_func(expression, sql=sql)\nsqlglot/optimizer/qualify_columns.py:150: in validate_qualify_columns\n    raise OptimizeError(error_msg)\nE   sqlglot.errors.OptimizeError: Column 'generate_series' could not be resolved. Line: 6, Col: 34\n\nDuring handling of the above exception, another exception occurred:\ntests/dialects/test_reprobot_sqlglot__8244.py:37: in test_starrocks_table_valued_function_qualify_columns\n    self.fail(f\"lineage() raised OptimizeError unexpectedly: {e}\")\nE   AssertionError: lineage() raised OptimizeError unexpectedly: Column 'generate_series' could not be resolved. Line: 6, Col: 34\n=========================== short test summary info ============================\nFAILED tests/dialects/test_reprobot_sqlglot__8244.py::TestIssue8244::test_starrocks_table_valued_function_qualify_columns\n1 failed in 0.35s\n"
+          "output": "starrocks_table_valued_function_qualify_columns ______\ntests/dialects/test_reprobot_sqlglot__8244.py:34: in test_starrocks_table_valued_function_qualify_columns\n    lineage(column=None, sql=expression, schema=schema, dialect=dialect,\nsqlglot/lineage.py:140: in lineage\n    expression = qualify.qualify(\nsqlglot/optimizer/qualify.py:111: in qualify\n    validate_qualify_columns_func(expression, sql=sql)\nsqlglot/optimizer/qualify_columns.py:150: in validate_qualify_columns\n    raise OptimizeError(error_msg)\nE   sqlglot.errors.OptimizeError: Column 'generate_series' could not be resolved. Line: 6, Col: 34\n\nDuring handling of the above exception, another exception occurred:\ntests/dialects/test_reprobot_sqlglot__8244.py:37: in test_starrocks_table_valued_function_qualify_columns\n    self.fail(f\"lineage() raised OptimizeError unexpectedly: {e}\")\nE   AssertionError: lineage() raised OptimizeError unexpectedly: Column 'generate_series' could not be resolved. Line: 6, Col: 34\n=========================== short test summary info ============================\nFAILED tests/dialects/test_reprobot_sqlglot__8244.py::TestIssue8244::test_starrocks_table_valued_function_qualify_columns\n1 failed in 0.31s\n"
         }
       ]
     },
@@ -276,7 +750,7 @@
         "calls": 2,
         "cached_calls": 2
       },
-      "wall_clock_s": 2.4,
+      "wall_clock_s": 2.2,
       "error": null,
       "test_source": "from collections.abc import Callable\nimport pytest\nfrom tomlkit import parse\nfrom tomlkit import dumps\nfrom tomlkit import loads\nfrom datetime import datetime\nfrom typing import Any\nfrom tomlkit.toml_document import TOMLDocument\n\n\ndef test_missing_newline_after_inline_table() -> None:\n    v = loads(\"\"\"[x]\\na.b = {}\"\"\")\n    v[\"x\"][\"c\"] = 3\n    expected_output = \"\"\"[x]\na.b = {}\nc = 3\n\"\"\"\n    assert dumps(v) == expected_output\n",
       "test_rel_path": "tests/test_reprobot_tomlkit__440.py",
@@ -306,7 +780,7 @@
         "calls": 2,
         "cached_calls": 2
       },
-      "wall_clock_s": 2.5,
+      "wall_clock_s": 2.2,
       "error": null,
       "test_source": "import pytest\nfrom tomlkit import parse\nfrom tomlkit.exceptions import KeyAlreadyPresent, TOMLKitError\n\n\ndef test_value_then_table_split_redefinition_raises_at_parse() -> None:\n    \"\"\"\n    Test that an out-of-order value-vs-table redefinition\n    raises KeyAlreadyPresent at parse time.\n    \"\"\"\n    src = '[a]\\nb = true\\n[zz]\\n[a.b]\\nc = 1\\n'\n    with pytest.raises(KeyAlreadyPresent):\n        parse(src)\n\n\ndef test_dotted_key_then_table_split_redefinition_raises_at_parse() -> None:\n    \"\"\"\n    Test that an out-of-order dotted-key-vs-table redefinition\n    raises KeyAlreadyPresent at parse time.\n    \"\"\"\n    src = '[a]\\nb.c = 1\\n[zz]\\nq = 9\\n[a.b]\\nd = 2\\n'\n    with pytest.raises(KeyAlreadyPresent):\n        parse(src)\n",
       "test_rel_path": "tests/test_reprobot_tomlkit__523.py",
@@ -316,7 +790,7 @@
           "verdict": "reproduced_assertion",
           "exception_type": null,
           "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
-          "output": "__REPROBOT_SANDBOX_READY__\nFF                                                                       [100%]\n=================================== FAILURES ===================================\n___________ test_value_then_table_split_redefinition_raises_at_parse ___________\ntests/test_reprobot_tomlkit__523.py:12: in test_value_then_table_split_redefinition_raises_at_parse\n    with pytest.raises(KeyAlreadyPresent):\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   Failed: DID NOT RAISE KeyAlreadyPresent\n________ test_dotted_key_then_table_split_redefinition_raises_at_parse _________\ntests/test_reprobot_tomlkit__523.py:22: in test_dotted_key_then_table_split_redefinition_raises_at_parse\n    with pytest.raises(KeyAlreadyPresent):\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   Failed: DID NOT RAISE KeyAlreadyPresent\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_tomlkit__523.py::test_value_then_table_split_redefinition_raises_at_parse\nFAILED tests/test_reprobot_tomlkit__523.py::test_dotted_key_then_table_split_redefinition_raises_at_parse\n2 failed in 0.05s\n"
+          "output": "__REPROBOT_SANDBOX_READY__\nFF                                                                       [100%]\n=================================== FAILURES ===================================\n___________ test_value_then_table_split_redefinition_raises_at_parse ___________\ntests/test_reprobot_tomlkit__523.py:12: in test_value_then_table_split_redefinition_raises_at_parse\n    with pytest.raises(KeyAlreadyPresent):\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   Failed: DID NOT RAISE KeyAlreadyPresent\n________ test_dotted_key_then_table_split_redefinition_raises_at_parse _________\ntests/test_reprobot_tomlkit__523.py:22: in test_dotted_key_then_table_split_redefinition_raises_at_parse\n    with pytest.raises(KeyAlreadyPresent):\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   Failed: DID NOT RAISE KeyAlreadyPresent\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_tomlkit__523.py::test_value_then_table_split_redefinition_raises_at_parse\nFAILED tests/test_reprobot_tomlkit__523.py::test_dotted_key_then_table_split_redefinition_raises_at_parse\n2 failed in 0.04s\n"
         }
       ]
     },
@@ -336,7 +810,7 @@
         "calls": 2,
         "cached_calls": 2
       },
-      "wall_clock_s": 2.4,
+      "wall_clock_s": 2.2,
       "error": null,
       "test_source": "import pytest\nimport tomlkit\nfrom tomlkit.exceptions import TOMLKitError\n\n\ndef test_nesting_table_in_inlinetable_raises_error():\n    \"\"\"\n    Test that nesting a Table inside an InlineTable raises a TOMLKitError.\n    \"\"\"\n    t = tomlkit.table()\n    t.append(\"a\", 1)\n\n    it = tomlkit.inline_table()\n\n    with pytest.raises(TOMLKitError, match=\"Inline tables cannot contain other tables\"):\n        it.append(\"table\", t)\n",
       "test_rel_path": "tests/test_reprobot_tomlkit__531.py",
@@ -346,7 +820,7 @@
           "verdict": "reproduced_assertion",
           "exception_type": null,
           "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
-          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n________________ test_nesting_table_in_inlinetable_raises_error ________________\ntests/test_reprobot_tomlkit__531.py:15: in test_nesting_table_in_inlinetable_raises_error\n    with pytest.raises(TOMLKitError, match=\"Inline tables cannot contain other tables\"):\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   Failed: DID NOT RAISE TOMLKitError\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_tomlkit__531.py::test_nesting_table_in_inlinetable_raises_error\n1 failed in 0.05s\n"
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n________________ test_nesting_table_in_inlinetable_raises_error ________________\ntests/test_reprobot_tomlkit__531.py:15: in test_nesting_table_in_inlinetable_raises_error\n    with pytest.raises(TOMLKitError, match=\"Inline tables cannot contain other tables\"):\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   Failed: DID NOT RAISE TOMLKitError\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_tomlkit__531.py::test_nesting_table_in_inlinetable_raises_error\n1 failed in 0.04s\n"
         }
       ]
     },
@@ -362,11 +836,11 @@
       "usage": {
         "prompt_tokens": 6293,
         "completion_tokens": 520,
-        "cost_usd": 0.00142,
+        "cost_usd": 0.0,
         "calls": 3,
-        "cached_calls": 2
+        "cached_calls": 3
       },
-      "wall_clock_s": 5.0,
+      "wall_clock_s": 3.0,
       "error": null,
       "test_source": "from tomlkit import aot\nfrom tomlkit import dumps\nfrom tomlkit import parse\nfrom tomlkit import table\n\n\ndef test_issue_542_aot_captures_too_many_keys() -> None:\n    doc = parse(\"a.b = 1\\nc.d = 2\\n\")\n    aot_obj = aot()\n    t = table()\n    t[\"x\"] = 9\n    aot_obj.append(t)\n    doc[\"a\"] = aot_obj\n    # The bug causes 'c.d = 2' to be incorrectly captured within the AOT 'a'.\n    # The expected output should have 'c.d = 2' outside of 'a'.\n    expected_dump = \"a.b = 1\\n[[a]]\\nx = 9\\n\\nc.d = 2\\n\"\n    assert dumps(doc) == expected_dump\n",
       "test_rel_path": "tests/test_reprobot_tomlkit__542.py",
@@ -399,11 +873,11 @@
       "usage": {
         "prompt_tokens": 5063,
         "completion_tokens": 558,
-        "cost_usd": 0.001448,
+        "cost_usd": 0.0,
         "calls": 3,
-        "cached_calls": 2
+        "cached_calls": 3
       },
-      "wall_clock_s": 5.4,
+      "wall_clock_s": 2.9,
       "error": null,
       "test_source": "import tomlkit\n\n\ndef test_scalar_not_captured_by_dictionary():\n    doc = tomlkit.loads(\"a.b = 1\\n\")\n    doc[\"a\"][\"c\"] = {}\n    doc[\"z\"] = 2\n\n    # The bug causes 'z = 2' to be nested under '[a.c]'\n    # The expected output should have 'z = 2' as a top-level key.\n    expected_output = \"\"\"a.b = 1\n\n[a.c]\nz = 2\n\"\"\"\n    # The bug causes the output to be:\n    # a.b = 1\n    #\n    # [a.c]\n    # z = 2\n    #\n    # The correct output should be:\n    # a.b = 1\n    #\n    # [a.c]\n    # z = 2\n    #\n    # This is the *buggy* output, which the original report states is wrong.\n    # The test should assert what the output *should* be.\n    # The 'z = 2' should be a top-level key, not nested under [a.c].\n    assert tomlkit.dumps(doc) == \"\"\"a.b = 1\n\n[a.c]\n\nz = 2\n\"\"\"\n",
       "test_rel_path": "tests/test_reprobot_tomlkit__543.py",
@@ -420,7 +894,7 @@
           "verdict": "reproduced_assertion",
           "exception_type": "AssertionError",
           "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
-          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n____________________ test_scalar_not_captured_by_dictionary ____________________\ntests/test_reprobot_tomlkit__543.py:31: in test_scalar_not_captured_by_dictionary\n    assert tomlkit.dumps(doc) == \"\"\"a.b = 1\nE   AssertionError: assert 'a.b = 1\\n\\n[a.c]\\nz = 2\\n' == 'a.b = 1\\n\\n[a.c]\\n\\nz = 2\\n'\nE     \nE       a.b = 1\nE       \nE       [a.c]\nE     - \nE       z = 2\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_tomlkit__543.py::test_scalar_not_captured_by_dictionary\n1 failed in 0.05s\n"
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n____________________ test_scalar_not_captured_by_dictionary ____________________\ntests/test_reprobot_tomlkit__543.py:31: in test_scalar_not_captured_by_dictionary\n    assert tomlkit.dumps(doc) == \"\"\"a.b = 1\nE   AssertionError: assert 'a.b = 1\\n\\n[a.c]\\nz = 2\\n' == 'a.b = 1\\n\\n[a.c]\\n\\nz = 2\\n'\nE     \nE       a.b = 1\nE       \nE       [a.c]\nE     - \nE       z = 2\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_tomlkit__543.py::test_scalar_not_captured_by_dictionary\n1 failed in 0.04s\n"
         }
       ]
     },
@@ -436,11 +910,11 @@
       "usage": {
         "prompt_tokens": 10271,
         "completion_tokens": 1838,
-        "cost_usd": 0.004669,
+        "cost_usd": 0.0,
         "calls": 4,
-        "cached_calls": 2
+        "cached_calls": 4
       },
-      "wall_clock_s": 11.1,
+      "wall_clock_s": 2.9,
       "error": null,
       "test_source": "import pytest\nimport tomlkit\nfrom tomlkit.items import Array\nfrom tomlkit.items import Float\n\n\ndef test_array_of_floats_with_torch_tensor_conversion_fails_with_type_error():\n    \"\"\"\n    Test that passing a tomlkit Array of Float items directly to torch.tensor\n    raises a TypeError, specifically \"object of type 'Float' has no len()\",\n    as described in the bug report.\n\n    This test should fail with the buggy version of tomlkit (0.15.0) and pass\n    once the bug is fixed, because the Array item should implicitly convert\n    its Float items to Python floats when iterated over in a context like\n    torch.tensor.\n    \"\"\"\n    toml_str = \"\"\"\n    a = [1.0, 2.0, 3.0]\n    \"\"\"\n    arr = tomlkit.loads(toml_str)\n\n    # Ensure that arr['a'] is an Array item\n    assert isinstance(arr[\"a\"], Array)\n\n    # Ensure that elements within the Array are Float items\n    assert all(isinstance(item, Float) for item in arr[\"a\"])\n\n    try:\n        import torch\n    except ImportError:\n        pytest.skip(\"PyTorch not installed, cannot test torch.tensor specific bug.\")\n        return\n\n    # The bug report states that this line causes a TypeError.\n    # The expected behavior (after fix) is that it should successfully create a tensor.\n    # Therefore, to make the test fail *now* and pass *later*, we assert that\n    # it *should* work, and catch the TypeError if it doesn't.\n    # This means the test will fail if the TypeError occurs, and pass if it doesn't.\n    try:\n        t = torch.tensor(arr[\"a\"], dtype=torch.float32)\n        # If we reach here, it means the bug is fixed or not present.\n        # We assert the type and content of the tensor to ensure correctness.\n        assert isinstance(t, torch.Tensor)\n        assert t.tolist() == [1.0, 2.0, 3.0]\n        assert t.dtype == torch.float32\n    except TypeError as e:\n        # This block should be hit when the bug is present.\n        # We re-raise the error to make the test fail, but only if it's the\n        # specific error described in the bug report.\n        if \"object of type 'Float' has no len()\" in str(e):\n            pytest.fail(\n                f\"Bug #562: torch.tensor failed with 'object of type 'Float' has no len()'. \"\n                \"This test should fail until the bug is fixed.\"\n            )\n        else:\n            # If it's a different TypeError, re-raise it as an unexpected error.\n            raise\n",
       "test_rel_path": "tests/test_reprobot_tomlkit__562.py",

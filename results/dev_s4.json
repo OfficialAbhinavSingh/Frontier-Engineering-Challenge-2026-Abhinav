@@ -1,15 +1,17 @@
 {
   "variant": "s4",
+  "tag": "",
+  "temperature": 0.0,
   "description": "adds cross-case repository memory (full Repro-Bot)",
   "model": "google/gemini-2.5-flash",
-  "n_cases": 6,
-  "f2p_solved": 3,
-  "f2p_rate": 0.5,
-  "total_cost_usd": 0.0,
-  "total_llm_calls": 12,
+  "n_cases": 13,
+  "f2p_solved": 4,
+  "f2p_rate": 0.3077,
+  "total_cost_usd": 0.025,
+  "total_llm_calls": 29,
   "cached_llm_calls": 12,
-  "mean_wall_clock_s": 3.5,
-  "wall_clock_total_s": 21.2,
+  "mean_wall_clock_s": 7.2,
+  "wall_clock_total_s": 93.2,
   "results": [
     {
       "case_id": "click__2263",
@@ -27,7 +29,7 @@
         "calls": 2,
         "cached_calls": 2
       },
-      "wall_clock_s": 2.7,
+      "wall_clock_s": 2.5,
       "error": null,
       "test_source": "import pytest\nimport click\nfrom click.testing import CliRunner\n\n\n@pytest.fixture\ndef runner():\n    return CliRunner()\n\n\ndef test_deprecated_option(runner):\n    @click.command()\n    @click.option(\"--old-name\", deprecated=True, help=\"This is the old name.\")\n    @click.option(\"--new-name\", help=\"This is the new name.\")\n    def cli(old_name, new_name):\n        if old_name:\n            click.echo(f\"Old name used: {old_name}\")\n        if new_name:\n            click.echo(f\"New name used: {new_name}\")\n\n    # Test using the deprecated option\n    result = runner.invoke(cli, [\"--old-name\", \"value\"])\n    assert \"Deprecated: Option '--old-name' is deprecated.\" in result.output\n    assert \"Old name used: value\" in result.output\n    assert result.exit_code == 0\n\n    # Test using the new option\n    result = runner.invoke(cli, [\"--new-name\", \"value\"])\n    assert \"Deprecated: Option '--old-name' is deprecated.\" not in result.output\n    assert \"New name used: value\" in result.output\n    assert result.exit_code == 0\n\n    # Test help message includes deprecation warning\n    result = runner.invoke(cli, [\"--help\"])\n    assert \"Deprecated: Option '--old-name' is deprecated.\" in result.output\n    assert \"--old-name TEXT  [deprecated] This is the old name.\" in result.output\n    assert \"--new-name TEXT  This is the new name.\" in result.output\n\n    # Test using both deprecated and new option (should warn for deprecated)\n    @click.command()\n    @click.option(\"--count\", deprecated=True, help=\"Old count option.\")\n    @click.option(\"--greetings-count\", help=\"New greetings count option.\")\n    def hello(count, greetings_count):\n        if count is not None:\n            click.echo(f\"Count: {count}\")\n        if greetings_count is not None:\n            click.echo(f\"Greetings Count: {greetings_count}\")\n\n    result = runner.invoke(hello, [\"--count\", \"5\", \"--greetings-count\", \"10\"])\n    assert \"Deprecated: Option '--count' is deprecated.\" in result.output\n    assert \"Count: 5\" in result.output\n    assert \"Greetings Count: 10\" in result.output\n    assert result.exit_code == 0\n",
       "test_rel_path": "tests/test_reprobot_click__2263.py",
@@ -57,7 +59,7 @@
         "calls": 2,
         "cached_calls": 2
       },
-      "wall_clock_s": 2.6,
+      "wall_clock_s": 2.5,
       "error": null,
       "test_source": "import os\nimport pytest\nimport click\nfrom click.testing import CliRunner\nfrom click.shell_completion import BashComplete\nfrom click.shell_completion import ZshComplete\nfrom click.shell_completion import FishComplete\n\n\n@pytest.fixture\ndef runner():\n    return CliRunner()\n\n\n@pytest.mark.parametrize(\"shell\", [\"bash\", \"zsh\", \"fish\"])\ndef test_file_option_completion_closes_file(runner, shell, tmp_path):\n    test_file = tmp_path / \"test.txt\"\n    test_file.write_text(\"hello\")\n\n    @click.group()\n    @click.option(\n        \"--config-file\",\n        default=str(test_file),\n        type=click.File(mode=\"r\"),\n        help=\"A config file.\",\n    )\n    def cli(config_file):\n        pass\n\n    # Simulate shell completion environment variables\n    env = {\n        f\"_{cli.name.upper()}_COMPLETE\": f\"{shell}_complete\",\n        \"COMP_WORDS\": \"cli --config-file\",\n        \"COMP_CWORD\": \"2\",\n        \"COMP_POINT\": \"18\",\n    }\n    if shell == \"zsh\":\n        env[\"_CLI_COMPLETE_LINE\"] = \"cli --config-file \"\n        env[\"_CLI_COMPLETE_POINT\"] = \"18\"\n    elif shell == \"fish\":\n        env[\"_CLI_COMPLETE_LINE\"] = \"cli --config-file \"\n        env[\"_CLI_COMPLETE_POINT\"] = \"18\"\n\n    # Run completion and check for ResourceWarning\n    with pytest.warns(ResourceWarning) as record:\n        result = runner.invoke(cli, [\"--completion\", f\"{shell}_complete\"], env=env)\n\n    # The bug is that the file is not closed, leading to a ResourceWarning.\n    # If the bug is fixed, there should be no ResourceWarning.\n    assert not record.list, \"ResourceWarning was raised, file was not closed.\"\n    assert result.exit_code == 0\n",
       "test_rel_path": "tests/test_reprobot_click__2644.py",
@@ -67,7 +69,231 @@
           "verdict": "reproduced_assertion",
           "exception_type": "AssertionError",
           "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
-          "output": "ile_option_completion_closes_file\n    assert not record.list, \"ResourceWarning was raised, file was not closed.\"\nE   AssertionError: ResourceWarning was raised, file was not closed.\nE   assert not [<warnings.WarningMessage object at 0x7f6f95189580>]\nE    +  where [<warnings.WarningMessage object at 0x7f6f95189580>] = WarningsChecker(record=True).list\n________________ test_file_option_completion_closes_file[fish] _________________\ntests/test_reprobot_click__2644.py:50: in test_file_option_completion_closes_file\n    assert not record.list, \"ResourceWarning was raised, file was not closed.\"\nE   AssertionError: ResourceWarning was raised, file was not closed.\nE   assert not [<warnings.WarningMessage object at 0x7f6f9518a750>]\nE    +  where [<warnings.WarningMessage object at 0x7f6f9518a750>] = WarningsChecker(record=True).list\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_click__2644.py::test_file_option_completion_closes_file[bash]\nFAILED tests/test_reprobot_click__2644.py::test_file_option_completion_closes_file[zsh]\nFAILED tests/test_reprobot_click__2644.py::test_file_option_completion_closes_file[fish]\n3 failed in 0.03s\n"
+          "output": "ile_option_completion_closes_file\n    assert not record.list, \"ResourceWarning was raised, file was not closed.\"\nE   AssertionError: ResourceWarning was raised, file was not closed.\nE   assert not [<warnings.WarningMessage object at 0x7f2548151040>]\nE    +  where [<warnings.WarningMessage object at 0x7f2548151040>] = WarningsChecker(record=True).list\n________________ test_file_option_completion_closes_file[fish] _________________\ntests/test_reprobot_click__2644.py:50: in test_file_option_completion_closes_file\n    assert not record.list, \"ResourceWarning was raised, file was not closed.\"\nE   AssertionError: ResourceWarning was raised, file was not closed.\nE   assert not [<warnings.WarningMessage object at 0x7f2548152090>]\nE    +  where [<warnings.WarningMessage object at 0x7f2548152090>] = WarningsChecker(record=True).list\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_click__2644.py::test_file_option_completion_closes_file[bash]\nFAILED tests/test_reprobot_click__2644.py::test_file_option_completion_closes_file[zsh]\nFAILED tests/test_reprobot_click__2644.py::test_file_option_completion_closes_file[fish]\n3 failed in 0.03s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "jinja__1253",
+      "repo": "pallets/jinja",
+      "variant": "s4",
+      "f2p": false,
+      "score_reason": "did_not_pass_at_fix:failed",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": true,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 5748,
+        "completion_tokens": 861,
+        "cost_usd": 0.003877,
+        "calls": 2,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 9.1,
+      "error": null,
+      "test_source": "import pytest\nfrom jinja2 import Environment\nfrom jinja2 import UndefinedError\nfrom jinja2 import DictLoader\n\ndef test_issue_1253_elif_undefined_error(env):\n    template_string = \"\"\"\n    {% if new_data_set_created is defined %}\n        {% if new_data_set_created == True %}\n            The new image data set <strong>{{ form_data[\"data_set_name\"] }}</strong> has been created.\n            {% set form_data = {\"data_set_name\": \"\", \"client\": \"\", \"project\": \"\"} %}\n        {% else %}\n            The new image data set <strong>{{ form_data[\"data_set_name\"] }}</strong> could not be created.<br />\n        {% endif %}\n    {% elif deleted_data_set is defined %}\n        The image data set <strong>{{ deleted_data_set }}</strong> has been deleted from DB and from disk.\n        {% set form_data = {\"data_set_name\": \"\", \"client\": \"\", \"project\": \"\"} %}\n    {% else %}\n        {% set form_data = {\"data_set_name\": \"\", \"client\": \"\", \"project\": \"\"} %}\n    {% endif %}\n    \"\"\"\n    env.loader = DictLoader({\"image-data-sets.html\": template_string})\n    template = env.get_template(\"image-data-sets.html\")\n\n    # This call should raise an UndefinedError because form_data is not passed\n    # when new_data_set_created is not defined, and the elif branch is taken.\n    # The bug is that the `elif` branch causes `form_data` to be undefined\n    # in the `else` block of the outer if, even if it's defined in the context.\n    with pytest.raises(UndefinedError) as excinfo:\n        template.render(deleted_data_set=\"test_dataset\")\n\n    assert \"'form_data' is undefined\" in str(excinfo.value)\n\n    # This call should work without error, as form_data is provided and\n    # new_data_set_created is True, so the first branch is taken.\n    # This is to confirm that the template works when form_data is explicitly\n    # used in the first branch.\n    result = template.render(new_data_set_created=True, form_data={\"data_set_name\": \"test_name\"})\n    assert \"The new image data set <strong>test_name</strong> has been created.\" in result\n\n    # This call should also work without error, as form_data is provided and\n    # new_data_set_created is False, so the second branch of the inner if is taken.\n    result = template.render(new_data_set_created=False, form_data={\"data_set_name\": \"test_name\"})\n    assert \"The new image data set <strong>test_name</strong> could not be created.\" in result\n\n    # This call should work without error, as form_data is provided and\n    # new_data_set_created is not defined, but the else branch is taken,\n    # where form_data is set.\n    result = template.render(form_data={\"data_set_name\": \"initial_name\"})\n    assert \"\" in result # The else branch just sets form_data, produces no output\n",
+      "test_rel_path": "tests/test_reprobot_jinja__1253.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "reproduced_assertion",
+          "exception_type": null,
+          "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n_____________________ test_issue_1253_elif_undefined_error _____________________\ntests/test_reprobot_jinja__1253.py:29: in test_issue_1253_elif_undefined_error\n    with pytest.raises(UndefinedError) as excinfo:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   Failed: DID NOT RAISE UndefinedError\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_jinja__1253.py::test_issue_1253_elif_undefined_error\n1 failed in 0.02s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "jinja__1413",
+      "repo": "pallets/jinja",
+      "variant": "s4",
+      "f2p": false,
+      "score_reason": "did_not_pass_at_fix:failed",
+      "verdict_at_parent": "reproduced_exception",
+      "self_reproduces": true,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 5936,
+        "completion_tokens": 301,
+        "cost_usd": 0.002533,
+        "calls": 2,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 7.9,
+      "error": null,
+      "test_source": "import pytest\nfrom jinja2 import Environment\nfrom jinja2 import TemplateSyntaxError\n\n\ndef test_namespace_multi_variable_assignment(env):\n    template = \"\"\"\n        {% set full = namespace(id=\"\", prev_id=\"\") -%}\n        {% for id in endpoints recursive %}\n          {% set full.prev_id, full.id = full.id, full.id + \"/\" + id -%}\n        {% endfor -%}\n        {{ full.id }}\n    \"\"\"\n    env = Environment()\n    tmpl = env.from_string(template)\n    # The bug causes a TemplateSyntaxError during compilation.\n    # If the bug is fixed, this should render correctly.\n    assert tmpl.render(endpoints=[\"a\", \"b\"]) == \"/a/b\"\n",
+      "test_rel_path": "tests/test_reprobot_jinja__1413.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "reproduced_exception",
+          "exception_type": "TemplateSyntaxError",
+          "reason": "TemplateSyntaxError was raised from inside the project's own code (src/jinja2/environment.py:1111 in from_string)",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n___________________ test_namespace_multi_variable_assignment ___________________\ntests/test_reprobot_jinja__1413.py:15: in test_namespace_multi_variable_assignment\n    tmpl = env.from_string(template)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nsrc/jinja2/environment.py:1111: in from_string\n    return cls.from_code(self, self.compile(source), gs, None)\n                               ^^^^^^^^^^^^^^^^^^^^\nsrc/jinja2/environment.py:771: in compile\n    self.handle_exception(source=source_hint)\nsrc/jinja2/environment.py:942: in handle_exception\n    raise rewrite_traceback_stack(source=source)\n<unknown>:4: in template\n    ???\nE   jinja2.exceptions.TemplateSyntaxError: expected token 'end of statement block', got ','\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_jinja__1413.py::test_namespace_multi_variable_assignment\n1 failed in 0.04s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "jinja__1430",
+      "repo": "pallets/jinja",
+      "variant": "s4",
+      "f2p": false,
+      "score_reason": "did_not_pass_at_fix:failed",
+      "verdict_at_parent": "reproduced_exception",
+      "self_reproduces": true,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 3612,
+        "completion_tokens": 1008,
+        "cost_usd": 0.003604,
+        "calls": 2,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 11.5,
+      "error": null,
+      "test_source": "import pytest\nfrom jinja2 import Environment\nfrom jinja2 import DictLoader\nfrom jinja2.ext import i18n\n\n\nclass TestI18nBlockPGettext:\n    def test_block_pgettext(self):\n        env = Environment(\n            loader=DictLoader(\n                {\n                    \"main\": \"\"\"\n                        {% pgettext \"my_context\" %}Hello{% endpgettext %}\n                        {% pgettext \"another_context\" %}World{% endpgettext %}\n                    \"\"\"\n                }\n            ),\n            extensions=[i18n],\n        )\n\n        # Mock the gettext functions to observe calls\n        calls = []\n\n        def mock_pgettext(context, message):\n            calls.append((\"pgettext\", context, message))\n            return f\"[{context}]{message}\"\n\n        env.install_gettext_callables(lambda x: x, lambda s, p, n: s, mock_pgettext, lambda c, s, p, n: s)\n\n        template = env.get_template(\"main\")\n        result = template.render()\n\n        assert result.strip() == \"[my_context]Hello\\n[another_context]World\"\n        assert calls == [\n            (\"pgettext\", \"my_context\", \"Hello\"),\n            (\"pgettext\", \"another_context\", \"World\"),\n        ]\n\n    def test_block_pgettext_with_variables(self):\n        env = Environment(\n            loader=DictLoader(\n                {\n                    \"main\": \"\"\"\n                        {% pgettext \"greeting\" name=\"John\" %}Hello, %(name)s!{% endpgettext %}\n                    \"\"\"\n                }\n            ),\n            extensions=[i18n],\n        )\n\n        calls = []\n\n        def mock_pgettext(context, message):\n            calls.append((\"pgettext\", context, message))\n            return f\"[{context}]{message}\"\n\n        env.install_gettext_callables(lambda x: x, lambda s, p, n: s, mock_pgettext, lambda c, s, p, n: s)\n\n        template = env.get_template(\"main\")\n        result = template.render()\n\n        assert result.strip() == \"[greeting]Hello, John!\"\n        assert calls == [\n            (\"pgettext\", \"greeting\", \"Hello, %(name)s!\"),\n        ]\n\n    def test_block_pgettext_with_pluralize(self):\n        env = Environment(\n            loader=DictLoader(\n                {\n                    \"main\": \"\"\"\n                        {% pgettext \"item_count\" num=1 %}One item{% pluralize %}{{ num }} items{% endpgettext %}\n                        {% pgettext \"item_count\" num=5 %}One item{% pluralize %}{{ num }} items{% endpgettext %}\n                    \"\"\"\n                }\n            ),\n            extensions=[i18n],\n        )\n\n        calls = []\n\n        def mock_npgettext(context, singular, plural, n):\n            calls.append((\"npgettext\", context, singular, plural, n))\n            if n == 1:\n                return f\"[{context}]{singular}\"\n            return f\"[{context}]{plural}\"\n\n        env.install_gettext_callables(lambda x: x, lambda s, p, n: s, lambda c, m: m, mock_npgettext)\n\n        template = env.get_template(\"main\")\n        result = template.render()\n\n        expected = \"[item_count]One item\\n[item_count]5 items\"\n        assert result.strip() == expected\n        assert calls == [\n            (\"npgettext\", \"item_count\", \"One item\", \"%(num)s items\", 1),\n            (\"npgettext\", \"item_count\", \"One item\", \"%(num)s items\", 5),\n        ]\n",
+      "test_rel_path": "tests/test_reprobot_jinja__1430.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "reproduced_exception",
+          "exception_type": "TemplateSyntaxError",
+          "reason": "TemplateSyntaxError was raised from inside the project's own code (src/jinja2/environment.py:998 in get_template)",
+          "output": "           ^^^^^^^^^^^^^^^^^^^^^^^^\nsrc/jinja2/environment.py:998: in get_template\n    return self._load_template(name, globals)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsrc/jinja2/environment.py:959: in _load_template\n    template = self.loader.load(self, name, self.make_globals(globals))\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsrc/jinja2/loaders.py:137: in load\n    code = environment.compile(source, name, filename)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsrc/jinja2/environment.py:758: in compile\n    self.handle_exception(source=source_hint)\nsrc/jinja2/environment.py:926: in handle_exception\n    raise rewrite_traceback_stack(source=source)\n<unknown>:2: in template\n    ???\nE   jinja2.exceptions.TemplateSyntaxError: Encountered unknown tag 'pgettext'.\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_jinja__1430.py::TestI18nBlockPGettext::test_block_pgettext\nFAILED tests/test_reprobot_jinja__1430.py::TestI18nBlockPGettext::test_block_pgettext_with_variables\nFAILED tests/test_reprobot_jinja__1430.py::TestI18nBlockPGettext::test_block_pgettext_with_pluralize\n3 failed in 0.13s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "jsonschema__1389",
+      "repo": "python-jsonschema/jsonschema",
+      "variant": "s4",
+      "f2p": false,
+      "score_reason": "did_not_pass_at_fix:failed",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": true,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 5274,
+        "completion_tokens": 494,
+        "cost_usd": 0.002817,
+        "calls": 2,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 8.6,
+      "error": null,
+      "test_source": "import jsonschema\nfrom jsonschema import ValidationError\n\n\ndef test_json_path_escapes_special_characters():\n    \"\"\"\n    The json_path property should correctly escape property names with special\n    characters or that are empty.\n    \"\"\"\n    keys = [\"\", \"[\", \".\", \"\\\\\", \"'\", \" \", \"\\\"\", \"a[0]\", \"foo-bar\"]\n    schema = {\n        \"properties\": {key: {\"type\": \"string\"} for key in keys},\n    }\n    instance = {\n        key: None for key in keys\n    }\n\n    validator = jsonschema.Draft7Validator(schema)\n    errors = sorted(validator.iter_errors(instance), key=lambda e: str(e.path[-1]))\n\n    expected_json_paths = {\n        \"\": \"$['']\",\n        \" \": \"$[' ']\",\n        \"'\": \"$[\\\"'\\\"]\",\n        \"\\\"\": \"$['\\\"']\",\n        \".\": \"$['.']\",\n        \"\\\\\": \"$['\\\\\\\\']\",\n        \"[\": \"$['[']\",\n        \"a[0]\": \"$['a[0]']\",\n        \"foo-bar\": \"$.foo-bar\",\n    }\n\n    for error in errors:\n        property_name = error.path[-1]\n        assert error.json_path == expected_json_paths[property_name], \\\n            f\"For property {property_name!r}, expected json_path {expected_json_paths[property_name]!r}, got {error.json_path!r}\"\n",
+      "test_rel_path": "jsonschema/tests/test_reprobot_jsonschema__1389.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "reproduced_assertion",
+          "exception_type": "AssertionError",
+          "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n__________________ test_json_path_escapes_special_characters ___________________\njsonschema/tests/test_reprobot_jsonschema__1389.py:35: in test_json_path_escapes_special_characters\n    assert error.json_path == expected_json_paths[property_name], \\\nE   AssertionError: For property '', expected json_path \"$['']\", got '$.'\nE   assert '$.' == \"$['']\"\nE     \nE     - $['']\nE     + $.\n=========================== short test summary info ============================\nFAILED jsonschema/tests/test_reprobot_jsonschema__1389.py::test_json_path_escapes_special_characters\n1 failed in 0.12s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "rich__3569",
+      "repo": "Textualize/rich",
+      "variant": "s4",
+      "f2p": false,
+      "score_reason": "did_not_pass_at_fix:failed",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": true,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 2076,
+        "completion_tokens": 1040,
+        "cost_usd": 0.003223,
+        "calls": 2,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 11.8,
+      "error": null,
+      "test_source": "import pytest\nfrom rich.console import Console\nfrom rich.panel import Panel\nfrom rich.style import Style\nimport io\n\ndef test_panel_title_style_with_background_color():\n    \"\"\"\n    Test that the title of a Panel respects the background color\n    defined in the Panel's style, even when the title itself has\n    inline styling.\n    \"\"\"\n    console = Console(file=io.StringIO(), width=80, color_system=\"truecolor\")\n    panel_style = Style(color=\"white\", bgcolor=\"blue\")\n    panel = Panel(\"Content\", title='[bold white]Title[/bold white]', style=panel_style)\n\n    # Render the panel to capture the output\n    console.print(panel)\n    output = console.file.getvalue()\n\n    # The bug is that the background color from the panel_style is not applied\n    # to the title area when the title has its own inline style.\n    # We expect to see the blue background color applied to the title.\n    # This is a simplified check, as parsing ANSI escape codes precisely\n    # is complex. We'll look for the blue background color code (48;2;0;0;255m)\n    # around the title text.\n    # The exact sequence might vary slightly depending on how rich renders it,\n    # but the blue background should be present.\n    # A common sequence for blue background is \\x1b[48;2;0;0;255m\n    # and for bold white foreground is \\x1b[1;38;2;255;255;255m\n    # We expect the blue background to be applied to the title area.\n    # The bug manifests as the blue background being absent from the title line.\n\n    # Look for the blue background color code (48;2;0;0;255m)\n    # and the bold white foreground color code (1;38;2;255;255;255m)\n    # around the word \"Title\".\n    # The exact position might vary, but the blue background should be active\n    # when \"Title\" is printed.\n\n    # This is a heuristic check. A more robust test would involve\n    # parsing the ANSI codes, but for a regression test, checking for\n    # the presence of the expected color sequence near the title is often sufficient.\n    # The bug implies that the background color from the panel's style\n    # is *not* applied to the title line. So, we assert that it *is* present.\n\n    # Expected sequence for bold white text on blue background:\n    # \\x1b[48;2;0;0;255m\\x1b[1;38;2;255;255;255mTitle\\x1b[0m\n    # Or, the background might be set first, then the foreground, then the text.\n    # The key is that the blue background escape code should appear before \"Title\"\n    # and be active for the title text.\n\n    # A simpler check: the blue background color should be present in the output\n    # on the line containing \"Title\".\n    title_line_found = False\n    blue_bg_found_on_title_line = False\n    for line in output.splitlines():\n        if \"Title\" in line:\n            title_line_found = True\n            # Check for the blue background color escape code\n            # \\x1b[48;2;0;0;255m is the truecolor blue background\n            if \"\\x1b[48;2;0;0;255m\" in line:\n                blue_bg_found_on_title_line = True\n            break\n\n    assert title_line_found, \"Title 'Title' not found in output.\"\n    assert blue_bg_found_on_title_line, (\n        \"Expected blue background color (48;2;0;0;255m) not found \"\n        \"on the line containing the Panel title. \"\n        \"This indicates the panel's background style is not applied to the title.\"\n    )\n",
+      "test_rel_path": "tests/test_reprobot_rich__3569.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "reproduced_assertion",
+          "exception_type": "AssertionError",
+          "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n_________________ test_panel_title_style_with_background_color _________________\ntests/test_reprobot_rich__3569.py:66: in test_panel_title_style_with_background_color\n    assert blue_bg_found_on_title_line, (\nE   AssertionError: Expected blue background color (48;2;0;0;255m) not found on the line containing the Panel title. This indicates the panel's background style is not applied to the title.\nE   assert False\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_rich__3569.py::test_panel_title_style_with_background_color\n1 failed in 0.11s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "rich__3577",
+      "repo": "Textualize/rich",
+      "variant": "s4",
+      "f2p": true,
+      "score_reason": "ok",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": true,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 5870,
+        "completion_tokens": 746,
+        "cost_usd": 0.003626,
+        "calls": 2,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 9.0,
+      "error": null,
+      "test_source": "import io\nimport pytest\nfrom rich.style import Style\nfrom rich.text import Text\nfrom rich.console import Console\nfrom rich.measure import Measurement\n\n\ndef test_from_ansi_trailing_newline():\n    \"\"\"\n    Test that Text.from_ansi() does not remove a trailing newline.\n    \"\"\"\n    # Test case 1: Single newline character\n    text_with_newline = Text.from_ansi(\"\\n\")\n    expected_text_with_newline = Text(\"\\n\")\n    assert text_with_newline == expected_text_with_newline, (\n        f\"Expected Text('{expected_text_with_newline.plain}') \"\n        f\"but got Text('{text_with_newline.plain}') for input '\\\\n'\"\n    )\n\n    # Test case 2: Text ending with a single newline\n    text_ending_with_newline = Text.from_ansi(\"hello\\n\")\n    expected_text_ending_with_newline = Text(\"hello\\n\")\n    assert text_ending_with_newline == expected_text_ending_with_newline, (\n        f\"Expected Text('{expected_text_ending_with_newline.plain}') \"\n        f\"but got Text('{text_ending_with_newline.plain}') for input 'hello\\\\n'\"\n    )\n\n    # Test case 3: Text ending with multiple newlines\n    text_ending_with_multiple_newlines = Text.from_ansi(\"world\\n\\n\")\n    expected_text_ending_with_multiple_newlines = Text(\"world\\n\\n\")\n    assert text_ending_with_multiple_newlines == expected_text_ending_with_multiple_newlines, (\n        f\"Expected Text('{expected_text_ending_with_multiple_newlines.plain}') \"\n        f\"but got Text('{text_ending_with_multiple_newlines.plain}') for input 'world\\\\n\\\\n'\"\n    )\n\n    # Test case 4: Text without a trailing newline (should remain unchanged)\n    text_no_newline = Text.from_ansi(\"plain text\")\n    expected_text_no_newline = Text(\"plain text\")\n    assert text_no_newline == expected_text_no_newline, (\n        f\"Expected Text('{expected_text_no_newline.plain}') \"\n        f\"but got Text('{text_no_newline.plain}') for input 'plain text'\"\n    )\n\n    # Test case 5: Empty string\n    empty_text = Text.from_ansi(\"\")\n    expected_empty_text = Text(\"\")\n    assert empty_text == expected_empty_text, (\n        f\"Expected Text('{expected_empty_text.plain}') \"\n        f\"but got Text('{empty_text.plain}') for input ''\"\n    )\n",
+      "test_rel_path": "tests/test_reprobot_rich__3577.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "reproduced_assertion",
+          "exception_type": "AssertionError",
+          "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n_______________________ test_from_ansi_trailing_newline ________________________\ntests/test_reprobot_rich__3577.py:16: in test_from_ansi_trailing_newline\n    assert text_with_newline == expected_text_with_newline, (\nE   AssertionError: Expected Text('\nE     ') but got Text('') for input '\\n'\nE   assert <text '' [] ''> == <text '\\n' [] ''>\nE     \nE     Use -v to get more diff\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_rich__3577.py::test_from_ansi_trailing_newline - A...\n1 failed in 0.08s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "rich__3740",
+      "repo": "Textualize/rich",
+      "variant": "s4",
+      "f2p": false,
+      "score_reason": "did_not_fail_at_parent:passed",
+      "verdict_at_parent": "no_fail",
+      "self_reproduces": false,
+      "rounds": 3,
+      "usage": {
+        "prompt_tokens": 9377,
+        "completion_tokens": 991,
+        "cost_usd": 0.005291,
+        "calls": 5,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 15.2,
+      "error": null,
+      "test_source": "import pytest\nfrom rich.style import Style\nfrom rich.text import Text, Span\n\n\ndef test_assemble_meta_python_314_bug():\n    \"\"\"\n    Test for issue #3740 where the comparison of Style objects with meta\n    attributes was failing in Python 3.14.\n\n    The bug report shows that the assertion `assert text._spans == [...]`\n    fails, specifically complaining about the `Style(meta={\"foo\": \"bar\"})`\n    part, even though the `repr` of the expected and actual `Style` objects\n    look identical. This suggests an issue with `Style.__eq__` when `meta`\n    is present, particularly in Python 3.14.\n\n    This test asserts the exact list of spans that the Text object should\n    produce, including the Style object with its meta attribute.\n    \"\"\"\n    text = Text.assemble(\"foo\", (\"bar\", \"bold\"), meta={\"foo\": \"bar\"})\n    assert str(text) == \"foobar\"\n\n    # The bug is in the comparison of the Style object itself.\n    # We need to assert the full list of spans as the bug report does.\n    # The failure is expected to be on the second Span's style.\n    expected_spans = [Span(3, 6, \"bold\"), Span(0, 6, Style(meta={\"foo\": \"bar\"}))]\n    assert text._spans == expected_spans\n",
+      "test_rel_path": "tests/test_reprobot_rich__3740.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "no_fail",
+          "exception_type": null,
+          "reason": "the test passed at the buggy commit, so it does not demonstrate the reported behaviour",
+          "output": "__REPROBOT_SANDBOX_READY__\n.                                                                        [100%]\n1 passed in 0.05s\n"
+        },
+        {
+          "round": 2,
+          "verdict": "no_fail",
+          "exception_type": null,
+          "reason": "the test passed at the buggy commit, so it does not demonstrate the reported behaviour",
+          "output": "__REPROBOT_SANDBOX_READY__\n.                                                                        [100%]\n1 passed in 0.05s\n"
+        },
+        {
+          "round": 3,
+          "verdict": "no_fail",
+          "exception_type": null,
+          "reason": "the test passed at the buggy commit, so it does not demonstrate the reported behaviour",
+          "output": "__REPROBOT_SANDBOX_READY__\n.                                                                        [100%]\n1 passed in 0.05s\n"
         }
       ]
     },
@@ -87,7 +313,7 @@
         "calls": 2,
         "cached_calls": 2
       },
-      "wall_clock_s": 8.8,
+      "wall_clock_s": 8.4,
       "error": null,
       "test_source": "import unittest\n\nfrom tests.dialects.test_dialect import Validator\n\n\nclass TestIssue5178(Validator):\n    def test_cte_udf_parse_error(self):\n        self.validate_identity(\n            \"\"\"\n            WITH FUNCTION f(num int)\n                RETURNS int\n                RETURN num\n            SELECT f(1);\n            \"\"\",\n            pretty=True,\n        )\n",
       "test_rel_path": "tests/dialects/test_reprobot_sqlglot__5178.py",
@@ -97,7 +323,7 @@
           "verdict": "reproduced_exception",
           "exception_type": "ParseError",
           "reason": "ParseError was raised from inside the project's own code (tests/dialects/test_dialect.py:61 in validate_identity)",
-          "output": "^^^^^^\nsqlglot/parser.py:2331: in _parse_statement\n    expression = self._parse_set_operations(expression) if expression else self._parse_select()\n                                                                           ^^^^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:3912: in _parse_select\n    query = self._parse_select_query(\nsqlglot/parser.py:3935: in _parse_select_query\n    cte = self._parse_with()\n          ^^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:4099: in _parse_with\n    cte = self._parse_cte()\n          ^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:4147: in _parse_cte\n    this=self._parse_wrapped(self._parse_statement),\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:8742: in _parse_wrapped\n    self.raise_error(\"Expecting (\")\nsqlglot/parser.py:2038: in raise_error\n    raise error\nE   sqlglot.errors.ParseError: Expecting (. Line 2, Col: 27.\nE     \nE               WITH FUNCTION \u001b[4mf\u001b[0m(num int)\nE                   RETURNS int\nE                   RETURN num\nE               SELECT f(1);\n=========================== short test summary info ============================\nFAILED tests/dialects/test_reprobot_sqlglot__5178.py::TestIssue5178::test_cte_udf_parse_error\n1 failed in 1.14s\n"
+          "output": "^^^^^^\nsqlglot/parser.py:2331: in _parse_statement\n    expression = self._parse_set_operations(expression) if expression else self._parse_select()\n                                                                           ^^^^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:3912: in _parse_select\n    query = self._parse_select_query(\nsqlglot/parser.py:3935: in _parse_select_query\n    cte = self._parse_with()\n          ^^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:4099: in _parse_with\n    cte = self._parse_cte()\n          ^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:4147: in _parse_cte\n    this=self._parse_wrapped(self._parse_statement),\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:8742: in _parse_wrapped\n    self.raise_error(\"Expecting (\")\nsqlglot/parser.py:2038: in raise_error\n    raise error\nE   sqlglot.errors.ParseError: Expecting (. Line 2, Col: 27.\nE     \nE               WITH FUNCTION \u001b[4mf\u001b[0m(num int)\nE                   RETURNS int\nE                   RETURN num\nE               SELECT f(1);\n=========================== short test summary info ============================\nFAILED tests/dialects/test_reprobot_sqlglot__5178.py::TestIssue5178::test_cte_udf_parse_error\n1 failed in 1.05s\n"
         }
       ]
     },
@@ -117,7 +343,7 @@
         "calls": 2,
         "cached_calls": 2
       },
-      "wall_clock_s": 2.4,
+      "wall_clock_s": 2.2,
       "error": null,
       "test_source": "from tomlkit import dumps\nfrom tomlkit import parse\n\n\ndef test_issue_291_whitespace_preservation() -> None:\n    content = \"\"\"\n[keys.a]\n#    \u2193 this whitespace disappears\n[keys .'a'.'c']\n  'd'\t= 'e'\n\"\"\"\n    doc = parse(content)\n    for mode in doc[\"keys\"]:\n        doc[\"keys\"][mode] = doc[\"keys\"][mode]\n\n    # The bug causes the whitespace of [keys .'a'.'c'] to be overwritten\n    # by the whitespace of [keys.a] when reassigning.\n    # The expected behavior is that the original whitespace is preserved.\n    expected_content = \"\"\"\n[keys.a]\n#    \u2193 this whitespace disappears\n[keys .'a'.'c']\n  'd'\t= 'e'\n\"\"\"\n    assert dumps(doc) == expected_content\n",
       "test_rel_path": "tests/test_reprobot_tomlkit__291.py",
@@ -127,7 +353,7 @@
           "verdict": "reproduced_assertion",
           "exception_type": null,
           "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
-          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n____________________ test_issue_291_whitespace_preservation ____________________\ntests/test_reprobot_tomlkit__291.py:25: in test_issue_291_whitespace_preservation\n    assert dumps(doc) == expected_content\nE   assert \"\\n[keys.a]\\n... 'd'\\t= 'e'\\n\" == \"\\n[keys.a]\\n... 'd'\\t= 'e'\\n\"\nE     \nE     Skipping 39 identical leading characters in diff, use -v to show\nE       ears\nE     - [keys .'a'.'c']\nE     ?      - - -\nE     + [keys.a.'c']\nE         'd'\t= 'e'\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_tomlkit__291.py::test_issue_291_whitespace_preservation\n1 failed in 0.05s\n"
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n____________________ test_issue_291_whitespace_preservation ____________________\ntests/test_reprobot_tomlkit__291.py:25: in test_issue_291_whitespace_preservation\n    assert dumps(doc) == expected_content\nE   assert \"\\n[keys.a]\\n... 'd'\\t= 'e'\\n\" == \"\\n[keys.a]\\n... 'd'\\t= 'e'\\n\"\nE     \nE     Skipping 39 identical leading characters in diff, use -v to show\nE       ears\nE     - [keys .'a'.'c']\nE     ?      - - -\nE     + [keys.a.'c']\nE         'd'\t= 'e'\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_tomlkit__291.py::test_issue_291_whitespace_preservation\n1 failed in 0.04s\n"
         }
       ]
     },
@@ -147,7 +373,7 @@
         "calls": 2,
         "cached_calls": 2
       },
-      "wall_clock_s": 2.4,
+      "wall_clock_s": 2.2,
       "error": null,
       "test_source": "import pytest\nfrom typing import Any\nfrom tomlkit import parse\nimport tomlkit\nfrom collections import OrderedDict\nfrom tomlkit.container import Container\n\n\ndef merge_dicts(a: dict, b: dict):\n    ret = a\n\n    for k, v in b.items():\n        if k in a and isinstance(a[k], (dict, OrderedDict, Container)):\n            ret[k] = merge_dicts(a[k], v)\n        else:\n            ret[k] = v\n    return ret\n\n\ndef test_rewrite_toml_data_no_extra_whitespace(tmp_path):\n    # Create a dummy TOML file with the reported structure\n    content = \"\"\"# xxx test\n\n\n[env.pro1.rst]\n    name = \"x7\"\n\n[env2]\n    name = 2\n\n[env3]\n    name = 3\n\"\"\"\n    file_ = tmp_path / \"test.toml\"\n    file_.write_text(content)\n\n    # Load, modify, and dump the TOML data\n    with open(file_, \"r\") as f:\n        t = tomlkit.load(f)\n\n    t = merge_dicts(\n        t,\n        {'env': {'pro1': {'rst': {'name': \"x7\"}}}}\n    )\n\n    with open(file_, \"w\") as f:\n        tomlkit.dump(t, f)\n\n    # Read the modified content and assert it matches the expected output\n    # (without the extra whitespace line)\n    expected_content = \"\"\"# xxx test\n\n\n[env.pro1.rst]\n    name = \"x7\"\n\n[env2]\n    name = 2\n\n[env3]\n    name = 3\n\"\"\"\n    assert file_.read_text() == expected_content\n",
       "test_rel_path": "tests/test_reprobot_tomlkit__352.py",
@@ -177,7 +403,7 @@
         "calls": 2,
         "cached_calls": 2
       },
-      "wall_clock_s": 2.3,
+      "wall_clock_s": 2.2,
       "error": null,
       "test_source": "from collections.abc import Callable\nfrom typing import Any\n\nimport pytest\n\nfrom tomlkit import parse\nfrom tomlkit.toml_document import TOMLDocument\n\n\ndef test_repr_of_nested_table_proxy_includes_all_keys() -> None:\n    content = \"\"\"\na.b.c = \"d\"\na.b.e = \"f\"\n\"\"\"\n    doc = parse(content)\n    value = doc[\"a\"]\n    expected = {\"b\": {\"c\": \"d\", \"e\": \"f\"}}\n\n    assert repr(value) == repr(expected)\n",
       "test_rel_path": "tests/test_reprobot_tomlkit__439.py",
@@ -187,7 +413,7 @@
           "verdict": "reproduced_assertion",
           "exception_type": null,
           "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
-          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n______________ test_repr_of_nested_table_proxy_includes_all_keys _______________\ntests/test_reprobot_tomlkit__439.py:19: in test_repr_of_nested_table_proxy_includes_all_keys\n    assert repr(value) == repr(expected)\nE   assert \"{'b': {'e': 'f'}}\" == \"{'b': {'c': 'd', 'e': 'f'}}\"\nE     \nE     - {'b': {'c': 'd', 'e': 'f'}}\nE     ?        ----------\nE     + {'b': {'e': 'f'}}\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_tomlkit__439.py::test_repr_of_nested_table_proxy_includes_all_keys\n1 failed in 0.05s\n"
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n______________ test_repr_of_nested_table_proxy_includes_all_keys _______________\ntests/test_reprobot_tomlkit__439.py:19: in test_repr_of_nested_table_proxy_includes_all_keys\n    assert repr(value) == repr(expected)\nE   assert \"{'b': {'e': 'f'}}\" == \"{'b': {'c': 'd', 'e': 'f'}}\"\nE     \nE     - {'b': {'c': 'd', 'e': 'f'}}\nE     ?        ----------\nE     + {'b': {'e': 'f'}}\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_tomlkit__439.py::test_repr_of_nested_table_proxy_includes_all_keys\n1 failed in 0.06s\n"
         }
       ]
     }

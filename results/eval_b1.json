@@ -4,14 +4,14 @@
   "temperature": 0.0,
   "description": "one general-purpose agent with tools and a test runner",
   "model": "google/gemini-2.5-flash",
-  "n_cases": 14,
-  "f2p_solved": 3,
-  "f2p_rate": 0.2143,
-  "total_cost_usd": 0.1565,
-  "total_llm_calls": 101,
-  "cached_llm_calls": 0,
-  "mean_wall_clock_s": 23.7,
-  "wall_clock_total_s": 331.7,
+  "n_cases": 27,
+  "f2p_solved": 6,
+  "f2p_rate": 0.2222,
+  "total_cost_usd": 0.2437,
+  "total_llm_calls": 201,
+  "cached_llm_calls": 76,
+  "mean_wall_clock_s": 19.7,
+  "wall_clock_total_s": 531.1,
   "results": [
     {
       "case_id": "click__2703",
@@ -25,11 +25,11 @@
       "usage": {
         "prompt_tokens": 14160,
         "completion_tokens": 6149,
-        "cost_usd": 0.019063,
+        "cost_usd": 0.0,
         "calls": 7,
-        "cached_calls": 0
+        "cached_calls": 7
       },
-      "wall_clock_s": 36.8,
+      "wall_clock_s": 0.8,
       "error": null,
       "test_source": "import subprocess\nimport sys\nimport os\n\n# ... (previous setup) ...\n\n    # Make the script executable\n    os.chmod(app_path, 0o755)\n\n    # Simulate zsh completion by running the script directly\n    # with the appropriate environment variables.\n    # The issue describes running `foo <Tab>`, which means completing the first argument.\n    # In Click's completion, this means _CLICK_COMPLETE_ARGS=\"\"\n    # and _CLICK_COMPLETE_CURRENT=\"\".\n    # The command being completed is 'foo'.\n    \n    # First, get the completion script (though not strictly needed for the bug repro,\n    # it's part of the setup for zsh completion)\n    # This step is usually done once by the user.\n    # For the test, we directly simulate the completion call.\n\n    # The actual completion call:\n    # _FOO_COMPLETE=zsh_complete _CLICK_COMPLETE_COMMAND=foo _CLICK_COMPLETE_ARGS=\"\" foo\n    \n    # The `_CLICK_COMPLETE_COMMAND` should be the path to the script.\n    # The `_CLICK_COMPLETE_ARGS` should be the arguments *before* the current one.\n    # The `COMP_WORDS` and `COMP_CWORD` are for shell-specific completion.\n    # Click's internal completion uses _CLICK_COMPLETE_COMMAND and _CLICK_COMPLETE_ARGS.\n\n    # Let's try to mimic the environment variables that Click's `_main_completion` expects.\n    # From `click/shell_completion.py`:\n    # if os.environ.get(\"_CLICK_COMPLETE_COMMAND\"):\n    #     _perform_completion(cli, prog_name, complete_var, args_var)\n\n    # So, we need to set `_CLICK_COMPLETE_COMMAND` and `_CLICK_COMPLETE_ARGS`.\n    # The `complete_var` is `_FOO_COMPLETE` in this case.\n    # The `args_var` is `_CLICK_COMPLETE_ARGS`.\n\n    env = os.environ.copy()\n    env[\\\"_FOO_COMPLETE\\\"] = \\\"zsh_complete\\\" # This tells Click to perform completion\n    env[\\\"_CLICK_COMPLETE_COMMAND\\\"] = str(app_path) # The command being completed\n    env[\\\"_CLICK_COMPLETE_ARGS\\\"] = \\\"\\\" # No arguments yet, completing the first one\n    env[\\\"COMP_WORDS\\\"] = \\\"foo\\\" # Simulating zsh's COMP_WORDS\n    env[\\\"COMP_CWORD\\\"] = \\\"1\\\" # Simulating zsh's COMP_CWORD (index of current word)\n    env[\\\"_CLICK_SCRIPT_NAME\\\"] = \\\"foo\\\" # The name of the script\n\n    # Execute the script directly\n    result = subprocess.run(\n        [sys.executable, str(app_path)],\n        env=env,\n        capture_output=True,\n        text=True,\n        check=False, # Don't raise an exception for non-zero exit codes\n    )\n\n    assert result.returncode == 0\n    \n    # ... (assertions) ...\n",
       "test_rel_path": "tests/test_reprobot_click__2703.py",
@@ -47,11 +47,11 @@
       "usage": {
         "prompt_tokens": 22523,
         "completion_tokens": 3451,
-        "cost_usd": 0.013222,
+        "cost_usd": 0.0,
         "calls": 10,
-        "cached_calls": 0
+        "cached_calls": 10
       },
-      "wall_clock_s": 26.6,
+      "wall_clock_s": 2.3,
       "error": null,
       "test_source": "import pytest\nfrom click.testing import CliRunner\nimport click\n\n@click.command()\ndef cli():\n    raise ValueError(\"This is an expected error\")\n\ndef test_global_catch_exceptions_setting():\n    runner = CliRunner()\n    # The bug is that there's no way to set catch_exceptions=False globally on the runner.\n    # So, by default, exceptions are caught.\n    # This test expects the exception NOT to be caught, which will fail at the current commit.\n    result = runner.invoke(cli)\n\n    # This assertion will fail because by default, catch_exceptions is True,\n    # and thus result.exception will NOT be None. It will contain the ValueError.\n    # If a global `catch_exceptions=False` were set on the runner, this assertion\n    # would pass, as the exception would propagate and not be caught by the runner.\n    assert result.exception is None\n    assert result.exit_code == 1\n",
       "test_rel_path": "tests/test_reprobot_click__2817.py",
@@ -69,11 +69,11 @@
       "usage": {
         "prompt_tokens": 15719,
         "completion_tokens": 1246,
-        "cost_usd": 0.007309,
+        "cost_usd": 0.0,
         "calls": 12,
-        "cached_calls": 0
+        "cached_calls": 12
       },
-      "wall_clock_s": 16.9,
+      "wall_clock_s": 0.8,
       "error": null,
       "test_source": "{\"thought\": \"I am truly sorry for the repeated failures. I understand the instruction perfectly now and will adhere to it.\n\nI need to read the `click/termui.py` file to understand how `prompt` is implemented and how it interacts with `readline`. This will help me craft a test case that exposes the backspace issue. I will use the `read_file` tool.\", \"tool\": \"read_file\", \"args\": {\"path\": \"click/termui.py\"}}\n",
       "test_rel_path": "tests/test_reprobot_click__2968.py",
@@ -89,15 +89,15 @@
       "self_reproduces": null,
       "rounds": 1,
       "usage": {
-        "prompt_tokens": 27181,
-        "completion_tokens": 7015,
-        "cost_usd": 0.021608,
-        "calls": 8,
-        "cached_calls": 0
+        "prompt_tokens": 47845,
+        "completion_tokens": 5335,
+        "cost_usd": 0.017301,
+        "calls": 11,
+        "cached_calls": 4
       },
-      "wall_clock_s": 40.8,
+      "wall_clock_s": 32.6,
       "error": null,
-      "test_source": "import click\nfrom click.testing import CliRunner\n\ndef test_fish_completion_multiline_help_bug():\n    @click.group()\n    def cli():\n        pass\n\n    @cli.command()\n    @click.option(\n        \"--test-option\",\n        help=\"This is the first line.\\\\nThis is the second line of help.\",\n    )\n    def hello(test_option):\n        click.echo(f\"Hello {test_option}\")\n\n    runner = CliRunner()\n    result = runner.invoke(\n        cli,\n        [],\n        env={\n            \"_CLICK_COMPLETE\": \"fish_complete\",\n            \"_CLICK_CLI_NAME\": \"cli\",\n            \"COMP_WORDS\": \"cli\", # Only the command name\n            \"COMP_CWORD\": \"0\",   # Index of 'cli'\n        },\n    )\n\n    assert result.exit_code == 0, f\"Expected exit code 0, got {result.exit_code}. Output: {result.output}\"\n\n    # We expect to see the raw multi-line help text in the output for the option\n    # when completing after '--'. This test is for the general case of completion.\n    # If this works, then the previous COMP_WORDS/COMP_CWORD should also work.\n    expected_output_part = \"plain,--test-option\\\\nThis is the first line.\\\\nThis is the second line of help.\"\n    assert expected_output_part in result.output\n",
+      "test_source": "import click\nfrom click.testing import CliRunner\n\ndef test_fish_completion_multiline_help_bug():\n    @click.group()\n    def cli():\n        pass\n\n    @cli.command()\n    @click.option(\n        \"--test-option\",\n        help=\"This is the first line.\\\nThis is the second line of help.\",\n    )\n    def hello(test_option):\n        click.echo(f\"Hello {test_option}\")\n\n    runner = CliRunner()\n    result = runner.invoke(\n        cli,\n        [],\n        env={\n            \"_CLICK_COMPLETE\": \"fish_complete\",\n            \"_CLICK_CLI_NAME\": \"cli\",\n            \"COMP_WORDS\": \"cli --\",\n            \"COMP_CWORD\": \"1\",\n        },\n    )\n\n    # According to the issue, the raw completion output itself does not error out Click,\n    # but the fish shell script fails to parse it. So, exit_code should be 0.\n    assert result.exit_code == 0, f\"Expected exit code 0, got {result.exit_code}. Output: {result.output}\"\n    \n    # The bug is that the multi-line help text is not escaped/handled correctly\n    # and appears directly in the completion output, which would break fish.\n    # We expect to see the raw multi-line help text in the output.\n    expected_output_part = \"plain,--test-option\\\nThis is the first line.\\\nThis is the second line of help.\"\n    assert expected_output_part in result.output\n",
       "test_rel_path": "tests/test_reprobot_click__3043.py",
       "attempts": []
     },
@@ -106,21 +106,307 @@
       "repo": "pallets/click",
       "variant": "b1",
       "f2p": false,
+      "score_reason": "did_not_pass_at_fix:failed",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 17796,
+        "completion_tokens": 4251,
+        "cost_usd": 0.008498,
+        "calls": 7,
+        "cached_calls": 4
+      },
+      "wall_clock_s": 15.6,
+      "error": null,
+      "test_source": "import click\nfrom click.testing import CliRunner\nimport pytest\n\nclass MyClass:\n    def __init__(self, value: str):\n        self.value = value\n\n    @classmethod\n    def from_str(cls, input_str: str) -> \"MyClass\":\n        if input_str != \"works\":\n            raise ValueError(f\"input was {input_str=}, should be works\")\n        return cls(input_str)\n\n# This is a simplified version of FuncParamType for testing the bug.\n# The actual FuncParamType in Click would wrap MyClass.from_str.\n# For this test, we're directly simulating the buggy behavior in convert.\n# The purpose is to demonstrate the error message behavior when a ValueError occurs.\nclass MyType(click.ParamType):\n    name = \"mytype\"\n\n    def convert(self, value, param, ctx):\n        try:\n            return MyClass.from_str(value)\n        except ValueError as e:\n            # This simulates the buggy behavior of FuncParamType in Click\n            # where self.fail is called with the raw 'value' instead of 'str(e)'.\n            # The issue describes that this should be changed to self.fail(str(e), ...).\n            self.fail(value, param, ctx)\n\n\n@click.command()\n@click.argument(\"mydata\", type=MyType())\ndef cli(mydata):\n    click.echo(f\"Success: {mydata.value}\")\n\ndef test_func_param_type_value_error_message():\n    runner = CliRunner()\n    result = runner.invoke(cli, [\"fails\"])\n\n    assert result.exit_code == 2\n    # This assertion checks for the *expected* error message after the fix.\n    # At the buggy commit, the detailed error message from ValueError is NOT included\n    # in the output because self.fail is called with the raw input value.\n    # Therefore, this assertion will FAIL at the buggy commit.\n    assert \"input was input_str='fails', should be works\" in result.output\n\n    # Once the fix is applied (i.e., self.fail(str(e), param, ctx)),\n    # the detailed error message will be present in the output, and this test will PASS.\n",
+      "test_rel_path": "tests/test_reprobot_click__3105.py",
+      "attempts": []
+    },
+    {
+      "case_id": "jinja__1463",
+      "repo": "pallets/jinja",
+      "variant": "b1",
+      "f2p": false,
+      "score_reason": "did_not_fail_at_parent:collection_error",
+      "verdict_at_parent": "broken_test",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 18082,
+        "completion_tokens": 1771,
+        "cost_usd": 0.00879,
+        "calls": 12,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 24.9,
+      "error": null,
+      "test_source": "{\"thought\": \"I sincerely apologize for the persistent JSON formatting errors. I am reviewing my process to ensure I adhere to the JSON requirement strictly. I will ensure this response is a valid JSON object.\n\nMy objective is to write a pytest test that fails at the current commit because the `groupby` filter does not support a `case_sensitive` parameter and sorts case-sensitively by default, which is inconsistent with the `sort` filter.\n\nTo achieve this, I need to examine the source code for `do_groupby` and `do_sort` to understand their current behavior. I will start by grepping for `def do_groupby` in `jinja2/filters.py`.\", \"tool\": \"grep\", \"args\": {\"pattern\": \"def do_groupby\", \"glob\": \"jinja2/filters.py\"}}\n",
+      "test_rel_path": "tests/test_reprobot_jinja__1463.py",
+      "attempts": []
+    },
+    {
+      "case_id": "jinja__1510",
+      "repo": "pallets/jinja",
+      "variant": "b1",
+      "f2p": true,
+      "score_reason": "ok",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 24214,
+        "completion_tokens": 1647,
+        "cost_usd": 0.009473,
+        "calls": 8,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 28.2,
+      "error": null,
+      "test_source": "import pytest\nfrom jinja2 import Environment\nfrom jinja2.nativetypes import NativeEnvironment\n\ndef test_macro_native_types():\n    env = NativeEnvironment(extensions=['jinja2.ext.do'], autoescape=False)\n    template = env.from_string(\"{%- macro x() -%}{{- [5,6] -}}{%- endmacro -%}{{- x()[0] -}}\")\n    result = template.render()\n    # The bug is that it returns the string '[' instead of the integer 5\n    # It should return the integer 5.\n    assert result == 5\n    assert isinstance(result, int)\n",
+      "test_rel_path": "tests/test_reprobot_jinja__1510.py",
+      "attempts": []
+    },
+    {
+      "case_id": "jinja__1521",
+      "repo": "pallets/jinja",
+      "variant": "b1",
+      "f2p": false,
       "score_reason": "did_not_fail_at_parent:passed",
       "verdict_at_parent": "no_fail",
       "self_reproduces": null,
       "rounds": 1,
       "usage": {
-        "prompt_tokens": 38784,
-        "completion_tokens": 5269,
-        "cost_usd": 0.018018,
+        "prompt_tokens": 1629,
+        "completion_tokens": 283,
+        "cost_usd": 0.001196,
+        "calls": 2,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 6.3,
+      "error": null,
+      "test_source": "import pytest\nfrom jinja2 import Environment\n\n@pytest.fixture\ndef env():\n    return Environment()\n\nclass TestHashing:\n    def test_template_hash(self, env):\n        template = env.parse(\"hash test\")\n        with pytest.raises(TypeError, match=\"unhashable type: 'list'\"):\n            hash(template)\n",
+      "test_rel_path": "tests/test_reprobot_jinja__1521.py",
+      "attempts": []
+    },
+    {
+      "case_id": "jinja__1573",
+      "repo": "pallets/jinja",
+      "variant": "b1",
+      "f2p": false,
+      "score_reason": "did_not_fail_at_parent:collection_error",
+      "verdict_at_parent": "broken_test",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 22201,
+        "completion_tokens": 4957,
+        "cost_usd": 0.017676,
+        "calls": 7,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 37.6,
+      "error": null,
+      "test_source": "import pytest\nimport jinja2\n\ndef add_two(x, y):\n    return [i + y for i in x]\n\ndef test_async_filter_subscriptable_error():\n    env = jinja2.Environment(enable_async=True)\n    env.filters.update({'add_two': add_two})\n    template = env.from_string(\\\"{% for item in (a.b|add_two(5))[:1] %}{{ item }}{% endfor %}\\\")\n    \n    data = {'a': {'b': [1, 2, 3]}}\n    \n    # Catch any exception to inspect it\n    with pytest.raises(Exception) as excinfo:\n        template.render(data)\n    \n    # Now check if it's the expected TypeError\n    assert isinstance(excinfo.value, TypeError)\n    assert \\\"'coroutine' object is not subscriptable\\\" in str(excinfo.value)\n",
+      "test_rel_path": "tests/test_reprobot_jinja__1573.py",
+      "attempts": []
+    },
+    {
+      "case_id": "jinja__1612",
+      "repo": "pallets/jinja",
+      "variant": "b1",
+      "f2p": false,
+      "score_reason": "did_not_fail_at_parent:passed",
+      "verdict_at_parent": "no_fail",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 6422,
+        "completion_tokens": 677,
+        "cost_usd": 0.003063,
+        "calls": 3,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 9.5,
+      "error": null,
+      "test_source": "import pytest\nimport pickle\nimport jinja2.filters\n\ndef test_do_first_not_pickleable():\n    \"\"\"Test that jinja2.filters.do_first is not pickleable due to the bug.\n\n    This test should FAIL at the current commit and PASS once the bug\n    (incorrect __name__/__qualname__ on async_variant decorated functions)\n    is fixed, allowing the function to be pickled.\n    \"\"\"\n    with pytest.raises(pickle.PicklingError) as excinfo:\n        pickle.dumps(jinja2.filters.do_first)\n    # The error message should indicate that the function cannot be pickled\n    # and specifically mention 'jinja2.filters.sync_do_first' as the unpickleable object.\n    assert \"Can't pickle\" in str(excinfo.value)\n    assert \"jinja2.filters.sync_do_first\" in str(excinfo.value)\n",
+      "test_rel_path": "tests/test_reprobot_jinja__1612.py",
+      "attempts": []
+    },
+    {
+      "case_id": "jinja__1701",
+      "repo": "pallets/jinja",
+      "variant": "b1",
+      "f2p": false,
+      "score_reason": "did_not_fail_at_parent:passed",
+      "verdict_at_parent": "no_fail",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 2903,
+        "completion_tokens": 838,
+        "cost_usd": 0.002966,
+        "calls": 3,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 11.2,
+      "error": null,
+      "test_source": "import pytest\nfrom jinja2.nativetypes import NativeEnvironment\n\ndef test_issue_1701_nativetypes_typeerror():\n    env = NativeEnvironment()\n    template = '{% block test %}{% for i in range(1) %}{{ loop.index }}{% endfor %}{% endblock %}{{ self.test() }}'\n    with pytest.raises(TypeError, match=\"sequence item 0: expected str instance, int found\"):\n        env.from_string(template).render()\n",
+      "test_rel_path": "tests/test_reprobot_jinja__1701.py",
+      "attempts": []
+    },
+    {
+      "case_id": "jinja__2027",
+      "repo": "pallets/jinja",
+      "variant": "b1",
+      "f2p": false,
+      "score_reason": "did_not_fail_at_parent:collection_error",
+      "verdict_at_parent": "broken_test",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 26317,
+        "completion_tokens": 2780,
+        "cost_usd": 0.014037,
+        "calls": 12,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 29.6,
+      "error": null,
+      "test_source": "{\"thought\": \"I am deeply sorry for the repeated JSON formatting errors. I understand the requirement perfectly and will ensure this response is a valid JSON object.\n\nI have the test code. I will now execute it using `run_test` to confirm it fails as expected at the current buggy commit.\", \"tool\": \"run_test\", \"args\": {\"source\": \"import pickle\\nimport pytest\\nimport jinja2.utils\\n\\ndef test_missing_can_be_pickled():\\n    try:\\n        pickled_missing = pickle.dumps(jinja2.utils.missing)\\n        unpickled_missing = pickle.loads(pickled_missing)\\n        assert unpickled_missing is jinja2.utils.missing\\n    except pickle.PicklingError as e:\\n        pytest.fail(f\\\"Pickling jinja2.utils.missing failed: {e}\\\")\\n\"}}\n",
+      "test_rel_path": "tests/test_reprobot_jinja__2027.py",
+      "attempts": []
+    },
+    {
+      "case_id": "rich__3796",
+      "repo": "Textualize/rich",
+      "variant": "b1",
+      "f2p": false,
+      "score_reason": "did_not_pass_at_fix:failed",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 57620,
+        "completion_tokens": 7938,
+        "cost_usd": 0.028923,
+        "calls": 10,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 62.5,
+      "error": null,
+      "test_source": "import io\nfrom rich.console import Console, Group\nfrom rich.live import Live\n\ndef test_live_empty_group_leaves_newline_buggy():\n    console = Console(file=io.StringIO(), record=True, force_terminal=True)\n    live = Live(Group(), console=console, transient=True)\n    with live:\n        pass\n    output_text = console.export_text()\n    # According to the bug report, this should leave a newline\n    # This test should PASS at the current commit (output_text is \"\\n\", len is 1)\n    # It should FAIL once the bug is fixed (output_text will be \"\", len is 0)\n    assert len(output_text) == 1\n\ndef test_live_group_with_empty_string_no_newline_fixed():\n    console = Console(file=io.StringIO(), record=True, force_terminal=True)\n    live = Live(Group(\"\"), console=console, transient=True)\n    with live:\n        pass\n    output_text = console.export_text()\n    # This should NOT leave a newline, so output should be empty, as per the workaround\n    # This test should PASS at the current commit (output_text is \"\", len is 0)\n    # It should continue to PASS after the fix\n    assert len(output_text) == 0\n",
+      "test_rel_path": "tests/test_reprobot_rich__3796.py",
+      "attempts": []
+    },
+    {
+      "case_id": "rich__3838",
+      "repo": "Textualize/rich",
+      "variant": "b1",
+      "f2p": false,
+      "score_reason": "did_not_fail_at_parent:collection_error",
+      "verdict_at_parent": "broken_test",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 69900,
+        "completion_tokens": 8872,
+        "cost_usd": 0.036048,
+        "calls": 12,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 58.5,
+      "error": null,
+      "test_source": "import io\nfrom rich.console import Console\n\ndef test_soft_wrap_background_color_bug():\n    console = Console(file=io.StringIO(), force_terminal=True, width=10)\n\n    # Print with soft_wrap enabled. The background color should NOT carry over to the next line.\n    console.print(\"longtext\", style=\"on white\", soft_wrap=True)\n    console.print(\"next line\")\n\n    output = console.file.getvalue()\n\n    # Expected output: 'longtext' should be wrapped, and the 'on white' style\n    # should be reset before the newline, so 'next line' is not white.\n    # The bug is that the reset is missing, so 'next line' *is* white.\n\n    # Let's look for the sequence: <background_color_code> <text> <newline> <text>\n    # If the bug is present, the background color will extend past the newline.\n    # If fixed, there should be a reset code before the newline.\n\n    # A simple check: if 'on white' is applied, we expect '\\x1b[47m'.\n    # If it's reset, we expect '\\x1b[0m'.\n\n    # The string \"longtext\" with width=10 will wrap. For example:\n    # \"longte\" (on white)\n    # \"xt\"     (on white)\n    # Then a newline, and \"next line\" should NOT be on white.\n\n    # Let's simulate the expected output if the bug is present:\n    # '\\x1b[47mlongte\\x1b[0m\\\n\\x1b[47mxt\\x1b[0m\\\nnext line\\\n'\n    # This is not quite right. The issue is that the *background* color carries over.\n    # So, it would be more like:\n    # '\\x1b[47mlongte\\\n\\x1b[47mxt\\x1b[0m\\\nnext line\\\n'\n    # The bug implies that the \\x1b[0m is missing *before* the soft wrap newline.\n\n    # Let's simplify. The issue states the background color carries over to the *following line*.\n    # This means the 'next line' output should *not* have the background color.\n    # If the bug is present, 'next line' will be on white.\n    # If fixed, 'next line' will not be on white.\n\n    # We can check for the presence of the background color escape code before 'next line'.\n    # The background color for 'on white' is typically '\\x1b[47m'.\n\n    # The output should contain '\\x1b[0m' before the 'next line' if fixed.\n    # If the bug is present, it will likely be missing.\n\n    # Let's make the text longer to ensure multiple soft wraps.\n    console_buggy = Console(file=io.StringIO(), force_terminal=True, width=10)\n    console_buggy.print(\"This is a very long line that should definitely soft wrap\", style=\"on white\", soft_wrap=True)\n    console_buggy.print(\"This is the next line and should not have background\", style=\"red\")\n    output_buggy = console_buggy.file.getvalue()\n\n    # If the bug is present, the 'on white' style (\\x1b[47m) will bleed into the second line.\n    # The 'red' style (\\x1b[31m) will then override it, but the *background* might still be there\n    # or the initial part of the 'next line' might be on white before 'red' takes over.\n\n    # The most direct way to test the bug is to check if the background color is *not* reset\n    # at the end of the soft-wrapped line segments.\n\n    # Let's look for the sequence where the background color is active, then a newline, then no reset.\n    # A simpler approach: check if the *second* line (which is explicitly styled 'red')\n    # also contains the 'on white' background style *before* its own 'red' style.\n\n    # The 'on white' style is \\x1b[47m\n    # The 'red' style is \\x1b[31m\n\n    # If the bug is present, we might see something like:\n    # ...\\x1b[47m\\\n\\x1b[47m\\x1b[31mThis is the next line...\n    # Or just ...\\x1b[47m\\\n\\x1b[31mThis is the next line... (where the 47m is still active)\n\n    # Let's make the second line unstyled to make the check clearer.\n    console_buggy_simple = Console(file=io.StringIO(), force_terminal=True, width=10)\n    console_buggy_simple.print(\"AAAAABBBBBCCCCC\", style=\"on white\", soft_wrap=True)\n    console_buggy_simple.print(\"next line\")\n    output_buggy_simple = console_buggy_simple.file.getvalue()\n\n    # Expected output if bug is present: The 'next line' will have a white background.\n    # This means the '\\x1b[47m' will be active when 'next line' is printed.\n    # So, we should NOT see '\\x1b[0m' immediately before the 'next line' content.\n\n    # Let's find the last occurrence of '\\x1b[47m' and the first occurrence of 'next line'.\n    # If there's no '\\x1b[0m' between them, the bug is present.\n\n    # The output will look something like:\n    # '\\x1b[47mAAAAA\\\n\\x1b[47mBBBBB\\\n\\x1b[47mCCCCC\\x1b[0m\\\nnext line\\\n' (if fixed)\n    # '\\x1b[47mAAAAA\\\n\\x1b[47mBBBBB\\\n\\x1b[47mCCCCC\\\nnext line\\\n' (if buggy, the last \\x1b[0m is missing)\n\n    # The issue specifically states \"background color carries over onto the following line\".\n    # This implies that the *next* `console.print` call will inherit the background.\n\n    # Let's check if the output contains '\\\n\\x1b[47m' which would indicate the background\n    # is still active after a soft wrap newline, or if it contains '\\\nnext line'\n    # without a preceding reset.\n\n    # The most robust way to check for the bug is to assert that the *second* line\n    # does *not* start with the background color escape code if it's not supposed to.\n\n    # If the bug is present, the output will contain '\\\nnext line' where 'next line' is implicitly on white.\n    # If fixed, it will contain '\\x1b[0m\\\nnext line' or similar.\n\n    # Let's make the first line just long enough to wrap once.\n    console_test = Console(file=io.StringIO(), force_terminal=True, width=10)\n    console_test.print(\"1234567890ABC\", style=\"on white\", soft_wrap=True)\n    console_test.print(\"DEF\", style=\"on blue\") # This line should be on blue, not on white.\n    output = console_test.file.getvalue()\n\n    # Expected output if fixed: ...\\x1b[0m\\\n\\x1b[44mDEF\\x1b[0m\\\n\n    # If the bug is present, the '\\x1b[0m' after 'ABC' is missing, so 'DEF' might be on white then on blue.\n    # Or, more simply, the background color from the first line is still active when the second line starts.\n\n    # Let's check if '\\x1b[47m' (on white) appears *before* '\\x1b[44m' (on blue) for the second line.\n    # If the bug is present, the sequence might be '\\x1b[47m\\x1b[44mDEF'\n    # If fixed, it should be '\\x1b[0m\\\n\\x1b[44mDEF'\n\n    # Find the start of the second line's content.\n    # The first line is \"1234567890ABC\". With width=10, it wraps to:\n    # \"1234567890\"\n    # \"ABC\"\n    # Then a newline, then \"DEF\".\n\n    # The output should contain '\\x1b[44mDEF' for the second line.\n    # We need to ensure that '\\x1b[47m' is *not* active when '\\x1b[44m' starts.\n\n    # Let's search for the pattern that indicates the bug:\n    # A newline followed by the background color of the *previous* line, then the style of the *current* line.\n    # Specifically, '\\\n\\x1b[47m\\x1b[44m'\n\n    assert \"\\\n\\x1b[47m\\x1b[44m\" not in output, \\\n        f\"Bug: Background color from previous line (on white) carried over to the next line (on blue). Output: {output!r}\"\n\n    # This test should fail if the bug is present because the \\x1b[47m will not be reset\n    # before the \\x1b[44m for the next line, leading to the sequence \\\n\\x1b[47m\\x1b[44m.\n    # If fixed, it should be \\\n\\x1b[0m\\x1b[44m.\n",
+      "test_rel_path": "tests/test_reprobot_rich__3838.py",
+      "attempts": []
+    },
+    {
+      "case_id": "rich__3881",
+      "repo": "Textualize/rich",
+      "variant": "b1",
+      "f2p": false,
+      "score_reason": "did_not_fail_at_parent:collection_error",
+      "verdict_at_parent": "broken_test",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 21442,
+        "completion_tokens": 5732,
+        "cost_usd": 0.020216,
+        "calls": 7,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 42.5,
+      "error": null,
+      "test_source": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n______________________ test_on_validate_error_markup_bug _______________________\ntests/test_reprobot_rich__3881.py:27: in test_on_validate_error_markup_bug\n    assert \\\"[prompt.invalid]Please enter Y or N\\\" not in output\nE   AssertionError: assert '[prompt.invalid]Please enter Y or N' not in 'Proceed? [y/n]: [prompt.invalid]Please enter Y or N\\\\nProceed? [y/n]: '\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_rich__3881.py::test_on_validate_error_markup_bug\n1 failed in 0.12s\n",
+      "test_rel_path": "tests/test_reprobot_rich__3881.py",
+      "attempts": []
+    },
+    {
+      "case_id": "rich__3943",
+      "repo": "Textualize/rich",
+      "variant": "b1",
+      "f2p": true,
+      "score_reason": "ok",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 16259,
+        "completion_tokens": 2442,
+        "cost_usd": 0.009622,
+        "calls": 6,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 23.4,
+      "error": null,
+      "test_source": "import pytest\nfrom rich.console import Console\nfrom rich.text import Text\n\ndef test_nerd_font_width():\n    console = Console(width=80, _environ={})\n    # The problematic Nerd Font character (f024d is a download folder icon)\n    nerd_font_char = \"\\U000f024d\"\n    text = Text(nerd_font_char)\n\n    # Measure the width of the text\n    measurement = console.measure(text)\n\n    # The character should be single-width\n    expected_width = 1\n    actual_width = measurement.maximum\n\n    assert actual_width == expected_width, f\"Expected width {expected_width}, but got {actual_width} for character {nerd_font_char}\"\n",
+      "test_rel_path": "tests/test_reprobot_rich__3943.py",
+      "attempts": []
+    },
+    {
+      "case_id": "rich__4041",
+      "repo": "Textualize/rich",
+      "variant": "b1",
+      "f2p": true,
+      "score_reason": "ok",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 48720,
+        "completion_tokens": 4636,
+        "cost_usd": 0.020211,
         "calls": 11,
         "cached_calls": 0
       },
-      "wall_clock_s": 38.7,
+      "wall_clock_s": 39.3,
       "error": null,
-      "test_source": "import click\nfrom click.testing import CliRunner\nimport pytest\nfrom click.types import FuncParamType\n\nclass MyClass:\n    def __init__(self, value: str):\n        self.value = value\n\n    @staticmethod\n    def from_str(input_str: str) -> \"MyClass\":\n        if input_str != \"works\":\n            raise ValueError(f\"input was {input_str=}, should be works\")\n        return MyClass(input_str)\n\n\n@click.command()\n@click.argument(\"mydata\", type=FuncParamType(MyClass.from_str))\ndef cli(mydata):\n    click.echo(f\"Success: {mydata.value}\")\n\ndef test_func_param_type_value_error_message():\n    runner = CliRunner()\n    result = runner.invoke(cli, [\"fails\"])\n\n    assert result.exit_code == 2\n    # At the buggy commit, FuncParamType's convert method calls self.fail(value, ...)\n    # when a ValueError occurs. This means the detailed error message from the\n    # ValueError itself is lost, and only the raw input value is used in the error.\n    # Therefore, we assert that the detailed error message is NOT in the output.\n    assert \"input was input_str='fails', should be works\" not in result.output\n\n    # Instead, the output contains a generic message using the raw input value.\n    assert \"Error: Invalid value for 'MYDATA': fails\" in result.output\n\n    # This test is designed to PASS at the buggy commit.\n    # Once the bug is fixed (i.e., self.fail(str(e), ...) is called),\n    # the detailed error message will be present in the output, causing\n    # the first assertion to fail, thus making the test FAIL after the fix.\n",
-      "test_rel_path": "tests/test_reprobot_click__3105.py",
+      "test_source": "import sys\nfrom rich.console import Console\nfrom rich.live import Live\n\nclass MockTTYStdout:\n    \"\"\"A mock stdout that reports as a TTY and delegates writes.\"\"\"\n    def __init__(self, original_stdout):\n        self._original_stdout = original_stdout\n\n    def isatty(self):\n        return True\n\n    def write(self, text):\n        self._original_stdout.write(text)\n\n    def flush(self):\n        self._original_stdout.flush()\n\n    def fileno(self):\n        # FileProxy explicitly calls fileno(), so we need to provide it.\n        # If original_stdout doesn't have fileno, this might still fail in some environments.\n        # For a robust test, we assume original_stdout has fileno if it's a real file.\n        return self._original_stdout.fileno()\n\ndef test_fileproxy_isatty_delegation():\n    original_stdout = sys.stdout\n    mock_stdout = MockTTYStdout(original_stdout)\n    sys.stdout = mock_stdout\n\n    try:\n        console = Console()\n        with Live(\"hello\", console=console, redirect_stdout=True):\n            # Inside Live, sys.stdout should be proxied. Its isatty() should delegate\n            # to the mocked sys.stdout, which returns True.\n            # The bug is that it returns False instead.\n            assert sys.stdout.isatty() is True\n    finally:\n        sys.stdout = original_stdout\n",
+      "test_rel_path": "tests/test_reprobot_rich__4041.py",
+      "attempts": []
+    },
+    {
+      "case_id": "rich__5090",
+      "repo": "Textualize/rich",
+      "variant": "b1",
+      "f2p": false,
+      "score_reason": "did_not_fail_at_parent:collection_error",
+      "verdict_at_parent": "broken_test",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 26750,
+        "completion_tokens": 2368,
+        "cost_usd": 0.009891,
+        "calls": 8,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 24.2,
+      "error": null,
+      "test_source": "============================= test session starts ==============================\n...\ncollected 1 item\n\ntest_reprobot_rich__5090.py F                                            [100%]\n\n=================================== FAILURES ===================================\n_______________________ test_double_width_character_length _______________________\n\n    def test_double_width_character_length():\n        # '\u4f60\u597d' consists of two double-width characters, so its cell_len should be 4\n>       assert cell_len('\u4f60\u597d') == 4\nE       assert 2 == 4\nE        +  where 2 = cell_len('\u4f60\u597d')\n\ntest_reprobot_rich__5090.py:5: AssertionError\n=========================== short test summary info ============================\nFAILED test_reprobot_rich__5090.py::test_double_width_character_length - Assert...\n============================== 1 failed in 0.03s ===============================\n",
+      "test_rel_path": "tests/test_reprobot_rich__5090.py",
       "attempts": []
     },
     {
@@ -133,13 +419,13 @@
       "self_reproduces": null,
       "rounds": 1,
       "usage": {
-        "prompt_tokens": 12461,
-        "completion_tokens": 861,
-        "cost_usd": 0.004528,
-        "calls": 5,
-        "cached_calls": 0
+        "prompt_tokens": 8877,
+        "completion_tokens": 732,
+        "cost_usd": 0.001607,
+        "calls": 4,
+        "cached_calls": 3
       },
-      "wall_clock_s": 12.7,
+      "wall_clock_s": 5.5,
       "error": null,
       "test_source": "import pytest\nimport sqlglot\n\ndef test_databricks_insert_replace_using():\n    sql = \"\"\"\nINSERT INTO TABLE students\n    REPLACE USING (country)\n    SELECT * FROM new_students;\n\"\"\"\n    with pytest.raises(sqlglot.errors.ParseError):\n        sqlglot.parse_one(sql, dialect=\"databricks\")\n",
       "test_rel_path": "tests/dialects/test_reprobot_sqlglot__7949.py",
@@ -155,15 +441,15 @@
       "self_reproduces": null,
       "rounds": 1,
       "usage": {
-        "prompt_tokens": 11302,
-        "completion_tokens": 1379,
-        "cost_usd": 0.005204,
-        "calls": 5,
-        "cached_calls": 0
+        "prompt_tokens": 14814,
+        "completion_tokens": 1402,
+        "cost_usd": 0.003419,
+        "calls": 6,
+        "cached_calls": 4
       },
-      "wall_clock_s": 15.5,
+      "wall_clock_s": 9.4,
       "error": null,
-      "test_source": "import pytest\nimport sqlglot\nfrom sqlglot.errors import ParseError\n\ndef test_mysql_create_table_auto_increment():\n    sql = \"\"\"CREATE TABLE t1(id INT KEY AUTO_INCREMENT);\"\"\"\n    # This test should fail at the current commit because of the ParseError.\n    # Once the bug is fixed, sqlglot.parse_one should succeed, and the test will pass.\n    sqlglot.parse_one(sql, read=\"mysql\")\n",
+      "test_source": "import pytest\nimport sqlglot\n\ndef test_mysql_create_table_auto_increment():\n    sql = \"\"\"CREATE TABLE t1(id INT KEY AUTO_INCREMENT);\"\"\"\n    # This test expects parsing to succeed. At the buggy commit, it will raise a ParseError, causing the test to fail.\n    # Once the bug is fixed, parsing will succeed, and the test will pass.\n    sqlglot.parse_one(sql, read=\"mysql\")\n",
       "test_rel_path": "tests/dialects/test_reprobot_sqlglot__8225.py",
       "attempts": []
     },
@@ -172,20 +458,20 @@
       "repo": "tobymao/sqlglot",
       "variant": "b1",
       "f2p": false,
-      "score_reason": "did_not_fail_at_parent:no_tests",
-      "verdict_at_parent": "broken_test",
+      "score_reason": "did_not_fail_at_parent:passed",
+      "verdict_at_parent": "no_fail",
       "self_reproduces": null,
       "rounds": 1,
       "usage": {
-        "prompt_tokens": 59625,
-        "completion_tokens": 6145,
-        "cost_usd": 0.023983,
+        "prompt_tokens": 57063,
+        "completion_tokens": 5164,
+        "cost_usd": 0.019546,
         "calls": 12,
-        "cached_calls": 0
+        "cached_calls": 3
       },
-      "wall_clock_s": 43.8,
+      "wall_clock_s": 32.9,
       "error": null,
-      "test_source": "from sqlglot import parse, Dialect, exp\nfrom sqlglot.dialects.dialect import NormalizationStrategy\nfrom sqlglot.lineage import lineage\nfrom sqlglot.schema import MappingSchema\nfrom sqlglot.errors import OptimizeError\n\nsql = \"\"\"\nWITH t AS (\n  SELECT p.user_id, gs.n AS to_deposit_days\n  FROM tbl1 p\n  CROSS JOIN (\n    SELECT generate_series AS n FROM TABLE(generate_series(0, 8000))\n  ) gs\n),\nt2 AS (\n  SELECT t.* FROM t\n)\nSELECT user_id, to_deposit_days FROM t2\n\"\"\"\n\ndialect = Dialect.get_or_raise('starrocks')\ndialect.normalization_strategy = NormalizationStrategy.CASE_INSENSITIVE\nexpression = parse(sql, read='starrocks')[0]\n\nschema = MappingSchema(dialect=dialect)\nschema.add_table(\"default.tbl1\", column_mapping={\"user_id\": \"BIGINT\"}, match_depth=False)\n\ntry:\n    lineage(column=None, sql=expression, schema=schema, dialect=dialect,\n            expand_stars=True, validate_qualify_columns=True)\nexcept OptimizeError as e:\n    print(f\"Caught OptimizeError: {e}\")\nexcept Exception as e:\n    print(f\"Caught unexpected error: {type(e).__name__}: {e}\")\nelse:\n    print(\"No error was raised.\")\n",
+      "test_source": "import pytest\nfrom sqlglot import parse, Dialect, exp\nfrom sqlglot.dialects.dialect import NormalizationStrategy\nfrom sqlglot.lineage import lineage\nfrom sqlglot.schema import MappingSchema\nfrom sqlglot.errors import OptimizeError\n\ndef test_starrocks_table_valued_function_lineage_fails_with_optimize_error():\n    sql = \"\"\"\n    WITH t AS (\n      SELECT p.user_id, gs.n AS to_deposit_days\n      FROM tbl1 p\n      CROSS JOIN (\n        SELECT generate_series AS n FROM TABLE(generate_series(0, 8000))\n      ) gs\n    ),\n    t2 AS (\n      SELECT t.* FROM t\n    )\n    SELECT user_id, to_deposit_days FROM t2\n    \"\"\"\n\n    dialect = Dialect.get_or_raise('starrocks')\n    dialect.normalization_strategy = NormalizationStrategy.CASE_INSENSITIVE\n    expression = parse(sql, read='starrocks')[0]\n\n    schema = MappingSchema(dialect=dialect)\n    schema.add_table(\"default.tbl1\", column_mapping={\"user_id\": \"BIGINT\"}, match_depth=False)\n\n    # This call is expected to raise an OptimizeError due to the bug\n    with pytest.raises(OptimizeError) as excinfo:\n        lineage(column=None, sql=expression, schema=schema, dialect=dialect,\n                expand_stars=True, validate_qualify_columns=True)\n\n    # The error message should indicate that 'generate_series' could not be resolved\n    assert \"Column 'generate_series' could not be resolved\" in str(excinfo.value)\n",
       "test_rel_path": "tests/dialects/test_reprobot_sqlglot__8244.py",
       "attempts": []
     },
@@ -201,11 +487,11 @@
       "usage": {
         "prompt_tokens": 2810,
         "completion_tokens": 447,
-        "cost_usd": 0.001961,
+        "cost_usd": 0.0,
         "calls": 3,
-        "cached_calls": 0
+        "cached_calls": 3
       },
-      "wall_clock_s": 7.4,
+      "wall_clock_s": 2.1,
       "error": null,
       "test_source": "import tomlkit\n\ndef test_inline_table_newline_after_add():\n    v = tomlkit.loads(\"\"\"[x]\\na.b = {}\"\"\")\n    v[\"x\"][\"c\"] = 3\n    result = tomlkit.dumps(v)\n    expected = \"\"\"[x]\\na.b = {}\\nc = 3\\n\"\"\"\n    assert result == expected\n",
       "test_rel_path": "tests/test_reprobot_tomlkit__440.py",
@@ -223,11 +509,11 @@
       "usage": {
         "prompt_tokens": 15878,
         "completion_tokens": 2010,
-        "cost_usd": 0.007341,
+        "cost_usd": 0.0,
         "calls": 6,
-        "cached_calls": 0
+        "cached_calls": 6
       },
-      "wall_clock_s": 15.7,
+      "wall_clock_s": 0.8,
       "error": null,
       "test_source": "============================= test session starts ==============================\nplatform linux -- Python 3.10.12, pytest-7.4.0, pluggy-1.3.0\nrootdir: /home/runner/work/tomlkit/tomlkit\ncollected 1 item\n\ntest_example.py F                                                        [100%]\n\n=================================== FAILURES ===================================\n_________________ test_value_vs_table_redefinition_out_of_order_raises_at_parse __________________\n\n    def test_value_vs_table_redefinition_out_of_order_raises_at_parse():\n        src = '[a]\\\\nb = true\\\\n[zz]\\\\n[a.b]\\\\nc = 1\\\\n'\n>       with pytest.raises(tomlkit.exceptions.KeyAlreadyPresent):\nE       Failed to raise <class 'tomlkit.exceptions.KeyAlreadyPresent'>\n\ntest_example.py:7: Failed to raise\n=========================== short test summary info ============================\nFAILED test_example.py::test_value_vs_table_redefinition_out_of_order_raises_at_parse - Failed to...\n============================== 1 failed in 0.01s ===============================\n",
       "test_rel_path": "tests/test_reprobot_tomlkit__523.py",
@@ -245,11 +531,11 @@
       "usage": {
         "prompt_tokens": 7539,
         "completion_tokens": 1169,
-        "cost_usd": 0.005184,
+        "cost_usd": 0.0,
         "calls": 6,
-        "cached_calls": 0
+        "cached_calls": 6
       },
-      "wall_clock_s": 12.9,
+      "wall_clock_s": 2.1,
       "error": null,
       "test_source": "import pytest\nimport tomlkit\n\ndef test_nesting_table_in_inlinetable_raises_error():\n    t = tomlkit.table()\n    t.append(\"a\", 1)\n\n    it = tomlkit.inline_table()\n\n    # The current implementation allows appending a Table to an InlineTable\n    # without raising an error, which is invalid TOML.\n    # This test expects a ValueError (or a more specific tomlkit exception)\n    # to be raised when this invalid operation is attempted.\n    # Therefore, this test will FAIL at the current commit because no error is raised.\n    # Once the bug is fixed and an error is raised, this test will PASS.\n    with pytest.raises(ValueError):  # Expecting an error to be raised\n        it.append(\"table\", t)\n",
       "test_rel_path": "tests/test_reprobot_tomlkit__531.py",
@@ -266,14 +552,14 @@
       "rounds": 1,
       "usage": {
         "prompt_tokens": 6447,
-        "completion_tokens": 4528,
-        "cost_usd": 0.013254,
+        "completion_tokens": 4523,
+        "cost_usd": 0.008135,
         "calls": 5,
-        "cached_calls": 0
+        "cached_calls": 4
       },
-      "wall_clock_s": 29.0,
+      "wall_clock_s": 19.8,
       "error": null,
-      "test_source": "import tomlkit\n\ndef test_aot_captures_too_many_keys():\n    doc = tomlkit.parse(\"a.b = 1\\\\nc.d = 2\\\\n\")\n    aot = tomlkit.aot()\n    t = tomlkit.table()\n    t[\"x\"] = 9\n    aot.append(t)\n    doc[\"a\"] = aot\n\n    result = tomlkit.dumps(doc)\n    print(f\"DUMPED RESULT:\\\\n{result}\") # Added print for debugging\n\n    # The bug is that 'c.d = 2' is captured within the '[[a]]' block.\n    # This means the string \"[[a]]\\nx = 9\\nc.d = 2\" will be present in the output.\n    # To make the test FAIL when the bug is present, we assert that this string is NOT in the result.\n    # Once the bug is fixed, this string will no longer be present, and the assertion will pass.\n    assert \"[[a]]\\\\nx = 9\\\\nc.d = 2\" not in result\n",
+      "test_source": "import tomlkit\n\ndef test_aot_captures_too_many_keys():\n    doc = tomlkit.parse(\"a.b = 1\\\\nc.d = 2\\\\n\")\n    aot = tomlkit.aot()\n    t = tomlkit.table()\n    t[\"x\"] = 9\n    aot.append(t)\n    doc[\"a\"] = aot\n    \n    result = tomlkit.dumps(doc)\n    \n    # If the bug is present, 'c.d = 2' will be directly under '[[a]]' after 'x = 9'.\n    # The correct output should have a blank line separating the array of tables from the next top-level key.\n    # Therefore, if the bug is present, the string \"[[a]]\\\\nx = 9\\\\n\\\\nc.d = 2\" will *not* be in the result.\n    # So, asserting its presence should make the test FAIL at the buggy commit.\n    assert \"[[a]]\\\\nx = 9\\\\n\\\\nc.d = 2\" in result\n",
       "test_rel_path": "tests/test_reprobot_tomlkit__542.py",
       "attempts": []
     },
@@ -282,20 +568,20 @@
       "repo": "python-poetry/tomlkit",
       "variant": "b1",
       "f2p": false,
-      "score_reason": "did_not_pass_at_fix:failed",
-      "verdict_at_parent": "reproduced_assertion",
+      "score_reason": "did_not_fail_at_parent:collection_error",
+      "verdict_at_parent": "broken_test",
       "self_reproduces": null,
       "rounds": 1,
       "usage": {
         "prompt_tokens": 5289,
-        "completion_tokens": 2313,
-        "cost_usd": 0.007369,
+        "completion_tokens": 2637,
+        "cost_usd": 0.00312,
         "calls": 4,
-        "cached_calls": 0
+        "cached_calls": 3
       },
-      "wall_clock_s": 17.2,
+      "wall_clock_s": 8.0,
       "error": null,
-      "test_source": "import tomlkit\nimport pytest\n\ndef test_scalar_not_captured_by_dictionary():\n    doc = tomlkit.loads(\"a.b = 1\\\n\")\n    doc[\"a\"][\"c\"] = {}\n    doc[\"z\"] = 2\n\n    dumped_toml = tomlkit.dumps(doc)\n\n    # The bug is that 'z = 2' is wrongly captured by the '[a.c]' table\n    # and is not a top-level key in the dumped output.\n    # The expected output from the bug report is:\n    # a.b = 1\n    # \n    # [a.c]\n    # z = 2\n    # In this output, 'z' is nested under 'a.c'.\n\n    # When re-parsing this buggy output, 'z' will not be found at the top level.\n    # Therefore, attempting to access `reparsed_doc[\"z\"]` should raise a NonExistentKey error.\n    # This test asserts that 'z' *should* be a top-level key, and thus the current\n    # buggy behavior (where it's not) will cause this assertion to fail.\n\n    reparsed_doc = tomlkit.loads(dumped_toml)\n\n    # Assert that 'z' is a top-level key in the re-parsed document.\n    # This assertion will fail at the buggy commit because 'z' is not a top-level key.\n    assert reparsed_doc[\"z\"] == 2\n\n    # Additionally, ensure that 'z' is not incorrectly nested under 'a.c'\n    assert \"c\" in reparsed_doc[\"a\"]\n    assert isinstance(reparsed_doc[\"a\"][\"c\"], tomlkit.toml_document.TOMLDocument)\n    assert \"z\" not in reparsed_doc[\"a\"][\"c\"]\n",
+      "test_source": "result\na.b = 1\n\n[a.c]\nz = 2\n",
       "test_rel_path": "tests/test_reprobot_tomlkit__543.py",
       "attempts": []
     },
@@ -311,11 +597,11 @@
       "usage": {
         "prompt_tokens": 12007,
         "completion_tokens": 2165,
-        "cost_usd": 0.008476,
+        "cost_usd": 0.0,
         "calls": 7,
-        "cached_calls": 0
+        "cached_calls": 7
       },
-      "wall_clock_s": 17.9,
+      "wall_clock_s": 0.8,
       "error": null,
       "test_source": "import pytest\nimport tomlkit\nimport torch\n\ndef test_float_array_to_torch_tensor_conversion():\n    toml_str = \"\"\"\na = [1.0, 2.0, 3.0]\n\"\"\"\n    arr = tomlkit.loads(toml_str)\n\n    # This line is expected to fail with TypeError at the buggy commit\n    # and pass once the bug is fixed.\n    t = torch.tensor(arr['a'], dtype=torch.float32)\n\n    # Assertions to ensure the tensor is correctly formed if it passes\n    assert t.tolist() == [1.0, 2.0, 3.0]\n    assert t.dtype == torch.float32\n",
       "test_rel_path": "tests/test_reprobot_tomlkit__562.py",

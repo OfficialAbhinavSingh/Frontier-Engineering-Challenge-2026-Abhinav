@@ -4,14 +4,14 @@
   "temperature": 0.0,
   "description": "adds signature grounding: a missing API the report names is a reproduction",
   "model": "google/gemini-2.5-flash",
-  "n_cases": 6,
-  "f2p_solved": 3,
-  "f2p_rate": 0.5,
-  "total_cost_usd": 0.0112,
-  "total_llm_calls": 17,
-  "cached_llm_calls": 11,
-  "mean_wall_clock_s": 6.2,
-  "wall_clock_total_s": 37.2,
+  "n_cases": 13,
+  "f2p_solved": 7,
+  "f2p_rate": 0.5385,
+  "total_cost_usd": 0.0206,
+  "total_llm_calls": 35,
+  "cached_llm_calls": 22,
+  "mean_wall_clock_s": 6.0,
+  "wall_clock_total_s": 78.2,
   "results": [
     {
       "case_id": "click__2263",
@@ -24,12 +24,12 @@
       "rounds": 2,
       "usage": {
         "prompt_tokens": 11480,
-        "completion_tokens": 716,
-        "cost_usd": 0.002536,
+        "completion_tokens": 688,
+        "cost_usd": 0.0,
         "calls": 4,
-        "cached_calls": 2
+        "cached_calls": 4
       },
-      "wall_clock_s": 6.7,
+      "wall_clock_s": 3.3,
       "error": null,
       "test_source": "import pytest\nimport click\nfrom click.testing import CliRunner\n\n\ndef test_deprecated_option_warns(runner: CliRunner) -> None:\n    @click.command()\n    @click.option(\"--count\", default=1, help=\"Number of greetings.\", deprecated=True)\n    @click.option(\"--name\", prompt=\"Your name\", help=\"The person to greet.\")\n    def hello(count, name):\n        \"\"\"Simple program that greets NAME for a total of COUNT times.\"\"\"\n        for x in range(count):\n            click.echo(f\"Hello {name}!\")\n\n    result = runner.invoke(hello, [\"--count\", \"2\", \"--name\", \"Test\"], input=\"Test\\n\")\n    assert \"Deprecated: Option '--count' is deprecated.\" in result.output\n",
       "test_rel_path": "tests/test_reprobot_click__2263.py",
@@ -39,14 +39,14 @@
           "verdict": "overspecified",
           "exception_type": "TypeError",
           "reason": "the test failed, but it makes 3 assertions and 2 of them rest on text the report never contains, so it will keep failing after the bug is fixed",
-          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n_________________________ test_deprecated_option_warns _________________________\ntests/test_reprobot_click__2263.py:8: in test_deprecated_option_warns\n    @click.option(\"--count\", default=1, help=\"Number of greetings.\", deprecated=True)\n     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsrc/click/decorators.py:375: in decorator\n    _param_memo(f, cls(param_decls, **attrs))\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^\nsrc/click/core.py:2478: in __init__\n    super().__init__(param_decls, type=type, multiple=multiple, **attrs)\nE   TypeError: Parameter.__init__() got an unexpected keyword argument 'deprecated'\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_click__2263.py::test_deprecated_option_warns - Typ...\n1 failed in 0.04s\n"
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n_________________________ test_deprecated_option_warns _________________________\ntests/test_reprobot_click__2263.py:8: in test_deprecated_option_warns\n    @click.option(\"--count\", default=1, help=\"Number of greetings.\", deprecated=True)\n     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsrc/click/decorators.py:375: in decorator\n    _param_memo(f, cls(param_decls, **attrs))\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^\nsrc/click/core.py:2478: in __init__\n    super().__init__(param_decls, type=type, multiple=multiple, **attrs)\nE   TypeError: Parameter.__init__() got an unexpected keyword argument 'deprecated'\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_click__2263.py::test_deprecated_option_warns - Typ...\n1 failed in 0.05s\n"
         },
         {
           "round": 2,
           "verdict": "reproduced_exception",
           "exception_type": "TypeError",
           "reason": "TypeError was raised from inside the project's own code (src/click/decorators.py:375 in decorator)",
-          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n_________________________ test_deprecated_option_warns _________________________\ntests/test_reprobot_click__2263.py:8: in test_deprecated_option_warns\n    @click.option(\"--count\", default=1, help=\"Number of greetings.\", deprecated=True)\n     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsrc/click/decorators.py:375: in decorator\n    _param_memo(f, cls(param_decls, **attrs))\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^\nsrc/click/core.py:2478: in __init__\n    super().__init__(param_decls, type=type, multiple=multiple, **attrs)\nE   TypeError: Parameter.__init__() got an unexpected keyword argument 'deprecated'\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_click__2263.py::test_deprecated_option_warns - Typ...\n1 failed in 0.05s\n"
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n_________________________ test_deprecated_option_warns _________________________\ntests/test_reprobot_click__2263.py:8: in test_deprecated_option_warns\n    @click.option(\"--count\", default=1, help=\"Number of greetings.\", deprecated=True)\n     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsrc/click/decorators.py:375: in decorator\n    _param_memo(f, cls(param_decls, **attrs))\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^\nsrc/click/core.py:2478: in __init__\n    super().__init__(param_decls, type=type, multiple=multiple, **attrs)\nE   TypeError: Parameter.__init__() got an unexpected keyword argument 'deprecated'\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_click__2263.py::test_deprecated_option_warns - Typ...\n1 failed in 0.04s\n"
         }
       ]
     },
@@ -54,43 +54,267 @@
       "case_id": "click__2644",
       "repo": "pallets/click",
       "variant": "s6",
+      "f2p": true,
+      "score_reason": "ok",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": true,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 7322,
+        "completion_tokens": 564,
+        "cost_usd": 0.0,
+        "calls": 2,
+        "cached_calls": 2
+      },
+      "wall_clock_s": 2.4,
+      "error": null,
+      "test_source": "import os\nimport pytest\nimport click\nfrom click.testing import CliRunner\nimport warnings\n\n@pytest.fixture\ndef runner():\n    return CliRunner()\n\ndef test_file_option_resource_warning_on_completion(runner):\n    config_file_path = \"test_config.txt\"\n\n    @click.group()\n    @click.option(\n        \"--config_file\",\n        default=config_file_path,\n        type=click.File(mode=\"r\"),\n        help=\"help\",\n    )\n    def cli(config_file):\n        pass\n\n    # Create a dummy config file\n    with open(config_file_path, \"w\") as f:\n        f.write(\"test content\")\n\n    try:\n        # Simulate shell completion\n        env = {\n            \"SHELL_COMPLETION_VAR\": \"bash_complete\",\n            \"_CLICK_CLI_COMPLETE\": \"bash_complete\",\n            \"COMP_WORDS\": \"cli --config_file\",\n            \"COMP_CWORD\": \"1\",\n        }\n\n        with warnings.catch_warnings(record=True) as w:\n            warnings.simplefilter(\"always\")\n            result = runner.invoke(cli, [\"--config_file\"], env=env, complete_var=\"SHELL_COMPLETION_VAR\")\n\n            # Assert that no ResourceWarning related to unclosed files is issued\n            for warning_message in w:\n                if issubclass(warning_message.category, ResourceWarning) and \"unclosed file\" in str(warning_message.message):\n                    pytest.fail(f\"ResourceWarning: {warning_message.message}\")\n\n            # Ensure the completion command itself didn't fail unexpectedly\n            assert result.exit_code == 0\n\n    finally:\n        # Clean up the dummy config file\n        if os.path.exists(config_file_path):\n            os.remove(config_file_path)\n",
+      "test_rel_path": "tests/test_reprobot_click__2644.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "reproduced_assertion",
+          "exception_type": null,
+          "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n_______________ test_file_option_resource_warning_on_completion ________________\ntests/test_reprobot_click__2644.py:44: in test_file_option_resource_warning_on_completion\n    pytest.fail(f\"ResourceWarning: {warning_message.message}\")\nE   Failed: ResourceWarning: unclosed file <_io.TextIOWrapper name='test_config.txt' mode='r' encoding='UTF-8'>\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_click__2644.py::test_file_option_resource_warning_on_completion\n1 failed in 0.02s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "jinja__1253",
+      "repo": "pallets/jinja",
+      "variant": "s6",
+      "f2p": true,
+      "score_reason": "ok",
+      "verdict_at_parent": "reproduced_exception",
+      "self_reproduces": true,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 5893,
+        "completion_tokens": 565,
+        "cost_usd": 0.002524,
+        "calls": 2,
+        "cached_calls": 1
+      },
+      "wall_clock_s": 5.9,
+      "error": null,
+      "test_source": "import pytest\nfrom jinja2 import Environment\nfrom jinja2 import UndefinedError\nfrom jinja2 import DictLoader\n\ndef test_issue_1253_elif_undefined_error(env):\n    template_string = \"\"\"\n    {% if new_data_set_created is defined %}\n        {% if new_data_set_created == True %}\n            The new image data set <strong>{{ form_data[\"data_set_name\"] }}</strong> has been created.\n            {% set form_data = {\"data_set_name\": \"\", \"client\": \"\", \"project\": \"\"} %}\n        {% else %}\n            The new image data set <strong>{{ form_data[\"data_set_name\"] }}</strong> could not be created.<br />\n        {% endif %}\n    {% elif deleted_data_set is defined %}\n        The image data set <strong>{{ deleted_data_set }}</strong> has been deleted from DB and from disk.\n        {% set form_data = {\"data_set_name\": \"\", \"client\": \"\", \"project\": \"\"} %}\n    {% else %}\n        {% set form_data = {\"data_set_name\": \"\", \"client\": \"\", \"project\": \"\"} %}\n    {% endif %}\n    \"\"\"\n    template = env.from_string(template_string)\n\n    # This call should not raise an UndefinedError for form_data\n    # when new_data_set_created is True, even with the elif block present.\n    # The bug causes it to raise UndefinedError because the `form_data`\n    # set in the outer scope is not correctly propagated into the inner `if` block\n    # when an `elif` is present.\n    rendered_output = template.render(\n        new_data_set_created=True,\n        form_data={\"data_set_name\": \"test_dataset\", \"client\": \"test_client\", \"project\": \"test_project\"}\n    )\n\n    assert \"The new image data set <strong>test_dataset</strong> has been created.\" in rendered_output\n",
+      "test_rel_path": "tests/test_reprobot_jinja__1253.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "reproduced_exception",
+          "exception_type": "UndefinedError",
+          "reason": "UndefinedError was raised from inside the project's own code (src/jinja2/environment.py:1295 in render)",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n_____________________ test_issue_1253_elif_undefined_error _____________________\ntests/test_reprobot_jinja__1253.py:29: in test_issue_1253_elif_undefined_error\n    rendered_output = template.render(\nsrc/jinja2/environment.py:1295: in render\n    self.environment.handle_exception()\nsrc/jinja2/environment.py:942: in handle_exception\n    raise rewrite_traceback_stack(source=source)\n<template>:4: in top-level template code\n    ???\nsrc/jinja2/environment.py:471: in getitem\n    return obj[argument]\n           ^^^^^^^^^^^^^\nE   jinja2.exceptions.UndefinedError: 'form_data' is undefined\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_jinja__1253.py::test_issue_1253_elif_undefined_error\n1 failed in 0.04s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "jinja__1413",
+      "repo": "pallets/jinja",
+      "variant": "s6",
+      "f2p": false,
+      "score_reason": "did_not_pass_at_fix:failed",
+      "verdict_at_parent": "reproduced_exception",
+      "self_reproduces": true,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 6081,
+        "completion_tokens": 302,
+        "cost_usd": 0.001659,
+        "calls": 2,
+        "cached_calls": 1
+      },
+      "wall_clock_s": 4.8,
+      "error": null,
+      "test_source": "import pytest\nfrom jinja2 import Environment\nfrom jinja2 import TemplateSyntaxError\n\n\ndef test_namespace_multi_variable_assignment(env):\n    template = \"\"\"\n        {% set full = namespace(id=\"\", prev_id=\"\") -%}\n        {% for id in endpoints recursive %}\n          {% set full.prev_id, full.id = full.id, full.id + \"/\" + id -%}\n        {% endfor -%}\n        {{ full.id }}\n    \"\"\"\n    env = Environment()\n    tmpl = env.from_string(template)\n    # The bug causes a TemplateSyntaxError during parsing.\n    # If the bug is fixed, this render call should succeed.\n    assert tmpl.render(endpoints=[\"a\", \"b\"]) == \"/a/b\"\n",
+      "test_rel_path": "tests/test_reprobot_jinja__1413.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "reproduced_exception",
+          "exception_type": "TemplateSyntaxError",
+          "reason": "TemplateSyntaxError was raised from inside the project's own code (src/jinja2/environment.py:1111 in from_string)",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n___________________ test_namespace_multi_variable_assignment ___________________\ntests/test_reprobot_jinja__1413.py:15: in test_namespace_multi_variable_assignment\n    tmpl = env.from_string(template)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nsrc/jinja2/environment.py:1111: in from_string\n    return cls.from_code(self, self.compile(source), gs, None)\n                               ^^^^^^^^^^^^^^^^^^^^\nsrc/jinja2/environment.py:771: in compile\n    self.handle_exception(source=source_hint)\nsrc/jinja2/environment.py:942: in handle_exception\n    raise rewrite_traceback_stack(source=source)\n<unknown>:4: in template\n    ???\nE   jinja2.exceptions.TemplateSyntaxError: expected token 'end of statement block', got ','\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_jinja__1413.py::test_namespace_multi_variable_assignment\n1 failed in 0.04s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "jinja__1430",
+      "repo": "pallets/jinja",
+      "variant": "s6",
+      "f2p": false,
+      "score_reason": "did_not_pass_at_fix:failed",
+      "verdict_at_parent": "reproduced_exception",
+      "self_reproduces": true,
+      "rounds": 2,
+      "usage": {
+        "prompt_tokens": 8700,
+        "completion_tokens": 1036,
+        "cost_usd": 0.004632,
+        "calls": 4,
+        "cached_calls": 1
+      },
+      "wall_clock_s": 12.7,
+      "error": null,
+      "test_source": "import pytest\nfrom jinja2 import Environment\nfrom jinja2 import DictLoader\nfrom jinja2.ext import InternationalizationExtension\n\n\nclass TestI18nBlockPGettext:\n    def test_block_pgettext_syntax(self):\n        env = Environment(\n            extensions=[InternationalizationExtension],\n            loader=DictLoader(\n                {\n                    \"test.html\": \"\"\"\n                        {% pgettext \"context\" %}Hello{% endpgettext %}\n                    \"\"\"\n                }\n            ),\n        )\n        # The bug is that the parser does not recognize `pgettext` as a block.\n        # This test asserts that the template can be parsed without syntax errors.\n        # We don't care about the rendering result here, just that it parses.\n        env.get_template(\"test.html\")\n        assert True # If we reach here, parsing succeeded, and the bug is fixed.\n",
+      "test_rel_path": "tests/test_reprobot_jinja__1430.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "overspecified",
+          "exception_type": "TemplateSyntaxError",
+          "reason": "the test failed, but it makes 4 assertions and 0 of them rest on text the report never contains, so it will keep failing after the bug is fixed",
+          "output": "      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsrc/jinja2/environment.py:998: in get_template\n    return self._load_template(name, globals)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsrc/jinja2/environment.py:959: in _load_template\n    template = self.loader.load(self, name, self.make_globals(globals))\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsrc/jinja2/loaders.py:137: in load\n    code = environment.compile(source, name, filename)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsrc/jinja2/environment.py:758: in compile\n    self.handle_exception(source=source_hint)\nsrc/jinja2/environment.py:926: in handle_exception\n    raise rewrite_traceback_stack(source=source)\n<unknown>:2: in template\n    ???\nE   jinja2.exceptions.TemplateSyntaxError: Encountered unknown tag 'pgettext'.\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_jinja__1430.py::TestI18nBlockPGettext::test_block_pgettext\nFAILED tests/test_reprobot_jinja__1430.py::TestI18nBlockPGettext::test_block_pgettext_with_variables\nFAILED tests/test_reprobot_jinja__1430.py::TestI18nBlockPGettext::test_block_pgettext_with_pluralize\n3 failed in 0.13s\n"
+        },
+        {
+          "round": 2,
+          "verdict": "reproduced_exception",
+          "exception_type": "TemplateSyntaxError",
+          "reason": "TemplateSyntaxError was raised from inside the project's own code (src/jinja2/environment.py:998 in get_template)",
+          "output": "= FAILURES ===================================\n_______________ TestI18nBlockPGettext.test_block_pgettext_syntax _______________\ntests/test_reprobot_jinja__1430.py:22: in test_block_pgettext_syntax\n    env.get_template(\"test.html\")\nsrc/jinja2/environment.py:998: in get_template\n    return self._load_template(name, globals)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsrc/jinja2/environment.py:959: in _load_template\n    template = self.loader.load(self, name, self.make_globals(globals))\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsrc/jinja2/loaders.py:137: in load\n    code = environment.compile(source, name, filename)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsrc/jinja2/environment.py:758: in compile\n    self.handle_exception(source=source_hint)\nsrc/jinja2/environment.py:926: in handle_exception\n    raise rewrite_traceback_stack(source=source)\n<unknown>:2: in template\n    ???\nE   jinja2.exceptions.TemplateSyntaxError: Encountered unknown tag 'pgettext'.\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_jinja__1430.py::TestI18nBlockPGettext::test_block_pgettext_syntax\n1 failed in 0.05s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "jsonschema__1389",
+      "repo": "python-jsonschema/jsonschema",
+      "variant": "s6",
       "f2p": false,
       "score_reason": "did_not_pass_at_fix:failed",
       "verdict_at_parent": "reproduced_assertion",
       "self_reproduces": true,
-      "rounds": 3,
+      "rounds": 1,
       "usage": {
-        "prompt_tokens": 19779,
-        "completion_tokens": 1466,
-        "cost_usd": 0.00871,
-        "calls": 5,
+        "prompt_tokens": 5419,
+        "completion_tokens": 394,
+        "cost_usd": 0.001942,
+        "calls": 2,
         "cached_calls": 1
       },
-      "wall_clock_s": 15.5,
+      "wall_clock_s": 4.7,
       "error": null,
-      "test_source": "import os\nimport pytest\nimport click\nfrom click.testing import CliRunner\nimport warnings\nimport typing\n\n\n@pytest.fixture\ndef runner():\n    return CliRunner()\n\n\n@click.group()\n@click.option(\n    \"--config_file\",\n    default=\"config.txt\",\n    type=click.File(mode=\"r\"),\n    help=\"help\",\n)\n@click.pass_context\ndef cli(ctx, config_file: typing.TextIO):\n    pass\n\n\n@cli.command()\ndef hello():\n    pass\n\n\ndef test_shell_completion_closes_file_option(runner, monkeypatch, tmp_path):\n    config_file_path = tmp_path / \"config.txt\"\n    config_file_path.write_text(\"test config\")\n\n    # Set up environment variables for shell completion\n    monkeypatch.setenv(\"_CLICK_CLI_COMPLETE\", \"bash_complete\")\n    monkeypatch.setenv(\"_CLICK_CLI_COMPLETE_USER_PROMPT\", \"1\")\n    monkeypatch.setenv(\"COMP_WORDS\", f\"cli --config_file {config_file_path}\")\n    monkeypatch.setenv(\"COMP_CWORD\", \"2\")\n    monkeypatch.setenv(\"COMP_POINT\", str(len(f\"cli --config_file {config_file_path}\")))\n\n    # Capture ResourceWarnings\n    with warnings.catch_warnings(record=True) as w:\n        warnings.simplefilter(\"always\")\n        # The bug occurs during shell completion, which is triggered by\n        # calling the main function with specific environment variables.\n        # The actual command line arguments don't matter much for this\n        # specific bug, as it's about context creation during completion.\n        runner.invoke(cli, [], catch_exceptions=False)\n\n        # Assert that a ResourceWarning related to unclosed files was issued\n        # This test should fail with the bug present and pass when fixed.\n        assert any(\n            issubclass(warning.category, ResourceWarning)\n            and \"unclosed file\" in str(warning.message)\n            and str(config_file_path) in str(warning.message)\n            for warning in w\n        )\n",
-      "test_rel_path": "tests/test_reprobot_click__2644.py",
+      "test_source": "import jsonschema\nfrom unittest import TestCase\n\n\nclass TestJsonPathEscaping(TestCase):\n    def test_json_path_for_special_characters(self):\n        keys = [\"\", \"[\", \".\", \"\\\\\", \"'\", \" \", \"\\\"\", \"a[0]\"]\n        schema = {\n            \"properties\": {key: {\"type\": \"string\"} for key in keys},\n        }\n        instance = {\n            key: None for key in keys\n        }\n\n        validator = jsonschema.Draft7Validator(schema)\n        errors = sorted(validator.iter_errors(instance), key=lambda e: str(e.path[-1]))\n\n        expected_json_paths = [\n            \"$['']\",\n            \"$[' ']\",\n            \"$['\\\"']\",\n            \"$['.']\",\n            \"$['\\\\']\",\n            \"$['[']\",\n            \"$['a[0]']\",\n            \"$['\\'']\",\n        ]\n\n        actual_json_paths = [error.json_path for error in errors]\n\n        self.assertEqual(actual_json_paths, expected_json_paths)\n",
+      "test_rel_path": "jsonschema/tests/test_reprobot_jsonschema__1389.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "reproduced_assertion",
+          "exception_type": "AssertionError",
+          "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n__________ TestJsonPathEscaping.test_json_path_for_special_characters __________\njsonschema/tests/test_reprobot_jsonschema__1389.py:31: in test_json_path_for_special_characters\n    self.assertEqual(actual_json_paths, expected_json_paths)\nE   AssertionError: Lists differ: ['$.', '$. ', '$.\"', \"$.'\", '$..', '$.[', '$.\\\\', '$.a[0]'] != [\"$['']\", \"$[' ']\", '$[\\'\"\\']', \"$['.']\", [38 chars]'']\"]\nE   \nE   First differing element 0:\nE   '$.'\nE   \"$['']\"\nE   \nE   - ['$.', '$. ', '$.\"', \"$.'\", '$..', '$.[', '$.\\\\', '$.a[0]']\nE   + [\"$['']\",\nE   +  \"$[' ']\",\nE   +  '$[\\'\"\\']',\nE   +  \"$['.']\",\nE   +  \"$['\\\\']\",\nE   +  \"$['[']\",\nE   +  \"$['a[0]']\",\nE   +  \"$[''']\"]\n=========================== short test summary info ============================\nFAILED jsonschema/tests/test_reprobot_jsonschema__1389.py::TestJsonPathEscaping::test_json_path_for_special_characters\n1 failed in 0.09s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "rich__3569",
+      "repo": "Textualize/rich",
+      "variant": "s6",
+      "f2p": true,
+      "score_reason": "ok",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": true,
+      "rounds": 2,
+      "usage": {
+        "prompt_tokens": 5737,
+        "completion_tokens": 1111,
+        "cost_usd": 0.004026,
+        "calls": 4,
+        "cached_calls": 1
+      },
+      "wall_clock_s": 14.7,
+      "error": null,
+      "test_source": "import io\n\nfrom rich.console import Console\nfrom rich.panel import Panel\nfrom rich.style import Style\n\n\ndef test_panel_title_background_color():\n    console = Console(file=io.StringIO(), force_terminal=True, color_system=\"truecolor\")\n    panel = Panel(\"content\", title='[bold white]Title[/bold white]', style=Style(color=\"white\", bgcolor=\"blue\"))\n    console.print(panel)\n    output = console.file.getvalue()\n\n    # The bug is that the title's background color is not applied.\n    # The report states \"Title unpainted\", meaning the background color of the panel\n    # is not applied to the title area.\n    # We expect the blue background color (ANSI code 44) to be present around the title.\n    # The current output shows `\\x1b[1;37mTitle\\x1b[0m` for the title,\n    # meaning bold white foreground, but no blue background.\n    # A correct output would include `44m` (blue background) in the style applied to the title.\n    # We are looking for the blue background color code (44) to be applied to the title.\n    # The exact sequence might be `\\x1b[44m...Title...` or `\\x1b[...;44mTitle...`.\n    # The key is that `44m` should be part of the style applied to \"Title\".\n    assert \"44mTitle\" in output\n",
+      "test_rel_path": "tests/test_reprobot_rich__3569.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "overspecified",
+          "exception_type": "AssertionError",
+          "reason": "the test failed, but it makes 1 assertions and 2 of them rest on text the report never contains, so it will keep failing after the bug is fixed",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n______________________ test_panel_title_background_color _______________________\ntests/test_reprobot_rich__3569.py:42: in test_panel_title_background_color\n    assert \"\\x1b[44m\\x1b[1m\\x1b[37mTitle\" in output or \"\\x1b[1;37;44mTitle\" in output\nE   AssertionError: assert ('\\x1b[44m\\x1b[1m\\x1b[37mTitle' in '\\x1b[37;44m\u256d\u2500\\x1b[0m\\x1b[37;44m\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\\x1b[0m \\x1b[1;37mTitle\\x1b[0m \\x1b[37;44m\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500...b[37;44m\u2502\\x1b[0m\\n\\x1b[37;44m\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\\x1b[0m\\n' or '\\x1b[1;37;44mTitle' in '\\x1b[37;44m\u256d\u2500\\x1b[0m\\x1b[37;44m\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\\x1b[0m \\x1b[1;37mTitle\\x1b[0m \\x1b[37;44m\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500...b[37;44m\u2502\\x1b[0m\\n\\x1b[37;44m\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\\x1b[0m\\n')\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_rich__3569.py::test_panel_title_background_color\n1 failed in 0.18s\n"
+        },
+        {
+          "round": 2,
+          "verdict": "reproduced_assertion",
+          "exception_type": "AssertionError",
+          "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n______________________ test_panel_title_background_color _______________________\ntests/test_reprobot_rich__3569.py:24: in test_panel_title_background_color\n    assert \"44mTitle\" in output\nE   AssertionError: assert '44mTitle' in '\\x1b[37;44m\u256d\u2500\\x1b[0m\\x1b[37;44m\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\\x1b[0m \\x1b[1;37mTitle\\x1b[0m \\x1b[37;44m\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500...b[37;44m\u2502\\x1b[0m\\n\\x1b[37;44m\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\\x1b[0m\\n'\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_rich__3569.py::test_panel_title_background_color\n1 failed in 0.11s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "rich__3577",
+      "repo": "Textualize/rich",
+      "variant": "s6",
+      "f2p": true,
+      "score_reason": "ok",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": true,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 6100,
+        "completion_tokens": 257,
+        "cost_usd": 0.001635,
+        "calls": 2,
+        "cached_calls": 1
+      },
+      "wall_clock_s": 5.0,
+      "error": null,
+      "test_source": "import pytest\nfrom rich.text import Text\n\ndef test_from_ansi_trailing_newline():\n    \"\"\"\n    Test that Text.from_ansi() does not remove a trailing newline.\n    \"\"\"\n    # The bug report states: Text(\"\\n\") != Text.from_ansi(\"\\n\")\n    # And the expected output for \"text\\n\" is <text 'text\\n' [] ''>\n    # So, we assert that Text.from_ansi(\"text\\n\") is equal to Text(\"text\\n\")\n    assert Text.from_ansi(\"text\\n\") == Text(\"text\\n\")\n",
+      "test_rel_path": "tests/test_reprobot_rich__3577.py",
+      "attempts": [
+        {
+          "round": 1,
+          "verdict": "reproduced_assertion",
+          "exception_type": "AssertionError",
+          "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
+          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n_______________________ test_from_ansi_trailing_newline ________________________\ntests/test_reprobot_rich__3577.py:11: in test_from_ansi_trailing_newline\n    assert Text.from_ansi(\"text\\n\") == Text(\"text\\n\")\nE   AssertionError: assert <text 'text' [] ''> == <text 'text\\n' [] ''>\nE     \nE     Use -v to get more diff\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_rich__3577.py::test_from_ansi_trailing_newline - A...\n1 failed in 0.06s\n"
+        }
+      ]
+    },
+    {
+      "case_id": "rich__3740",
+      "repo": "Textualize/rich",
+      "variant": "s6",
+      "f2p": false,
+      "score_reason": "did_not_fail_at_parent:passed",
+      "verdict_at_parent": "no_fail",
+      "self_reproduces": false,
+      "rounds": 3,
+      "usage": {
+        "prompt_tokens": 10015,
+        "completion_tokens": 864,
+        "cost_usd": 0.004172,
+        "calls": 5,
+        "cached_calls": 2
+      },
+      "wall_clock_s": 10.9,
+      "error": null,
+      "test_source": "import pytest\nfrom rich.style import Style\nfrom rich.text import Text\nfrom rich.text import Span\n\n\ndef test_assemble_meta():\n    text = Text.assemble(\"foo\", (\"bar\", \"bold\"), meta={\"foo\": \"bar\"})\n    # The bug report shows an AssertionError where the two lists of Spans\n    # are reported as not equal, specifically at index 1.\n    # The diff shows:\n    # At index 1 diff: Span(0, 6, Style(meta={'foo': 'bar'})) != Span(0, 6, Style(meta={'foo': 'bar'}))\n    # This indicates that even though the repr of the Style objects look identical,\n    # their internal comparison fails.\n    # The test should assert the exact list of spans that the reporter expected,\n    # which currently fails due to the bug in Style comparison.\n    expected_spans = [\n        Span(3, 6, \"bold\"),\n        Span(0, 6, Style(meta={\"foo\": \"bar\"})),\n    ]\n    assert text._spans == expected_spans\n",
+      "test_rel_path": "tests/test_reprobot_rich__3740.py",
       "attempts": [
         {
           "round": 1,
           "verdict": "no_fail",
           "exception_type": null,
           "reason": "the test passed at the buggy commit, so it does not demonstrate the reported behaviour",
-          "output": "__REPROBOT_SANDBOX_READY__\n.                                                                        [100%]\n1 passed in 0.01s\n"
+          "output": "__REPROBOT_SANDBOX_READY__\n.                                                                        [100%]\n1 passed in 0.05s\n"
         },
         {
           "round": 2,
           "verdict": "no_fail",
           "exception_type": null,
           "reason": "the test passed at the buggy commit, so it does not demonstrate the reported behaviour",
-          "output": "__REPROBOT_SANDBOX_READY__\n.                                                                        [100%]\n1 passed in 0.01s\n"
+          "output": "__REPROBOT_SANDBOX_READY__\n.                                                                        [100%]\n1 passed in 0.05s\n"
         },
         {
           "round": 3,
-          "verdict": "reproduced_assertion",
+          "verdict": "no_fail",
           "exception_type": null,
-          "reason": "an assertion about the observed value failed, which is what a wrong-output bug looks like",
-          "output": "__REPROBOT_SANDBOX_READY__\nF                                                                        [100%]\n=================================== FAILURES ===================================\n___________________ test_shell_completion_closes_file_option ___________________\ntests/test_reprobot_click__2644.py:53: in test_shell_completion_closes_file_option\n    assert any(\nE   assert False\nE    +  where False = any(<generator object test_shell_completion_closes_file_option.<locals>.<genexpr> at 0x7fe990430740>)\n=========================== short test summary info ============================\nFAILED tests/test_reprobot_click__2644.py::test_shell_completion_closes_file_option\n1 failed in 0.02s\n"
+          "reason": "the test passed at the buggy commit, so it does not demonstrate the reported behaviour",
+          "output": "__REPROBOT_SANDBOX_READY__\n.                                                                        [100%]\n1 passed in 0.05s\n"
         }
       ]
     },
@@ -110,7 +334,7 @@
         "calls": 2,
         "cached_calls": 2
       },
-      "wall_clock_s": 8.0,
+      "wall_clock_s": 7.3,
       "error": null,
       "test_source": "import unittest\n\nfrom sqlglot import parse_one\nfrom sqlglot.errors import ParseError\n\n\nclass TestReprobot5178(unittest.TestCase):\n    def test_trino_cte_udf_parse_error(self):\n        sql = \"\"\"\n        WITH FUNCTION f(num int)\n            RETURNS int\n            RETURN num\n        SELECT f(1);\n        \"\"\"\n        try:\n            parse_one(sql, dialect=\"trino\")\n            self.assertTrue(True)  # If no ParseError, test passes\n        except ParseError as e:\n            self.fail(f\"Parsing the CTE UDF raised a ParseError: {e}\")\n",
       "test_rel_path": "tests/dialects/test_reprobot_sqlglot__5178.py",
@@ -120,7 +344,7 @@
           "verdict": "reproduced_exception",
           "exception_type": "ParseError",
           "reason": "ParseError was raised from inside the project's own code (sqlglot/__init__.py:160 in parse_one)",
-          "output": "ot/parser.py:4099: in _parse_with\n    cte = self._parse_cte()\n          ^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:4147: in _parse_cte\n    this=self._parse_wrapped(self._parse_statement),\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:8742: in _parse_wrapped\n    self.raise_error(\"Expecting (\")\nsqlglot/parser.py:2038: in raise_error\n    raise error\nE   sqlglot.errors.ParseError: Expecting (. Line 2, Col: 23.\nE     \nE           WITH FUNCTION \u001b[4mf\u001b[0m(num int)\nE               RETURNS int\nE               RETURN num\nE           SELECT f(1);\n\nDuring handling of the above exception, another exception occurred:\ntests/dialects/test_reprobot_sqlglot__5178.py:19: in test_trino_cte_udf_parse_error\n    self.fail(f\"Parsing the CTE UDF raised a ParseError: {e}\")\nE   AssertionError: Parsing the CTE UDF raised a ParseError: Expecting (. Line 2, Col: 23.\nE     \nE           WITH FUNCTION \u001b[4mf\u001b[0m(num int)\nE               RETURNS int\nE               RETURN num\nE           SELECT f(1);\n=========================== short test summary info ============================\nFAILED tests/dialects/test_reprobot_sqlglot__5178.py::TestReprobot5178::test_trino_cte_udf_parse_error\n1 failed in 1.00s\n"
+          "output": "ot/parser.py:4099: in _parse_with\n    cte = self._parse_cte()\n          ^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:4147: in _parse_cte\n    this=self._parse_wrapped(self._parse_statement),\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlglot/parser.py:8742: in _parse_wrapped\n    self.raise_error(\"Expecting (\")\nsqlglot/parser.py:2038: in raise_error\n    raise error\nE   sqlglot.errors.ParseError: Expecting (. Line 2, Col: 23.\nE     \nE           WITH FUNCTION \u001b[4mf\u001b[0m(num int)\nE               RETURNS int\nE               RETURN num\nE           SELECT f(1);\n\nDuring handling of the above exception, another exception occurred:\ntests/dialects/test_reprobot_sqlglot__5178.py:19: in test_trino_cte_udf_parse_error\n    self.fail(f\"Parsing the CTE UDF raised a ParseError: {e}\")\nE   AssertionError: Parsing the CTE UDF raised a ParseError: Expecting (. Line 2, Col: 23.\nE     \nE           WITH FUNCTION \u001b[4mf\u001b[0m(num int)\nE               RETURNS int\nE               RETURN num\nE           SELECT f(1);\n=========================== short test summary info ============================\nFAILED tests/dialects/test_reprobot_sqlglot__5178.py::TestReprobot5178::test_trino_cte_udf_parse_error\n1 failed in 0.92s\n"
         }
       ]
     },
@@ -140,7 +364,7 @@
         "calls": 2,
         "cached_calls": 2
       },
-      "wall_clock_s": 2.4,
+      "wall_clock_s": 2.2,
       "error": null,
       "test_source": "from tomlkit import dumps\nfrom tomlkit import parse\n\ndef test_whitespace_preservation_in_dotted_keys() -> None:\n    content = \"\"\"\n[keys.a]\n#    \u2193 this whitespace disappears\n[keys .'a'.'c']\n  'd'\t= 'e'\n\"\"\"\n    doc = parse(content)\n    # The bug report states that \"self to self shouldn't change anything?\"\n    # and that the whitespace disappears after this operation.\n    # We simulate this by reassigning the item to itself.\n    doc[\"keys\"][\"a\"] = doc[\"keys\"][\"a\"]\n    doc[\"keys\"][\"a\"][\"c\"] = doc[\"keys\"][\"a\"][\"c\"] # This line is not in the original bug report, but it is necessary to trigger the bug.\n    assert dumps(doc) == content.strip()\n",
       "test_rel_path": "tests/test_reprobot_tomlkit__291.py",
@@ -170,7 +394,7 @@
         "calls": 2,
         "cached_calls": 2
       },
-      "wall_clock_s": 2.4,
+      "wall_clock_s": 2.2,
       "error": null,
       "test_source": "import pytest\nfrom typing import Any\nfrom tomlkit import parse\nimport tomlkit\n\n\ndef test_rewrite_toml_data_adds_whitespace_line(tmp_path) -> None:\n    content = \"\"\"# xxx test\n\n\n[env.pro1.rst]\n    name = \"x7\"\n\n[env2]\n    name = 2\n\n[env3]\n    name = 3\n\"\"\"\n    file_path = tmp_path / \"test.toml\"\n    file_path.write_text(content)\n\n    def merge_dicts(a: dict, b: dict):\n        ret = a\n\n        for k, v in b.items():\n            if k in a and isinstance(a[k], (dict, tomlkit.toml_document.TOMLDocument, tomlkit.container.Container)):\n                ret[k] = merge_dicts(a[k], v)\n            else:\n                ret[k] = v\n        return ret\n\n    with open(file_path, \"r\") as f:\n        t = tomlkit.load(f)\n\n    t = merge_dicts(\n        t,\n        {'env': {'pro1': {'rst': {'name': \"x7\"}}}}\n    )\n\n    with open(file_path, \"w\") as f:\n        tomlkit.dump(t, f)\n\n    expected_content = \"\"\"# xxx test\n\n\n[env.pro1.rst]\n    name = \"x7\"\n\n[env2]\n    name = 2\n\n[env3]\n    name = 3\n\"\"\"\n    assert file_path.read_text() == expected_content\n",
       "test_rel_path": "tests/test_reprobot_tomlkit__352.py",
@@ -200,7 +424,7 @@
         "calls": 2,
         "cached_calls": 2
       },
-      "wall_clock_s": 2.4,
+      "wall_clock_s": 2.3,
       "error": null,
       "test_source": "from typing import Any\nimport pytest\nfrom tomlkit import parse\nfrom tomlkit.toml_document import TOMLDocument\n\n\ndef test_missing_keys_in_repro_of_outofordertableproxy() -> None:\n    a = parse(\n        \"\"\"\na.b.c = \"d\"\na.b.e = \"f\"\n\"\"\"\n    )\n    value = a[\"a\"]\n    expected = {\"b\": {\"c\": \"d\", \"e\": \"f\"}}\n\n    assert repr(value) == repr(expected)\n",
       "test_rel_path": "tests/test_reprobot_tomlkit__439.py",

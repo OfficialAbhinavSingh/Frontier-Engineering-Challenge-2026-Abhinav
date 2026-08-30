@@ -103,9 +103,14 @@ issue whose body does not contain the fix. Before a case enters the set, the
 Fail-to-Pass. Cases that fail that check are dropped, not worked around —
 `data/cases/dropped.json` records every one and why.
 
-The cases are split into a development set and an evaluation set by a pure
-function of the case ids, fixed before any result was seen. Iteration happened on
-the development set.
+**40 cases survive that check**, mined from six libraries (jinja 10, tomlkit 9,
+rich 9, click 7, sqlglot 4, jsonschema 1). They are split into a development set
+(13) and an evaluation set (27) by a pure function of the case ids, fixed before
+any result was seen, and stratified per repository. Iteration happened on the
+development set. Because the split is a function of the id and not of the set,
+adding repositories later could only add cases to each side — every earlier
+evaluation case is still an evaluation case, so results before and after the
+dataset grew remain comparable.
 
 ---
 
@@ -213,81 +218,132 @@ container built from a digest-pinned base image.
 
 ## Reproducibility
 
-**The model-response cache is committed.** Every model call behind every reported
-number is stored in `data/cache/llm/`, keyed by a hash of the exact request. A
-reader can reproduce the headline table offline, with no API key and no spend:
+**Every reported score can be re-derived without a model.** Each result file
+records the exact test source the run produced, and scoring a test source is a
+pure operation: run it at the parent commit, run it at the fix commit, compare.
+No API key, no cache, no sampling.
 
 ```bash
-make repos && make validate && make replay
+make repos && make validate && make verify-scores
 ```
 
-Live runs will not match exactly — the model is not deterministic across time and
-the repair loop amplifies small differences. That is stated in
-[REPRODUCTION.md](REPRODUCTION.md) rather than glossed, and it is precisely why
-the cache ships.
+That writes `results/SCORE_VERIFICATION.md` and prints any case where the
+re-derived flag disagrees with the reported one. As committed:
+**17 result files, 459 case-scores, 0 mismatches.** `make validate` is the same idea
+one level down: before a case is allowed into the dataset, the *maintainer's own*
+regression test has to demonstrate Fail-to-Pass in your Docker.
+
+**The model-response cache is also committed**, so the agents can be watched
+working without paying, but it reproduces the recorded runs only partially and
+the shortfall is measured rather than glossed: 27/27 for `b0`, 15/27 for `s5`,
+8/27 for `b1`. pytest prints its own runtime into output that gets quoted into
+prompts, so those prompts are not byte-stable between runs and their cache
+lookups miss. `make replay-check` measures it, and
+[REPRODUCTION.md](REPRODUCTION.md) explains why fixing it would invalidate the
+entire cache for more than this project's remaining budget.
+
+Live runs will not match exactly either — the model is not deterministic across
+time and the repair loop amplifies small differences. That is why the scores, not
+the trajectories, are what the reproducibility claim rests on.
 
 ---
 
 ## Results
 
-Evaluation split, 14 cases never used to choose anything, `google/gemini-2.5-flash`.
+Evaluation split, 27 cases across six repositories, `google/gemini-2.5-flash`.
 Repeated variants are the mean of three independent runs with the range they spanned.
 
 | Variant | Fail-to-Pass | Rate | Model calls/case |
 | --- | --- | ---: | ---: |
-| `b0` — one prompt, no tools | 2/14 | 14% | 1.0 |
-| `b1` — general-purpose agent with the same tools | 2.7/14 (2–3) | 19% | 7.2 |
-| `s1`–`s4` — structured pipeline | 3/14 | 21% | 2.4–2.7 |
-| **`s5` — pre-registered final system** | **4.3/14 (4–5)** | **31%** | 2.9 |
-| `s6` — plus signature grounding (post-hoc) | 5.0/14 (4–6) | 36% | 2.8 |
-| `x1` — removed: model-judged verification | 5.0/14 (4–6) | 36% | 4.2 |
+| `b0` — one prompt, no tools | 5/27 | 19% | 1.0 |
+| **`b1` — general-purpose agent with the same tools** | **6.0/27 (6–6)** | **22%** | 7.3 |
+| `s1`–`s4` — structured pipeline, one run each | 7–9/27 | 26–33% | 2.6–2.9 |
+| **`s5` — pre-registered final system** | **8.7/27 (8–9)** | **32%** | 3.1 |
+| `s6` — plus signature grounding (post-hoc) | 9.3/27 (8–11) | 35% | 2.9 |
+| `x1` — removed: model-judged verification | 10.3/27 (9–12) | 38% | 4.3 |
 
-**The headline claim is `s5` against `b1`: 4.3 versus 2.7 cases, a 59% relative
-improvement, using 2.9 model calls per case instead of 7.2.**
+**The headline claim is `s5` against `b1`: 8.7 versus 6.0 cases, a 45% relative
+improvement, using 3.1 model calls per case instead of 7.3.** Their ranges do not
+overlap across three runs each (8–9 against 6–6), which is the only comparison in
+this table the sample size actually resolves.
 
-`s6` is reported separately and deliberately. The blind spot it fixes was found
-on the evaluation split, so it is a post-hoc result and is not offered as a clean
-held-out number. It is included because it settles what `x1` meant: the
-model-judged verifier's entire advantage came from one blind spot in the
-deterministic rule, and once that was fixed deterministically, `s6` matched `x1`
-exactly — same mean, same range — using a third fewer model calls. `x1` is not
-better; it was paying a model to notice one thing a rule can notice for free.
+Everything else in the table is honest about being unresolved. `s1`–`s4` were run
+once each and land inside or beside `s5`'s range, so **the rungs of the ablation
+ladder are not separable at this sample size** — the structured pipeline as a
+whole beats the baseline, but this data cannot rank its individual pieces. Twenty-seven
+cases means one case is nearly four points.
+
+### Two results that went against me
+
+Both were produced by checks built specifically to catch this kind of thing, and
+both are reported because they fired.
+
+**`s6` fails its clean held-out test.** Signature grounding was designed in
+response to a case on the first evaluation split, so that split stopped being
+held out for it. Five repositories were added to the dataset afterwards. On those
+13 unseen cases `s6` scores **4.3/13 against `s5`'s 4.7/13** — no better, slightly
+worse. The rule earned its gain on the split it was derived from and does not
+carry. It stays in the repository as a switchable variant and is **not** the
+shipped system.
+
+**`x1` — the model-judged verifier I removed on principle — leads.** 10.3/27
+against `s5`'s 8.7/27, and 5.3/13 against 4.7/13 held out. An earlier, smaller
+run had `s6` matching it exactly, which supported a tidy story that the model was
+only paying to notice one thing a rule could notice for free. **At 27 cases that
+story is dead.** The remaining honest framing is a trade: `x1` buys roughly one
+extra case for 39% more model calls and a verifier whose verdicts are not
+reproducible across runs. Removing it is a defensible choice about determinism and
+cost, not a win on accuracy, and the switch is kept so the claim can be re-run.
+
+Full tables, per-case outcomes and the verdict distribution:
+[results/REPORT.md](results/REPORT.md). What each change bought, including what it
+did not buy: [CHANGELOG_IMPROVEMENT.md](CHANGELOG_IMPROVEMENT.md).
 
 Model calls per case is the efficiency measure to read. The dollar figures in
 [results/REPORT.md](results/REPORT.md) are deflated for variants whose prompts
 were already cached, whereas call counts are not affected by caching.
-
-Full tables, per-case outcomes and the verdict distribution:
-[results/REPORT.md](results/REPORT.md). What each change bought:
-[CHANGELOG_IMPROVEMENT.md](CHANGELOG_IMPROVEMENT.md).
 
 ### The number this project is really about
 
 The agent decides for itself whether it reproduced the bug. How often that
 judgement is wrong is the quantity worth reducing:
 
-| | `s4` | `s5` | `s6` |
-| --- | ---: | ---: | ---: |
-| False-confidence rate | 77% | 63% | 61% |
+| | `s4` | `s5` | `s6` | `x1` |
+| --- | ---: | ---: | ---: | ---: |
+| False-confidence rate | 65% | 68% | 62% | **48%** |
 
-Every one of those runs reported success. Between a third and a quarter of them
-were right.
+Every one of those runs reported success. Roughly a third of them were right.
+
+**The deterministic verifier does not move this number much, and the model-judged
+one does.** That is the sharpest finding here, and it points straight at the
+reason: the structural checks catch the errors that are visible in structure —
+a traceback that never entered the project, an invented parameter, an assertion
+stack too specific to be a claim about one bug. What they cannot catch is an
+assertion that reaches the bug and then expects the wrong value, because at the
+buggy commit that is byte-for-byte identical to a correct one. A model reading the
+report can partly judge it. A rule reading the traceback cannot. That failure class
+is 57% of all remaining failures, which is why it dominates the gap.
 
 ---
 
 ## Main failure mode
 
 **The test asserts the wrong expected value.** Across the final system's runs,
-55% of case-runs failed as `did_not_pass_at_fix` — the test failed at the buggy
-commit *and* at the fixed one. Only 7% failed the other way, by not failing at
-the buggy commit at all.
+57% of case-runs failed as `did_not_pass_at_fix` — the test failed at the buggy
+commit *and* at the fixed one. Only 10% failed the other way, by not failing at
+the buggy commit at all, and 1% produced no test.
 
 These tests are not missing the bug. They reach it, and then assert something the
 fixed code does not produce either: invented help text, an exact whitespace
 round-trip, an error message the reporter never quoted. The verifier's most
-common verdict on them is `reproduced_assertion` — the one verdict whose
-correctness cannot be checked structurally, because an assertion that fails at
-the buggy commit looks identical whether the expected value is right or wrong.
+common verdict on them is `reproduced_assertion` (30% of all attempts) — the one
+verdict whose correctness cannot be checked structurally, because an assertion
+that fails at the buggy commit looks identical whether the expected value is
+right or wrong.
+
+This is the class the deterministic verifier is blind to by construction, and
+closing it is the obvious next piece of work rather than something this
+submission claims to have solved.
 
 ## Hot take
 
@@ -300,14 +356,16 @@ code, or did it blow up at the call site? Do the asserted strings appear anywher
 in the report, or did the agent invent them? Is the missing parameter one the
 reporter asked for? Each of those is a fact sitting in output that most pipelines
 throw away, and each converts a boolean "it failed" into an instruction for what
-to do next. Typing those verdicts moved false confidence from 77% to 61% and beat
-a model-judged verifier at a third fewer calls.
+to do next. Typing those verdicts is what lets the repair loop give the opposite
+advice to two failures that look identical, and it is why the pipeline clears a
+baseline holding the same tools.
 
-The residue does not yield to that treatment. Whether the asserted expected value
-is the one the fixed code will produce cannot be checked without the fix — that
-is an oracle question, and the only oracle available is a paragraph of prose
-written by a stranger. It is 55% of the remaining failures and it is not a
-prompting problem.
+The residue does not yield to that treatment, and the measurements say so
+bluntly. Whether the asserted expected value is the one the fixed code will
+produce cannot be checked without the fix — that is an oracle question, and the
+only oracle available is a paragraph of prose written by a stranger. It is 57% of
+the remaining failures, it is not a prompting problem, and it is the reason a
+model-judged verifier still outscores the deterministic one I shipped.
 
 So: build verification that returns a typed signal rather than a boolean, and
 push everything you can into the part that evidence can settle. Then be honest
@@ -327,9 +385,12 @@ Not written by me, and used under their own licences:
 - **The target repositories** — [sqlglot](https://github.com/tobymao/sqlglot),
   [tomlkit](https://github.com/python-poetry/tomlkit),
   [click](https://github.com/pallets/click),
-  [arrow](https://github.com/arrow-py/arrow). Public, unmodified, cloned at
-  pinned commits. The bug reports and the maintainers' regression tests are
-  theirs; they are used as ground truth and are never shown to the agent.
+  [jinja](https://github.com/pallets/jinja),
+  [rich](https://github.com/Textualize/rich),
+  [jsonschema](https://github.com/python-jsonschema/jsonschema). Public,
+  unmodified, cloned at pinned commits. The bug reports and the maintainers'
+  regression tests are theirs; they are used as ground truth and are never shown
+  to the agent.
 - **pytest** and **Python 3.12**, inside the sandbox image.
 - **OpenRouter** as the model gateway.
 

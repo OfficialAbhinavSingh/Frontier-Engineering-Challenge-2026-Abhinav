@@ -4,14 +4,14 @@
   "temperature": 0.0,
   "description": "one prompt, no tools, no execution",
   "model": "google/gemini-2.5-flash",
-  "n_cases": 14,
-  "f2p_solved": 2,
-  "f2p_rate": 0.1429,
-  "total_cost_usd": 0.0179,
-  "total_llm_calls": 14,
-  "cached_llm_calls": 0,
+  "n_cases": 27,
+  "f2p_solved": 5,
+  "f2p_rate": 0.1852,
+  "total_cost_usd": 0.0258,
+  "total_llm_calls": 27,
+  "cached_llm_calls": 14,
   "mean_wall_clock_s": 3.9,
-  "wall_clock_total_s": 55.6,
+  "wall_clock_total_s": 106.1,
   "results": [
     {
       "case_id": "click__2703",
@@ -25,11 +25,11 @@
       "usage": {
         "prompt_tokens": 1359,
         "completion_tokens": 834,
-        "cost_usd": 0.002493,
+        "cost_usd": 0.0,
         "calls": 1,
-        "cached_calls": 0
+        "cached_calls": 1
       },
-      "wall_clock_s": 6.9,
+      "wall_clock_s": 1.4,
       "error": null,
       "test_source": "import os\nimport subprocess\nimport sys\n\nimport click\nfrom click.shell_completion import CompletionItem\n\n\nclass Foo(click.ParamType):\n    def convert(self, value, param, ctx):\n        return value\n\n    def shell_complete(self, ctx, param, incomplete):\n        return [\n            CompletionItem(value=value, help=\"adsf\")\n            for value in [\"baz:quux\", \"spam:eggs\"]\n        ]\n\n\n@click.command()\n@click.argument(\"foo\", type=Foo())\ndef main(foo):\n    click.echo(foo)\n\n\ndef test_zsh_completion_with_colon_in_value(cli_runner, tmp_path):\n    script_path = tmp_path / \"foo.py\"\n    script_path.write_text(\n        \"\"\"\n#!/usr/bin/env python3\nfrom click.shell_completion import CompletionItem\nimport click\n\nclass Foo(click.ParamType):\n    def convert(self, value, param, ctx):\n        return value\n\n    def shell_complete(self, ctx, param, incomplete):\n        return [\n            CompletionItem(value=value, help=\"adsf\") for value in \n            [\"baz:quux\", \"spam:eggs\"]\n        ]\n\n@click.command()\n@click.argument(\"foo\", type=Foo())\ndef main(foo):\n    print(foo)\n\"\"\"\n    )\n    script_path.chmod(0o755)\n\n    # Generate completion script\n    env = os.environ.copy()\n    env[\"_FOO_COMPLETE\"] = \"zsh_source\"\n    env[\"PATH\"] = f\"{tmp_path}:{env['PATH']}\"\n\n    result = subprocess.run(\n        [sys.executable, str(script_path)],\n        env=env,\n        capture_output=True,\n        text=True,\n        check=True,\n    )\n    completion_script = result.stdout\n\n    # Simulate zsh completion\n    zsh_script = f\"\"\"\n        # Load completion script\n        eval \"{completion_script}\"\n\n        # Simulate completion for 'foo '\n        compdef _foo foo\n        _foo_completion_setup\n\n        # Set up completion environment\n        export COMP_LINE=\"foo \"\n        export COMP_POINT=\"${{#COMP_LINE}}\"\n        export _CLI_COMPLETE_CUR=\"foo\"\n        export _CLI_COMPLETE_WORD_COUNT=\"1\"\n        export _CLI_COMPLETE_TYPE=\"zsh\"\n        export _CLI_COMPLETE_INDEX=\"1\"\n        export _CLI_COMPLETE_ARGS=\"foo\"\n\n        # Call the completion function\n        _foo\n\n        # Print the completion results\n        for item in \"${{reply[@]}}\"; do\n            echo \"$item\"\n        done\n    \"\"\"\n\n    # Use a temporary file for the zsh script to ensure proper execution\n    zsh_script_path = tmp_path / \"zsh_test.zsh\"\n    zsh_script_path.write_text(zsh_script)\n\n    # Execute zsh with the completion script\n    zsh_process = subprocess.run(\n        [\"zsh\", \"--no-rcs\", \"--no-aliases\", str(zsh_script_path)],\n        capture_output=True,\n        text=True,\n        check=True,\n    )\n    completion_output = zsh_process.stdout.strip().splitlines()\n\n    expected_output = [\"baz:quux -- adsf\", \"spam:eggs -- adsf\"]\n\n    # The bug causes the output to be split at the colon\n    assert sorted(completion_output) == sorted(expected_output)\n",
       "test_rel_path": "tests/test_reprobot_click__2703.py",
@@ -47,11 +47,11 @@
       "usage": {
         "prompt_tokens": 792,
         "completion_tokens": 363,
-        "cost_usd": 0.001145,
+        "cost_usd": 0.0,
         "calls": 1,
-        "cached_calls": 0
+        "cached_calls": 1
       },
-      "wall_clock_s": 4.1,
+      "wall_clock_s": 1.5,
       "error": null,
       "test_source": "import pytest\n\nfrom click.testing import CliRunner\nfrom click import ClickException, command\n\n\n@command()\ndef cli_error():\n    raise ClickException(\"This is a test error.\")\n\n\ndef test_runner_catch_exceptions_default():\n    runner = CliRunner()\n    result = runner.invoke(cli_error)\n    assert result.exit_code == 1\n    assert \"This is a test error.\" in result.output\n\n\ndef test_runner_catch_exceptions_false_on_invoke():\n    runner = CliRunner()\n    result = runner.invoke(cli_error, catch_exceptions=False)\n    with pytest.raises(ClickException, match=\"This is a test error.\"):\n        # The bug is that catch_exceptions=False on invoke doesn't propagate\n        # to the runner's default behavior.\n        # This test will fail if the bug is fixed, as the exception will be caught\n        # by the runner's default behavior (which is True).\n        # The expected behavior is that the exception is re-raised.\n        result.exit_code\n\n\ndef test_runner_catch_exceptions_on_runner_init():\n    # This test demonstrates the desired behavior if the feature were implemented.\n    # It should fail because CliRunner does not currently accept catch_exceptions\n    # as an __init__ parameter.\n    with pytest.raises(TypeError):\n        runner = CliRunner(catch_exceptions=False)\n        result = runner.invoke(cli_error)\n        with pytest.raises(ClickException, match=\"This is a test error.\"):\n            result.exit_code\n",
       "test_rel_path": "tests/test_reprobot_click__2817.py",
@@ -69,11 +69,11 @@
       "usage": {
         "prompt_tokens": 920,
         "completion_tokens": 927,
-        "cost_usd": 0.002593,
+        "cost_usd": 0.0,
         "calls": 1,
-        "cached_calls": 0
+        "cached_calls": 1
       },
-      "wall_clock_s": 7.5,
+      "wall_clock_s": 1.6,
       "error": null,
       "test_source": "import os\nimport sys\nimport pty\nimport select\nimport time\nimport click\nfrom click.testing import CliRunner\n\ndef test_backspace_and_line_wrapping_on_linux():\n    if sys.platform != \"linux\":\n        # This bug is specific to Linux\n        return\n\n    # Create a pseudo-terminal to simulate user input\n    master, slave = pty.openpty()\n    \n    # Define a simple Click command that uses click.prompt\n    @click.command()\n    def cli():\n        name = click.prompt(\"Enter your name\")\n        click.echo(f\"Hello, {name}!\")\n\n    # Start the Click application in a separate process\n    pid = os.fork()\n    if pid == 0:  # Child process\n        os.close(master)\n        os.dup2(slave, sys.stdin.fileno())\n        os.dup2(slave, sys.stdout.fileno())\n        os.dup2(slave, sys.stderr.fileno())\n        os.close(slave)\n        cli.main(standalone_mode=False)\n        os._exit(0)\n    else:  # Parent process\n        os.close(slave)\n\n        # Wait for the prompt to appear\n        output = b\"\"\n        while b\"Enter your name\" not in output:\n            r, _, _ = select.select([master], [], [], 0.1)\n            if r:\n                output += os.read(master, 1024)\n            else:\n                time.sleep(0.01) # Give the child process some time\n\n        # Simulate typing \"hello\"\n        os.write(master, b\"hello\")\n        time.sleep(0.1) # Give time for the input to be processed\n\n        # Simulate one backspace\n        os.write(master, b\"\\x7f\") # ASCII for backspace\n        time.sleep(0.1)\n\n        # Simulate typing \"world\" and then Enter\n        os.write(master, b\"world\\n\")\n        time.sleep(0.1)\n\n        # Read the final output\n        final_output = b\"\"\n        while True:\n            r, _, _ = select.select([master], [], [], 0.1)\n            if r:\n                data = os.read(master, 1024)\n                if not data:\n                    break\n                final_output += data\n            else:\n                break\n\n        os.waitpid(pid, 0)\n        os.close(master)\n\n        # Decode output for assertion\n        final_output_str = final_output.decode(\"utf-8\", errors=\"ignore\")\n\n        # The bug causes backspace to remove more than one character,\n        # so \"hello\" + backspace + \"world\" should result in \"hellworld\"\n        # if backspace worked correctly.\n        # Due to the bug, it might result in \"heworld\" or similar.\n        # The prompt also gets messed up.\n        # We are looking for the *incorrect* behavior.\n        # If the bug is present, the output will not contain \"Hello, hellworld!\"\n        # but something like \"Hello, heworld!\" or \"Hello, hworld!\".\n        # The most reliable way to detect the bug is to check if the\n        # backspace removed more than one character.\n        # Since the prompt is also messed up, we can check for the final echoed input.\n\n        # Expected correct behavior: \"hellworld\"\n        # Expected buggy behavior: \"heworld\" (if two chars are removed) or \"hworld\" (if three chars are removed)\n\n        # We'll assert that the *incorrect* output is present, indicating the bug.\n        # If the bug is fixed, this assertion should fail.\n        assert \"Hello, heworld!\" in final_output_str or \"Hello, hworld!\" in final_output_str, \\\n            f\"The backspace bug was not reproduced. Expected 'Hello, heworld!' or 'Hello, hworld!' but got:\\n{final_output_str}\"\n",
       "test_rel_path": "tests/test_reprobot_click__2968.py",
@@ -91,11 +91,11 @@
       "usage": {
         "prompt_tokens": 2270,
         "completion_tokens": 376,
-        "cost_usd": 0.001621,
+        "cost_usd": 0.0,
         "calls": 1,
-        "cached_calls": 0
+        "cached_calls": 1
       },
-      "wall_clock_s": 4.2,
+      "wall_clock_s": 1.5,
       "error": null,
       "test_source": "import os\nimport sys\n\nimport click\nfrom click.testing import CliRunner\n\n\ndef test_fish_completion_multiline_help_text(monkeypatch):\n    @click.command()\n    @click.option(\n        \"--at\",\n        help=\"\\b\\nAttachment with explicit mimetype,\\n--at image.jpg image/jpeg\",\n    )\n    def cli(at):\n        pass\n\n    runner = CliRunner()\n\n    # Simulate fish completion environment\n    monkeypatch.setitem(os.environ, \"_CLICK_COMPLETE\", \"fish_source\")\n    monkeypatch.setitem(os.environ, \"_AT_COMPLETE\", \"fish_complete\")\n    monkeypatch.setitem(os.environ, \"COMP_WORDS\", \"cli --\")\n    monkeypatch.setitem(os.environ, \"COMP_CWORD\", \"1\")\n\n    result = runner.invoke(cli, [\"--completion\", \"fish\"])\n\n    assert not result.exception\n    assert result.exit_code == 0\n\n    # The expected output for the problematic option should be:\n    # plain,--at\\tAttachment with explicit mimetype, --at image.jpg image/jpeg\n    # The key is that the multiline help text is flattened into a single line\n    # with tabs and spaces, and the newline characters are removed or replaced.\n    # The original bug caused the raw newlines to be present, leading to\n    # parsing errors in fish.\n    expected_line_part = \"plain,--at\\tAttachment with explicit mimetype, --at image.jpg image/jpeg\"\n    assert expected_line_part in result.output.replace(\"\\n\", \" \") # Replace newlines for easier checking\n",
       "test_rel_path": "tests/test_reprobot_click__3043.py",
@@ -113,14 +113,300 @@
       "usage": {
         "prompt_tokens": 1140,
         "completion_tokens": 277,
-        "cost_usd": 0.001035,
+        "cost_usd": 0.0,
+        "calls": 1,
+        "cached_calls": 1
+      },
+      "wall_clock_s": 1.5,
+      "error": null,
+      "test_source": "import pytest\nimport click\nfrom click.testing import CliRunner\nfrom click.types import FuncParamType\n\nclass MyClass:\n    def __init__(self, myvalue: str):\n        self.myvalue = myvalue\n\n    @staticmethod\n    def from_str(input_str: str) -> \"MyClass\":\n        if input_str != \"works\":\n            raise ValueError(f\"input was {input_str!r}, should be 'works'\")\n        return MyClass(input_str)\n\n@click.command()\n@click.argument(\"mydata\", type=FuncParamType(MyClass.from_str))\ndef cli(mydata):\n    click.echo(f\"MyData: {mydata.myvalue}\")\n\ndef test_func_param_type_value_error_message():\n    runner = CliRunner()\n    result = runner.invoke(cli, [\"fails\"])\n    assert result.exit_code == 2\n    # The bug is that it currently outputs \"Error: Invalid value for 'MYDATA': fails\"\n    # It should output the message from the ValueError\n    assert \"Error: Invalid value for 'MYDATA': input was 'fails', should be 'works'\" in result.output\n",
+      "test_rel_path": "tests/test_reprobot_click__3105.py",
+      "attempts": []
+    },
+    {
+      "case_id": "jinja__1463",
+      "repo": "pallets/jinja",
+      "variant": "b0",
+      "f2p": false,
+      "score_reason": "did_not_fail_at_parent:passed",
+      "verdict_at_parent": "no_fail",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 931,
+        "completion_tokens": 850,
+        "cost_usd": 0.002404,
+        "calls": 1,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 8.8,
+      "error": null,
+      "test_source": "from jinja2 import Environment\n\ndef test_groupby_case_sensitive_sorting():\n    env = Environment()\n    template = env.from_string(\"\"\"\n    {% set items = [\n        {'name': 'apple'},\n        {'name': 'Banana'},\n        {'name': 'APPLE'},\n        {'name': 'banana'}\n    ] %}\n    {% for group in items|groupby('name') %}\n        {{ group.grouper }}:\n        {% for item in group.list %}\n            {{ item.name }}\n        {% endfor %}\n    {% endfor %}\n    \"\"\")\n\n    # Expected output if groupby was case-insensitive by default or had a case_sensitive=False option\n    # The current implementation is case-sensitive, so 'apple' and 'APPLE' are separate groups.\n    # The bug is that there's no way to make them a single group without manual pre-processing.\n    expected_output_case_insensitive = \"\"\"\n    apple:\n        apple\n        APPLE\n    Banana:\n        Banana\n        banana\n    \"\"\"\n\n    # Actual output with current case-sensitive groupby\n    actual_output_case_sensitive = \"\"\"\n    APPLE:\n        APPLE\n    Banana:\n        Banana\n    apple:\n        apple\n    banana:\n        banana\n    \"\"\"\n\n    # The test fails if the actual output matches the case-insensitive expectation,\n    # but the bug is that it *doesn't* match, and there's no way to make it.\n    # So, we assert that the current output is NOT what we'd want if case_sensitive=False existed.\n    # This demonstrates the lack of the feature.\n\n    # Render the template\n    result = template.render().strip().replace(\" \", \"\").replace(\"\\n\", \"\")\n\n    # This assertion will pass, demonstrating the current case-sensitive behavior.\n    # The *bug* is that we cannot make it fail by setting a parameter like case_sensitive=False.\n    # The issue requests the ability to get the 'expected_output_case_insensitive'.\n    # So, we assert that the current output is NOT the desired case-insensitive output.\n    # If the feature were implemented, this test would need to be modified to pass\n    # by setting case_sensitive=False and asserting against expected_output_case_insensitive.\n    assert result != expected_output_case_insensitive.strip().replace(\" \", \"\").replace(\"\\n\", \"\")\n\n    # To further highlight the bug, let's show what `sort` does by default\n    template_sort = env.from_string(\"\"\"\n    {% set items = [\n        {'name': 'apple'},\n        {'name': 'Banana'},\n        {'name': 'APPLE'},\n        {'name': 'banana'}\n    ] %}\n    {% for item in items|sort(attribute='name') %}\n        {{ item.name }}\n    {% endfor %}\n    \"\"\")\n    result_sort = template_sort.render().strip().replace(\" \", \"\").replace(\"\\n\", \"\")\n    expected_sort_case_insensitive = \"appleAPPLEBananabanana\"\n    # This assertion passes, showing `sort` is case-insensitive by default.\n    assert result_sort == expected_sort_case_insensitive\n\n    # The core of the bug is the inconsistency and lack of control in `groupby`.\n    # The test fails because `groupby` does not produce the case-insensitive grouping\n    # that `sort` does by default, and there's no parameter to change this.\n    # If `groupby` had `case_sensitive=False` and we used it, the test would pass\n    # by asserting against `expected_output_case_insensitive`.\n    # Since it doesn't, we assert that the current output is different from the desired\n    # case-insensitive output, highlighting the missing functionality.\n",
+      "test_rel_path": "tests/test_reprobot_jinja__1463.py",
+      "attempts": []
+    },
+    {
+      "case_id": "jinja__1510",
+      "repo": "pallets/jinja",
+      "variant": "b0",
+      "f2p": false,
+      "score_reason": "did_not_pass_at_fix:failed",
+      "verdict_at_parent": "shallow_fail",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 821,
+        "completion_tokens": 172,
+        "cost_usd": 0.000676,
+        "calls": 1,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 4.3,
+      "error": null,
+      "test_source": "from jinja2 import Environment\nfrom jinja2 import select_autoescape\n\n\ndef test_macro_native_types():\n    env = Environment(\n        enable_async=True,\n        autoescape=select_autoescape([\"html\", \"xml\"]),\n        extensions=[\"jinja2.ext.do\"],\n        trim_blocks=True,\n        lstrip_blocks=True,\n        optimized=False,\n        native=True,\n    )\n    template = env.from_string(\n        \"{%- macro x() -%}{{- [5,6] -}}{%- endmacro -%}{{- x()[0] -}}\"\n    )\n    result = template.render()\n    assert result == 5\n    assert isinstance(result, int)\n",
+      "test_rel_path": "tests/test_reprobot_jinja__1510.py",
+      "attempts": []
+    },
+    {
+      "case_id": "jinja__1521",
+      "repo": "pallets/jinja",
+      "variant": "b0",
+      "f2p": false,
+      "score_reason": "did_not_fail_at_parent:passed",
+      "verdict_at_parent": "no_fail",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 976,
+        "completion_tokens": 88,
+        "cost_usd": 0.000513,
+        "calls": 1,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 2.1,
+      "error": null,
+      "test_source": "import pytest\nfrom jinja2 import Environment\n\nclass TestHashing:\n    def test_template_hash(self):\n        env = Environment()\n        template = env.parse(\"hash test\")\n        # This assertion is expected to fail with TypeError due to the bug\n        with pytest.raises(TypeError, match=\"unhashable type: 'list'\"):\n            hash(template)\n",
+      "test_rel_path": "tests/test_reprobot_jinja__1521.py",
+      "attempts": []
+    },
+    {
+      "case_id": "jinja__1573",
+      "repo": "pallets/jinja",
+      "variant": "b0",
+      "f2p": false,
+      "score_reason": "did_not_fail_at_parent:collection_error",
+      "verdict_at_parent": "broken_test",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 1013,
+        "completion_tokens": 321,
+        "cost_usd": 0.001106,
+        "calls": 1,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 13.8,
+      "error": null,
+      "test_source": "import pytest\nimport jinja2\n\n@pytest.mark.asyncio\nasync def test_issue_1573():\n    jinja_env = jinja2.Environment(enable_async=True)\n    jinja_env.filters.update({'add_two': lambda x, y: [i + y for i in x]})\n\n    template = jinja_env.from_string(\n        \"{% for item in (a.b|add_two(5))[:1] %}{{ item }}{% endfor %}\"\n    )\n    data = {\"a\": {\"b\": [1, 2, 3]}}\n\n    with pytest.raises(TypeError) as excinfo:\n        await template.render_async(data)\n\n    assert \"coroutine' object is not subscriptable\" in str(excinfo.value)\n\n    # Test the alternative syntax that causes a SyntaxError\n    template_syntax_error = jinja_env.from_string(\n        \"{% for item in a.b|add_two(5)[:1] %}{{ item }}{% endfor %}\"\n    )\n    with pytest.raises(jinja2.exceptions.TemplateSyntaxError) as excinfo:\n        # We need to compile the template to trigger the syntax error\n        template_syntax_error.render(data)\n    assert \"expected token 'end of statement block', got '['\" in str(excinfo.value)\n",
+      "test_rel_path": "tests/test_reprobot_jinja__1573.py",
+      "attempts": []
+    },
+    {
+      "case_id": "jinja__1612",
+      "repo": "pallets/jinja",
+      "variant": "b0",
+      "f2p": true,
+      "score_reason": "ok",
+      "verdict_at_parent": "shallow_fail",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 1169,
+        "completion_tokens": 98,
+        "cost_usd": 0.000596,
+        "calls": 1,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 3.0,
+      "error": null,
+      "test_source": "import pickle\nimport pytest\n\nfrom jinja2.filters import do_first\n\n\ndef test_do_first_is_pickleable():\n    \"\"\"\n    Test that the do_first filter is pickleable.\n    \"\"\"\n    try:\n        pickle.dumps(do_first)\n    except pickle.PicklingError as e:\n        pytest.fail(f\"do_first filter is not pickleable: {e}\")\n",
+      "test_rel_path": "tests/test_reprobot_jinja__1612.py",
+      "attempts": []
+    },
+    {
+      "case_id": "jinja__1701",
+      "repo": "pallets/jinja",
+      "variant": "b0",
+      "f2p": false,
+      "score_reason": "did_not_fail_at_parent:passed",
+      "verdict_at_parent": "no_fail",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 1019,
+        "completion_tokens": 202,
+        "cost_usd": 0.000811,
+        "calls": 1,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 2.7,
+      "error": null,
+      "test_source": "import pytest\n\nfrom jinja2.nativetypes import NativeEnvironment\n\n\ndef test_issue_1701_nativetypes_block_loop_index_typeerror():\n    \"\"\"\n    This test reproduces the TypeError: sequence item 0: expected str instance, int found\n    when using NativeEnvironment with a block containing a loop that outputs loop.index\n    and the block is called using self.block_name().\n    \"\"\"\n    env = NativeEnvironment()\n    template = env.from_string(\n        '{% block test %}{% for i in range(1) %}{{ loop.index }}{% endfor %}{% endblock %}{{ self.test() }}'\n    )\n    with pytest.raises(TypeError) as excinfo:\n        template.render()\n    assert \"sequence item 0: expected str instance, int found\" in str(excinfo.value)\n",
+      "test_rel_path": "tests/test_reprobot_jinja__1701.py",
+      "attempts": []
+    },
+    {
+      "case_id": "jinja__2027",
+      "repo": "pallets/jinja",
+      "variant": "b0",
+      "f2p": true,
+      "score_reason": "ok",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 959,
+        "completion_tokens": 133,
+        "cost_usd": 0.00062,
         "calls": 1,
         "cached_calls": 0
       },
       "wall_clock_s": 3.9,
       "error": null,
-      "test_source": "import pytest\nimport click\nfrom click.testing import CliRunner\nfrom click.types import FuncParamType\n\nclass MyClass:\n    def __init__(self, myvalue: str):\n        self.myvalue = myvalue\n\n    @staticmethod\n    def from_str(input_str: str) -> \"MyClass\":\n        if input_str != \"works\":\n            raise ValueError(f\"input was {input_str!r}, should be 'works'\")\n        return MyClass(input_str)\n\n@click.command()\n@click.argument(\"mydata\", type=FuncParamType(MyClass.from_str))\ndef cli(mydata):\n    click.echo(f\"MyData: {mydata.myvalue}\")\n\ndef test_func_param_type_value_error_message():\n    runner = CliRunner()\n    result = runner.invoke(cli, [\"fails\"])\n    assert result.exit_code == 2\n    # The bug is that it currently outputs \"Error: Invalid value for 'MYDATA': fails\"\n    # It should output the message from the ValueError\n    assert \"Error: Invalid value for 'MYDATA': input was 'fails', should be 'works'\" in result.output\n",
-      "test_rel_path": "tests/test_reprobot_click__3105.py",
+      "test_source": "import pickle\nimport pytest\n\nfrom jinja2.utils import missing\n\n\ndef test_pickle_missing():\n    \"\"\"\n    Test that the `jinja2.utils.missing` singleton can be pickled and unpickled.\n    \"\"\"\n    try:\n        pickled_missing = pickle.dumps(missing)\n        unpickled_missing = pickle.loads(pickled_missing)\n        assert unpickled_missing is missing\n    except pickle.PicklingError as e:\n        pytest.fail(f\"Pickling jinja2.utils.missing failed: {e}\")\n",
+      "test_rel_path": "tests/test_reprobot_jinja__2027.py",
+      "attempts": []
+    },
+    {
+      "case_id": "rich__3796",
+      "repo": "Textualize/rich",
+      "variant": "b0",
+      "f2p": false,
+      "score_reason": "did_not_pass_at_fix:failed",
+      "verdict_at_parent": "reproduced_assertion",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 3118,
+        "completion_tokens": 391,
+        "cost_usd": 0.001913,
+        "calls": 1,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 4.7,
+      "error": null,
+      "test_source": "from rich.console import Console, Group\nfrom rich.live import Live\nfrom rich.text import Text\nfrom io import StringIO\n\n\ndef test_live_empty_render_leaves_newline():\n    \"\"\"\n    Test that Live with an empty Group and transient=True leaves a spurious newline.\n    \"\"\"\n    console = Console(file=StringIO(), record=True)\n\n    # Case 1: Live with an empty Group\n    list_empty = []\n    live_empty = Live(Group(*list_empty), transient=True, console=console)\n    with live_empty:\n        pass\n\n    output_empty = console.file.getvalue()\n    # Expecting a newline because of the bug\n    assert output_empty.endswith(\"\\n\")\n\n    console.file = StringIO() # Reset console output\n\n    # Case 2: Live with a Group containing an empty string\n    list_with_empty_string = [\"\"]\n    live_with_empty_string = Live(Group(*list_with_empty_string), transient=True, console=console)\n    with live_with_empty_string:\n        pass\n\n    output_with_empty_string = console.file.getvalue()\n    # Expecting no newline at the end when an empty string is present\n    assert not output_with_empty_string.endswith(\"\\n\")\n\n    # The bug is that output_empty.endswith(\"\\n\") is True, while it should be False\n    # if the behavior was consistent with output_with_empty_string.\n    # This test will fail if the bug is fixed and output_empty does not end with a newline.\n    # For the purpose of reproducing the bug, we assert the buggy behavior.\n    assert output_empty.endswith(\"\\n\")\n",
+      "test_rel_path": "tests/test_reprobot_rich__3796.py",
+      "attempts": []
+    },
+    {
+      "case_id": "rich__3838",
+      "repo": "Textualize/rich",
+      "variant": "b0",
+      "f2p": false,
+      "score_reason": "did_not_pass_at_fix:failed",
+      "verdict_at_parent": "shallow_fail",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 3317,
+        "completion_tokens": 1760,
+        "cost_usd": 0.005395,
+        "calls": 1,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 13.0,
+      "error": null,
+      "test_source": "from rich.console import Console\nfrom rich.text import Text\nfrom rich.segment import Segment\nfrom rich.style import Style\n\ndef test_soft_wrap_background_color_bleed():\n    \"\"\"\n    Test that background color does not bleed onto the next line when soft wrapping is enabled.\n    \"\"\"\n    console = Console(\n        width=20,  # Set a small width to force soft wrapping\n        record=True,  # Record output for inspection\n        file=open(\"test_output.txt\", \"w\") # Write to a file to capture raw ANSI\n    )\n\n    # Print with soft_wrap enabled. The background color should NOT carry over.\n    console.print(\"This is a long line with a blue background that should soft wrap.\", style=\"on blue\", soft_wrap=True)\n    console.print(\"This line should NOT have a blue background.\")\n\n    # Get the recorded output\n    output = console.export_text(clear=False)\n\n    # Assert that the background color is reset after the first line's soft wrap\n    # This is a simplified check. A more robust check would parse ANSI codes.\n    # We are looking for a pattern where the 'on blue' style is applied,\n    # then a newline, and then the 'on blue' style is NOT present at the start of the next line.\n\n    # The exact ANSI sequence for 'on blue' might vary, but a common one is \\x1b[44m\n    # and for reset is \\x1b[0m.\n    # We expect to see \\x1b[44m...<text>...\\x1b[0m\\n<text>...\n    # If the bug is present, it would be \\x1b[44m...<text>\\n<text>... (without the reset)\n\n    # For a simple check, we can look for the presence of the reset code after the first line\n    # and the absence of the background color code at the start of the second line.\n\n    # This test is designed to fail if the background color bleeds.\n    # It checks for the presence of the 'on blue' style at the beginning of the second line.\n    # If the bug is fixed, the second line should not start with 'on blue'.\n\n    # A more robust check would involve parsing the ANSI escape codes.\n    # For this bug, the key is that the style is NOT reset before the newline.\n    # So, if the second line starts with the background color, the bug is present.\n\n    # Let's simulate the expected output if the bug is present vs fixed.\n    # If bug is present:\n    # ...[on blue]...[soft wrap point]\\n[on blue]...\n    # If bug is fixed:\n    # ...[on blue]...[reset]\\n...\n\n    # We can't directly inspect the ANSI codes from export_text in a simple string comparison\n    # because the exact wrapping point and content will vary.\n    # Instead, we'll look for a specific pattern that indicates the bleed.\n\n    # The most direct way to check for this without full ANSI parsing\n    # is to look for the background color escape code at the start of the second line.\n    # This is a bit fragile as it depends on the exact ANSI sequence.\n    # A common sequence for 'on blue' is '\\x1b[44m'.\n\n    # Let's get the raw segments to inspect styles more directly.\n    segments = list(console.render_lines(\n        console.renderable_to_console(\n            Text(\"This is a long line with a blue background that should soft wrap.\", style=\"on blue\"),\n            console.options.update(soft_wrap=True)\n        ),\n        console.options\n    ))\n    segments_second_line = list(console.render_lines(\n        console.renderable_to_console(\n            Text(\"This line should NOT have a blue background.\"),\n            console.options\n        ),\n        console.options\n    ))\n\n    # The bug implies that the style from the first line carries over to the second line\n    # *without an explicit reset*.\n    # When `soft_wrap=True`, Rich internally breaks the line. The issue is that\n    # it doesn't insert a style reset before the implicit newline it adds.\n    # So, the subsequent `console.print` call, which starts a new line,\n    # inherits the style from the end of the previous line.\n\n    # To test this, we need to check the style of the first segment of the *second* `console.print` call.\n    # If the bug is present, this segment will have a background color.\n\n    # We need to capture the raw ANSI output to truly verify this.\n    # The `export_text` method with `styles=True` might give us some clues,\n    # but it often simplifies the ANSI.\n\n    # Let's try to get the raw ANSI output and check for the sequence.\n    # This requires a bit more low-level inspection.\n\n    # A simpler approach for a pytest is to check the *rendered* segments.\n    # If the bug is present, the first segment of the second line will have a background style.\n\n    # We need to render the two lines together to see the bleed.\n    # Let's create a mock console that captures segments.\n    from rich.console import Console, ConsoleOptions, RenderResult\n    from rich.measure import Measurement\n    from rich.segment import Segment\n    from rich.style import Style\n\n    class MockConsole(Console):\n        def __init__(self, *args, **kwargs):\n            super().__init__(*args, **kwargs)\n            self.segments_output = []\n\n        def _render_buffer(self, renderables: RenderResult, options: ConsoleOptions):\n            for segment in renderables:\n                self.segments_output.append(segment)\n            return super()._render_buffer(renderables, options)\n\n    mock_console = MockConsole(width=20, record=True, file=open(\"test_output_mock.txt\", \"w\"))\n\n    mock_console.print(\"This is a long line with a blue background that should soft wrap.\", style=\"on blue\", soft_wrap=True)\n    mock_console.print(\"This line should NOT have a blue background.\")\n\n    # Now, inspect the captured segments.\n    # We need to find the segments corresponding to the second line.\n    # The first line will end with a newline segment.\n    # The segments after that newline segment belong to the second print.\n\n    found_newline = False\n    second_line_segments = []\n    for segment in mock_console.segments_output:\n        if found_newline:\n            second_line_segments.append(segment)\n        if segment.text == \"\\n\":\n            found_newline = True\n\n    # If the bug is present, the first non-empty segment of the second line\n    # will have a background color.\n    assert second_line_segments, \"No segments found for the second line.\"\n\n    first_segment_of_second_line = None\n    for segment in second_line_segments:\n        if segment.text.strip(): # Find the first non-whitespace segment\n            first_segment_of_second_line = segment\n            break\n\n    assert first_segment_of_second_line is not None, \"Second line is empty or only whitespace.\"\n\n    # The bug is that the background color carries over.\n    # So, we assert that the first segment of the second line does NOT have a background color.\n    assert first_segment_of_second_line.style is None or first_segment_of_second_line.style.bgcolor is None, \\\n        f\"Background color bled onto the second line. First segment style: {first_segment_of_second_line.style}\"\n",
+      "test_rel_path": "tests/test_reprobot_rich__3838.py",
+      "attempts": []
+    },
+    {
+      "case_id": "rich__3881",
+      "repo": "Textualize/rich",
+      "variant": "b0",
+      "f2p": false,
+      "score_reason": "did_not_fail_at_parent:passed",
+      "verdict_at_parent": "no_fail",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 1730,
+        "completion_tokens": 362,
+        "cost_usd": 0.001424,
+        "calls": 1,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 4.5,
+      "error": null,
+      "test_source": "import io\nfrom unittest.mock import patch\n\nfrom rich.console import Console\nfrom rich.prompt import Confirm\n\n\ndef test_confirm_on_validate_error_markup_disabled():\n    \"\"\"\n    Tests that Confirm.ask's validation error message respects markup=True\n    even when the console has markup=False.\n    \"\"\"\n    output = io.StringIO()\n    console = Console(file=output, markup=False, force_terminal=True)\n\n    # Simulate user entering an invalid choice, then a valid one\n    with patch(\"builtins.input\", side_effect=[\"invalid\", \"y\"]):\n        Confirm.ask(\"Proceed?\", console=console)\n\n    # The expected error message should have markup applied,\n    # even though the console was created with markup=False.\n    # This means the style tags should be rendered, not printed literally.\n    expected_error_message_part = \"Please enter Y or N\"\n    actual_output = output.getvalue()\n\n    # Check that the styled error message appears and the markup is processed\n    # (i.e., we don't see the literal '[prompt.invalid]' tags).\n    # We're looking for the styled text, which implies markup was enabled for that print.\n    assert expected_error_message_part in actual_output\n    assert \"[prompt.invalid]\" not in actual_output\n    # The bug is that if console.markup is False, the error message\n    # \"[prompt.invalid]Please enter Y or N\" is printed literally with the tags.\n    # If the fix is applied, the tags are processed and not visible in the output.\n",
+      "test_rel_path": "tests/test_reprobot_rich__3881.py",
+      "attempts": []
+    },
+    {
+      "case_id": "rich__3943",
+      "repo": "Textualize/rich",
+      "variant": "b0",
+      "f2p": false,
+      "score_reason": "did_not_fail_at_parent:collection_error",
+      "verdict_at_parent": "broken_test",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 3136,
+        "completion_tokens": 324,
+        "cost_usd": 0.001751,
+        "calls": 1,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 4.3,
+      "error": null,
+      "test_source": "from rich.console import Console\nfrom rich.text import Text\nfrom rich.cells import get_and_apply_character_cell_size_overrides\n\n# This is the Nerd Font character for a downloads folder, which was reported as\n# being incorrectly rendered as double-width.\nNERD_FONT_DOWNLOADS_ICON = \"\\U000f024d\"\n\ndef test_nerd_font_character_width():\n    \"\"\"\n    Test that a specific Nerd Font character is correctly identified as single-width.\n    \"\"\"\n    # Ensure the character width overrides are applied\n    get_and_apply_character_cell_size_overrides()\n\n    console = Console(width=80, record=True)\n    text = Text(NERD_FONT_DOWNLOADS_ICON)\n\n    # Render the text to get its cell width\n    with console:\n        console.print(text, end=\"\")\n    \n    # The rendered text should have a width of 1, as it's a single character\n    # that should be treated as single-width.\n    # If the bug is present, this will be 2.\n    rendered_width = console.measure(text).maximum\n\n    assert rendered_width == 1, (\n        f\"Nerd Font character '{NERD_FONT_DOWNLOADS_ICON}' \"\n        f\"was incorrectly measured as {rendered_width} cells wide, expected 1.\"\n    )\n",
+      "test_rel_path": "tests/test_reprobot_rich__3943.py",
+      "attempts": []
+    },
+    {
+      "case_id": "rich__4041",
+      "repo": "Textualize/rich",
+      "variant": "b0",
+      "f2p": true,
+      "score_reason": "ok",
+      "verdict_at_parent": "shallow_fail",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 2308,
+        "completion_tokens": 551,
+        "cost_usd": 0.00207,
+        "calls": 1,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 5.3,
+      "error": null,
+      "test_source": "import sys\nfrom rich.console import Console\nfrom rich.live import Live\nfrom unittest.mock import Mock\n\ndef test_fileproxy_isatty_delegation():\n    \"\"\"\n    Test that FileProxy.isatty() correctly delegates to the underlying file.\n    \"\"\"\n    # Create a mock file object that behaves like a TTY\n    mock_tty_file = Mock()\n    mock_tty_file.isatty.return_value = True\n    mock_tty_file.write.return_value = None # Mock write to prevent errors\n\n    # Create a mock file object that behaves like a non-TTY\n    mock_non_tty_file = Mock()\n    mock_non_tty_file.isatty.return_value = False\n    mock_non_tty_file.write.return_value = None # Mock write to prevent errors\n\n    # Temporarily replace sys.stdout with the mock TTY file\n    original_stdout = sys.stdout\n    sys.stdout = mock_tty_file\n\n    console = Console()\n\n    # Test with a TTY-like stdout\n    with Live(\"hello\", console=console, redirect_stdout=True):\n        # Inside Live, sys.stdout should be a FileProxy that delegates isatty()\n        # to the original (mocked) sys.stdout, which is a TTY.\n        assert sys.stdout.isatty() is True, \"FileProxy.isatty() should return True when underlying file is a TTY\"\n\n    # Restore original stdout\n    sys.stdout = original_stdout\n\n    # Temporarily replace sys.stdout with the mock non-TTY file\n    sys.stdout = mock_non_tty_file\n\n    # Test with a non-TTY-like stdout\n    with Live(\"hello\", console=console, redirect_stdout=True):\n        # Inside Live, sys.stdout should be a FileProxy that delegates isatty()\n        # to the original (mocked) sys.stdout, which is not a TTY.\n        assert sys.stdout.isatty() is False, \"FileProxy.isatty() should return False when underlying file is not a TTY\"\n\n    # Restore original stdout\n    sys.stdout = original_stdout\n\n    # The bug is that FileProxy.isatty() always returns False,\n    # so the first assertion (assert sys.stdout.isatty() is True)\n    # should fail if the bug is present.\n",
+      "test_rel_path": "tests/test_reprobot_rich__4041.py",
+      "attempts": []
+    },
+    {
+      "case_id": "rich__5090",
+      "repo": "Textualize/rich",
+      "variant": "b0",
+      "f2p": false,
+      "score_reason": "did_not_fail_at_parent:passed",
+      "verdict_at_parent": "no_fail",
+      "self_reproduces": null,
+      "rounds": 1,
+      "usage": {
+        "prompt_tokens": 3677,
+        "completion_tokens": 2186,
+        "cost_usd": 0.006568,
+        "calls": 1,
+        "cached_calls": 0
+      },
+      "wall_clock_s": 17.3,
+      "error": null,
+      "test_source": "import pytest\nfrom rich.console import Console\nfrom rich.table import Table\nfrom rich.text import Text\n\n\ndef test_double_width_character_in_background_of_modal_screen():\n    \"\"\"\n    Test that double-width characters are measured correctly when rendered\n    in the background of a modal screen, specifically when they are part\n    of a Rich Table.\n\n    This test simulates the scenario where a DataTable (which uses Rich Table)\n    is in the background and a modal screen is pushed on top. The issue\n    describes incorrect rendering of double-width characters in this context.\n\n    We'll check the width of a cell containing a double-width character.\n    If the bug is present, the measured width might be incorrect, leading\n    to misalignment or truncation.\n    \"\"\"\n    console = Console(width=80, record=True)\n\n    table = Table(show_header=True, header_style=\"bold magenta\")\n    table.add_column(\"ID\")\n    table.add_column(\"Track Title\")\n    table.add_column(\"Artist\")\n\n    # A track title with a double-width character (\u9752\u6625\u30b5\u30c4\u30d0\u30c4\u8ad6)\n    table.add_row(\"1\", \"\u9752\u6625\u30b5\u30c4\u30d0\u30c4\u8ad6\", \"3-nen E-gumi Utatan\")\n    table.add_row(\"2\", \"Normal Title\", \"Artist Name\")\n\n    # Render the table to a string\n    with console:\n        console.print(table)\n    output = console.export_text()\n\n    # Find the line containing the double-width character\n    # We expect the double-width character to take up 2 cells.\n    # The column width should accommodate this.\n    # Let's find the line with \"\u9752\u6625\u30b5\u30c4\u30d0\u30c4\u8ad6\"\n    line_with_double_width = None\n    for line in output.splitlines():\n        if \"\u9752\u6625\u30b5\u30c4\u30d0\u30c4\u8ad6\" in line:\n            line_with_double_width = line\n            break\n\n    assert line_with_double_width is not None, \"Double-width character line not found in output\"\n\n    # Extract the part of the line corresponding to the \"Track Title\" column\n    # This is a bit fragile as it depends on the exact rendering of the table.\n    # A more robust test might involve inspecting the Rich segments directly.\n    # For this bug, we're looking for visual misalignment, which implies\n    # an incorrect width calculation.\n\n    # Let's assume the column for \"Track Title\" starts after \"ID\" and its padding.\n    # We need to find the start and end of the \"\u9752\u6625\u30b5\u30c4\u30d0\u30c4\u8ad6\" text within the line.\n    # The actual width of \"\u9752\u6625\u30b5\u30c4\u30d0\u30c4\u8ad6\" is 14 (7 double-width characters * 2).\n    # We'll check if the rendered text occupies the expected number of cells.\n\n    # A simpler check: if the bug is present, the table rendering might be visibly broken.\n    # We can check the length of the rendered string for the double-width text.\n    # The `Text.cell_len` should correctly report the width.\n\n    text_obj = Text(\"\u9752\u6625\u30b5\u30c4\u30d0\u30c4\u8ad6\")\n    expected_cell_width = text_obj.cell_len\n\n    # This is a very basic check. The actual bug manifests as visual misalignment\n    # when a modal is on top, which is hard to test without a full Textual app.\n    # However, if Rich's underlying cell width calculation is wrong, this might fail.\n    # The issue description implies Rich's `_cell_widths.py` might be involved.\n\n    # Let's try to find the rendered text and check its length in the output.\n    # This is still an approximation, as Rich adds padding and borders.\n    # The core of the bug is that `rich.cells.cell_len` might return an incorrect\n    # value for double-width characters in certain contexts (like when a modal is active).\n\n    # For a direct Rich test, we can assert on the `cell_len` function itself.\n    # If `cell_len` is correct, the rendering *should* be correct.\n    from rich.cells import cell_len\n\n    assert cell_len(\"\u9752\u6625\u30b5\u30c4\u30d0\u30c4\u8ad6\") == 14, \"cell_len for double-width characters is incorrect\"\n    assert cell_len(\"Bolero!\") == 7, \"cell_len for single-width characters is incorrect\"\n\n    # The bug is specifically about the interaction with Textual's modal screen\n    # and how Rich measures characters *in the background*.\n    # To truly reproduce, we'd need to run the Textual app and inspect the rendered\n    # output of the background table when the modal is active.\n    # Since this is a Rich test, we can only test Rich's core components.\n    # If `cell_len` is correct, then the issue might be in how Textual uses Rich\n    # or how Rich's console handles rendering when obscured.\n\n    # Given the issue description, the problem is likely in `rich.cells.cell_len`\n    # or how Rich's `Console` uses it when rendering to a buffer that's then\n    # partially obscured by a modal.\n\n    # A more direct test for the reported bug would involve:\n    # 1. Running the MRE Textual app.\n    # 2. Capturing the console output *after* the modal is displayed.\n    # 3. Inspecting the captured output for the DataTable's row containing\n    #    \"\u9752\u6625\u30b5\u30c4\u30d0\u30c4\u8ad6\" to see if it's truncated or misaligned.\n\n    # Since we can't easily simulate a Textual modal screen within a pure Rich test,\n    # we'll rely on the assumption that the root cause is an incorrect `cell_len`\n    # or a related measurement within Rich itself. If `cell_len` is correct,\n    # and the bug still exists, it points to a more complex interaction.\n\n    # For now, we'll assert that the fundamental `cell_len` function works as expected.\n    # If this test passes, but the bug persists in Textual, it means the problem\n    # is not in `rich.cells.cell_len` directly, but perhaps in how Rich's `Console`\n    # or Textual's rendering engine handles the dimensions when compositing layers.\n\n    # The original issue mentions \"Double-width character measured incorrectly when in background of modal screen\".\n    # This implies that `rich.cells.cell_len` might be returning 1 instead of 2 for\n    # double-width characters *under specific conditions* (e.g., when the console\n    # is in a \"background\" state or when its output is being clipped/composited).\n\n    # Let's add a more specific check that might catch a subtle bug in `cell_len`\n    # if it were to misbehave under certain (unsimulated) conditions.\n    # This is a bit of a stretch for a pure Rich test, but it's the closest we can get.\n\n    # If the bug is that the *rendered* width is incorrect, even if `cell_len` is right,\n    # then we need to inspect the actual rendered string.\n    # Let's check the length of the rendered \"\u9752\u6625\u30b5\u30c4\u30d0\u30c4\u8ad6\" within the table output.\n    # This is still not perfect because the table adds padding.\n\n    # A better approach for a Rich-only test is to check the `Text` object's\n    # `cell_len` property, which is what Rich uses internally.\n    text_with_double_width = Text(\"\u9752\u6625\u30b5\u30c4\u30d0\u30c4\u8ad6\")\n    assert text_with_double_width.cell_len == 14, \"Text.cell_len for double-width characters is incorrect\"\n\n    # If the bug is in how Rich's `Console` clips or measures when rendering\n    # to a specific width, we can try to force a narrow column.\n    table_narrow = Table(show_header=False)\n    table_narrow.add_column(\"Col1\", width=10) # A width that should truncate if measured incorrectly\n    table_narrow.add_row(\"\u9752\u6625\u30b5\u30c4\u30d0\u30c4\u8ad6\")\n\n    with console:\n        console.print(table_narrow)\n    output_narrow = console.export_text()\n\n    # If \"\u9752\u6625\u30b5\u30c4\u30d0\u30c4\u8ad6\" (14 cells) is put into a 10-cell column, it should be truncated.\n    # If it's measured as 7 cells, it might fit or be truncated differently.\n    # This is still not directly testing the \"modal background\" aspect.\n\n    # The most direct way to test the reported bug would be to use Textual's\n    # `App.run_test` and then inspect the DOM or the rendered output.\n    # Since this is a Rich test, we are limited to Rich's API.\n\n    # The current test asserts that `rich.cells.cell_len` and `rich.text.Text.cell_len`\n    # correctly report the width of double-width characters. If these fundamental\n    # measurements are correct, then the bug in Textual's context might be\n    # related to how Textual composes Rich's output, or how Rich's `Console`\n    # handles rendering when its `width` property changes or when it's\n    # rendering to an off-screen buffer that's later composited.\n\n    # For now, this test serves as a baseline for Rich's character width calculation.\n    # If this test fails, it indicates a core Rich bug. If it passes, the bug\n    # is likely in the interaction between Rich and Textual's rendering pipeline.\n",
+      "test_rel_path": "tests/test_reprobot_rich__5090.py",
       "attempts": []
     },
     {
@@ -135,11 +421,11 @@
       "usage": {
         "prompt_tokens": 3098,
         "completion_tokens": 315,
-        "cost_usd": 0.001717,
+        "cost_usd": 0.0,
         "calls": 1,
-        "cached_calls": 0
+        "cached_calls": 1
       },
-      "wall_clock_s": 3.9,
+      "wall_clock_s": 1.0,
       "error": null,
       "test_source": "import pytest\nfrom sqlglot import parse_one, exp\n\ndef test_databricks_insert_replace_using():\n    sql = \"\"\"\n    INSERT INTO TABLE students\n        REPLACE USING (country)\n        SELECT * FROM new_students;\n    \"\"\"\n    # This test expects a parsing error because REPLACE USING is not yet supported.\n    # The bug is that sqlglot.parse_one fails to parse this valid Databricks SQL.\n    with pytest.raises(Exception) as excinfo:\n        parse_one(sql, dialect=\"databricks\")\n    \n    # We can be more specific about the expected error if sqlglot provides a specific error type\n    # for unsupported syntax. For now, a general Exception is sufficient to indicate failure.\n    assert \"Expected\" in str(excinfo.value) or \"Invalid expression\" in str(excinfo.value)\n\n    # If the feature were implemented, the test would look something like this:\n    # expression = parse_one(sql, dialect=\"databricks\")\n    # assert isinstance(expression, exp.Insert)\n    # assert expression.this.name == \"students\"\n    # # Assuming 'replace_using' would be a new attribute on the Insert expression\n    # assert expression.args.get(\"replace_using\").expressions[0].name == \"country\"\n    # assert isinstance(expression.expression, exp.Select)\n",
       "test_rel_path": "tests/dialects/test_reprobot_sqlglot__7949.py",
@@ -157,11 +443,11 @@
       "usage": {
         "prompt_tokens": 2866,
         "completion_tokens": 126,
-        "cost_usd": 0.001175,
+        "cost_usd": 0.0,
         "calls": 1,
-        "cached_calls": 0
+        "cached_calls": 1
       },
-      "wall_clock_s": 2.4,
+      "wall_clock_s": 1.0,
       "error": null,
       "test_source": "import pytest\nimport sqlglot\nfrom sqlglot.errors import ParseError\n\ndef test_mysql_create_table_auto_increment_key_parse_error():\n    sql = \"\"\"CREATE TABLE t1(id INT KEY AUTO_INCREMENT);\"\"\"\n    with pytest.raises(ParseError) as excinfo:\n        sqlglot.parse_one(sql, read=\"mysql\")\n    assert \"Expecting\" in str(excinfo.value)\n    assert \"Line 1, Col: 42\" in str(excinfo.value)\n",
       "test_rel_path": "tests/dialects/test_reprobot_sqlglot__8225.py",
@@ -179,11 +465,11 @@
       "usage": {
         "prompt_tokens": 3352,
         "completion_tokens": 392,
-        "cost_usd": 0.001986,
+        "cost_usd": 0.0,
         "calls": 1,
-        "cached_calls": 0
+        "cached_calls": 1
       },
-      "wall_clock_s": 3.7,
+      "wall_clock_s": 1.0,
       "error": null,
       "test_source": "import pytest\nfrom sqlglot import parse, Dialect\nfrom sqlglot.dialects.dialect import NormalizationStrategy\nfrom sqlglot.lineage import lineage\nfrom sqlglot.schema import MappingSchema\nfrom sqlglot.errors import OptimizeError\n\ndef test_starrocks_table_valued_function_lineage_qualify_columns():\n    sql = \"\"\"\n    WITH t AS (\n      SELECT p.user_id, gs.n AS to_deposit_days\n      FROM tbl1 p\n      CROSS JOIN (\n        SELECT generate_series AS n FROM TABLE(generate_series(0, 8000))\n      ) gs\n    ),\n    t2 AS (\n      SELECT t.* FROM t\n    )\n    SELECT user_id, to_deposit_days FROM t2\n    \"\"\"\n\n    dialect = Dialect.get_or_raise('starrocks')\n    dialect.normalization_strategy = NormalizationStrategy.CASE_INSENSITIVE\n    expression = parse(sql, read='starrocks')[0]\n\n    schema = MappingSchema(dialect=dialect)\n    schema.add_table(\"default.tbl1\", column_mapping={\"user_id\": \"BIGINT\"}, match_depth=False)\n\n    # This test expects an OptimizeError due to the bug.\n    # The bug is that 'generate_series' cannot be resolved when validate_qualify_columns=True.\n    with pytest.raises(OptimizeError) as excinfo:\n        lineage(column=None, sql=expression, schema=schema, dialect=dialect,\n                expand_stars=True, validate_qualify_columns=True)\n    \n    assert \"Column 'generate_series' could not be resolved\" in str(excinfo.value)\n",
       "test_rel_path": "tests/dialects/test_reprobot_sqlglot__8244.py",
@@ -201,11 +487,11 @@
       "usage": {
         "prompt_tokens": 431,
         "completion_tokens": 91,
-        "cost_usd": 0.000357,
+        "cost_usd": 0.0,
         "calls": 1,
-        "cached_calls": 0
+        "cached_calls": 1
       },
-      "wall_clock_s": 2.9,
+      "wall_clock_s": 1.4,
       "error": null,
       "test_source": "import tomlkit\n\ndef test_missing_newline_after_inline_table():\n    v = tomlkit.loads(\"\"\"[x]\\na.b = {}\"\"\")\n    v[\"x\"][\"c\"] = 3\n    expected_output = \"\"\"[x]\na.b = {}\nc = 3\n\"\"\"\n    assert tomlkit.dumps(v) == expected_output\n",
       "test_rel_path": "tests/test_reprobot_tomlkit__440.py",
@@ -223,11 +509,11 @@
       "usage": {
         "prompt_tokens": 1839,
         "completion_tokens": 363,
-        "cost_usd": 0.001459,
+        "cost_usd": 0.0,
         "calls": 1,
-        "cached_calls": 0
+        "cached_calls": 1
       },
-      "wall_clock_s": 4.3,
+      "wall_clock_s": 1.5,
       "error": null,
       "test_source": "import pytest\n\nfrom tomlkit.exceptions import KeyAlreadyPresent\nfrom tomlkit.toml_document import TOMLDocument\nfrom tomlkit import parse\n\n\ndef test_out_of_order_value_vs_table_redefinition_raises_on_parse():\n    \"\"\"\n    Test that an out-of-order value-vs-table redefinition\n    raises KeyAlreadyPresent at parse time.\n    \"\"\"\n    src = '[a]\\nb = true\\n[zz]\\n[a.b]\\nc = 1\\n'\n\n    with pytest.raises(KeyAlreadyPresent) as excinfo:\n        parse(src)\n\n    assert 'Key \"b\" already exists.' in str(excinfo.value)\n\n    # Verify that the in-order twin still raises at parse time\n    with pytest.raises(KeyAlreadyPresent) as excinfo:\n        parse('[a]\\nb = true\\n[a.b]\\nc = 1\\n')\n    assert 'Key \"b\" already exists.' in str(excinfo.value)\n\n\ndef test_dotted_key_then_table_split_raises_on_parse():\n    \"\"\"\n    Test that a dotted-key-then-table split redefinition\n    raises KeyAlreadyPresent at parse time.\n    \"\"\"\n    src = '[a]\\nb.c = 1\\n[zz]\\nq = 9\\n[a.b]\\nd = 2\\n'\n\n    with pytest.raises(KeyAlreadyPresent) as excinfo:\n        parse(src)\n\n    assert 'Key \"b\" already exists.' in str(excinfo.value)\n",
       "test_rel_path": "tests/test_reprobot_tomlkit__523.py",
@@ -245,11 +531,11 @@
       "usage": {
         "prompt_tokens": 476,
         "completion_tokens": 185,
-        "cost_usd": 0.000605,
+        "cost_usd": 0.0,
         "calls": 1,
-        "cached_calls": 0
+        "cached_calls": 1
       },
-      "wall_clock_s": 3.4,
+      "wall_clock_s": 1.5,
       "error": null,
       "test_source": "import pytest\nimport tomlkit\n\ndef test_nesting_table_in_inline_table_raises_error():\n    t = tomlkit.table()\n    t.append(\"a\", 1)\n\n    it = tomlkit.inline_table()\n\n    with pytest.raises(tomlkit.exceptions.TOMLKitError, match=\"Cannot nest a Table inside an InlineTable\"):\n        it.append(\"table\", t)\n\n    d = tomlkit.document()\n    d.append(\"inline_table\", it)\n\n    # Also test the dump method directly to ensure it doesn't silently write invalid TOML\n    with pytest.raises(tomlkit.exceptions.TOMLKitError, match=\"Cannot dump a document containing a Table nested in an InlineTable\"):\n        tomlkit.dumps(d)\n",
       "test_rel_path": "tests/test_reprobot_tomlkit__531.py",
@@ -267,11 +553,11 @@
       "usage": {
         "prompt_tokens": 446,
         "completion_tokens": 141,
-        "cost_usd": 0.000486,
+        "cost_usd": 0.0,
         "calls": 1,
-        "cached_calls": 0
+        "cached_calls": 1
       },
-      "wall_clock_s": 2.8,
+      "wall_clock_s": 1.4,
       "error": null,
       "test_source": "import tomlkit\n\n\ndef test_aot_captures_too_many_keys():\n    doc = tomlkit.parse(\"a.b = 1\\nc.d = 2\\n\")\n    aot = tomlkit.aot()\n    t = tomlkit.table()\n    t[\"x\"] = 9\n    aot.append(t)\n    doc[\"a\"] = aot\n    \n    expected_output = \"\"\"[[a]]\nx = 9\n\nc.d = 2\n\"\"\"\n    assert tomlkit.dumps(doc) == expected_output\n",
       "test_rel_path": "tests/test_reprobot_tomlkit__542.py",
@@ -289,11 +575,11 @@
       "usage": {
         "prompt_tokens": 408,
         "completion_tokens": 103,
-        "cost_usd": 0.00038,
+        "cost_usd": 0.0,
         "calls": 1,
-        "cached_calls": 0
+        "cached_calls": 1
       },
-      "wall_clock_s": 2.7,
+      "wall_clock_s": 1.5,
       "error": null,
       "test_source": "import tomlkit\n\ndef test_scalar_wrongly_captured_by_dictionary():\n    doc = tomlkit.loads(\"a.b = 1\\n\")\n    doc[\"a\"][\"c\"] = {}\n    doc[\"z\"] = 2\n\n    expected_output = \"\"\"a.b = 1\nz = 2\n\n[a.c]\n\"\"\"\n    assert tomlkit.dumps(doc) == expected_output\n",
       "test_rel_path": "tests/test_reprobot_tomlkit__543.py",
@@ -311,11 +597,11 @@
       "usage": {
         "prompt_tokens": 659,
         "completion_tokens": 259,
-        "cost_usd": 0.000845,
+        "cost_usd": 0.0,
         "calls": 1,
-        "cached_calls": 0
+        "cached_calls": 1
       },
-      "wall_clock_s": 2.6,
+      "wall_clock_s": 0.8,
       "error": null,
       "test_source": "import pytest\nimport tomlkit\nimport torch\n\ndef test_float_array_to_torch_tensor():\n    \"\"\"\n    Reproduces the bug where tomlkit.items.Array containing tomlkit.items.Float\n    cannot be converted to a torch.tensor due to TypeError: object of type 'Float' has no len().\n    \"\"\"\n    arr = tomlkit.loads(\"\"\"\n    a = [1.0, 2.0, 3.0]\n    \"\"\")\n\n    # The bug manifests when trying to convert the tomlkit.items.Array directly\n    # to a torch.tensor.\n    # In tomlkit 0.15.0, the __len__ method of tomlkit.items.Float is missing,\n    # causing a TypeError when torch tries to iterate over the array elements\n    # and potentially check their length (e.g., for nested structures).\n    with pytest.raises(TypeError) as excinfo:\n        _ = torch.tensor(arr['a'], dtype=torch.float32)\n\n    assert \"object of type 'Float' has no len()\" in str(excinfo.value)\n",
       "test_rel_path": "tests/test_reprobot_tomlkit__562.py",

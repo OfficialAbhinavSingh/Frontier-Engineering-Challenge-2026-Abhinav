@@ -12,7 +12,7 @@ command and its output on screen together.
 
 ## 0:00–0:40 — The problem
 
-**On screen:** `python3 -m reprobot.demo --case-id click__2817` — stop after the
+**On screen:** `python3 -m reprobot.demo --case-id click__3105` — stop after the
 bug report prints, before the run gets going.
 
 > This is a real bug report on a real Python library. Prose, written by a user.
@@ -39,12 +39,21 @@ bug report prints, before the run gets going.
 > anything. A test that always fails is caught by the second condition. One that
 > never fails is caught by the first. The metric defends itself.
 >
+> And because no model is in the scoring, you don't have to take my word for any
+> of it. `make verify-scores` re-runs every test my agents produced, in your
+> Docker, and re-derives every number in this table — no API key, no model.
+> 459 case-scores, zero mismatches.
+>
+> Twenty-seven evaluation cases, six libraries, and each case is pre-verified —
+> the *maintainer's own* test has to demonstrate Fail-to-Pass before the case is
+> allowed in.
+>
 > The naive baseline is what people actually do — paste the report into a model,
-> take the test back. **Two out of fourteen.**
+> take the test back. **Five out of twenty-seven.**
 >
 > But I don't want to beat that. The honest baseline is the second row: one
 > general-purpose agent, same model, same budget, and the same tools — including
-> the sandbox, so it can run its own test. That's **2.7 out of 14**, averaged over
+> the sandbox, so it can run its own test. That's **6.0 out of 27**, averaged over
 > three runs.
 >
 > B1 already has the test runner. So everything after this has to come from how
@@ -52,9 +61,11 @@ bug report prints, before the run gets going.
 
 ---
 
-## 1:15–2:45 — One realistic execution
+## 1:15–2:30 — One realistic execution
 
-**On screen:** let the `click__2817` demo run.
+**On screen:** let the `click__3105` demo run. It takes two rounds: the first
+attempt comes back `broken_test`, the repair fixes it, and the second is a
+reproduction that goes on to pass Fail-to-Pass.
 
 > Cartographer first — deterministic, no model. It ranks modules against the
 > report and reads this project's real fixtures and import conventions out of its
@@ -88,65 +99,64 @@ bug report prints, before the run gets going.
 
 ---
 
-## 2:45–3:30 — The changelog
+## 2:30–3:15 — The result, and what it does not say
 
 **On screen:** `CHANGELOG_IMPROVEMENT.md`, then the headline table.
 
 > Every row is a measured run of the same evaluation with one thing switched.
 >
-> The structured pipeline with sandbox verification took the baseline's 2.7 to 3.
-> The repo map, the in-repo examples, the typed repair prompts, the memory — each
-> stayed at 3. On fourteen cases those steps are not separable, and I say that in
-> the changelog rather than dressing it up as a ladder.
+> The headline is the structured pipeline against the fair baseline: **8.7 versus
+> 6.0 out of 27** — a 45% relative improvement, using 3.1 model calls per case
+> against its 7.3. Three runs each, and the ranges don't overlap: 8 to 9 against
+> 6 to 6.
 >
-> The change that mattered was minimal-claim authoring: **3 to 4.3 out of 14**.
-> That's the headline — a 59% relative improvement over the fair baseline, using
-> 2.9 model calls per case against its 7.2.
+> That's the *only* comparison in this table I'll claim. The middle rungs were run
+> once each and land inside that range. At 27 cases one case is nearly four
+> points, so the ladder shows the pipeline clears the baseline — it does not show
+> which rung did the work, and the changelog says so instead of dressing it up.
 >
-> It came from reading traces, not scores. Every single case was self-reporting
-> success on the first attempt, and half were still wrong. The tests weren't
-> missing the bug — they caught it and thirteen other things, including help text
-> the agent invented. So they failed at the buggy commit for the right reason and
-> at the fixed commit for the wrong one.
+> The change I can point at came from reading traces, not scores. Every case was
+> self-reporting success on the first attempt, and half were still wrong. The
+> tests weren't missing the bug — they caught it and thirteen other things,
+> including help text the agent invented.
 
 ---
 
-## 3:30–4:20 — The experiment I removed, and why it's interesting
+## 3:15–4:15 — The two results that went against me
 
-**On screen:** the `x1` and `s6` rows.
+**On screen:** the held-out table, then the `x1` row.
 
-> Here's the one I removed — and it beat me first.
+> Two things here didn't go my way, and both were caught by checks I built to
+> catch exactly this.
 >
-> The obvious way to build the verifier is to hand the pytest output to a model
-> and ask "did this reproduce the bug?" I built it. It scored **5.0 against my
-> 4.3**. My deterministic verifier lost.
+> First. I found a blind spot in my verifier and fixed it — that's `s6`, and it
+> scores higher: 9.3 against 8.7. But I found that blind spot *on the evaluation
+> split*, which means I tuned a rule against my own test set.
 >
-> The whole gap was one case — this one. It asks for `CliRunner` to accept
-> `catch_exceptions`. The fix *adds* that parameter. So the correct reproduction
-> is calling it and getting a `TypeError` at the call site, with no project frame
-> anywhere — which my `shallow_fail` rule threw out as a misused API, and then
-> the repair loop turned a correct test into two worse ones.
+> So I added five more repositories afterwards. Thirteen cases the rule has never
+> influenced. On those, **`s6` scores 4.3 against `s5`'s 4.7.** It's worse. The
+> gain didn't generalise — I'd fitted a rule to the one case that motivated it.
+> So `s6` is not the shipped system. `s5` is.
 >
-> When the bug *is* a missing signature, that error is the symptom. So I fixed it
-> deterministically: if the identifier the interpreter complained about is one the
-> reporter asked for, that's a reproduction.
+> Second, and this is the uncomfortable one. **The model-judged verifier I removed
+> on principle is still beating me** — 10.3 against 8.7, and it wins held out too.
 >
-> After that fix, **5.0 against 5.0 — same mean, same range — at 2.8 model calls
-> per case instead of 4.2.** The model verifier wasn't better. It was paying, on
-> every attempt, to notice one thing a rule notices for free.
->
-> That fix was found on the held-out split, so I report it as post-hoc and keep
-> the pre-registered number as the headline instead of quietly swapping it in.
+> On a smaller run those two tied exactly, and I wrote that up as: the model was
+> only paying to notice one thing a rule notices for free. Doubling the dataset
+> killed that story. So the claim I actually make is a trade, not a win: removing
+> it costs about one case in 27, and buys 28% fewer model calls and a verifier
+> that returns the same verdict every run. The switch is still in the tree so you
+> can disagree with me by re-running it.
 
 ---
 
-## 4:20–5:00 — Failure mode and hot take
+## 4:15–5:00 — Failure mode and hot take
 
 **On screen:** failure breakdown and self-verification tables.
 
-> Where it still fails: 55% of remaining failures assert the wrong expected value.
-> The test reaches the bug and then asserts something the fixed code doesn't
-> produce either.
+> Here's why that verifier still wins, and it's the most interesting thing I
+> found. **57% of remaining failures assert the wrong expected value** — the test
+> reaches the bug, then asserts something the fixed code doesn't produce either.
 >
 > So the hot take. **A test that fails is not a test that reproduces — and the
 > difference splits into a part you can verify without the answer, and a part you
@@ -154,28 +164,38 @@ bug report prints, before the run gets going.
 >
 > Whether a frame entered project code. Whether the asserted strings appear
 > anywhere in the report. Whether the missing parameter is one the reporter asked
-> for. All facts, all sitting in output most pipelines throw away. Typing those
-> verdicts moved false confidence from 77% to 61% and beat a model-judged verifier
-> using a third fewer calls.
+> for. All facts, all sitting in output most pipelines throw away.
 >
-> What's left doesn't yield to that. Whether the expected value is the one the fix
-> produces is an oracle question, and the only oracle is a paragraph of prose
-> written by a stranger.
+> But whether the *expected value* is the one the fix produces is an oracle
+> question, and the only oracle is a paragraph of prose written by a stranger.
+> That's the part no rule can touch — and it's most of what's left, which is
+> exactly why a model can still beat my rules there. My false-confidence rate sits
+> at 68%; the model verifier gets it to 48%.
 >
 > So: make your verifier return a typed signal instead of a boolean, push
 > everything you can into the part evidence can settle — it's more than you'd
-> think, and it's usually already in the output you discarded — and put the human
-> checkpoint exactly on the part that's left. That's why this thing proposes and
-> stops.
+> think — and put the human checkpoint exactly on the part that's left. That's why
+> this thing proposes and stops.
 
 ---
 
 ## Checklist before recording
 
 - [ ] `make report` run, `results/REPORT.md` current
+- [ ] `make verify-scores` run clean, `results/SCORE_VERIFICATION.md` current
 - [ ] Every number above cross-checked against that file
-- [ ] `click__2817` demo rehearsed once — it repairs, which shows more than a
-      first-try success
+- [ ] `click__3105` demo rehearsed once — it repairs, which shows more than a
+      first-try success. Backup case if it drifts: `jinja__1573` (also two
+      rounds, `broken_test` then `reproduced_exception`)
+- [ ] Demo run once *before* recording so its prompts are in `data/cache/llm` —
+      the demo uses its own memory directory, so its prompts are not the ones the
+      evaluation cached, and a cold demo makes live API calls on camera
 - [ ] `data/cache/llm` populated so the demo replays fast on camera
 - [ ] Terminal cleared, font enlarged
 - [ ] Runtime under 5:00
+
+## Notes on what to keep if you run long
+
+Cut from 1:15–2:30 (the pipeline walk-through) before cutting anything in
+3:15–4:15. The falsified-result section is the part of this submission that is
+hard to fake, and it is the reason the numbers are worth trusting.
