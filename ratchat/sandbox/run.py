@@ -98,6 +98,22 @@ def image_exists(repo_name: str) -> bool:
     return proc.returncode == 0
 
 
+def pin_sha_for(repos_dir: Path | str, repo_name: str) -> str:
+    """The commit an image is pinned at: the clone's HEAD.
+
+    Every case moves the working tree within one image, so the pin decides the
+    installed dependency generation for a whole repository -- and a test suite
+    run against the wrong generation fails or does not collect at all. This must
+    therefore be one definition, not one per caller: `dataset.validate` and
+    `scripts/build_images.py` both build images, and when they disagreed the
+    images differed silently and only the gold control noticed.
+    """
+    return subprocess.run(
+        ["git", "-C", str(Path(repos_dir) / repo_name), "rev-parse", "HEAD"],
+        capture_output=True, text=True, check=True,
+    ).stdout.strip()
+
+
 def build_image(repo: str, pin_sha: str, dockerfile: str = "envs/Dockerfile.repo",
                 quiet: bool = False) -> None:
     """Build the per-repo environment image.

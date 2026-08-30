@@ -17,7 +17,8 @@ import re
 import subprocess
 from pathlib import Path
 
-from ratchat.sandbox.run import build_image, image_exists, run_test
+from ratchat.sandbox.run import (build_image, image_exists, pin_sha_for,
+                                 run_test)
 
 ADDED_TEST_DEF = re.compile(r"^\+\s*(?:async )?def (test_[A-Za-z0-9_]+)\s*\(", re.M)
 # Not every project adds a new test function. Table-driven suites extend an
@@ -123,10 +124,7 @@ def main() -> None:
             name = repo.split("/")[1]
             if image_exists(name):
                 continue
-            head = subprocess.run(
-                ["git", "-C", str(repos_dir / name), "rev-parse", "HEAD"],
-                capture_output=True, text=True, check=True,
-            ).stdout.strip()
+            head = pin_sha_for(repos_dir, name)
             print(f"building image for {repo} @ {head[:12]}")
             build_image(repo, head)
 
