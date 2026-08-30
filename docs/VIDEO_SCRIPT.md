@@ -8,6 +8,29 @@ before recording and do not read a number that is not in that file.
 Record at 1920×1080, terminal font large enough to read at half size. Keep the
 command and its output on screen together.
 
+## What the brief asks for, and where each part lands
+
+The brief: *begin with the problem and the simple baseline, then walk through one
+realistic execution from start to finish. Show the final comparison and briefly
+explain the changelog. Highlight the change that contributed most, and one
+experiment you removed.*
+
+Six requirements, in the order the brief gives them:
+
+| # | Required | Section | Length |
+| --- | --- | --- | ---: |
+| 1 | The problem | `0:00–0:35` | 35s |
+| 2 | The simple baseline | `0:35–1:10` | 35s |
+| 3 | One realistic execution, start to finish | `1:10–2:25` | 75s |
+| 4 | The final comparison, and the changelog explained | `2:25–3:00` | 35s |
+| 5 | **The change that contributed most** | `3:00–3:25` | 25s |
+| 6 | **One experiment you removed** | `3:25–4:15` | 50s |
+| — | Failure mode and hot take (not required; cut first if long) | `4:15–5:00` | 45s |
+
+Requirements 5 and 6 are the two most often skipped, and they are the two easiest
+to check against the repository, so say them in plain words rather than implying
+them.
+
 ---
 
 ## What you are actually showing — read this first
@@ -124,7 +147,7 @@ Docker and no API key.
 
 ---
 
-## 0:00–0:40 — The problem
+## 0:00–0:35 — Requirement 1: the problem
 
 **On screen:** run `python3 -m ratchat.demo --case-id click__3105`. It completes
 in about three seconds. Scroll back to the top and hold on `THE BUG REPORT` while
@@ -145,7 +168,7 @@ you talk.
 
 ---
 
-## 0:40–1:15 — The measurement, and two baselines
+## 0:35–1:10 — Requirement 2: the simple baseline (and a fairer one)
 
 **On screen:** `results/REPORT.md`, headline table.
 
@@ -176,7 +199,7 @@ you talk.
 
 ---
 
-## 1:15–2:30 — One realistic execution
+## 1:10–2:25 — Requirement 3: one realistic execution, start to finish
 
 **On screen:** scroll from the bug report down into `RATCHAT RUNNING` and stop on
 the two round lines. The run took two rounds: the first attempt comes back
@@ -216,54 +239,77 @@ to pass Fail-to-Pass. If you are using the split pane, this is where the
 
 ---
 
-## 2:30–3:15 — The result, and what it does not say
+## 2:25–3:00 — Requirement 4: the final comparison, and the changelog
 
-**On screen:** `CHANGELOG_IMPROVEMENT.md`, then the headline table.
+**On screen:** the headline table in `results/REPORT.md`, then scroll
+`CHANGELOG_IMPROVEMENT.md` so the ladder table is visible.
 
-> Every row is a measured run of the same evaluation with one thing switched.
+> Here is the final comparison. **8.7 out of 27 against the fair baseline's 6.0** —
+> a 45% relative improvement, using 3.1 model calls per case against its 7.3.
+> Three runs each, and the ranges don't overlap: 8 to 9 against 6 to 6.
 >
-> The headline is the structured pipeline against the fair baseline: **8.7 versus
-> 6.0 out of 27** — a 45% relative improvement, using 3.1 model calls per case
-> against its 7.3. Three runs each, and the ranges don't overlap: 8 to 9 against
-> 6 to 6.
+> The changelog is this table plus the evidence for every row. Each row is the
+> same evaluation re-run with exactly one thing switched, so a difference can be
+> attributed to that thing — and where it can't, it says so.
 >
-> That's the *only* comparison in this table I'll claim. The middle rungs were run
-> once each and land inside that range. At 27 cases one case is nearly four
-> points, so the ladder shows the pipeline clears the baseline — it does not show
-> which rung did the work, and the changelog says so instead of dressing it up.
->
-> The change I can point at came from reading traces, not scores. Every case was
-> self-reporting success on the first attempt, and half were still wrong. The
-> tests weren't missing the bug — they caught it and thirteen other things,
-> including help text the agent invented.
+> Because that's the *only* comparison here I'll actually claim. The middle rungs
+> were run once each and land inside that range. At 27 cases one case is nearly
+> four percentage points.
 
 ---
 
-## 3:15–4:15 — The two results that went against me
+## 3:00–3:25 — Requirement 5: the change that contributed most
 
-**On screen:** the held-out table, then the `x1` row.
+**On screen:** stay on the ladder table. Point at the `b1` row, then the `s1` row.
 
-> Two things here didn't go my way, and both were caught by checks I built to
-> catch exactly this.
+> So which change actually did the work? The table answers it, and the answer is
+> the first structural one.
 >
-> First. I found a blind spot in my verifier and fixed it — that's `s6`, and it
-> scores higher: 9.3 against 8.7. But I found that blind spot *on the evaluation
-> split*, which means I tuned a rule against my own test set.
+> **Going from the general-purpose agent to the structured pipeline is worth two
+> whole cases — 6.0 to 8.** That's the largest single step in this table, and the
+> only one bigger than the noise floor. Every rung after it moves by one case or
+> less.
 >
-> So I added five more repositories afterwards. Thirteen cases the rule has never
-> influenced. On those, **`s6` scores 4.3 against `s5`'s 4.7.** It's worse. The
-> gain didn't generalise — I'd fitted a rule to the one case that motivated it.
-> So `s6` is not the shipped system. `s5` is.
+> And it isn't more tool access — B1 already had the sandbox and the test runner.
+> What changed is that the verifier stopped returning pass-or-fail and started
+> returning *where* the failure happened, and that verdict is what drives the
+> repair. Structure over access. That's the contribution.
 >
-> Second, and this is the uncomfortable one. **The model-judged verifier I removed
-> on principle is still beating me** — 10.3 against 8.7, and it wins held out too.
+> I'll be straight about the rest: on 27 cases I cannot rank the later rungs
+> against each other, and the changelog says that rather than dressing it up.
+
+**Pause here.** If the recording runs long, this is the last section to cut, not
+the first.
+
+---
+
+## 3:25–4:15 — Requirement 6: the experiment I removed
+
+**On screen:** the `x1` row in the headline table, then the held-out table.
+
+Lead with `x1` — that is the removed experiment the brief asks for. `s6` is a
+bonus and goes second; drop it entirely if you are running long.
+
+> The experiment I removed is `x1`, and it's the uncomfortable one, so I'll put it
+> plainly. `x1` replaces my deterministic verifier with a model asked "did this
+> reproduce the bug?" **I removed it, and it is still beating me** — 10.3 against
+> 8.7, and it wins on the held-out cases too.
 >
-> On a smaller run those two tied exactly, and I wrote that up as: the model was
-> only paying to notice one thing a rule notices for free. Doubling the dataset
-> killed that story. So the claim I actually make is a trade, not a win: removing
-> it costs about one case in 27, and buys 28% fewer model calls and a verifier
-> that returns the same verdict every run. The switch is still in the tree so you
-> can disagree with me by re-running it.
+> On a smaller run the two tied exactly, and I wrote that up as: the model was only
+> paying to notice one thing a rule notices for free. Doubling the dataset killed
+> that story, so I killed the write-up.
+>
+> The claim I actually make is a trade, not a win. Removing it costs about one case
+> in 27, and buys 28% fewer model calls and a verifier that returns the same
+> verdict every run — the thing this whole project is about. The switch is still in
+> the tree, so you can disagree with me by re-running it.
+>
+> There's a second one on this slide. I found a blind spot in my verifier and fixed
+> it — `s6` — and it scores higher, 9.3 against 8.7. But I found that blind spot
+> *on the evaluation split*, so I'd tuned a rule against my own test set. I added
+> five repositories afterwards: thirteen cases the rule never influenced. On those
+> **`s6` scores 4.3 against `s5`'s 4.7.** Worse. It didn't generalise, so it didn't
+> ship.
 
 ---
 
@@ -417,8 +463,8 @@ ffprobe -v error -show_entries format=duration -of csv=p=0 ratchat-demo.mp4   # 
 ffprobe -v error -show_entries stream=codec_type -of csv=p=0 ratchat-demo.mp4 # video + audio
 ```
 
-If it is over 5:00, cut the pipeline walk-through first — see the note at the
-bottom of this file.
+If it is over 5:00, see "Notes on what to keep if you run long" at the bottom —
+cut the hot take first, never requirements 5 and 6.
 
 **If you would rather have scenes, webcam or a pause key**, OBS is installed and
 works on Hyprland through PipeWire; pick "Screen Capture (PipeWire)" as the
@@ -453,6 +499,15 @@ submitting.
 
 ## Notes on what to keep if you run long
 
-Cut from 1:15–2:30 (the pipeline walk-through) before cutting anything in
-3:15–4:15. The falsified-result section is the part of this submission that is
-hard to fake, and it is the reason the numbers are worth trusting.
+Sections 1–6 are all required by the brief. Cut in this order:
+
+1. **`4:15–5:00`, failure mode and hot take** — not required by the brief. Losing
+   it costs nothing against the rubric.
+2. **The `s6` half of `3:25–4:15`** — the brief asks for *one* removed experiment,
+   and `x1` is that one. `s6` is a bonus.
+3. **Narration inside `1:10–2:25`** — trim the pipeline walk-through, but keep the
+   two verdict lines and the Fail-to-Pass block on screen. That is requirement 3.
+
+Do not cut `3:00–3:25` or the `x1` part of `3:25–4:15`. Those are requirements 5
+and 6, they are the two most commonly skipped, and they are the parts of this
+submission that are hardest to fake.
