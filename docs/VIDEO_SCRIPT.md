@@ -10,10 +10,125 @@ command and its output on screen together.
 
 ---
 
+## What you are actually showing — read this first
+
+**The demo finishes in about 3 seconds.** Every model call is served from the
+committed cache, so there is no live typing to watch and nothing to wait for. Do
+not try to narrate over a running command; there is no running command. The shape
+of this recording is:
+
+> **run it once, then scroll back up through the output and talk over it.**
+
+The scrollback is the real output of the real run. Nothing is staged.
+
+**Say the quiet part out loud, because it is a strength.** The model calls are
+replayed from cache — that is why it is instant and free. **The test execution is
+not cached.** Every round genuinely builds a container, checks out the commit,
+injects the test and runs pytest, and the Fail-to-Pass check runs the test twice
+more, at the buggy commit and at the real fix. Four real container runs in that
+three seconds.
+
+**Prove it on camera.** Split the terminal. Left pane runs the demo, right pane
+runs:
+
+```bash
+watch -n 0.3 'docker ps --format "{{.Image}}  {{.Names}}"'
+```
+
+Containers named `ratchat-<hex>` on image `ratchat-env:click` appear and vanish
+while the demo runs. That one shot answers "is this real or a recording" better
+than anything you can say.
+
+### The five screens, in order
+
+| # | On screen | Command | What appears |
+| --- | --- | --- | --- |
+| 1 | The bug report | `python3 -m ratchat.demo --case-id click__3105` | 137 lines, instantly. Scroll to the top. |
+| 2 | The run | *(scroll down)* | `RATCHAT RUNNING`, the two rounds and their verdicts |
+| 3 | The test | *(scroll down)* | `PROPOSED TEST` — the generated pytest file |
+| 4 | The proof | *(scroll down)* | `GROUND TRUTH` — parent `failed`, fix `passed`, **Fail-to-Pass: YES** |
+| 5 | The stop | *(scroll down)* | `HUMAN CHECKPOINT` — it proposes and stops |
+
+Then two document screens: `results/REPORT.md` for the tables, and
+`CHANGELOG_IMPROVEMENT.md` for the two results that went against you.
+
+### There is no UI, and that is the correct answer
+
+This is a developer tool and an evaluation. The deliverable is the agent system
+and the evidence that it works, not a screen. Do not apologise for the terminal
+and do not build a wrapper around it — a dashboard would add nothing a judge can
+check, and the whole submission argues for checkable claims over presentation.
+
+What replaces a UI is **artifacts a reviewer can act on**. Show them.
+
+### Optional 20-second shot: the output is a real patch
+
+Strong, concrete, and it costs nothing:
+
+```bash
+python3 -m ratchat.demo --case-id click__3105 --approve
+ls proposals/click__3105/
+```
+
+```
+REPRODUCTION.md   add-test.patch   test_reprobot_click__3105.py   trajectory.jsonl
+```
+
+Then prove the patch is real against the upstream project, not a toy:
+
+```bash
+cd data/repos/click
+git checkout 5b9630f50fde          # the commit where the bug is still present
+git apply --check ../../../proposals/click__3105/add-test.patch && echo APPLIES
+```
+
+It prints `APPLIES`. That is the maintainers' actual repository, at the actual
+buggy commit, accepting the generated test as a clean patch that adds one file and
+touches nothing else.
+
+> This is what it hands a maintainer: the test, a patch that applies to their
+> repository, the verifier's evidence, the attempts it rejected, and the part it
+> could not establish. Then it stops and asks.
+
+Afterwards put the clone back with `git checkout main`.
+
+### Landmarks in the demo output
+
+Run once, then scroll to these. Line numbers are from the current committed run.
+
+- **lines 2–52** — `THE BUG REPORT`: the real issue text, prose, unedited
+- **lines 54–64** — `RATCHAT RUNNING`: the pipeline line, then
+  `round 1: broken_test (AttributeError)` and
+  `round 2: reproduced_assertion (no exception)`, each with the verifier's reason
+- **lines 66–95** — `PROPOSED TEST`: the actual generated test file
+- **lines 97–108** — `GROUND TRUTH`: `at parent … failed`, `at fix … passed`,
+  `Fail-to-Pass: YES`, then `4 model calls, 8956 tokens, $0.0000`
+- **lines 110–137** — `HUMAN CHECKPOINT`
+
+**Pause longest on the two verdict lines and on the Fail-to-Pass block.** Those
+are the argument. Everything else is context.
+
+**One thing not to dwell on:** the generated file is named
+`tests/test_reprobot_click__3105.py`. The project was renamed late and that string
+is frozen because it is part of the model cache key — the README explains it. Do
+not read it aloud; if you want to pre-empt it, one clause is enough: "the filename
+still carries the old project name, and the README explains why that string is
+load-bearing."
+
+### What you cannot run live
+
+`make verify-scores` takes about **10 minutes** — it re-runs 459 case-scores in
+Docker. Do not run it on camera. Show the committed
+`results/SCORE_VERIFICATION.md` instead, and say it is reproducible by anyone with
+Docker and no API key.
+
+---
+
 ## 0:00–0:40 — The problem
 
-**On screen:** `python3 -m ratchat.demo --case-id click__3105` — stop after the
-bug report prints, before the run gets going.
+**On screen:** run `python3 -m ratchat.demo --case-id click__3105`. It completes
+in about three seconds. Scroll back to the top and hold on `THE BUG REPORT` while
+you talk.
 
 > This is a real bug report on a real Python library. Prose, written by a user.
 >
@@ -63,9 +178,11 @@ bug report prints, before the run gets going.
 
 ## 1:15–2:30 — One realistic execution
 
-**On screen:** let the `click__3105` demo run. It takes two rounds: the first
-attempt comes back `broken_test`, the repair fixes it, and the second is a
-reproduction that goes on to pass Fail-to-Pass.
+**On screen:** scroll from the bug report down into `RATCHAT RUNNING` and stop on
+the two round lines. The run took two rounds: the first attempt comes back
+`broken_test`, the repair fixes it, and the second is a reproduction that goes on
+to pass Fail-to-Pass. If you are using the split pane, this is where the
+`docker ps` side already showed containers appearing.
 
 > Cartographer first — deterministic, no model. It ranks modules against the
 > report and reads this project's real fixtures and import conventions out of its
@@ -179,6 +296,75 @@ reproduction that goes on to pass Fail-to-Pass.
 
 ---
 
+## Every command, in order
+
+Tested end to end. Run the whole thing once as a rehearsal before recording; it
+takes under a minute and costs nothing.
+
+**Before you hit record** — confirm the machine is camera-ready:
+
+```bash
+cd /data/Projects/ratchat
+make test                      # expect: 28 passed
+git status --short             # expect: no output
+docker images | grep ratchat-env | wc -l    # expect: 9
+```
+
+**Split pane, right side** — start this first and leave it running:
+
+```bash
+watch -n 0.3 'docker ps --format "{{.Image}}  {{.Names}}"'
+```
+
+**Left side, shot 1 — the run (screens 1 to 5).** Clear, run, then scroll up:
+
+```bash
+clear
+python3 -m ratchat.demo --case-id click__3105
+```
+
+Expect: 137 lines in ~3 seconds, `Fail-to-Pass: YES  (ok)`, `$0.0000`, and
+containers flashing in the right pane. Scroll to the top and walk down through
+the five screens.
+
+**Shot 2 — the tables.** `-l md` gives syntax colouring; plain `cat` is fine too:
+
+```bash
+bat -l md --paging=never results/REPORT.md
+bat -l md --paging=never results/SCORE_VERIFICATION.md
+bat -l md --paging=never CHANGELOG_IMPROVEMENT.md
+```
+
+**Shot 3 — the output is a real patch (optional, ~20s):**
+
+```bash
+python3 -m ratchat.demo --case-id click__3105 --approve
+ls -1 proposals/click__3105/
+bat --paging=never proposals/click__3105/add-test.patch
+```
+
+```bash
+cd data/repos/click
+git checkout 5b9630f50fde
+git apply --check ../../../proposals/click__3105/add-test.patch && echo APPLIES
+git checkout main          # put the clone back
+cd ../../..
+```
+
+Expect `APPLIES`. Do not skip the `git checkout main` at the end.
+
+**What each command is for:**
+
+| Command | The feature it demonstrates |
+| --- | --- |
+| `python3 -m ratchat.demo --case-id click__3105` | the whole pipeline, the typed verdicts, the repair loop, and the Fail-to-Pass check |
+| the `watch docker ps` pane | the sandbox is real — every round runs in a container with no network |
+| `--approve` + `ls proposals/...` | it produces a reviewable bundle, not just a string |
+| `git apply --check` | the patch applies to the maintainers' own repository at the buggy commit |
+| `results/REPORT.md` | the measured comparison against a baseline holding the same tools |
+| `results/SCORE_VERIFICATION.md` | every number re-derivable with no model and no API key |
+| `CHANGELOG_IMPROVEMENT.md` | the results that went against me, with the evidence |
+
 ## Checklist before recording
 
 - [ ] `make report` run, `results/REPORT.md` current
@@ -196,6 +382,10 @@ reproduction that goes on to pass Fail-to-Pass.
       committed under `data/cache/llm` and it writes no memory, so the first run
       on a fresh clone replays exactly like the tenth
 - [ ] Terminal cleared, font enlarged
+- [ ] Scrollback long enough to hold 137 lines (the demo prints it all at once)
+- [ ] Optional split pane running
+      `watch -n 0.3 'docker ps --format "{{.Image}}  {{.Names}}"'` — the strongest
+      single shot in the recording, because it shows the sandbox is real
 - [ ] Runtime under 5:00
 
 ## Notes on what to keep if you run long
