@@ -5,7 +5,7 @@ REPOS := tobymao/sqlglot python-poetry/tomlkit pallets/click \
 MODEL ?= google/gemini-2.5-flash
 SPLIT ?= eval
 
-.PHONY: help repos images dataset validate demo baseline solution eval report replay replay-check verify-scores test trajectories clean-results
+.PHONY: help repos images dataset validate controls demo baseline solution eval report replay replay-check verify-scores test trajectories clean-results
 
 help:
 	@echo "Ratchat — turn a bug report into a verified failing test"
@@ -21,6 +21,9 @@ help:
 	@echo "  make solution    run the final systems live       (needs OPENROUTER_API_KEY)"
 	@echo "  make eval        run every variant live           (needs OPENROUTER_API_KEY)"
 	@echo "  make report      rebuild results/REPORT.md from results/"
+	@echo "  make images      build the sandbox images (REPO=click for just one)"
+	@echo "  make controls    run the metric's controls (ceiling + two floors),"
+	@echo "                   no API key, \$$0.00"
 	@echo "  make demo        run one case end to end, printing the trajectory"
 	@echo "                   cached: no API key, \$$0.00, same result every run"
 	@echo "  make test        run the harness unit tests (needs uv)"
@@ -41,6 +44,11 @@ dataset: repos
 	$(PY) -m ratchat.dataset.mine \
 		$(foreach r,$(REPOS),--repo $(r)) \
 		--limit 4000 --want 26 --max-lookups 200 --out data/cases/mined_all.json
+
+# Build the per-repo sandbox images without mining or validating. Takes
+# REPO=<name> to build a single one, which is what CI does.
+images:
+	$(PY) scripts/build_images.py $(if $(REPO),--repo $(REPO))
 
 validate:
 	$(PY) -m ratchat.dataset.validate \
@@ -89,6 +97,14 @@ replay-check:
 	$(PY) scripts/replay_fidelity.py \
 		--variant b0 --variant b1 --variant s5 --variant s6 --variant x1 \
 		--split $(SPLIT) --out results/REPLAY_FIDELITY.md
+
+# The controls that bound the metric. No model, no API key, no cost: c_gold
+# measures the ceiling the scorer can award, and the two floors must score zero.
+controls:
+	$(PY) -m ratchat.eval.run \
+		--variant c_gold --variant c_sabotage --variant c_vacuous \
+		--split $(SPLIT) --out-dir results
+	$(MAKE) report
 
 demo:
 	$(PY) -m ratchat.demo --model $(MODEL)

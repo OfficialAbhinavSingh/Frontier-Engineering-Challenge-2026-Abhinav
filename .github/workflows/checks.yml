@@ -1,0 +1,54 @@
+# Runs on a machine that is not the author's, with no API key and no secrets.
+#
+# The point is not that the tests pass. It is that the *controls* pass: an
+# independent runner rebuilds a sandbox from the pinned base image and confirms
+# that a test which always fails and a test which always passes both score zero
+# under Fail-to-Pass, while the maintainer's own regression test scores every
+# case. If that ever stops being true, no number in the report means anything,
+# and this is the check that says so without anyone having to trust the author.
+name: checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unit:
+    name: harness unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: pytest
+        run: uv run --quiet --with pytest --python 3.12 python -m pytest tests/ -q
+
+  controls:
+    name: metric controls (no API key)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # Only the repository the controls run against. Cloning all six would take
+      # ~8 minutes and prove nothing extra: a control is a per-case fact, so one
+      # repository is a real check of the same property at a fraction of the cost.
+      - name: clone the target repository
+        run: |
+          mkdir -p data/repos
+          git clone --quiet https://github.com/pallets/click.git data/repos/click
+
+      - name: build the sandbox image
+        run: python scripts/build_images.py --repo click
+
+      # No secrets are available to this step, which is the claim being made.
+      - name: run the controls
+        run: python scripts/check_controls.py --split eval --only-repo click

@@ -29,6 +29,7 @@ from ratchat.agents.common import Budget
 from ratchat.agents.memory import RepoMemory
 from ratchat.agents.solver import SolverConfig, solve
 from ratchat.agents.verifier import verify
+from ratchat.eval.controls import produce_control
 from ratchat.llm.client import LLMClient
 from ratchat.repo import RepoView
 from ratchat.sandbox.run import run_test
@@ -82,6 +83,22 @@ VARIANTS: dict[str, dict] = {
         "cfg": dict(use_map=True, use_examples=True, use_typed_repair=True,
                     use_memory=True, use_minimal_claim=True, use_llm_verdict=True),
     },
+    # Controls. No model is called, so these cost nothing and are identical on
+    # every machine. They bound the metric from both ends: c_gold measures the
+    # ceiling the scorer can award, and the two floors must score exactly zero.
+    # See ratchat/eval/controls.py for why each one is the control it is.
+    "c_gold": {"kind": "control", "desc": "CONTROL: the maintainer's own test (ceiling)"},
+    "c_sabotage": {"kind": "control", "desc": "CONTROL: a test that always fails (must score 0)"},
+    "c_vacuous": {"kind": "control", "desc": "CONTROL: a test that always passes (must score 0)"},
+}
+
+CONTROLS = {name for name, spec in VARIANTS.items() if spec["kind"] == "control"}
+
+# What each control must score for the metric to mean what the report says.
+CONTROL_EXPECTATION = {
+    "c_gold": "all",
+    "c_sabotage": "none",
+    "c_vacuous": "none",
 }
 
 
@@ -106,13 +123,24 @@ def split_cases(cases: list[dict], dev_fraction: float = 0.25) -> tuple[list, li
 
 
 def score_case(case: dict, test_rel_path: str, test_source: str,
-               timeout_s: int = 300) -> dict:
-    """The Fail-to-Pass check. The only code permitted to touch the fix commit."""
+               timeout_s: int = 300,
+               extra_pytest_args: tuple[str, ...] = ()) -> dict:
+    """The Fail-to-Pass check. The only code permitted to touch the fix commit.
+
+    `extra_pytest_args` exists for the `c_gold` control alone. An agent writes a
+    file containing only its own test, so every test in the file is the test
+    under measurement. The maintainer's file is not like that -- it holds the
+    added test plus every sibling test that already lived there -- so scoring it
+    whole would measure the health of the whole file rather than the reproduction.
+    Selecting the added test restores the comparison the agent actually faces.
+    Nothing else passes this argument, and the default changes no reported score.
+    """
     if not test_source.strip():
         return {"f2p": False, "reason": "empty_test", "parent": None, "fix": None}
 
     at_parent = run_test(case["repo_name"], case["parent_sha"], test_rel_path,
-                         test_source, timeout_s=timeout_s)
+                         test_source, timeout_s=timeout_s,
+                         extra_pytest_args=extra_pytest_args)
     verdict = verify(at_parent, test_rel_path)
 
     if at_parent.outcome != "failed":
@@ -125,7 +153,8 @@ def score_case(case: dict, test_rel_path: str, test_source: str,
         }
 
     at_fix = run_test(case["repo_name"], case["fix_sha"], test_rel_path,
-                      test_source, timeout_s=timeout_s)
+                      test_source, timeout_s=timeout_s,
+                      extra_pytest_args=extra_pytest_args)
     passed = at_fix.outcome == "passed"
     return {
         "f2p": passed,
@@ -165,7 +194,11 @@ def run_variant(variant: str, cases: list[dict], repos_dir: Path, model: str,
                     variant_desc=spec["desc"], model=model)
 
         try:
-            if variant == "b0":
+            if spec["kind"] == "control":
+                produced = produce_control(variant, case, repos_dir)
+                trace.event("control_test_built", variant=variant,
+                            test_rel_path=produced["test_rel_path"])
+            elif variant == "b0":
                 produced = run_b0(case, view, client, trace)
             elif variant == "b1":
                 produced = run_b1(case, view, client, trace, budget)
@@ -180,7 +213,8 @@ def run_variant(variant: str, cases: list[dict], repos_dir: Path, model: str,
             trace.event("variant_error", error=error)
 
         scored = score_case(case, produced.get("test_rel_path") or "tests/test_ratchat.py",
-                            produced.get("test_source", ""), timeout_s)
+                            produced.get("test_source", ""), timeout_s,
+                            tuple(produced.get("extra_pytest_args", ())))
         trace.event("scored", **{k: v for k, v in scored.items()
                                  if k in ("f2p", "reason", "verdict")})
 
@@ -198,6 +232,9 @@ def run_variant(variant: str, cases: list[dict], repos_dir: Path, model: str,
             "error": error,
             "test_source": produced.get("test_source", ""),
             "test_rel_path": produced.get("test_rel_path", ""),
+            # Recorded so a result file carries everything needed to re-derive
+            # its own score. Empty for every variant that writes its own test.
+            "extra_pytest_args": list(produced.get("extra_pytest_args", ())),
             "attempts": produced.get("attempts", []),
         }
         trace.finish({k: v for k, v in record.items() if k != "test_source"})
@@ -244,6 +281,9 @@ def main() -> None:
     ap.add_argument("--max-steps", type=int, default=12)
     ap.add_argument("--max-test-runs", type=int, default=6)
     ap.add_argument("--limit", type=int, default=0, help="run only the first N cases")
+    ap.add_argument("--only-repo", action="append", default=[],
+                    help="restrict to these repositories; may be repeated. Used by "
+                         "CI, which builds one sandbox image rather than six.")
     ap.add_argument("--temperature", type=float, default=0.0)
     ap.add_argument("--tag", default="",
                     help="suffix for result files and traces, used for repeat runs")
@@ -252,6 +292,10 @@ def main() -> None:
     all_cases = json.loads(Path(args.cases).read_text())
     dev, evaluation = split_cases(all_cases)
     chosen = {"dev": dev, "eval": evaluation, "all": all_cases}[args.split]
+    if args.only_repo:
+        chosen = [c for c in chosen if c["repo_name"] in set(args.only_repo)]
+        if not chosen:
+            raise SystemExit(f"no cases in split '{args.split}' for {args.only_repo}")
     if args.limit:
         chosen = sorted(chosen, key=lambda c: (c["repo_name"], c["case_id"]))[:args.limit]
 

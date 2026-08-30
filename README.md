@@ -94,7 +94,44 @@ The primary metric is **Fail-to-Pass (F2P)**, and it needs no judgement:
 No model scores anything. A test that always fails is caught by the second
 condition; a test that never fails is caught by the first; a test that touches
 existing files is rejected outright, because the generated file is a new path
-that did not previously exist. The metric defends itself.
+that did not previously exist.
+
+### Controls, so the claim above is measured rather than asserted
+
+Everything above is a claim about the metric, and a claim about a metric is worth
+nothing until you have run the inputs whose answer you already know. Three
+controls do that. None of them calls a model, so they cost nothing and return the
+same thing on every machine: `make controls`.
+
+| Control | What it runs | Must score | Scored |
+| --- | --- | --- | ---: |
+| `c_gold` | the maintainer's own regression test | 27/27 | **27/27** |
+| `c_sabotage` | `assert False` — a test that always fails | 0/27 | **0/27** |
+| `c_vacuous` | `assert True` — a test that always passes | 0/27 | **0/27** |
+
+Fail-to-Pass is a conjunction, and each floor satisfies exactly one half of it
+and nothing else. They score zero for *different* recorded reasons —
+`did_not_pass_at_fix` for the saboteur, `did_not_fail_at_parent` for the vacuous
+test — which is what shows both conditions are load-bearing rather than one
+carrying the other. If either floor scored above zero, agreement with a single
+condition would be counting as evidence, and every number in this README would be
+inflated.
+
+`c_gold` is the ceiling, and its value is that it measures the scorer instead of
+trusting it. A case is admitted to the dataset only after `dataset.validate`
+replays the maintainer's test at both commits — but that is a different code path
+from the one that produces the headline number. Running gold back through the
+scorer closes the gap, and 27/27 says the ceiling is the whole set: every case
+Ratchat misses is a case some test could have caught.
+
+Building the ceiling found a real discrepancy, which is the reason to build it.
+Scoring the maintainer's *whole file* gives 12/13 on the development split, not
+13/13: on `rich__3577`, three unrelated tests in `tests/test_ansi.py` are already
+red at the fix commit, while the test the fix actually added passes. The agent is
+scored on a file containing only its own test, so the honest comparison selects
+the tests the fix added — and that selector is recorded in the result file, not
+applied by special-casing a variant name, so `make verify-scores` re-derives the
+control exactly the way it re-derives everything else.
 
 **The cases are real and pre-verified.** Each one comes from a merged commit that
 fixed source code and added a regression test, and that closed exactly one linked
@@ -229,7 +266,7 @@ make repos && make validate && make verify-scores
 
 That writes `results/SCORE_VERIFICATION.md` and prints any case where the
 re-derived flag disagrees with the reported one. As committed:
-**17 result files, 459 case-scores, 0 mismatches.** `make validate` is the same idea
+**20 result files, 540 case-scores, 0 mismatches.** `make validate` is the same idea
 one level down: before a case is allowed into the dataset, the *maintainer's own*
 regression test has to demonstrate Fail-to-Pass in your Docker.
 

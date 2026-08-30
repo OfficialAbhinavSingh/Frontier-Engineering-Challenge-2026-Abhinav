@@ -25,12 +25,12 @@ import re
 from collections import Counter, defaultdict
 from pathlib import Path
 
-from ratchat.eval.run import VARIANTS
+from ratchat.eval.run import CONTROL_EXPECTATION, CONTROLS, VARIANTS
 
 CURRENT_DESCRIPTIONS = {name: spec["desc"] for name, spec in VARIANTS.items()}
 
 ORDER = {"b0": 0, "b1": 1, "s1": 2, "s2": 3, "s3": 4, "s4": 5, "s5": 6,
-         "s6": 7, "x1": 8}
+         "s6": 7, "x1": 8, "c_gold": 9, "c_sabotage": 10, "c_vacuous": 11}
 
 TAG = re.compile(r"_r\d+$")
 
@@ -203,10 +203,44 @@ def verdict_distribution(entries: list[dict]) -> str:
     return "\n".join(lines)
 
 
+def control_table(controls: dict[str, list[dict]]) -> str:
+    """The controls, with what each one had to score for the metric to hold."""
+    rows = [
+        "| Control | What it runs | Must score | Scored | |",
+        "| --- | --- | --- | ---: | :--: |",
+    ]
+    for variant, entries in controls.items():
+        entry = entries[0]
+        n, solved = entry["n_cases"], entry["f2p_solved"]
+        expectation = CONTROL_EXPECTATION[variant]
+        required = n if expectation == "all" else 0
+        ok = solved == required
+        rows.append(
+            f"| `{variant}` | {CURRENT_DESCRIPTIONS[variant].removeprefix('CONTROL: ')} "
+            f"| {required}/{n} | **{solved}/{n}** | {'PASS' if ok else 'FAIL'} |"
+        )
+    return "\n".join(rows)
+
+
 def build(results_dir: Path, split: str) -> str:
-    runs = load(results_dir, split)
-    if not runs:
+    all_runs = load(results_dir, split)
+    if not all_runs:
         return f"No results found in {results_dir} for split '{split}'."
+
+    controls = {v: e for v, e in all_runs.items() if v in CONTROLS}
+    runs = {v: e for v, e in all_runs.items() if v not in CONTROLS}
+
+    # `make controls` rebuilds the report, so a results directory holding nothing
+    # but controls is a reachable state, not a hypothetical one.
+    if not runs:
+        return "\n".join([
+            f"# Results — `{split}` split\n",
+            "Only controls have been run for this split. The comparison table "
+            "needs at least one variant.\n",
+            "## Controls\n",
+            control_table(controls),
+            "",
+        ])
 
     first = next(iter(runs.values()))[0]
     final = runs.get("s5") or list(runs.values())[-1]
@@ -237,6 +271,22 @@ def build(results_dir: Path, split: str) -> str:
         "These repositories were added to the dataset afterwards and were never "
         "seen when the rule was designed.\n",
         held_out_subset(runs),
+        "\n## Controls\n",
+        "A score means nothing until you know what it does on inputs whose "
+        "answer is already known. No model is called for any of these, so they "
+        "cost nothing and return the same thing on every machine.\n",
+        control_table(controls) if controls else "_Not run for this split._",
+        "\n`c_sabotage` and `c_vacuous` each satisfy exactly one half of "
+        "Fail-to-Pass and nothing else -- one always fails, one always passes. "
+        "They score zero for different reasons, and the reason is recorded per "
+        "case: `did_not_pass_at_fix` for the first, `did_not_fail_at_parent` for "
+        "the second. If either scored above zero, agreement with one condition "
+        "would be counting as evidence and every number above would be inflated.\n",
+        "\n`c_gold` is the ceiling, and it measures the scorer rather than "
+        "trusting it: the dataset admits a case only after `dataset.validate` "
+        "replays the maintainer's test at both commits, but that is a different "
+        "code path from the one that produces the headline. Running gold back "
+        "through the scorer closes the gap.\n",
         "\n## Self-verification gap\n",
         "The agent decides for itself whether it reproduced the bug. This is how "
         "often that judgement was wrong.\n",

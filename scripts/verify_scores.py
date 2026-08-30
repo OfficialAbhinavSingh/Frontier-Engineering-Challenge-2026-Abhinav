@@ -54,6 +54,7 @@ def main() -> None:
                 record.get("test_rel_path") or "tests/test_ratchat.py",
                 record.get("test_source", ""),
                 args.timeout,
+                tuple(record.get("extra_pytest_args", ())),
             )
             redone += bool(scored["f2p"])
             if bool(scored["f2p"]) == bool(record["f2p"]):

@@ -73,6 +73,41 @@ cases would have entered the set as permanent, unwinnable failures.
 sees anything, is what stops a dataset from silently encoding environment rot.
 `data/cases/dropped.json` records all 36 rejections and why.
 
+### The controls, added last, and what they caught
+
+Every row above is a claim about the metric, and none of them tested the metric
+on inputs whose answer was already known. Three controls now do, none of them
+calling a model (`make controls`, $0.00):
+
+| Control | What it runs | Must score | Scored |
+| --- | --- | --- | ---: |
+| `c_gold` | the maintainer's own regression test | 27/27 | **27/27** |
+| `c_sabotage` | `assert False` — always fails | 0/27 | **0/27** |
+| `c_vacuous` | `assert True` — always passes | 0/27 | **0/27** |
+
+The two floors matter separately, because Fail-to-Pass is a conjunction and each
+floor satisfies exactly one half of it. They score zero for different recorded
+reasons — `did_not_pass_at_fix` and `did_not_fail_at_parent` — so both conditions
+are demonstrably load-bearing. Had either scored above zero, agreement with one
+condition would have been counting as evidence and every number in this changelog
+would be inflated.
+
+`c_gold` earned its place immediately by disagreeing. Scoring the maintainer's
+*whole test file* gives **12/13 on the development split, not 13/13**: on
+`rich__3577`, three unrelated tests in `tests/test_ansi.py` are already red at the
+fix commit, while the test that commit added passes. `dataset.validate` never saw
+this because it selects the added tests with `-k`; the scorer did not, and the two
+had quietly diverged. The control is the only thing that runs both paths against
+each other. Fixed by selecting the added tests and **recording that selector in
+the result file**, so `make verify-scores` re-derives the control the same way it
+re-derives everything else rather than special-casing a variant name.
+
+**Learning:** a validator and a scorer that agree by construction are one code
+path; when they are two, only a control that runs them against each other will
+tell you they have drifted. The ceiling is worth as much as the floors — 27/27
+says every case Ratchat misses is one that some test could have caught, so the
+gap is the agent's, not the dataset's.
+
 ### The baseline was losing to my parser, twice
 
 B1's first measured run made **zero tool calls across all six development
@@ -245,7 +280,7 @@ at the parent commit, run it at the fix commit, compare — and every result fil
 records the exact source its run produced. So `make verify-scores` re-derives
 every reported Fail-to-Pass flag from committed data with **no model, no cache and
 no API key**, and prints any disagreement by case. Measured over everything
-reported: **17 result files, 459 case-scores, 0 mismatches**. The reproducibility
+reported: **20 result files, 540 case-scores, 0 mismatches**. The reproducibility
 of the results never depended on the cache; only the convenience of watching the
 agents work for free did.
 

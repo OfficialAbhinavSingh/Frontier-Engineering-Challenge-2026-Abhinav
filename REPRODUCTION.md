@@ -49,14 +49,30 @@ Docker, with no model, no key and no cache.
 ```bash
 make repos          # clone the target repositories        (~8 min, ~700 MB)
 make validate       # build sandbox images, re-verify cases (~25 min first time)
+make controls       # the metric's ceiling and its two floors (~3 min)
 make verify-scores  # re-derive every Fail-to-Pass flag in results/
 ```
+
+`make controls` is the quickest thing here that tells you whether the metric is
+real, and it is the one to run first if you only run one. It scores three inputs
+whose answers are known in advance and calls no model:
+
+| Control | Must score | Scored |
+| --- | --- | ---: |
+| `c_gold` — the maintainer's own regression test | 27/27 | **27/27** |
+| `c_sabotage` — a test that always fails | 0/27 | **0/27** |
+| `c_vacuous` — a test that always passes | 0/27 | **0/27** |
+
+The two floors must score zero for *different* reasons — `did_not_pass_at_fix`
+and `did_not_fail_at_parent` — because Fail-to-Pass is a conjunction and each
+floor tests one half of it. `make test` asserts all of this, so a control that
+drifts fails the suite instead of sitting in the report looking like evidence.
 
 This writes `results/SCORE_VERIFICATION.md`, re-deriving the flag for every case
 in every result file and printing any disagreement by case. The measured result,
 committed alongside this guide:
 
-**17 result files, 459 case-scores, 0 mismatches.** Every Fail-to-Pass number in
+**20 result files, 540 case-scores, 0 mismatches.** Every Fail-to-Pass number in
 the report was re-derived exactly from the committed test sources, with no model
 and no API key. If your run does not come back clean, a number in the report is
 wrong and should not be believed.
@@ -228,7 +244,7 @@ Measured on an 8-core Linux host, Docker 29.7.2, from a cold start.
 | `make repos` | 4–6 min | free |
 | `make validate` (first run, includes image builds) | 25–40 min | free |
 | `make validate` (images already built) | 10–20 min | free |
-| `make verify-scores` (every recorded run, 18 result files) | 45–70 min | **$0** |
+| `make verify-scores` (every recorded run, 20 result files) | 45–70 min | **$0** |
 | `make replay` (every variant) | 25–40 min | **$0** |
 | `make replay-check` (five variants) | 25–40 min | **$0** |
 | `make eval` live (every variant) | 60–90 min | see `results/REPORT.md` |

@@ -4,6 +4,9 @@
 | `eval_b1.json` | 27 | 6 | 6 | 0 |
 | `eval_b1_r2.json` | 27 | 6 | 6 | 0 |
 | `eval_b1_r3.json` | 27 | 6 | 6 | 0 |
+| `eval_c_gold.json` | 27 | 27 | 27 | 0 |
+| `eval_c_sabotage.json` | 27 | 0 | 0 | 0 |
+| `eval_c_vacuous.json` | 27 | 0 | 0 | 0 |
 | `eval_s1.json` | 27 | 8 | 8 | 0 |
 | `eval_s2.json` | 27 | 7 | 7 | 0 |
 | `eval_s3.json` | 27 | 8 | 8 | 0 |

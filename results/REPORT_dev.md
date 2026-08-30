@@ -70,6 +70,22 @@ The signature-grounding rule in `s6` was written in response to a case on the fi
 | `s4` | 1.0/7 | 14% |
 | `s6` | 3.0/7 | 43% |
 
+## Controls
+
+A score means nothing until you know what it does on inputs whose answer is already known. No model is called for any of these, so they cost nothing and return the same thing on every machine.
+
+| Control | What it runs | Must score | Scored | |
+| --- | --- | --- | ---: | :--: |
+| `c_gold` | the maintainer's own test (ceiling) | 13/13 | **13/13** | PASS |
+| `c_sabotage` | a test that always fails (must score 0) | 0/13 | **0/13** | PASS |
+| `c_vacuous` | a test that always passes (must score 0) | 0/13 | **0/13** | PASS |
+
+`c_sabotage` and `c_vacuous` each satisfy exactly one half of Fail-to-Pass and nothing else -- one always fails, one always passes. They score zero for different reasons, and the reason is recorded per case: `did_not_pass_at_fix` for the first, `did_not_fail_at_parent` for the second. If either scored above zero, agreement with one condition would be counting as evidence and every number above would be inflated.
+
+
+`c_gold` is the ceiling, and it measures the scorer rather than trusting it: the dataset admits a case only after `dataset.validate` replays the maintainer's test at both commits, but that is a different code path from the one that produces the headline. Running gold back through the scorer closes the gap.
+
+
 ## Self-verification gap
 
 The agent decides for itself whether it reproduced the bug. This is how often that judgement was wrong.
