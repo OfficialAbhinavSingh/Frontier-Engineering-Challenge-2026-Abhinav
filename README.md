@@ -387,6 +387,33 @@ improvement, using 3.1 model calls per case instead of 7.3.** Their ranges do no
 overlap across three runs each (8–9 against 6–6), which is the only comparison in
 this table the sample size actually resolves.
 
+### Read 32% against the difficulty of the corpus, not against 100%
+
+A rate near a third invites the question of whether it is any good, and the
+answer depends entirely on how hard the cases are. Two numbers here settle that,
+and both are measured rather than argued.
+
+**The floor.** `b0` is a single prompt with no tools and no execution — the thing
+a developer actually does when they paste an issue into a chat window. It scores
+**19%**, and that number is a property of the corpus rather than of the prompt.
+On a package with four modules, finding the right one is not the problem, and a
+no-tool baseline should be expected to do far better than this. These are jinja,
+rich, sqlglot and click: large projects where locating the module and matching
+its fixtures *is* most of the work, and where a test that fails for the wrong
+reason looks exactly like one that works. So 19% is the difficulty of the
+problem, stated in the same units as the result — and any Fail-to-Pass rate
+should be read against the baseline of its own corpus, never across corpora.
+
+**The ceiling.** `c_gold` scores **27/27**. The maintainer's own regression test
+passes the gate on every single case, so the target is not merely assumed to be
+reachable — it is measured. The 32% is therefore distance from a real 100%, not
+from an unknown limit, and every case missed is one that some test could have
+caught. The gap is the agent's, not the dataset's.
+
+Read together: the headroom above a no-tool baseline is 81 points, the pipeline
+takes 13 of them, and the remaining 68 are not a mystery — the failure table
+below accounts for all of them.
+
 Everything else in the table is honest about being unresolved. `s1`–`s4` were run
 once each and land inside or beside `s5`'s range, so **the rungs of the ablation
 ladder are not separable at this sample size** — the structured pipeline as a
