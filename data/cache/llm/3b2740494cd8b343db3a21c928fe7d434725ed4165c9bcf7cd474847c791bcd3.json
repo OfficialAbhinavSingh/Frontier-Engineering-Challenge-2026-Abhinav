@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"The `dumps` function checks if the data is a `Mapping` and then converts it to a dictionary before calling `item(data, _sort_keys=sort_keys).as_string()`. This suggests that the order of keys in the dictionary may not be preserved if the dictionary is created from an unordered collection. I will now create a test that reproduces the issue described in the issue report.\",\"tool\":\"run_test\",\"args\":{\"source\":\"import tomlkit\\n\\ndef test_scalar_captured_by_dictionary():\\n    doc = tomlkit.loads(\\\"\\\"\\\"a.b = 1\\\\n\\\"\\\"\\\")\\n    doc[\\\"a\\\"][\\\"c\\\"] = {}\\n    doc[\\\"z\\\"] = 2\\n    result = tomlkit.dumps(doc)\\n    expected = \\\"\\\"\\\"a.b = 1\\\\n\\\\n[a.c]\\\\nz = 2\\\\n\\\"\\\"\\\"\\n    assert result == expected, f'Expected: {expected}, but got: {result}'\\n\"}}",
+  "usage": {
+    "prompt_tokens": 1138,
+    "completion_tokens": 214,
+    "cost_usd": 0.000299,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175218.9107862
+}

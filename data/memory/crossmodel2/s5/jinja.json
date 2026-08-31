@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Always ensure that the test case is designed to specifically trigger the bug by using the exact input that caused the issue, especially when dealing with methods like __hash__ that may have specific input requirements.",
+    "from_case": "jinja__1521",
+    "added_at": 1788177021.4072254
+  },
+  {
+    "text": "Follow the project's conventions for naming fixtures and helper functions to ensure clarity in what each test is validating, making it easier to identify if the test is relevant to the reported bug.",
+    "from_case": "jinja__1521",
+    "added_at": 1788177021.4072273
+  },
+  {
+    "text": "Always ensure that the API is being used correctly according to the project's conventions, especially when dealing with async features and custom filters, to avoid misusing the API and encountering RuntimeWarnings.",
+    "from_case": "jinja__1573",
+    "added_at": 1788177033.0713017
+  },
+  {
+    "text": "When writing tests, follow the established structure and naming conventions for fixtures and helper functions to ensure clarity and maintainability, which can help in quickly identifying issues related to API misuse.",
+    "from_case": "jinja__1573",
+    "added_at": 1788177033.0713036
+  },
+  {
+    "text": "Always ensure that the test you are writing targets the specific API shape that is known to cause issues, particularly when dealing with mixed types in sequences, as this can lead to TypeErrors.",
+    "from_case": "jinja__1701",
+    "added_at": 1788177052.7132938
+  },
+  {
+    "text": "Follow the project's conventions for import paths and fixture names to ensure consistency and clarity in your tests, making it easier to identify and reproduce bugs.",
+    "from_case": "jinja__1701",
+    "added_at": 1788177052.7132967
+  },
+  {
+    "text": "Always ensure that the test you are writing directly targets the specific behavior or functionality that is reported in the bug. This includes verifying that the test fails at the buggy commit before proceeding with further attempts.",
+    "from_case": "jinja__2027",
+    "added_at": 1788177061.062676
+  },
+  {
+    "text": "Follow the project's conventions for import paths and fixture names to ensure consistency and clarity in your tests. This helps in quickly identifying the relevant parts of the codebase and reduces the chances of overlooking critical aspects of the bug.",
+    "from_case": "jinja__2027",
+    "added_at": 1788177061.0626776
+  }
+]

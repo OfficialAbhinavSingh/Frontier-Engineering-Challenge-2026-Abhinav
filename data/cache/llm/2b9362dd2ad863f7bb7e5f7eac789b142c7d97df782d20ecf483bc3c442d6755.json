@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```python\nimport pytest\nimport tomlkit\n\ndef test_tomlkit_float_length_error() -> None:\n    arr = tomlkit.loads(\"\"\"\n    a = [1.0, 2.0, 3.0]\n    \"\"\")\n\n    with pytest.raises(TypeError):\n        _ = arr['a'][0]  # Accessing the first element to trigger the bug\n```",
+  "usage": {
+    "prompt_tokens": 4498,
+    "completion_tokens": 83,
+    "cost_usd": 0.000427,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788177186.2876794
+}

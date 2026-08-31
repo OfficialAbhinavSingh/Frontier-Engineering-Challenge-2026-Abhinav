@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```json\n[\n    \"Always ensure that the test names clearly reflect the behavior being tested, including the specific conditions and expected outcomes, to avoid confusion and misinterpretation of the test's purpose.\",\n    \"Follow the project's conventions for import paths and fixture names consistently, as deviations can lead to incorrect assumptions about the test environment and the data being used.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 435,
+    "completion_tokens": 74,
+    "cost_usd": 0.00011,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788177176.991666
+}

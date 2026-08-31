@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"source_files\": [\"src/click/core.py\"], \"test_file\": \"src/click/testing.py\", \"why\": \"The proposed change involves modifying the `CLIRunner` class, which is likely defined in `src/click/core.py`, and the related tests for this functionality would be in `src/click/testing.py`.\"}",
+  "usage": {
+    "prompt_tokens": 641,
+    "completion_tokens": 71,
+    "cost_usd": 0.000139,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175267.9710891
+}

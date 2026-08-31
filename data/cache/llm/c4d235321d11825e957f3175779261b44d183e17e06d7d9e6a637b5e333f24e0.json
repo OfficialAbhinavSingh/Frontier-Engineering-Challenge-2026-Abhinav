@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```json\n[\n    \"Always ensure that the test you are writing is specifically designed to capture the behavior described in the bug report, especially when dealing with edge cases like font rendering or character encoding.\",\n    \"Follow the project's conventions for import paths and fixture names to maintain consistency and clarity in your tests, making it easier to identify and reproduce issues.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 325,
+    "completion_tokens": 72,
+    "cost_usd": 9.2e-05,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788176274.9628
+}

@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```python\nimport pytest\nimport click\nfrom click._utils import UNSET\n\ndef attachment_types_callback(ctx, param, value):\n    return value\n\n@click.command()\n@click.option(\n    \"attachment_types\",\n    \"--at\",\n    \"--attachment-type\",\n    type=(str, str),\n    multiple=True,\n    callback=attachment_types_callback,\n    help=\"\\b\\nAttachment with explicit mimetype,\\n--at image.jpg image/jpeg\",\n)\ndef cli(attachment_types):\n    pass\n\ndef test_multi_line_help_text_completion(runner):\n    result = runner.invoke(cli, ['--'])\n    assert result.exit_code != 0  # Expecting an error due to the bug\n```",
+  "usage": {
+    "prompt_tokens": 4966,
+    "completion_tokens": 139,
+    "cost_usd": 0.000828,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175295.0946343
+}

@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"The test I created passed, which indicates that the issue is not being reproduced correctly. I will modify the test to ensure that the dictionary is being constructed in a way that reflects the issue described in the report. Specifically, I will ensure that the order of keys is manipulated to demonstrate the bug more clearly.\",\"tool\":\"run_test\",\"args\":{\"source\":\"import tomlkit\\n\\ndef test_scalar_captured_by_dictionary():\\n    doc = tomlkit.loads(\\\"\\\"\\\"a.b = 1\\\\n\\\"\\\"\\\")\\n    doc[\\\"a\\\"][\\\"c\\\"] = {}\\n    # Adding a top-level key after a nested key\\n    doc[\\\"z\\\"] = 2\\n    result = tomlkit.dumps(doc)\\n    expected = \\\"\\\"\\\"a.b = 1\\\\n\\\\n[a.c]\\\\n\\\\nz = 2\\\\n\\\"\\\"\\\"\\n    assert result == expected, f'Expected: {expected}, but got: {result}'\\n\"}}",
+  "usage": {
+    "prompt_tokens": 1430,
+    "completion_tokens": 208,
+    "cost_usd": 0.000339,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788176984.6067905
+}

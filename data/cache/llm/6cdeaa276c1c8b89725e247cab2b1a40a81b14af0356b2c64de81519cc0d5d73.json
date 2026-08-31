@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```python\nimport pytest\nfrom jinja2 import Environment\n\nclass TestHashing:\n    def test_template_hash(self, env):\n        template = env.parse(\"hash test\")\n        with pytest.raises(TypeError):\n            hash(template)\n```",
+  "usage": {
+    "prompt_tokens": 2779,
+    "completion_tokens": 49,
+    "cost_usd": 0.000446,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175332.9776962
+}

@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"The test failed because no exception was raised when attempting to get completions, indicating that the completion process did not handle the multi-line help text as expected. I will modify the test to check for the output of the completions directly and assert that it does not contain the expected '--at' option, which would indicate a failure in handling the multi-line help text.\",\"tool\":\"run_test\",\"args\":{\"source\":\"import pytest\\nimport click\\n\\n\\ndef _get_completions(cli, args, incomplete):\\n    from click.shell_completion import ShellComplete\\n    comp = ShellComplete(cli, {}, cli.name, \\\"_CLICK_COMPLETE\\\")\\n    return comp.get_completions(args, incomplete)\\n\\n\\ndef test_multiline_help_option():\\n    @click.command()\\n    @click.option(\\n        \\\"--at\\\",\\n        type=(str, str),\\n        multiple=True,\\n        help=\\\"\\\\b\\\\nAttachment with explicit mimetype,\\\\n--at image.jpg image/jpeg\\\"\\n    )\\n    def cli(at):\\n        pass\\n\\n    # Simulate the command line input for completion\\n    completions = _get_completions(cli, [\\\"--\\\"], \\\"\\\")\\n    assert completions is not None\\n    assert not any(c.value.startswith('--at') for c in completions), \\\"Expected '--at' to be missing from completions\\\"\\n\\n    # Check if the multi-line help text is handled without errors\\n    try:\\n        _get_completions(cli, [\\\"--at\\\"], \\\"\\\")\\n    except Exception as e:\\n        pytest.fail(f\\\"Completion raised an exception: {e}\\\")\"}}",
+  "usage": {
+    "prompt_tokens": 5819,
+    "completion_tokens": 354,
+    "cost_usd": 0.000711,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175589.7188606
+}

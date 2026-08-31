@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"I found the `src/click/shell_completion.py` file, which is relevant to the issue. I will also check the `tests/test_shell_completion.py` file to see if there are existing tests related to shell completion. This will help me understand how to structure my new test for the multi-line help text issue.\",\"tool\":\"list_files\",\"args\":{\"subdir\":\"tests\"}}",
+  "usage": {
+    "prompt_tokens": 2199,
+    "completion_tokens": 80,
+    "cost_usd": 0.000253,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788167754.3066008
+}

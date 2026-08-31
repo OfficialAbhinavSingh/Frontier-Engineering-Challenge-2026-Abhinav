@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "[\n    \"Always ensure that the test you are writing targets the specific API shape that is known to cause issues, particularly when dealing with mixed types in sequences, as this can lead to TypeErrors.\",\n    \"Follow the project's conventions for import paths and fixture names to ensure consistency and clarity in your tests, making it easier to identify and reproduce bugs.\"\n]",
+  "usage": {
+    "prompt_tokens": 325,
+    "completion_tokens": 71,
+    "cost_usd": 9.1e-05,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175381.359723
+}

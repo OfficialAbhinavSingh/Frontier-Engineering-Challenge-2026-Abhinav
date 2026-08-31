@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"source_files\": [\"src/jinja2/environment.py\", \"src/jinja2/filters.py\"], \"test_file\": \"tests/test_async_filters.py\", \"why\": \"The issue involves async behavior and custom filters, which are likely handled in the environment and filters source files, while the test file for async filters is the most relevant for regression testing.\"}",
+  "usage": {
+    "prompt_tokens": 871,
+    "completion_tokens": 74,
+    "cost_usd": 0.000175,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175343.6359773
+}

@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```python\nimport pytest\nfrom jinja2.nativetypes import NativeEnvironment\n\ndef test_type_error_on_render():\n    template = NativeEnvironment().from_string(\n        '{% block test %}{% for i in range(1) %}{{ loop.index }}{% endfor %}{% endblock %}{{ self.test() }}'\n    )\n    with pytest.raises(TypeError):\n        template.render()\n```",
+  "usage": {
+    "prompt_tokens": 3176,
+    "completion_tokens": 85,
+    "cost_usd": 0.000527,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175371.552976
+}

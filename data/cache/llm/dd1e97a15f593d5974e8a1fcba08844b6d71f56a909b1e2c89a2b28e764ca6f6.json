@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"source_files\": [\"tomlkit/items.py\", \"tomlkit/api.py\"], \"test_file\": \"tests/test_items.py\", \"why\": \"The issue involves the handling of 'Float' objects in the tomlkit library, which is directly related to the items module.\"}",
+  "usage": {
+    "prompt_tokens": 878,
+    "completion_tokens": 59,
+    "cost_usd": 0.000167,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175555.4788742
+}

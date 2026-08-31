@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"I need to locate the `async_variant` decorator and the `do_first` function in the `jinja2.filters` module to understand how they are defined and how the bug manifests. I will start by searching for the `async_variant` decorator in the source code.\",\"tool\":\"grep\",\"args\":{\"pattern\":\"async_variant\",\"glob\":\"src/jinja2/async_utils.py\"}}",
+  "usage": {
+    "prompt_tokens": 652,
+    "completion_tokens": 80,
+    "cost_usd": 0.000146,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788167906.397947
+}

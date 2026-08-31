@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"The output shows that the completions list is empty, confirming that the multi-line help text is indeed causing the completion to fail. I will adjust the test to check for the specific error that occurs when trying to get completions with the multi-line help text. This will help demonstrate that the bug exists and will fail the test as expected.\",\"tool\":\"run_test\",\"args\":{\"source\":\"import pytest\\nimport click\\n\\n\\ndef _get_completions(cli, args, incomplete):\\n    from click.shell_completion import ShellComplete\\n    comp = ShellComplete(cli, {}, cli.name, \\\"_CLICK_COMPLETE\\\")\\n    return comp.get_completions(args, incomplete)\\n\\n\\ndef test_multiline_help_option():\\n    @click.command()\\n    @click.option(\\n        \\\"--at\\\",\\n        type=(str, str),\\n        multiple=True,\\n        help=\\\"\\\\b\\\\nAttachment with explicit mimetype,\\\\n--at image.jpg image/jpeg\\\"\\n    )\\n    def cli(at):\\n        pass\\n\\n    # Check if the multi-line help text causes an error during completion\\n    with pytest.raises(Exception) as excinfo:\\n        _get_completions(cli, [\\\"--at\\\"], \\\"\\\")\\n    assert \\\"unknown option\\\" in str(excinfo.value)  # Check for specific error message\"}}",
+  "usage": {
+    "prompt_tokens": 5352,
+    "completion_tokens": 287,
+    "cost_usd": 0.000975,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175585.109517
+}

@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"Now that I found the `PromptBase` class, I will look for the `on_validate_error` method within the same file to understand its implementation and how it handles error messages.\",\"tool\":\"grep\",\"args\":{\"pattern\":\"def on_validate_error\",\"glob\":\"rich/prompt.py\"}}",
+  "usage": {
+    "prompt_tokens": 573,
+    "completion_tokens": 60,
+    "cost_usd": 0.000122,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788167983.917855
+}

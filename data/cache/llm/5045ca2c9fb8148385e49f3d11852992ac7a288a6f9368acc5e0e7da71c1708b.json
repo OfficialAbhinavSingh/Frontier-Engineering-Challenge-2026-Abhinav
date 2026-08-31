@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"I will run the test I just created to see if it fails as expected due to the lack of support for the `REPLACE USING` syntax in the current implementation.\",\"tool\":\"run_test\",\"args\":{\"source\":\"import pytest\\nfrom sqlglot import parse_one\\n\\n\\ndef test_insert_replace_using():\\n    sql = \\\"\\\"\\\"\\n    INSERT INTO TABLE students\\n        REPLACE USING (country)\\n        SELECT * FROM new_students;\\n    \\\"\\\"\\\"\\n    # This should raise an error or return None due to unsupported syntax\\n    with pytest.raises(Exception):\\n        parse_one(sql, dialect=\\\"databricks\\\")\\n\"}}",
+  "usage": {
+    "prompt_tokens": 5151,
+    "completion_tokens": 138,
+    "cost_usd": 0.000481,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788168404.0680912
+}

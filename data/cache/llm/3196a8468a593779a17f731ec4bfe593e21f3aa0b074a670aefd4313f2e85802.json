@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```python\nimport pytest\nfrom rich.console import Console\nfrom rich.screen import Screen\n\ndef test_double_width_character_measurement():\n    console = Console(width=10, height=5, legacy_windows=False)\n    with console.capture() as capture:\n        console.print(Screen(\"\u3042\"))  # Using a double-width character\n    result = capture.get()\n    expected = \"\u3042        \\n\"  # Expected output with correct measurement\n    assert result == expected\n```",
+  "usage": {
+    "prompt_tokens": 4159,
+    "completion_tokens": 96,
+    "cost_usd": 0.000681,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788176286.486937
+}

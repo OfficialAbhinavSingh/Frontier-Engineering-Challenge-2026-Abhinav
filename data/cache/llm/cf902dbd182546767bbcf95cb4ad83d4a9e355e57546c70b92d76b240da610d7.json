@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"The `tests/test_shell_completion.py` file contains various tests for shell completion using Click. I will create a new test function that specifically tests the multi-line help text issue. This function will define a command with an option that has multi-line help text and will check if the completion works correctly without raising errors. I will now write this test function.\",\"tool\":\"run_test\",\"args\":{\"source\":\"import pytest\\nimport click\\n\\n\\ndef _get_completions(cli, args, incomplete):\\n    from click.shell_completion import ShellComplete\\n    comp = ShellComplete(cli, {}, cli.name, \\\"_CLICK_COMPLETE\\\")\\n    return comp.get_completions(args, incomplete)\\n\\n\\ndef test_multiline_help_option():\\n    @click.command()\\n    @click.option(\\n        \\\"--at\\\",\\n        type=(str, str),\\n        multiple=True,\\n        help=\\\"\\\\b\\\\nAttachment with explicit mimetype,\\\\n--at image.jpg image/jpeg\\\"\\n    )\\n    def cli(at):\\n        pass\\n\\n    # Simulate the command line input for completion\\n    completions = _get_completions(cli, [\\\"--\\\"], \\\"\\\")\\n    assert completions is not None\\n    assert any(c.value.startswith('--at') for c in completions)\\n\\n    # Check if the multi-line help text is handled without errors\\n    try:\\n        _get_completions(cli, [\\\"--at\\\"], \\\"\\\")\\n    except Exception as e:\\n        pytest.fail(f\\\"Completion raised an exception: {e}\\\")\"}}",
+  "usage": {
+    "prompt_tokens": 4224,
+    "completion_tokens": 338,
+    "cost_usd": 0.000654,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788167759.2049072
+}

@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```python\nimport pytest\nfrom rich.live import Live\nfrom rich.console import Group\n\ndef test_live_empty_render_leaves_spurious_newline() -> None:\n    console = Console()\n    with Live(Group(), console=console, transient=True) as live:\n        pass\n    # Capture the output after the Live context\n    output = console.export_text()\n    assert output == \"\"\n```",
+  "usage": {
+    "prompt_tokens": 3742,
+    "completion_tokens": 79,
+    "cost_usd": 0.000609,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175401.526134
+}

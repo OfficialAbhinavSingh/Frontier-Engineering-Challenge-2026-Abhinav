@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"The test continues to pass, which indicates that the error is not being raised as expected. I will review the SQL and the test setup again to ensure that it accurately reflects the conditions described in the issue. I will also check if there are any additional configurations or setups needed for the `lineage` function to trigger the error. I will create a new test file with a more explicit setup to ensure that the error is raised as expected. I will also check the `MappingSchema` to ensure it is correctly set up for the test case.\",\"tool\":\"read_file\",\"args\":{\"path\":\"sqlglot/schema.py\"}}",
+  "usage": {
+    "prompt_tokens": 5206,
+    "completion_tokens": 127,
+    "cost_usd": 0.000512,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788168488.6496608
+}

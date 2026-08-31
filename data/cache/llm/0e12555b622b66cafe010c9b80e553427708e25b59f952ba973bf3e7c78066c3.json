@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```python\nimport sys\nfrom rich.console import Console\nfrom rich.live import Live\n\ndef test_file_proxy_isatty() -> None:\n    console = Console()\n    print(\"Before Live:\", sys.stdout.isatty())  # True\n\n    with Live(\"hello\", console=console, redirect_stdout=True):\n        assert sys.stdout.isatty()  # Should be True, but currently False due to the bug\n\n    print(\"After Live:\", sys.stdout.isatty())  # True\n```",
+  "usage": {
+    "prompt_tokens": 2898,
+    "completion_tokens": 103,
+    "cost_usd": 0.000496,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788177110.3306026
+}

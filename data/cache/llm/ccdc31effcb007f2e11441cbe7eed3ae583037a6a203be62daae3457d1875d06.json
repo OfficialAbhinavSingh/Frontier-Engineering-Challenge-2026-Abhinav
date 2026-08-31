@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"The `test_inline_table` function is quite minimal and only checks if an inline table is an instance of `InlineTable`. I will create a new test that specifically checks the behavior described in the issue: ensuring that a newline is present before a new key when dumping a TOML document. I will write this test in a new file as specified.\",\"tool\":\"list_files\",\"args\":{\"subdir\":\"tests\"}}",
+  "usage": {
+    "prompt_tokens": 1723,
+    "completion_tokens": 85,
+    "cost_usd": 0.000194,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788168496.1507902
+}

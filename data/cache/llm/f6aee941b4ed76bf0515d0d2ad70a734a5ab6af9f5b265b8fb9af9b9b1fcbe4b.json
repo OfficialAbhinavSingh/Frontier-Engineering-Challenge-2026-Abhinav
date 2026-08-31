@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"I found the `lineage` function in `sqlglot/lineage.py`. Now, I will read the implementation of the `lineage` function to understand how it processes the SQL and interacts with the schema and the `qualify_columns` function. I will read the file starting from the line where `lineage` is defined.\",\"tool\":\"read_file\",\"args\":{\"path\":\"sqlglot/lineage.py\",\"start\":82,\"end\":102}}",
+  "usage": {
+    "prompt_tokens": 1087,
+    "completion_tokens": 98,
+    "cost_usd": 0.000222,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788168446.8704379
+}

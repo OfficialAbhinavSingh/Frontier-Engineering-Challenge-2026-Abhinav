@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"I need to read more lines to get a better understanding of how the `lineage` function processes the SQL and interacts with the schema. I will read additional lines to see the complete implementation of the function.\",\"tool\":\"read_file\",\"args\":{\"path\":\"sqlglot/lineage.py\",\"start\":102,\"end\":142}}",
+  "usage": {
+    "prompt_tokens": 1465,
+    "completion_tokens": 70,
+    "cost_usd": 0.000175,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788168448.1417623
+}

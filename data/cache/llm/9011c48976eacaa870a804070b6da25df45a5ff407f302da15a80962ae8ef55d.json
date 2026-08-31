@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```json\n[\n    \"Ensure that the correct constructor arguments are used for project-specific classes like ParamType, as incorrect usage can lead to TypeErrors that do not reflect the actual bug being tested.\",\n    \"Follow the established naming conventions for fixtures and helper functions to avoid confusion and ensure that tests are structured in a way that clearly indicates their purpose and expected behavior.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 528,
+    "completion_tokens": 76,
+    "cost_usd": 0.000125,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175312.8817744
+}

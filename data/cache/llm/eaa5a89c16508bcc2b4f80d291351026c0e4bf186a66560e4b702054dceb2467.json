@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"I found the definition of the `async_variant` decorator in `src/jinja2/async_utils.py`. Now, I will search for the `do_first` function in the `jinja2.filters` module to see how it is decorated and to confirm its behavior.\",\"tool\":\"grep\",\"args\":{\"pattern\":\"do_first\",\"glob\":\"src/jinja2/filters.py\"}}",
+  "usage": {
+    "prompt_tokens": 784,
+    "completion_tokens": 79,
+    "cost_usd": 0.000165,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788167908.287668
+}

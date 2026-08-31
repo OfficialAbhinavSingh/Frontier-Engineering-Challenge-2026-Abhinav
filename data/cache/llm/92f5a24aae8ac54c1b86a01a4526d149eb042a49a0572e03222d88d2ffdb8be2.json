@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```python\nimport pytest\nimport tomlkit\nimport torch\n\ndef test_float_has_no_len() -> None:\n    arr = tomlkit.loads(\"\"\"\n    a = [1.0, 2.0, 3.0]\n    \"\"\")\n\n    # This should raise a TypeError due to the bug\n    with pytest.raises(TypeError):\n        torch.tensor(arr['a'], dtype=torch.float32)\n```",
+  "usage": {
+    "prompt_tokens": 4331,
+    "completion_tokens": 87,
+    "cost_usd": 0.000404,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175565.4731417
+}

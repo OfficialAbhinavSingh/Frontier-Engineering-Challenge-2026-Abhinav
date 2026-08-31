@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"source_files\": [\"rich/console.py\", \"rich/_windows_renderer.py\"], \"test_file\": \"tests/test_console.py\", \"why\": \"The issue relates to how characters are rendered in the console, which is primarily handled in console.py and affected by the Windows renderer.\"}",
+  "usage": {
+    "prompt_tokens": 1656,
+    "completion_tokens": 58,
+    "cost_usd": 0.000283,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175435.6271694
+}

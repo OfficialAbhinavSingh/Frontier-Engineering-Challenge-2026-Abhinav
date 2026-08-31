@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```python\nimport pytest\nimport sqlglot\n\ndef test_insert_replace_using():\n    sql = \"\"\"\n    INSERT INTO TABLE students\n        REPLACE USING (country)\n        SELECT * FROM new_students;\n    \"\"\"\n    parsed = sqlglot.parse_one(sql, dialect=\"databricks\")\n    assert parsed is not None  # This will fail if the REPLACE USING is not handled correctly\n```",
+  "usage": {
+    "prompt_tokens": 4591,
+    "completion_tokens": 81,
+    "cost_usd": 0.000737,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175464.9812267
+}

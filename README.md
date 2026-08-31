@@ -176,16 +176,26 @@ So both sides were re-run on a second model from a different vendor — the same
 them on the same model**. Absolute scores across models are not comparable and
 are not presented as if they were.
 
-| Model | Price in/out per M | `b1` same tools | `s5` Ratchat | Gap |
-| --- | --- | ---: | ---: | ---: |
-| `gemini-2.5-flash` | $0.300 / $2.50 | 6.0/27 (range 6-6) | **8.7/27 (range 8-9)** | **+2.7** (+44%) |
-| `mistral-small-3.2-24b` | $0.075 / $0.20 | 2.7/27 (range 2-3) | **6.3/27 (range 5-7)** | **+3.7** (+138%) |
+| Model | Vendor | Price in/out per M | `b1` same tools | `s5` Ratchat | Gap |
+| --- | --- | --- | ---: | ---: | ---: |
+| `gemini-2.5-flash` | Google | $0.300 / $2.50 | 6.0/27 (6-6) | **8.7/27 (8-9)** | **+2.7** (+44%) |
+| `mistral-small-3.2-24b` | Mistral | $0.075 / $0.20 | 2.7/27 (2-3) | **6.3/27 (5-7)** | **+3.7** (+138%) |
+| `gpt-4o-mini` | OpenAI | $0.150 / $0.60 | 1.0/27 (1-1) | **2.0/27 (2-2)** | +1.0 (noise floor) |
 
-Three runs each, and within each model the ranges do not overlap. The pipeline
-wins on both, and wins by more on the weaker model: a general-purpose agent
-degrades sharply when the model gets worse, while the structured one degrades
-gently. That is the strongest evidence in this repository that the improvement is
-attributable to the architecture rather than to the model.
+Three runs each, three vendors. The pipeline is ahead on all three, and ahead by
+more than the noise floor on two: within those, the ranges do not overlap. A
+general-purpose agent degrades sharply as the model weakens — 6.0 to 2.7 — while
+the structured one degrades gently, 8.7 to 6.3. That is the strongest evidence
+here that the ladder measured design rather than one vendor's model.
+
+**The third model bounds the claim rather than extending it.** On `gpt-4o-mini`
+both systems collapse and the margin is a single case, which this README elsewhere
+calls the noise floor and will not now treat as a finding. What it shows is a
+limit: structure cannot rescue a model that cannot write a working test at all.
+It widens the gap where the model is capable enough to act on instruction, and it
+manufactures no capability that is absent. The report generator marks that row as
+noise rather than printing its relative percentage, because "+100%" of one case
+would be exactly the overclaim the rest of this file warns about.
 
 **The cross-comparison, stated carefully.** `s5` on the cheap model scores
 6.3/27 against `b1` on the expensive model at 6.0/27, for $0.0101 a run against

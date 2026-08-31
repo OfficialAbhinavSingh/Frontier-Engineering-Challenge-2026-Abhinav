@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"The `Insert` class in `dml.py` defines the structure for INSERT statements but does not currently support the `REPLACE USING` clause. I will now create a test file that attempts to use the `REPLACE USING` syntax in an INSERT statement, which should fail at this commit due to the lack of support. I will save this test in `tests/dialects/test_reprobot_sqlglot__7949.py`.\",\"final_test\":\"import pytest\\nfrom sqlglot import parse_one\\n\\n\\ndef test_insert_replace_using():\\n    sql = \\\"\\\"\\\"\\n    INSERT INTO TABLE students\\n        REPLACE USING (country)\\n        SELECT * FROM new_students;\\n    \\\"\\\"\\\"\\n    # This should raise an error or return None due to unsupported syntax\\n    with pytest.raises(Exception):\\n        parse_one(sql, dialect=\\\"databricks\\\")\\n\"}",
+  "usage": {
+    "prompt_tokens": 4930,
+    "completion_tokens": 188,
+    "cost_usd": 0.000593,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788168400.5498414
+}

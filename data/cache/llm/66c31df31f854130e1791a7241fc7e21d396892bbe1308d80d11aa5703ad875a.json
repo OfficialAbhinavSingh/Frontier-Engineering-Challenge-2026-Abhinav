@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```python\nfrom collections.abc import Callable\nimport pytest\nfrom tomlkit import parse\n\ndef test_missing_newline_after_inline_table(example: Callable[[str], str]) -> None:\n    content = example(\"[x]\\na.b = {}\")\n    \n    doc = parse(content)\n    doc[\"x\"][\"c\"] = 3\n\n    assert doc.as_string() == \"[x]\\na.b = {}\\nc = 3\\n\"\n```",
+  "usage": {
+    "prompt_tokens": 3097,
+    "completion_tokens": 91,
+    "cost_usd": 0.000519,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175519.1479232
+}

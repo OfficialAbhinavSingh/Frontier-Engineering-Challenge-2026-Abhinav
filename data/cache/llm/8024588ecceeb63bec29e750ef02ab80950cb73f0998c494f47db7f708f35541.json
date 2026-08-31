@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```python\nimport pytest\nfrom rich.console import Console\nfrom rich.screen import Screen\n\ndef test_double_width_character_rendering():\n    console = Console(width=10, height=5, legacy_windows=False)\n    with console.capture() as capture:\n        console.print(Screen(\"\u3042\\n\u3042\"))\n    result = capture.get()\n    expected = \"\u3042         \\n\u3042         \\n\"\n    assert result == expected\n```",
+  "usage": {
+    "prompt_tokens": 4183,
+    "completion_tokens": 85,
+    "cost_usd": 0.000678,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788177116.6172488
+}

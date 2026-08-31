@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"I need to locate the `PromptBase` class and the `on_validate_error` method to understand how the error message is printed. This will help me create a test that fails due to the bug described in the issue.\",\"tool\":\"grep\",\"args\":{\"pattern\":\"class PromptBase\",\"glob\":\"*.py\"}}",
+  "usage": {
+    "prompt_tokens": 482,
+    "completion_tokens": 65,
+    "cost_usd": 0.000111,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788167982.495899
+}

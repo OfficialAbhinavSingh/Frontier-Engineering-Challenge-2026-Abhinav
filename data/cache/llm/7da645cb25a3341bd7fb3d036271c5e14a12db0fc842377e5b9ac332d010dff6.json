@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"source_files\": [\"sqlglot/expressions/dml.py\", \"sqlglot/parser.py\"], \"test_file\": \"tests/dialects/test_databricks.py\", \"why\": \"The feature request pertains to modifying the INSERT behavior, which is handled in dml.py, and the dialect-specific implementation for Databricks should be tested in the corresponding test file.\"}",
+  "usage": {
+    "prompt_tokens": 941,
+    "completion_tokens": 79,
+    "cost_usd": 0.000189,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175463.1012585
+}

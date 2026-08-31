@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"I found the `sync_do_first` function and the `do_first` function that is decorated with `@async_variant`. Now, I will read the relevant parts of the `src/jinja2/filters.py` file to understand how the `do_first` function is defined and how the decorator affects it.\",\"tool\":\"read_file\",\"args\":{\"path\":\"src/jinja2/filters.py\",\"start\":582,\"end\":600}}",
+  "usage": {
+    "prompt_tokens": 943,
+    "completion_tokens": 91,
+    "cost_usd": 0.000196,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788167909.9471624
+}

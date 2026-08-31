@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```python\nimport pytest\nimport pickle\nimport jinja2.utils\n\ndef test_pickle_missing():\n    # Attempting to pickle jinja2.utils.missing should raise a PicklingError\n    with pytest.raises(pickle.PicklingError):\n        pickle.dumps(jinja2.utils.missing)\n```",
+  "usage": {
+    "prompt_tokens": 2708,
+    "completion_tokens": 62,
+    "cost_usd": 0.000261,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175394.4280555
+}

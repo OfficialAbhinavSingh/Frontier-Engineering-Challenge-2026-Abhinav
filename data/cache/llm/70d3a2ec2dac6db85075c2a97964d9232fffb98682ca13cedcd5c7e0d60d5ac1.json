@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```json\n[\n    \"Always ensure that all necessary modules are imported at the beginning of your test files to avoid NameErrors during test collection.\",\n    \"When writing assertions, be mindful of the expected output format, especially when dealing with console output that may include escape sequences.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 642,
+    "completion_tokens": 58,
+    "cost_usd": 0.000131,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788176253.7650335
+}

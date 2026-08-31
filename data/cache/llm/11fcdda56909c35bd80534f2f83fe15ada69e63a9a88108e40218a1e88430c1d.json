@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"The test failed because the completion did not return any values starting with '--at'. This indicates that the multi-line help text might be causing the completion to not function as expected. I will modify the test to check the raw completions directly and ensure that the multi-line help text is being processed correctly. I will also add more assertions to verify the output of the completion function.\",\"tool\":\"run_test\",\"args\":{\"source\":\"import pytest\\nimport click\\n\\n\\ndef _get_completions(cli, args, incomplete):\\n    from click.shell_completion import ShellComplete\\n    comp = ShellComplete(cli, {}, cli.name, \\\"_CLICK_COMPLETE\\\")\\n    return comp.get_completions(args, incomplete)\\n\\n\\ndef test_multiline_help_option():\\n    @click.command()\\n    @click.option(\\n        \\\"--at\\\",\\n        type=(str, str),\\n        multiple=True,\\n        help=\\\"\\\\b\\\\nAttachment with explicit mimetype,\\\\n--at image.jpg image/jpeg\\\"\\n    )\\n    def cli(at):\\n        pass\\n\\n    # Simulate the command line input for completion\\n    completions = _get_completions(cli, [\\\"--\\\"], \\\"\\\")\\n    assert completions is not None\\n    assert any(c.value.startswith('--at') for c in completions), \\\"Expected '--at' to be in completions\\\"\\n\\n    # Check if the multi-line help text is handled without errors\\n    try:\\n        _get_completions(cli, [\\\"--at\\\"], \\\"\\\")\\n    except Exception as e:\\n        pytest.fail(f\\\"Completion raised an exception: {e}\\\")\\n\\n    # Check if the help text is correctly formatted\\n    assert any(c.help == \\\"\\\\b\\\\nAttachment with explicit mimetype,\\\\n--at image.jpg image/jpeg\\\" for c in completions), \\\"Expected multi-line help text to be present\\\"\"}}",
+  "usage": {
+    "prompt_tokens": 4770,
+    "completion_tokens": 410,
+    "cost_usd": 0.000962,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788176375.416136
+}

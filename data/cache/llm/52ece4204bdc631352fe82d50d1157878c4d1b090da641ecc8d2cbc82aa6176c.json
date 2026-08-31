@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"The test has failed as expected, indicating that `sys.stdout.isatty()` returns `False` before entering the `Live` context, which is incorrect behavior due to the bug in `FileProxy`. I will finalize the test file now.\",\"final_test\":\"import sys\\nfrom rich.console import Console\\nfrom rich.live import Live\\n\\n\\ndef test_isatty_in_live():\\n    console = Console()\\n    assert sys.stdout.isatty() is True, \\\"Before Live: stdout should be a tty\\\"\\n\\n    with Live(\\\"hello\\\", console=console, redirect_stdout=True):\\n        assert sys.stdout.isatty() is False, \\\"Inside Live: stdout should not be a tty\\\"\\n\\n    assert sys.stdout.isatty() is True, \\\"After Live: stdout should be a tty\\\"\"}",
+  "usage": {
+    "prompt_tokens": 2671,
+    "completion_tokens": 173,
+    "cost_usd": 0.000504,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788176051.3950572
+}

@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```json\n[\n    \"Always ensure that the API is being used correctly according to the project's conventions, especially when dealing with async features and custom filters, to avoid misusing the API and encountering RuntimeWarnings.\",\n    \"When writing tests, be cautious with the structure of template strings and the expected syntax, as incorrect usage can lead to TemplateSyntaxErrors that indicate a misunderstanding of the API's expected input.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 980,
+    "completion_tokens": 84,
+    "cost_usd": 0.000197,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788176206.5635655
+}

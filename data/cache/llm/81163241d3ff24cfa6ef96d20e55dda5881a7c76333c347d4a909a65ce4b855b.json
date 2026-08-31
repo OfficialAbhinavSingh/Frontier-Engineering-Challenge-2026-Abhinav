@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"The completions are still empty when checking directly for the `--at` option. This indicates that the multi-line help text is likely causing the completion system to fail to recognize the option. I will simplify the help text to a single line to see if the completion works correctly, which will confirm that the issue is indeed with the multi-line help text.\",\"tool\":\"run_test\",\"args\":{\"source\":\"import pytest\\nimport click\\n\\n\\ndef _get_completions(cli, args, incomplete):\\n    from click.shell_completion import ShellComplete\\n    comp = ShellComplete(cli, {}, cli.name, \\\"_CLICK_COMPLETE\\\")\\n    return comp.get_completions(args, incomplete)\\n\\n\\ndef test_multiline_help_option():\\n    @click.command()\\n    @click.option(\\n        \\\"--at\\\",\\n        type=(str, str),\\n        multiple=True,\\n        help=\\\"Attachment with explicit mimetype\\\"\\n    )\\n    def cli(at):\\n        pass\\n\\n    # Check completions for the --at option directly\\n    completions = _get_completions(cli, [\\\"--at\\\"], \\\"\\\")\\n    print(completions)  # Debugging output\\n    assert completions is not None\\n    assert any(c.value.startswith('--at') for c in completions)\\n\\n    # Check if the multi-line help text is handled without errors\\n    try:\\n        _get_completions(cli, [\\\"--at\\\"], \\\"\\\")\\n    except Exception as e:\\n        pytest.fail(f\\\"Completion raised an exception: {e}\\\")\"}}",
+  "usage": {
+    "prompt_tokens": 5923,
+    "completion_tokens": 340,
+    "cost_usd": 0.00067,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788167775.7541
+}

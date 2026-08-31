@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"I found the `StarRocks` class in `sqlglot/dialects/starrocks.py`. I will read its implementation to understand how it handles SQL parsing and if there are any specific configurations that might affect the behavior of the `TABLE()` function.\",\"tool\":\"read_file\",\"args\":{\"path\":\"sqlglot/dialects/starrocks.py\",\"start\":0,\"end\":40}}",
+  "usage": {
+    "prompt_tokens": 4069,
+    "completion_tokens": 82,
+    "cost_usd": 0.000362,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788176935.3789866
+}

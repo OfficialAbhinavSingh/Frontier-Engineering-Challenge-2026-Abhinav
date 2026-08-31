@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"The completion for the `--at` option is still not being recognized, even with the simplified help text. This suggests that the issue may not solely be with the multi-line help text but could also involve how the option is defined or how the completion system is set up. I will check the implementation of the `ShellComplete` class in `src/click/shell_completion.py` to understand how it processes options and completions.\",\"tool\":\"read_file\",\"args\":{\"path\":\"src/click/shell_completion.py\"}}",
+  "usage": {
+    "prompt_tokens": 6484,
+    "completion_tokens": 107,
+    "cost_usd": 0.000576,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788167778.179861
+}

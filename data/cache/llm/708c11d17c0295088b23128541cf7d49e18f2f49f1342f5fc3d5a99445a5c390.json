@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"source_files\": [\"src/jinja2/filters.py\", \"src/jinja2/async_utils.py\"], \"test_file\": \"tests/test_async_filters.py\", \"why\": \"The issue relates to the behavior of filters in Jinja, specifically those decorated with @async_variant, which are defined in filters.py and async_utils.py, and the regression test should be in the async filters test file.\"}",
+  "usage": {
+    "prompt_tokens": 941,
+    "completion_tokens": 84,
+    "cost_usd": 0.000192,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175362.608157
+}

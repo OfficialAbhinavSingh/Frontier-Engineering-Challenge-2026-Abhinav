@@ -1,0 +1,32 @@
+[
+  {
+    "text": "Always ensure that the test is structured to check the specific behavior described in the bug report, particularly focusing on the expected output and conditions that trigger the bug.",
+    "from_case": "click__2817",
+    "added_at": 1788177003.0441773
+  },
+  {
+    "text": "Follow the project's conventions for naming fixtures and helper functions to ensure clarity and consistency, which helps in understanding the context of the tests and reduces the likelihood of misinterpretation.",
+    "from_case": "click__2817",
+    "added_at": 1788177003.0441806
+  },
+  {
+    "text": "Always use the correct import paths for internal modules; incorrect paths can lead to AttributeErrors that prevent tests from running.",
+    "from_case": "click__2968",
+    "added_at": 1788177006.3072317
+  },
+  {
+    "text": "Ensure that fixture names are consistent with their intended use; mismatched or unclear fixture names can lead to confusion and incorrect test setups.",
+    "from_case": "click__2968",
+    "added_at": 1788177006.3072338
+  },
+  {
+    "text": "Ensure that the correct constructor arguments are used for project-specific classes like ParamType, as incorrect usage can lead to TypeErrors that do not reflect the actual bug being tested.",
+    "from_case": "click__3105",
+    "added_at": 1788177012.1116483
+  },
+  {
+    "text": "Follow the established naming conventions for fixtures and helper functions to avoid confusion and ensure that tests are structured in a way that clearly indicates their purpose and expected behavior.",
+    "from_case": "click__3105",
+    "added_at": 1788177012.11165
+  }
+]

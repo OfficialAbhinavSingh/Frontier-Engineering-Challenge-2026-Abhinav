@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "[\n    \"Always ensure that the test you are writing directly targets the specific behavior or functionality that is reported in the bug. This includes verifying that the test fails at the buggy commit before proceeding with further attempts.\",\n    \"Follow the project's conventions for import paths and fixture names to ensure consistency and clarity in your tests. This helps in quickly identifying the relevant parts of the codebase and reduces the chances of overlooking critical aspects of the bug.\"\n]",
+  "usage": {
+    "prompt_tokens": 320,
+    "completion_tokens": 88,
+    "cost_usd": 0.000101,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175396.8320208
+}

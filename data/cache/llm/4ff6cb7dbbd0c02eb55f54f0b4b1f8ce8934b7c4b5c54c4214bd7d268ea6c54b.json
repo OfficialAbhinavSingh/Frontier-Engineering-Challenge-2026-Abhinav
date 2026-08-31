@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"I found several test functions in `tests/test_api.py`, including `test_inline_table` and `test_table`, which seem relevant to the issue at hand. I will read the `test_inline_table` function to see how inline tables are currently being tested.\",\"tool\":\"read_file\",\"args\":{\"path\":\"tests/test_api.py\",\"start\":298,\"end\":304}}",
+  "usage": {
+    "prompt_tokens": 1606,
+    "completion_tokens": 78,
+    "cost_usd": 0.000288,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175151.151124
+}

@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```python\nfrom tomlkit import parse, aot, table\n\ndef test_aot_captures_only_its_own_keys() -> None:\n    doc = parse(\"a.b = 1\\nc.d = 2\\n\")\n    aot_instance = aot()\n    t = table()\n    t[\"x\"] = 9\n    aot_instance.append(t)\n    doc[\"a\"] = aot_instance\n    result = doc.as_string()\n    assert result == \"[[a]]\\nx = 9\\n\"\n```",
+  "usage": {
+    "prompt_tokens": 4043,
+    "completion_tokens": 113,
+    "cost_usd": 0.000674,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175540.0580618
+}

@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```python\nimport sys\nimport pytest\nfrom rich.console import Console\nfrom rich.live import Live\n\ndef test_file_proxy_isatty() -> None:\n    console = Console()\n    with Live(\"hello\", console=console, redirect_stdout=True):\n        assert sys.stdout.isatty()  # This should be True, but currently fails\n```",
+  "usage": {
+    "prompt_tokens": 2874,
+    "completion_tokens": 72,
+    "cost_usd": 0.000474,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788176279.1364255
+}

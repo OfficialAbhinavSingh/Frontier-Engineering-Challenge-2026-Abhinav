@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"source_files\": [\"tomlkit/api.py\", \"tomlkit/items.py\"], \"test_file\": \"tests/test_items.py\", \"why\": \"The issue relates to how tables are captured and stored, which is likely handled in the api and items modules, while the test for this behavior would logically belong in the test_items file.\"}",
+  "usage": {
+    "prompt_tokens": 682,
+    "completion_tokens": 70,
+    "cost_usd": 0.000144,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175537.0612514
+}

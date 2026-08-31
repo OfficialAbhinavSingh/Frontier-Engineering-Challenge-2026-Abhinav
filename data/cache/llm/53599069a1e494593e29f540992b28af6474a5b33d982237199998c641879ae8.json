@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"I've located the `on_validate_error` method. Next, I will read its implementation to see how it currently handles the error message and confirm if it indeed does not enable markup when printing the error.\",\"tool\":\"read_file\",\"args\":{\"path\":\"rich/prompt.py\",\"start\":258,\"end\":278}}",
+  "usage": {
+    "prompt_tokens": 670,
+    "completion_tokens": 65,
+    "cost_usd": 0.00014,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788167985.3193607
+}

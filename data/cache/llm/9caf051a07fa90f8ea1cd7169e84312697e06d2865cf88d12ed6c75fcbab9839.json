@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"source_files\": [\"rich/prompt.py\", \"rich/console.py\"], \"test_file\": \"tests/test_console.py\", \"why\": \"The bug is related to the validation error handling in the prompt, which is likely implemented in prompt.py, and the console behavior is relevant as it affects how errors are printed.\"}",
+  "usage": {
+    "prompt_tokens": 717,
+    "completion_tokens": 67,
+    "cost_usd": 0.000148,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175428.5541108
+}

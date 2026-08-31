@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"The test is still passing, which indicates that the conditions for reproducing the bug are not being met. I will take a different approach by simplifying the test case and focusing on the specific SQL that triggers the issue. I will also ensure that the SQL is correctly formatted and that the schema setup is minimal yet sufficient to reproduce the error. I will modify the SQL to ensure it is correctly set up and rerun the test.\",\"tool\":\"run_test\",\"args\":{\"source\":\"import pytest\\nfrom sqlglot import parse, Dialect, exp\\nfrom sqlglot.lineage import lineage\\nfrom sqlglot.schema import MappingSchema\\nfrom sqlglot.errors import OptimizeError\\n\\nsql = \\\"\\\"\\\"\\nSELECT p.user_id, gs.n AS to_deposit_days\\nFROM tbl1 p\\nCROSS JOIN TABLE(generate_series(0, 8000)) gs\\n\\\"\\\"\\\"\\n\\ndialect = Dialect.get_or_raise('starrocks')\\nschema = MappingSchema(dialect=dialect)\\nschema.add_table(\\\"default.tbl1\\\", column_mapping={\\\"user_id\\\": \\\"BIGINT\\\"}, match_depth=False)\\n\\n# Test that the lineage function raises the expected OptimizeError\\n\\ndef test_lineage_optimize_error():\\n    expression = parse(sql, read='starrocks')[0]\\n    with pytest.raises(OptimizeError, match=\\\"Column 'generate_series' could not be resolved\\\"):\\n        lineage(column=None, sql=expression, schema=schema, dialect=dialect,\\n                expand_stars=True, validate_qualify_columns=True) \\n\"}}",
+  "usage": {
+    "prompt_tokens": 4841,
+    "completion_tokens": 328,
+    "cost_usd": 0.000923,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788176117.1507933
+}

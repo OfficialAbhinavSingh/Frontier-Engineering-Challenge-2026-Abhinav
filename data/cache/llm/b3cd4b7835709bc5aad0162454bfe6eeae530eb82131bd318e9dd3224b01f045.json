@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```python\nimport pytest\nfrom rich.console import Console\n\ndef test_nerd_font_double_width() -> None:\n    console = Console()\n    # Using a nerd font character that is incorrectly calculated as double width\n    nerd_font_character = \"\\U000f024d\"  # Downloads folder icon\n    console.print(nerd_font_character)\n    \n    # The expected width should be 1, but due to the bug, it is calculated as 2\n    width, _ = console.size\n    assert width == 1\n```",
+  "usage": {
+    "prompt_tokens": 3791,
+    "completion_tokens": 112,
+    "cost_usd": 0.000636,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175439.275863
+}

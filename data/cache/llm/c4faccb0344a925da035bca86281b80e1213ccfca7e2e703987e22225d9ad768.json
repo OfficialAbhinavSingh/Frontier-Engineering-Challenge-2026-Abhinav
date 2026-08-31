@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```python\nimport pytest\nimport click\n\ndef test_backspace_behavior(runner, monkeypatch):\n    @click.command()\n    def cli():\n        return click.prompt(\"Enter text\", default=\"test\")\n\n    monkeypatch.setattr(click._compat, \"isatty\", lambda _: True)\n    result = runner.invoke(cli, input=\"te\\x08st\\n\")  # Simulate backspace\n    assert result.output.strip() == \"Enter text: test\"\n```",
+  "usage": {
+    "prompt_tokens": 4226,
+    "completion_tokens": 94,
+    "cost_usd": 0.000402,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175284.6846833
+}

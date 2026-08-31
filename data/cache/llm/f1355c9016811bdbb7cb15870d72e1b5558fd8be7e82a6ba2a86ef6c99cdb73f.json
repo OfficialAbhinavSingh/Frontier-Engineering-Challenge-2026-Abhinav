@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```json\n[\n    \"Always ensure that the API is being used correctly according to the project's conventions, especially when dealing with async features and custom filters, to avoid misusing the API and encountering RuntimeWarnings.\",\n    \"When writing tests, follow the established structure and naming conventions for fixtures and helper functions to ensure clarity and maintainability, which can help in quickly identifying issues related to API misuse.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 980,
+    "completion_tokens": 82,
+    "cost_usd": 0.000196,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788177033.071142
+}

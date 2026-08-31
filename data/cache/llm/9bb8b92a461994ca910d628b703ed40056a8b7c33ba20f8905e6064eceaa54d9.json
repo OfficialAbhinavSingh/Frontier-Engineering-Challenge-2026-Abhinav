@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"I found the definition of the `aot` function in `tomlkit/api.py`. I will read its implementation to understand how it captures keys and how it might be causing the issue described in the bug report.\",\"tool\":\"read_file\",\"args\":{\"path\":\"tomlkit/api.py\",\"start\":234,\"end\":254}}",
+  "usage": {
+    "prompt_tokens": 726,
+    "completion_tokens": 70,
+    "cost_usd": 0.000151,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175182.470904
+}

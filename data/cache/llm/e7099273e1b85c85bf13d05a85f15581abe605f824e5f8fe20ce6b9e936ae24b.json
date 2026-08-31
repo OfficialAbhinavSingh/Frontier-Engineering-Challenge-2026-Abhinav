@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```json\n[\n    \"Always import necessary classes and functions at the beginning of your test files to avoid NameErrors. This includes ensuring that any required fixtures are properly defined and accessible.\",\n    \"When using the Console class, remember to set the 'record' parameter to True in the constructor if you intend to capture output. This is a common pitfall that can lead to assertion errors when exporting console contents.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 509,
+    "completion_tokens": 84,
+    "cost_usd": 0.000127,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788177065.9013276
+}

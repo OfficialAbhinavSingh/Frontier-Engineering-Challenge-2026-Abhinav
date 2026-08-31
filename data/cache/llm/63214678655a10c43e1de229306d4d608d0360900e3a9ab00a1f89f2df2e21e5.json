@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```python\nimport pytest\nfrom rich.console import Console\n\ndef test_nerd_font_double_width() -> None:\n    console = Console(record=True)\n    console.print(\"\\U000f024d\")  # This is the nerd font character for downloads folder\n    output = console.export_text()\n    assert output.count(\"\\U000f024d\") == 1  # Should be counted as a single character\n```",
+  "usage": {
+    "prompt_tokens": 3793,
+    "completion_tokens": 86,
+    "cost_usd": 0.000621,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788176264.7400777
+}

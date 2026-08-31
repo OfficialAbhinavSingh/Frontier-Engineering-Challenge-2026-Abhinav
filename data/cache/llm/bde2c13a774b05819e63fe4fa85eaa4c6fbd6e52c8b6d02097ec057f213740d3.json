@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"The test failed because the `MockConsole` class does not implement the `input` method, which is required by the `Confirm.ask` method. I will add an `input` method to the `MockConsole` class to simulate user input for the test.\",\"final_test\":\"import pytest\\nfrom rich.console import Console\\nfrom rich.prompt import Confirm\\n\\nclass MockConsole:\\n    def __init__(self, markup):\\n        self.markup = markup\\n        self.output = ''\\n\\n    def print(self, message):\\n        if self.markup:\\n            self.output += f'<markup>{message}</markup>'\\n        else:\\n            self.output += str(message)\\n\\n    def input(self, prompt, password=False, stream=None):\\n        # Simulate invalid input\\n        return 'invalid'\\n\\n@pytest.fixture\\ndef console():\\n    return MockConsole(markup=False)\\n\\ndef test_confirm_invalid_response(console):\\n    # Simulate an invalid response\\n    with pytest.raises(SystemExit):\\n        Confirm.ask(\\\"Choose Y or N:\\\", console=console)\\n    assert '[prompt.invalid]Please enter Y or N' in console.output\\n\"}",
+  "usage": {
+    "prompt_tokens": 2204,
+    "completion_tokens": 254,
+    "cost_usd": 0.000483,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175714.5826755
+}

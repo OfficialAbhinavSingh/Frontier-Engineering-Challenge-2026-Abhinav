@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"I need to locate the `CLIRunner` class and the `invoke` method to understand how to set the `catch_exceptions` parameter. I will start by searching for `CLIRunner` in the repository.\",\"tool\":\"grep\",\"args\":{\"pattern\":\"class CLIRunner\"}}",
+  "usage": {
+    "prompt_tokens": 395,
+    "completion_tokens": 61,
+    "cost_usd": 9.6e-05,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788167703.1848264
+}

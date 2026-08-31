@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"The `aot` function creates an instance of `AoT`, which is likely responsible for managing the array of tables. I need to find the `AoT` class to understand how it captures keys and why it might be capturing `c.d` incorrectly. I will search for the `AoT` class in the tomlkit module.\",\"tool\":\"grep\",\"args\":{\"pattern\":\"class AoT\",\"glob\":\"tomlkit/*.py\"}}",
+  "usage": {
+    "prompt_tokens": 1017,
+    "completion_tokens": 93,
+    "cost_usd": 0.000208,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175184.0575545
+}

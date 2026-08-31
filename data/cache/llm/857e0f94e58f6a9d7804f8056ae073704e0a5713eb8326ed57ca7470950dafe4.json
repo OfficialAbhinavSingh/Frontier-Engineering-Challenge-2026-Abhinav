@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"I need to locate the `FuncParamType` class and understand how it currently handles errors, particularly in the `convert` method. This will help me create a test that demonstrates the bug described in the issue.\",\"tool\":\"grep\",\"args\":{\"pattern\":\"class FuncParamType\",\"glob\":\"**/*.py\"}}",
+  "usage": {
+    "prompt_tokens": 673,
+    "completion_tokens": 65,
+    "cost_usd": 0.00014,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788167799.6914337
+}

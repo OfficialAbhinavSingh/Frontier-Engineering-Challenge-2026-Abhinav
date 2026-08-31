@@ -27,6 +27,7 @@ TAG = re.compile(r"_r\d+$")
 PRICING = {
     "google/gemini-2.5-flash": (0.30, 2.50),
     "mistralai/mistral-small-3.2-24b-instruct": (0.075, 0.20),
+    "openai/gpt-4o-mini": (0.15, 0.60),
 }
 
 
@@ -64,16 +65,21 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--split", default="eval")
     ap.add_argument("--primary-dir", default="results")
-    ap.add_argument("--cross-dir", default="results/crossmodel")
+    ap.add_argument("--cross-dir", action="append",
+                    default=None, help="may be repeated, one per extra model")
     ap.add_argument("--out", default="results/CROSS_MODEL.md")
     args = ap.parse_args()
 
-    primary = collect([p for v in ("b1", "s5")
-                       for p in glob.glob(f"{args.primary_dir}/{args.split}_{v}*.json")])
-    cross = collect([p for v in ("b1", "s5")
-                     for p in glob.glob(f"{args.cross_dir}/{args.split}_{v}*.json")])
-    if not cross:
-        raise SystemExit(f"no cross-model results in {args.cross_dir}")
+    def load_dir(d: str) -> dict:
+        return collect([p for v in ("b1", "s5")
+                        for p in glob.glob(f"{d}/{args.split}_{v}*.json")])
+
+    cross_dirs = args.cross_dir or ["results/crossmodel", "results/crossmodel2"]
+    primary = load_dir(args.primary_dir)
+    crosses = [c for c in (load_dir(d) for d in cross_dirs) if c.get("b1") and c.get("s5")]
+    if not crosses:
+        raise SystemExit(f"no cross-model results in {cross_dirs}")
+    cross = crosses[0]
 
     lines = [
         "# Does the advantage survive a change of model?\n",
@@ -82,7 +88,7 @@ def main() -> None:
         "model is doing the work.\n",
         "The test has to move **both** sides. `b1` is one general-purpose agent with "
         "the same tools, including the sandbox; `s5` is the shipped pipeline. Both "
-        "are re-run on a second model from a different vendor, and what is compared "
+        "are re-run on further models from other vendors, and what is compared "
         "is the **gap between them on the same model** -- absolute scores across "
         "different models are not comparable and are not presented as if they were.\n",
         "| Model | Price in/out per M | `b1` same tools | `s5` Ratchat | Gap |",
@@ -90,7 +96,7 @@ def main() -> None:
     ]
 
     rows = []
-    for label, stats in (("primary", primary), ("cross", cross)):
+    for stats in [primary, *crosses]:
         if "b1" not in stats or "s5" not in stats:
             continue
         model = stats["s5"]["model"]
@@ -99,27 +105,47 @@ def main() -> None:
         gap = stats["s5"]["mean"] - stats["b1"]["mean"]
         rel = (gap / stats["b1"]["mean"] * 100) if stats["b1"]["mean"] else 0.0
         rows.append((model, gap, rel))
+        # One case is ~4 points at n=27, and the report says so elsewhere. A gap of
+        # a single case is therefore at the noise floor, and printing its relative
+        # percentage as if it were a finding would be the overclaim this project
+        # spends the rest of its README warning about.
+        thin = abs(gap) <= 1.0
+        cell = f"**+{gap:.1f}** (at noise floor)" if thin else f"**+{gap:.1f}** ({rel:+.0f}%)"
         lines.append(
             f"| `{model}` | {price_s} | {score(stats['b1'])} | **{score(stats['s5'])}** "
-            f"| **+{gap:.1f}** ({rel:+.0f}%) |"
+            f"| {cell} |"
         )
 
     lines.append("")
-    if len(rows) == 2:
-        (m1, g1, r1), (m2, g2, r2) = rows
-        if g2 > 0 and g1 > 0:
+    if rows:
+        wins = [r for r in rows if r[1] > 1.0]
+        thin = [r for r in rows if 0 < r[1] <= 1.0]
+        losses = [r for r in rows if r[1] <= 0]
+        summary = "; ".join(f"**+{g:.1f} ({rel:+.0f}%)** on `{m.split('/')[-1]}`"
+                            for m, g, rel in wins)
+        if not losses:
+            vendors = len({m.split('/')[0] for m, _, _ in rows})
             lines.append(
-                f"The pipeline beats the same-tools baseline on both models: "
-                f"**+{g1:.1f} cases ({r1:+.0f}%)** on `{m1.split('/')[-1]}` and "
-                f"**+{g2:.1f} cases ({r2:+.0f}%)** on `{m2.split('/')[-1]}`. "
-                "The architecture, not the model, is what the improvement is "
-                "attributable to.\n")
-        elif g2 <= 0:
+                f"The pipeline is ahead of the same-tools baseline on all "
+                f"{len(rows)} models, from {vendors} different vendors. It is ahead "
+                f"by more than the noise floor on {len(wins)} of them: {summary}.\n")
+            if thin:
+                names = ", ".join(f"`{m.split('/')[-1]}`" for m, _, _ in thin)
+                lines.append(
+                    f"On {names} the margin is a single case, which is at the noise "
+                    "floor and is not evidence of anything on its own. What that run "
+                    "does show is a **bound on the claim**: both systems collapse to "
+                    "near zero there, so structure does not rescue a model that "
+                    "cannot write a working test in the first place. It widens the "
+                    "gap where the model is capable enough to act on instruction, "
+                    "and it cannot manufacture capability that is absent.\n")
+        else:
+            lost = "; ".join(f"`{m.split('/')[-1]}` at {g:+.1f}" for m, g, _ in losses)
             lines.append(
-                f"**The advantage does not transfer.** On "
-                f"`{m2.split('/')[-1]}` the pipeline scores {g2:+.1f} against the "
-                "same-tools baseline, so on this model the structure buys nothing. "
-                "Reported because it is what the run returned.\n")
+                f"**The advantage does not transfer everywhere.** It holds on "
+                f"{len(wins)} of {len(rows)} models ({summary}) but not on {lost}, "
+                "where the structure buys nothing. Reported because it is what the "
+                "runs returned.\n")
 
     # The tempting cross-comparison, checked rather than asserted. A cheap model
     # running the pipeline against an expensive one running the general-purpose
@@ -159,7 +185,7 @@ def main() -> None:
                  + "; ".join(
                      f"`{s['s5']['model'].split('/')[-1]}` "
                      f"b1 {s['b1']['calls']:.1f}, s5 {s['s5']['calls']:.1f}"
-                     for s in (primary, cross) if "b1" in s and "s5" in s) + "\n")
+                     for s in [primary, *crosses] if "b1" in s and "s5" in s) + "\n")
 
     Path(args.out).write_text("\n".join(lines))
     print("\n".join(lines))

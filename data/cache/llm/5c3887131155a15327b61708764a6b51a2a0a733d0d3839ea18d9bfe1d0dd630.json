@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"The `StarRocksParser` class extends `MySQLParser` and overrides certain properties and functions. However, I need to see how it specifically handles the parsing of table-valued functions like `TABLE()`. I will continue reading the `StarRocksParser` class to find any relevant methods that deal with function parsing.\",\"tool\":\"read_file\",\"args\":{\"path\":\"sqlglot/parsers/starrocks.py\",\"start\":40,\"end\":80}}",
+  "usage": {
+    "prompt_tokens": 5180,
+    "completion_tokens": 95,
+    "cost_usd": 0.000498,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788176938.772039
+}

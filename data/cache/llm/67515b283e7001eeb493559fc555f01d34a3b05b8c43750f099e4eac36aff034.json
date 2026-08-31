@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"The test still passed, indicating that the conditions for reproducing the bug are not being met. I will review the SQL and the context in which the `TABLE()` function is used to ensure that the test accurately reflects the scenario described in the issue. I will also check if there are any additional configurations or setups needed for the `lineage` function to trigger the error. I will modify the SQL to ensure it is correctly formatted and rerun the test.\",\"tool\":\"run_test\",\"args\":{\"source\":\"import pytest\\nfrom sqlglot import parse, Dialect, exp\\nfrom sqlglot.lineage import lineage\\nfrom sqlglot.schema import MappingSchema\\nfrom sqlglot.errors import OptimizeError\\n\\nsql = \\\"\\\"\\\"\\nWITH t AS (\\n  SELECT p.user_id, gs.n AS to_deposit_days\\n  FROM tbl1 p\\n  CROSS JOIN (\\n    SELECT generate_series AS n FROM TABLE(generate_series(0, 8000))\\n  ) gs\\n),\\nt2 AS (\\n  SELECT t.* FROM t\\n)\\nSELECT user_id, to_deposit_days FROM t2\\n\\\"\\\"\\\"\\n\\ndialect = Dialect.get_or_raise('starrocks')\\nschema = MappingSchema(dialect=dialect)\\nschema.add_table(\\\"default.tbl1\\\", column_mapping={\\\"user_id\\\": \\\"BIGINT\\\"}, match_depth=False)\\n\\n# Adding a table for the generate_series function to simulate the bug\\nschema.add_table(\\\"default.generate_series\\\", column_mapping={\\\"n\\\": \\\"INT\\\"}, match_depth=False)\\n\\ndef test_lineage_optimize_error():\\n    expression = parse(sql, read='starrocks')[0]\\n    with pytest.raises(OptimizeError, match=\\\"Column 'generate_series' could not be resolved\\\"):\\n        lineage(column=None, sql=expression, schema=schema, dialect=dialect,\\n                expand_stars=True, validate_qualify_columns=True) \\n\"}}",
+  "usage": {
+    "prompt_tokens": 3865,
+    "completion_tokens": 407,
+    "cost_usd": 0.000546,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788176104.336142
+}

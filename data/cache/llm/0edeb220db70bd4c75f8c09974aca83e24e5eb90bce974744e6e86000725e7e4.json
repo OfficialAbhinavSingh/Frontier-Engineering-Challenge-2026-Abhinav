@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```python\nimport pytest\nfrom tomlkit import parse\n\ndef test_scalar_captured_by_dictionary() -> None:\n    content = \"a.b = 1\\n\"\n    doc = parse(content)\n    doc[\"a\"][\"c\"] = {}\n    doc[\"z\"] = 2\n\n    assert doc.as_string() == \"a.b = 1\\n\\n[a.c]\\nz = 2\\n\"\n```",
+  "usage": {
+    "prompt_tokens": 3438,
+    "completion_tokens": 85,
+    "cost_usd": 0.000567,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175547.9439318
+}

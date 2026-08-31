@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```python\nfrom tomlkit import parse\nfrom collections.abc import Callable\nimport pytest\n\ndef test_inline_table_cannot_contain_table() -> None:\n    it = parse(\"{table = {a = 1}}\")\n    \n    with pytest.raises(ValueError):\n        it[\"table\"]  # Expecting an error when trying to access the invalid inline table\n```",
+  "usage": {
+    "prompt_tokens": 3160,
+    "completion_tokens": 77,
+    "cost_usd": 0.00052,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175533.228466
+}

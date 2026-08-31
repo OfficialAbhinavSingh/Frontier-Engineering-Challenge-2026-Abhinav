@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"I've located the `convert` method and the `fail` method in the `FuncParamType` class. The `convert` method currently raises a `BadParameter` exception with a generic message when a `ValueError` occurs. I need to create a test that demonstrates this issue by using a custom class that utilizes `FuncParamType` and triggers a `ValueError`.\",\"tool\":\"grep\",\"args\":{\"pattern\":\"FuncParamType\",\"glob\":\"**/*.py\"}}",
+  "usage": {
+    "prompt_tokens": 2229,
+    "completion_tokens": 98,
+    "cost_usd": 0.000393,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788167802.801743
+}

@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```python\nimport pytest\nimport click\n\ndef test_clirunner_catch_exceptions(runner):\n    result = runner.invoke(click.Command('test', params=[click.Argument(['arg'])]), ['value'], catch_exceptions=None)\n    assert result.exit_code != 0  # This should pass once the bug is fixed\n```",
+  "usage": {
+    "prompt_tokens": 2186,
+    "completion_tokens": 68,
+    "cost_usd": 0.000369,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175273.4126341
+}

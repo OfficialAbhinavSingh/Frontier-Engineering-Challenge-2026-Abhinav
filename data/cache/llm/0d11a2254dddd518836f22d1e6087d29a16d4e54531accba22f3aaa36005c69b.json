@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"source_files\": [\"rich/file_proxy.py\", \"rich/live.py\"], \"test_file\": \"tests/test_live.py\", \"why\": \"The issue is related to the behavior of the FileProxy class in rich/file_proxy.py, and the Live context in rich/live.py, which is where the isatty() method needs to be tested.\"}",
+  "usage": {
+    "prompt_tokens": 950,
+    "completion_tokens": 71,
+    "cost_usd": 0.000185,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175444.009867
+}

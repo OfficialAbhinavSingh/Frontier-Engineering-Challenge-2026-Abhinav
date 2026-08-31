@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```python\nimport pytest\nfrom jinja2 import Environment\n\n@pytest.fixture\ndef env_async():\n    return Environment(enable_async=True)\n\ndef test_custom_filter_coroutine_error(env_async):\n    env_async.filters.update({'add_two': lambda x, y: [i + y for i in x]})\n    a = {'b': [1, 2, 3]}\n    tmpl = env_async.from_string(\"{% for item in a.b|add_two(5)[:1] %}{{ item }}{% endfor %}\")\n    with pytest.raises(TypeError, match=\"'coroutine' object is not subscriptable\"):\n        tmpl.render(a=a)\n```",
+  "usage": {
+    "prompt_tokens": 5032,
+    "completion_tokens": 135,
+    "cost_usd": 0.000519,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788176202.5410967
+}

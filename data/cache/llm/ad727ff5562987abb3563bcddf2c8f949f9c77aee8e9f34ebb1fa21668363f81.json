@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"source_files\": [\"rich/screen.py\", \"rich/console.py\"], \"test_file\": \"tests/test_screen.py\", \"why\": \"The issue relates to modal screens, which are handled in rich/screen.py, and the console measurement, which is likely affected by rich/console.py.\"}",
+  "usage": {
+    "prompt_tokens": 2187,
+    "completion_tokens": 62,
+    "cost_usd": 0.000365,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175451.2154803
+}

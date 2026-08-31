@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"I will finalize the test file that demonstrates the bug by using the `FuncParamType` with a function that raises a `ValueError`. This test will check that the error message is as expected when the conversion fails.\",\"final_test\":\"import pytest\\nimport click\\n\\nclass MyClass:\\n    @staticmethod\\n    def from_str(input: str) -> 'MyClass':\\n        if input != 'works':\\n            raise ValueError(f'input was {input=}, should be works')\\n        return MyClass()\\n\\n@pytest.mark.parametrize('input_value, expected_message', [\\n    ('fail', 'input was input_value=\\'fail\\', should be works'),\\n])\\ndef test_func_param_type(input_value, expected_message):\\n    param_type = click.types.FuncParamType(MyClass.from_str)\\n    with pytest.raises(click.exceptions.BadParameter) as excinfo:\\n        param_type.convert(input_value, None, None)\\n    assert expected_message in str(excinfo.value)\"}",
+  "usage": {
+    "prompt_tokens": 4232,
+    "completion_tokens": 213,
+    "cost_usd": 0.000455,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788167810.1125212
+}

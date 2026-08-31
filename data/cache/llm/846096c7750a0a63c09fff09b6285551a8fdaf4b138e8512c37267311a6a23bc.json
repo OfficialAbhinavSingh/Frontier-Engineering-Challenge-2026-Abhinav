@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"source_files\": [\"src/jinja2/environment.py\", \"src/jinja2/nativetypes.py\"], \"test_file\": \"tests/test_nativetypes.py\", \"why\": \"The issue relates to how macros handle native types, which is primarily managed in the environment and native types files, and the regression test should be in the nativetypes test file.\"}",
+  "usage": {
+    "prompt_tokens": 728,
+    "completion_tokens": 79,
+    "cost_usd": 0.000157,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175323.43719
+}

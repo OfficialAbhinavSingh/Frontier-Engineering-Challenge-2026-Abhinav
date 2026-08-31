@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"There are multiple definitions of `parse_one` in the `sqlglot/__init__.py` file. I will read the file to understand the context and see which implementation is relevant for MySQL parsing. I will start by reading the first definition of `parse_one` to see how it works.\",\"tool\":\"read_file\",\"args\":{\"path\":\"sqlglot/__init__.py\",\"start\":114,\"end\":154}}",
+  "usage": {
+    "prompt_tokens": 3106,
+    "completion_tokens": 89,
+    "cost_usd": 0.000298,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788168425.5052235
+}

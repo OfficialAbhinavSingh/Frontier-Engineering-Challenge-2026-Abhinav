@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```python\nimport unittest\nfrom sqlglot.lineage import lineage\nfrom sqlglot import Dialect, exp\nfrom sqlglot.schema import MappingSchema\nfrom sqlglot.errors import OptimizeError\n\nclass TestLineageStarRocks(unittest.TestCase):\n    def test_lineage_with_starrrocks_tvf(self):\n        sql = \"\"\"\n        WITH t AS (\n          SELECT p.user_id, gs.n AS to_deposit_days\n          FROM tbl1 p\n          CROSS JOIN (\n            SELECT generate_series AS n FROM TABLE(generate_series(0, 8000))\n          ) gs\n        ),\n        t2 AS (\n          SELECT t.* FROM t\n        )\n        SELECT user_id, to_deposit_days FROM t2\n        \"\"\"\n\n        dialect = Dialect.get_or_raise('starrocks')\n        expression = exp.parse(sql, read='starrocks')[0]\n\n        schema = MappingSchema(dialect=dialect)\n        schema.add_table(\"default.tbl1\", column_mapping={\"user_id\": \"BIGINT\"}, match_depth=False)\n\n        with self.assertRaises(OptimizeError):\n            lineage(column=None, sql=expression, schema=schema, dialect=dialect,\n                    expand_stars=True, validate_qualify_columns=True)\n\nif __name__ == \"__main__\":\n    unittest.main()\n```",
+  "usage": {
+    "prompt_tokens": 5018,
+    "completion_tokens": 264,
+    "cost_usd": 0.000911,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788177155.4012566
+}

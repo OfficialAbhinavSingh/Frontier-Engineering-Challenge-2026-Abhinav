@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"The `on_validate_error` method calls `self.console.print(error)` without enabling markup. I will now create a test that simulates a validation error when using `Confirm.ask` with `markup=False`, and checks if the error message is printed without markup. This test should fail due to the bug.\",\"tool\":\"list_files\",\"args\":{\"subdir\":\"tests\"}}",
+  "usage": {
+    "prompt_tokens": 985,
+    "completion_tokens": 76,
+    "cost_usd": 0.000193,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788167986.9142525
+}

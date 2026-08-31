@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"I will start by searching for the relevant functions in the tomlkit module that handle loading and dumping TOML data. This will help me understand how to create a test that reproduces the issue described in the bug report.\",\"tool\":\"grep\",\"args\":{\"pattern\":\"def \",\"glob\":\"*.py\"}}",
+  "usage": {
+    "prompt_tokens": 412,
+    "completion_tokens": 63,
+    "cost_usd": 0.0001,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788168492.6955464
+}

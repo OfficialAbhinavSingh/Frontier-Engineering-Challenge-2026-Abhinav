@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"Next, I will check the implementation of the `INSERT` statement in the `sqlglot/parsers/databricks.py` file to see how it currently handles the INSERT syntax and where the `REPLACE USING` functionality can be added.\",\"tool\":\"read_file\",\"args\":{\"path\":\"sqlglot/parsers/databricks.py\"}}",
+  "usage": {
+    "prompt_tokens": 2720,
+    "completion_tokens": 71,
+    "cost_usd": 0.000451,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788168396.2170534
+}

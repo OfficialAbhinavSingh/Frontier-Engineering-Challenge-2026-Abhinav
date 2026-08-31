@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"The `parse_one` function has multiple overloads, but the actual implementation is not visible in the lines I read. I will continue reading the file to find the complete implementation of the `parse_one` function to understand how it processes SQL statements and handles errors.\",\"tool\":\"read_file\",\"args\":{\"path\":\"sqlglot/__init__.py\",\"start\":134}}",
+  "usage": {
+    "prompt_tokens": 3387,
+    "completion_tokens": 78,
+    "cost_usd": 0.000324,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788176910.5099196
+}

@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"I will create a new test file named `test_reprobot_rich__4041.py` in the `tests` directory. This test will check the behavior of `sys.stdout.isatty()` inside a `Live` context with `redirect_stdout=True`.\",\"final_test\":\"import sys\\nfrom rich.console import Console\\nfrom rich.live import Live\\n\\n\\ndef test_isatty_in_live():\\n    console = Console()\\n    assert sys.stdout.isatty() is True, \\\"Before Live: stdout should be a tty\\\"\\n\\n    with Live(\\\"hello\\\", console=console, redirect_stdout=True):\\n        assert sys.stdout.isatty() is False, \\\"Inside Live: stdout should not be a tty\\\"\\n\\n    assert sys.stdout.isatty() is True, \\\"After Live: stdout should be a tty\\\"\"}",
+  "usage": {
+    "prompt_tokens": 1953,
+    "completion_tokens": 178,
+    "cost_usd": 0.000285,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788168359.498092
+}

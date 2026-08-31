@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```python\nimport pytest\nimport click\nfrom click import ParamType\n\nclass MyClass(ParamType):\n    name = \"myclass\"\n\n    @staticmethod\n    def from_str(input: str) -> 'MyClass':\n        if input != 'works':\n            raise ValueError(f'input was {input=}, should be works')\n        return MyClass()\n\n@pytest.fixture\ndef runner():\n    return click.testing.CliRunner()\n\ndef test_func_param_type_value_error(runner):\n    @click.command()\n    @click.argument(\"mydata\", type=MyClass())\n    def test_command(mydata):\n        click.echo(f\"mydata={mydata}\")\n\n    result = runner.invoke(test_command, [\"fail\"])\n    assert result.exit_code != 0\n    assert \"input was value='fail', should be works\" in result.output\n```",
+  "usage": {
+    "prompt_tokens": 3152,
+    "completion_tokens": 173,
+    "cost_usd": 0.000375,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175309.5735104
+}

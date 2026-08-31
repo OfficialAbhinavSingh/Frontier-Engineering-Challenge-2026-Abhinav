@@ -108,10 +108,11 @@ The whole ladder was measured on `gemini-2.5-flash`, so none of it separated the
 architecture from the model. Both ends were re-run on `mistral-small-3.2-24b`
 from a different vendor, three runs each:
 
-| Model | `b1` same tools | `s5` Ratchat | Gap |
-| --- | ---: | ---: | ---: |
-| `gemini-2.5-flash` | 6.0/27 (6-6) | 8.7/27 (8-9) | +2.7 (+44%) |
-| `mistral-small-3.2-24b` | 2.7/27 (2-3) | 6.3/27 (5-7) | +3.7 (+138%) |
+| Model | Vendor | `b1` same tools | `s5` Ratchat | Gap |
+| --- | --- | ---: | ---: | ---: |
+| `gemini-2.5-flash` | Google | 6.0/27 (6-6) | 8.7/27 (8-9) | +2.7 (+44%) |
+| `mistral-small-3.2-24b` | Mistral | 2.7/27 (2-3) | 6.3/27 (5-7) | +3.7 (+138%) |
+| `gpt-4o-mini` | OpenAI | 1.0/27 (1-1) | 2.0/27 (2-2) | +1.0 (noise floor) |
 
 The pipeline wins on both, and wins by more on the weaker model. The
 general-purpose agent falls from 6.0 to 2.7 when the model gets worse; the
@@ -125,6 +126,19 @@ cheaper per output token, with structure, beating an expensive one without it*.
 Two more runs made it 6.3/27 with a range of 5-7 against 6-6 — overlapping, so
 it matches rather than beats, at about 24x lower cost. The tie is what is
 reported.
+
+A third model, from a third vendor, then bounded the claim instead of extending
+it. On `gpt-4o-mini` both systems collapse — 1.0/27 and 2.0/27, zero variance
+across three runs each — and the margin is a single case. One case is roughly four
+points at n=27, which this changelog calls the noise floor everywhere else, so it
+is marked as noise rather than reported as "+100%". The finding is the limit:
+structure widens the gap where the model can act on instruction and cannot
+manufacture capability that is absent.
+
+**Learning:** the honest presentation had to be enforced in code, not in prose.
+The generator now marks any gap of one case or less as at the noise floor and
+suppresses its percentage, because the temptation to write "+100%" of a
+one-case difference is strongest exactly when the number flatters you.
 
 **Learning:** the run that gives you the quotable number is the one to repeat
 first. A single sample is where a claim is most likely to be true and least

@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"I will start by exploring the repository to understand the current implementation of the INSERT statement and how it handles different dialects. This will help me identify where the `REPLACE USING` functionality can be integrated and how to write a test that fails due to the current lack of support.\",\"tool\":\"list_files\",\"args\":{\"subdir\":\"\"}}",
+  "usage": {
+    "prompt_tokens": 599,
+    "completion_tokens": 71,
+    "cost_usd": 0.000132,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788168394.6573687
+}

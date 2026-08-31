@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```python\nfrom jinja2 import Environment\nimport pytest\n\ndef test_groupby_case_insensitivity(env):\n    tmpl = env.from_string('{% for key, items in [\"apple\", \"Banana\", \"apple\", \"banana\"]|groupby %}{{ key }}: {{ items|join(\", \") }}{% endfor %}')\n    expected_output = \"Banana: Banana\\napple: apple\"\n    assert tmpl.render() == expected_output\n```",
+  "usage": {
+    "prompt_tokens": 4226,
+    "completion_tokens": 93,
+    "cost_usd": 0.00069,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175318.0345926
+}

@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"The existing tests in `tests/test_shell_completion.py` focus on various aspects of command completion. I will create a new test that specifically checks the output of the shell completion for the `Foo` command as described in the issue. This test will verify that the output includes colons in the expected format. I will implement this test now.\",\"tool\":\"run_test\",\"args\":{\"source\":\"import click\\nfrom click.shell_completion import CompletionItem\\n\\nclass Foo(click.ParamType):\\n    def convert(self, value, param, ctx):\\n        return value\\n\\n    def shell_complete(self, ctx, param, incomplete):\\n        return [\\n            CompletionItem(value=value, help=\\\"adsf\\\") for value in \\n            [\\\"baz:quux\\\", \\\"spam:eggs\\\"]\\n        ]\\n\\n@click.command()\\n@click.argument(\\\"foo\\\", type=Foo())\\ndef main(foo):\\n    print(foo)\\n\\n\\ndef test_shell_completion():\\n    cli = click.Command('foo', params=[click.Argument(['foo'], type=Foo())])\\n    completions = cli.get_completion('', 'foo', '')\\n    completion_values = [c.value for c in completions]\\n    assert 'baz:quux' in completion_values\\n    assert 'spam:eggs' in completion_values\\n    assert 'baz' in completion_values\\n    assert 'spam' in completion_values\\n    assert 'quux' not in completion_values\\n    assert 'eggs' not in completion_values\\n\"}}",
+  "usage": {
+    "prompt_tokens": 3075,
+    "completion_tokens": 323,
+    "cost_usd": 0.000559,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788167693.2515757
+}

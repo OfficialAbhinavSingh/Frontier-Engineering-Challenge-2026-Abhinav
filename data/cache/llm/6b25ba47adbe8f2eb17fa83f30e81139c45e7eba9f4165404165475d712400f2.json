@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```json\n[\n    \"Always ensure that the test is structured to check the specific behavior described in the bug report, particularly focusing on the expected output and conditions that trigger the bug.\",\n    \"Follow the project's conventions for naming fixtures and helper functions to ensure clarity and consistency, which helps in understanding the context of the tests and reduces the likelihood of misinterpretation.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 394,
+    "completion_tokens": 75,
+    "cost_usd": 0.000104,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175275.7480934
+}

@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"The `StarRocks` class extends `MySQL`, and it uses a custom parser (`StarRocksParser`). I need to check the `StarRocksParser` to see how it handles the parsing of SQL, especially for table-valued functions like `TABLE()`. This might give me insights into why the test is not failing as expected. I will look for the `StarRocksParser` class in `sqlglot/parsers/starrocks.py`.\",\"tool\":\"read_file\",\"args\":{\"path\":\"sqlglot/parsers/starrocks.py\",\"start\":0,\"end\":40}}",
+  "usage": {
+    "prompt_tokens": 4397,
+    "completion_tokens": 124,
+    "cost_usd": 0.000427,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788176937.162224
+}

@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"The `DatabricksParser` class extends the `SparkParser` and does not currently handle the `REPLACE USING` syntax for the `INSERT` statement. I will now check the `sqlglot/expressions/dml.py` file to see how the `INSERT` expression is defined and where I can add support for the `REPLACE USING` functionality.\",\"tool\":\"read_file\",\"args\":{\"path\":\"sqlglot/expressions/dml.py\"}}",
+  "usage": {
+    "prompt_tokens": 3487,
+    "completion_tokens": 97,
+    "cost_usd": 0.00038,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788168398.1404924
+}

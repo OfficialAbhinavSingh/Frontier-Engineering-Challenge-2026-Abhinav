@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```python\nimport pytest\nimport io\nfrom rich.console import Console\nfrom rich.prompt import Confirm\n\ndef test_confirm_invalid_choice_markup_disabled() -> None:\n    console = Console(markup=False, file=io.StringIO())\n    with pytest.raises(Exception) as excinfo:\n        Confirm.ask(\"Continue\", console=console, choices=[\"y\", \"n\"])\n    assert str(excinfo.value) == \"[prompt.invalid]Please enter Y or N\"\n```",
+  "usage": {
+    "prompt_tokens": 2848,
+    "completion_tokens": 92,
+    "cost_usd": 0.000482,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788176258.3342443
+}

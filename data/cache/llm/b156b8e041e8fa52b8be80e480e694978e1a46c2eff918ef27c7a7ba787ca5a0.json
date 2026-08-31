@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```python\nimport pytest\nfrom rich.console import Console\n\ndef test_background_color_carries_over_on_soft_wrap() -> None:\n    console = Console(file=io.StringIO(), width=20, soft_wrap=True)\n    console.print(\"soft wrap is on\", style=\"blue on white\")\n    console.print(\"still has background color from previous line\")\n    output = console.file.getvalue()\n    assert output.splitlines()[1].startswith(\"\\x1b[48;5;15m\")  # Check if the background color carries over\n```",
+  "usage": {
+    "prompt_tokens": 3790,
+    "completion_tokens": 112,
+    "cost_usd": 0.000636,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175415.8245668
+}

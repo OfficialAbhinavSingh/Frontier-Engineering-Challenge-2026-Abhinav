@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```json\n[\n    \"Ensure that custom filters are used correctly in templates, especially when dealing with async features, to avoid common syntax errors like using subscripting on coroutine results.\",\n    \"Follow the project's conventions for import paths and helper functions to ensure that the tests are set up correctly and that the API is used as intended.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 979,
+    "completion_tokens": 68,
+    "cost_usd": 0.000188,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175357.774209
+}

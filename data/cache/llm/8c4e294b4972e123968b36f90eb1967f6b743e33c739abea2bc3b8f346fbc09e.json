@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"source_files\": [\"src/click/shell_completion.py\", \"src/click/core.py\"], \"test_file\": \"tests/test_shell_completion.py\", \"why\": \"The issue relates to shell completion, which is handled in shell_completion.py, and the test file for shell completion is the most appropriate for regression testing.\"}",
+  "usage": {
+    "prompt_tokens": 1910,
+    "completion_tokens": 66,
+    "cost_usd": 0.000326,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175290.936573
+}

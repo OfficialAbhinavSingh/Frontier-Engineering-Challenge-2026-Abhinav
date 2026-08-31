@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"source_files\": [\"tomlkit/toml_document.py\", \"tomlkit/items.py\"], \"test_file\": \"tests/test_toml_document.py\", \"why\": \"The issue relates to the formatting of TOML documents, which is likely handled in toml_document.py, and the relevant tests for this behavior would be in test_toml_document.py.\"}",
+  "usage": {
+    "prompt_tokens": 683,
+    "completion_tokens": 78,
+    "cost_usd": 0.000149,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175516.0169976
+}

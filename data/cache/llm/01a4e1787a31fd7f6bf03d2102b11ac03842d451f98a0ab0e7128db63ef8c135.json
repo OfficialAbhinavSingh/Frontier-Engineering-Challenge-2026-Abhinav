@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"I will start by searching for the relevant functions in the tomlkit library that handle the creation of tables and inline tables. This will help me understand how to test the behavior described in the issue.\",\"tool\":\"grep\",\"args\":{\"pattern\":\"def \",\"glob\":\"*.py\"}}",
+  "usage": {
+    "prompt_tokens": 451,
+    "completion_tokens": 58,
+    "cost_usd": 0.000102,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175148.2853515
+}

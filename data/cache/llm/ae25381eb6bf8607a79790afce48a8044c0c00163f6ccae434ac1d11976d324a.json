@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"I will create a new test file named `test_reprobot_rich__3881.py` in the `tests` directory. This test will use `Confirm.ask` with `markup=False` and check the output when an invalid response is provided. I will write the test now.\",\"final_test\":\"import pytest\\nfrom rich.console import Console\\nfrom rich.prompt import Confirm\\n\\nclass MockConsole:\\n    def __init__(self, markup):\\n        self.markup = markup\\n        self.output = ''\\n\\n    def print(self, message):\\n        if self.markup:\\n            self.output += f'<markup>{message}</markup>'\\n        else:\\n            self.output += str(message)\\n\\n@pytest.fixture\\ndef console():\\n    return MockConsole(markup=False)\\n\\ndef test_confirm_invalid_response(console):\\n    # Simulate an invalid response\\n    with pytest.raises(SystemExit):\\n        Confirm.ask(\\\"Choose Y or N:\\\", console=console)\\n    assert '[prompt.invalid]Please enter Y or N' in console.output\\n\"}",
+  "usage": {
+    "prompt_tokens": 1437,
+    "completion_tokens": 230,
+    "cost_usd": 0.000277,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788167989.4372776
+}

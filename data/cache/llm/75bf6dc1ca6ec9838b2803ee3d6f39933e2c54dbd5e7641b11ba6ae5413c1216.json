@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```python\nimport pytest\nimport tomlkit\nimport torch\n\ndef test_tomlkit_float_length_error() -> None:\n    arr = tomlkit.loads(\"\"\"\n    a = [1.0, 2.0, 3.0]\n    \"\"\")\n\n    with pytest.raises(TypeError, match=\"object of type 'Float' has no len()\"):\n        t = torch.tensor(arr['a'], dtype=torch.float32)\n```",
+  "usage": {
+    "prompt_tokens": 4110,
+    "completion_tokens": 92,
+    "cost_usd": 0.000672,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788177182.5141284
+}

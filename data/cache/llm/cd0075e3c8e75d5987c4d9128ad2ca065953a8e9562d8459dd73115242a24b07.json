@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"I need to create a test that replicates the issue with multi-line help text in the Click library for Fish shell completion. I'll start by checking the relevant files in the repository to find where the `@click.option` decorator is used, particularly looking for the `help` parameter that contains multi-line text.\",\"tool\":\"list_files\",\"args\":{\"subdir\":\"\"}}",
+  "usage": {
+    "prompt_tokens": 1660,
+    "completion_tokens": 77,
+    "cost_usd": 0.000295,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788167752.609706
+}

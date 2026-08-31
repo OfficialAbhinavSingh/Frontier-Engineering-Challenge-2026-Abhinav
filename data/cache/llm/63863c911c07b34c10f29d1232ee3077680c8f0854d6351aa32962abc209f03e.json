@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```python\nimport pytest\nimport pickle\nfrom jinja2 import Environment\nfrom jinja2.filters import sync_do_first\n\ndef test_sync_do_first_not_pickleable():\n    with pytest.raises(pickle.PicklingError):\n        pickle.dumps(sync_do_first)\n```",
+  "usage": {
+    "prompt_tokens": 3697,
+    "completion_tokens": 55,
+    "cost_usd": 0.000588,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788177039.090029
+}

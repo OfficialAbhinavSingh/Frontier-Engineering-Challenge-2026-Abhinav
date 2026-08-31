@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```python\nimport pytest\nfrom tomlkit import parse\nfrom tomlkit.exceptions import TOMLKitError\n\ndef test_out_of_order_value_vs_table_redefinition() -> None:\n    src = '[a]\\nb = true\\n[zz]\\n[a.b]\\nc = 1\\n'\n    with pytest.raises(TOMLKitError):\n        parse(src)\n```",
+  "usage": {
+    "prompt_tokens": 2524,
+    "completion_tokens": 76,
+    "cost_usd": 0.000424,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175524.8010552
+}

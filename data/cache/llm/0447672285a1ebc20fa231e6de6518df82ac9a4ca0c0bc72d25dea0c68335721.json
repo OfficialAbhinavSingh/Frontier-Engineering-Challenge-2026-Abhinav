@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```python\nimport pytest\nfrom sqlglot import parse_one\nfrom sqlglot.dialects.mysql import MySQL\n\ndef test_create_table_auto_increment_parse_error():\n    sql = \"\"\"CREATE TABLE t1(id INT KEY AUTO_INCREMENT);\"\"\"\n    with pytest.raises(Exception):\n        parse_one(sql, read=\"mysql\")\n```",
+  "usage": {
+    "prompt_tokens": 3431,
+    "completion_tokens": 66,
+    "cost_usd": 0.000554,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175475.003203
+}

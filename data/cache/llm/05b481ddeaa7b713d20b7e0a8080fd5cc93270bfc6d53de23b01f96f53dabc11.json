@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```json\n[\n    \"Always ensure that the test case accurately reflects the bug report by verifying the expected behavior against the correct output. This includes checking the specific conditions under which the bug occurs, especially when dealing with character rendering or encoding.\",\n    \"Follow the project's conventions for naming test functions and structuring tests. Use descriptive names that clearly indicate what is being tested, and ensure that the test is placed in the appropriate test file to maintain clarity and organization.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 417,
+    "completion_tokens": 95,
+    "cost_usd": 0.00012,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788177105.4766767
+}

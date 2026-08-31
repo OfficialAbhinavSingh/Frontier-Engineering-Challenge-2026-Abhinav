@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"The output captured does not contain any ANSI escape codes, indicating that the background color is not being applied as expected. I will modify the test to print the output directly to see what the actual formatting looks like, and then adjust the assertions based on that output.\",\"tool\":\"run_test\",\"args\":{\"source\":\"import pytest\\nfrom rich.console import Console\\n\\n\\ndef test_soft_wrap_background_color():\\n    console = Console()\\n    \\n    # Capture the output of the first print with soft_wrap=True\\n    from io import StringIO\\n    import sys\\n    output = StringIO()\\n    sys.stdout = output\\n    console.print(\\\"soft wrap is on\\\", style=\\\"blue on white\\\", soft_wrap=True)\\n    console.print(\\\"still has background color from previous line\\\")\\n    sys.stdout = sys.__stdout__\\n    \\n    # Check the output\\n    printed_output = output.getvalue().splitlines()\\n    print(printed_output)  # Debugging line to see the actual output\\n    assert len(printed_output) > 1\\n    print(repr(printed_output[1]))  # Print the second line to see its raw representation\\n    assert printed_output[1].startswith('\\\\x1b[48;5;255m')  # Check if background color is present\\n    \\n    # Capture the output of the second print with soft_wrap=False\\n    output = StringIO()\\n    sys.stdout = output\\n    console.print(\\\"soft wrap is off\\\", style=\\\"blue on white\\\", soft_wrap=False)\\n    console.print(\\\"correctly has no color from previous line\\\")\\n    sys.stdout = sys.__stdout__\\n    \\n    # Check the output\\n    printed_output = output.getvalue().splitlines()\\n    assert len(printed_output) > 1\\n    assert not printed_output[1].startswith('\\\\x1b[48;5;255m')  # Check if background color is absent\\n\"}}",
+  "usage": {
+    "prompt_tokens": 4332,
+    "completion_tokens": 414,
+    "cost_usd": 0.000601,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175670.307353
+}

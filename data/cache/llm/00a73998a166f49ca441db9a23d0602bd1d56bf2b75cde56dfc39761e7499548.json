@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"The test still passes, indicating that the error is not being raised as expected. I will take a different approach and simplify the test to focus solely on the SQL that is supposed to trigger the error. I will also ensure that the SQL is correctly formatted and that the schema is set up properly. I will create a minimal test case that directly tests the lineage function with the problematic SQL and checks for the `OptimizeError`.\",\"tool\":\"run_test\",\"args\":{\"source\":\"import pytest\\nfrom sqlglot import parse, Dialect, exp\\nfrom sqlglot.lineage import lineage\\nfrom sqlglot.schema import MappingSchema\\nfrom sqlglot.errors import OptimizeError\\n\\nsql = \\\"\\\"\\\"\\nSELECT p.user_id, gs.n AS to_deposit_days\\nFROM tbl1 p\\nCROSS JOIN (\\n    SELECT generate_series AS n FROM TABLE(generate_series(0, 8000))\\n) gs\\n\\\"\\\"\\\"\\n\\ndialect = Dialect.get_or_raise('starrocks')\\nschema = MappingSchema(dialect=dialect)\\nschema.add_table(\\\"default.tbl1\\\", column_mapping={\\\"user_id\\\": \\\"BIGINT\\\"}, match_depth=False)\\n\\n# Simplified test case to directly test the lineage function\\ndef test_lineage_optimize_error():\\n    # This should raise an OptimizeError due to unresolved column\\n    with pytest.raises(OptimizeError, match=\\\"Column 'generate_series' could not be resolved\\\"):\\n        lineage(column=None, sql=parse(sql, read='starrocks')[0], schema=schema, dialect=dialect,\\n                expand_stars=True, validate_qualify_columns=True)\\n\"}}",
+  "usage": {
+    "prompt_tokens": 4784,
+    "completion_tokens": 343,
+    "cost_usd": 0.000923,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788168483.849286
+}

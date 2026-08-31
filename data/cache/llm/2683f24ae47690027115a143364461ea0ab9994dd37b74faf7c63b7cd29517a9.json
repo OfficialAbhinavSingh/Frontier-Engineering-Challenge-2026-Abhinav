@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"I will start by searching for the relevant files in the repository to understand how the Jinja environment and filters are set up. This will help me create a test that reproduces the issue.\",\"tool\":\"list_files\",\"args\":{\"subdir\":\"\"}}",
+  "usage": {
+    "prompt_tokens": 572,
+    "completion_tokens": 53,
+    "cost_usd": 0.000118,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788167891.2445624
+}

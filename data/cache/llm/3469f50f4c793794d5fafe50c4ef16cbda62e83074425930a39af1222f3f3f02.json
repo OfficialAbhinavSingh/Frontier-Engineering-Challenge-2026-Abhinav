@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"I will run the test I just created to see if it behaves as expected and to check the actual output from pytest.\",\"tool\":\"run_test\",\"args\":{\"source\":\"import tomlkit\\nimport pytest\\n\\ndef test_inline_table_with_table_append():\\n    t = tomlkit.table()  # Create a regular table\\n    t.append('a', 1)  # Append a key-value pair to the table\\n\\n    it = tomlkit.inline_table()  # Create an inline table\\n    with pytest.raises(TypeError):  # Expecting a TypeError when appending a table\\n        it.append('table', t)  # Attempt to append the table to the inline table\\n\\n    d = tomlkit.document()  # Create a document\\n    d.append('inline_table', it)  # Append the inline table to the document\\n\\n    with open('output.toml', 'w') as f:\\n        tomlkit.dump(d, f)  # Dump the document to a file\\n\"}}",
+  "usage": {
+    "prompt_tokens": 3185,
+    "completion_tokens": 216,
+    "cost_usd": 0.000377,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175169.4895744
+}

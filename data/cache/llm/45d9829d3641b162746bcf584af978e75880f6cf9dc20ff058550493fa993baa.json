@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"I found a reference to `FuncParamType` in `tests/test_info_dict.py`. I will read this test file to see how `FuncParamType` is currently being tested, which will help me create a new test that demonstrates the bug.\",\"tool\":\"read_file\",\"args\":{\"path\":\"tests/test_info_dict.py\"}}",
+  "usage": {
+    "prompt_tokens": 2434,
+    "completion_tokens": 68,
+    "cost_usd": 0.000233,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788167804.2167687
+}

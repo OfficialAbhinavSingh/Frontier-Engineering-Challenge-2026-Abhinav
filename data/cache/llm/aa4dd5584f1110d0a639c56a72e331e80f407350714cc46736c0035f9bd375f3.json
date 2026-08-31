@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"The test is still failing, indicating that the `--at` option is not being recognized at all. This suggests that the issue is deeper than just the help text formatting. I will create a more basic command without any help text to see if the option can be recognized at all. This will help isolate the problem further.\",\"tool\":\"run_test\",\"args\":{\"source\":\"import pytest\\nimport click\\n\\n\\ndef _get_completions(cli, args, incomplete):\\n    from click.shell_completion import ShellComplete\\n    comp = ShellComplete(cli, {}, cli.name, \\\"_CLICK_COMPLETE\\\")\\n    return comp.get_completions(args, incomplete)\\n\\n\\ndef test_basic_option_recognition():\\n    @click.command()\\n    @click.option(\\n        \\\"--at\\\",\\n        type=(str, str),\\n        multiple=True\\n    )\\n    def cli(at):\\n        pass\\n\\n    # Check if the --at option is recognized\\n    try:\\n        completions = _get_completions(cli, [\\\"--at\\\"], \\\"\\\")\\n        assert completions is not None\\n        assert any(c.value == '--at' for c in completions)\\n    except Exception as e:\\n        pytest.fail(f\\\"Completion raised an exception: {e}\\\")\"}}",
+  "usage": {
+    "prompt_tokens": 8737,
+    "completion_tokens": 277,
+    "cost_usd": 0.000853,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788167788.3334224
+}

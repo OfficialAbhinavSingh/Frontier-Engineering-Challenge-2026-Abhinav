@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "```json\n[\n    \"Always import necessary classes and functions at the beginning of your test files to avoid NameErrors during test collection.\",\n    \"Ensure that you are aware of the required parameters for constructors in the API, such as 'record=True' for the Console class, to prevent assertion errors related to incorrect usage.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 509,
+    "completion_tokens": 67,
+    "cost_usd": 0.000117,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788175407.3971777
+}

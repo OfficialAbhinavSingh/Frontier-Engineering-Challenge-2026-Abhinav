@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "text": "{\"thought\":\"I need to create a test that replicates the issue with zsh completion in the Click library. The test will check if the output of the shell completion includes colons in the expected format. First, I will look for the relevant files in the repository to understand how to set up the test.\",\"tool\":\"list_files\",\"args\":{\"subdir\":\"\"}}",
+  "usage": {
+    "prompt_tokens": 806,
+    "completion_tokens": 75,
+    "cost_usd": 0.000166,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788167687.6243768
+}
