@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "```python\nimport pytest\nimport io\nfrom rich.console import Console\nfrom rich.text import Text\nfrom rich.style import Style\n\ndef test_double_width_char_in_background():\n    console = Console(file=io.StringIO(), width=60, height=11)\n    text = Text(\"\u9752\u6625\u30b5\u30c4\u30d0\u30c4\u8ad6\", style=Style(bgcolor=\"blue\"))\n    console.print(text, style=\"on blue\")\n    output = console.file.getvalue()\n    assert \"\u9752\u6625\u30b5\u30c4\u30d0\u30c4\u8ad6\" in output\n```",
+  "usage": {
+    "prompt_tokens": 5280,
+    "completion_tokens": 112,
+    "cost_usd": 0.000418,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788155887.6653383
+}

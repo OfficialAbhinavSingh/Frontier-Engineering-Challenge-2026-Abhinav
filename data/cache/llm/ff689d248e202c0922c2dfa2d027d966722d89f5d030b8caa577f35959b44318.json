@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "```python\nimport unittest\nfrom sqlglot import parse_one\nfrom sqlglot.expressions import Insert\n\nclass TestInsertReplace(unittest.TestCase):\n    def test_insert_replace_parsing(self):\n        sql = \"\"\"\n        INSERT INTO TABLE students\n            REPLACE USING (country)\n            SELECT * FROM new_students;\n        \"\"\"\n        parsed = parse_one(sql, dialect=\"databricks\")\n        self.assertIsInstance(parsed, Insert)\n```",
+  "usage": {
+    "prompt_tokens": 4220,
+    "completion_tokens": 95,
+    "cost_usd": 0.000336,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788155902.50599
+}

@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "{\"thought\": \"The on_validate_error method is defined at line 258 in prompt.py. I need to read the complete method implementation to understand its current behavior.\", \"tool\": \"read_file\", \"args\": {\"path\": \"rich/prompt.py\", \"start\": 258, \"end\": 265}}",
+  "usage": {
+    "prompt_tokens": 2599,
+    "completion_tokens": 73,
+    "cost_usd": 0.00021,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788154772.4978921
+}

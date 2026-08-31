@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "```json\n{\"source_files\": [\"rich/prompt.py\"], \"test_file\": \"tests/test_console.py\", \"why\": \"The bug is related to the prompt functionality and console output handling.\"}\n```",
+  "usage": {
+    "prompt_tokens": 801,
+    "completion_tokens": 44,
+    "cost_usd": 6.9e-05,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788155837.5101626
+}

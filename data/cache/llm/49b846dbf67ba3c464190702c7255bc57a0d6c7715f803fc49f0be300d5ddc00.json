@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "```python\nimport pytest\nfrom rich.live import Live\nfrom rich.console import Group, Console\nimport io\n\ndef test_empty_live_with_transient() -> None:\n    \"\"\"Test that Live with empty renderable and transient=True does not leave a newline.\"\"\"\n    console = Console(file=io.StringIO(), force_terminal=True)\n    with Live(Group(), console=console, transient=True):\n        pass\n    output = console.file.getvalue()\n    assert output == \"\"\n```",
+  "usage": {
+    "prompt_tokens": 5021,
+    "completion_tokens": 101,
+    "cost_usd": 0.000397,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788155814.8609319
+}

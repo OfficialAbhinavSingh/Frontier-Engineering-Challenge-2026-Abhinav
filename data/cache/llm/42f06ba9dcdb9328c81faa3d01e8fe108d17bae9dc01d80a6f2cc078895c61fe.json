@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "```python\nimport pytest\nfrom rich.console import Console\nimport io\n\ndef test_soft_wrap_background_color() -> None:\n    console = Console(file=io.StringIO(), width=20, soft_wrap=True)\n    console.print(\"soft wrap is on\", style=\"blue on white\", soft_wrap=True)\n    console.print(\"still has background color from previous line\")\n    output = console.file.getvalue()\n    assert \"blue on white\" not in output\n```",
+  "usage": {
+    "prompt_tokens": 4204,
+    "completion_tokens": 101,
+    "cost_usd": 0.000336,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788155826.2950697
+}

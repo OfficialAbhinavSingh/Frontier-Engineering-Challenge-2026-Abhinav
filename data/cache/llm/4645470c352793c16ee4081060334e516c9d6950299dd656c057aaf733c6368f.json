@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "```json\n{\n  \"source_files\": [\"sqlglot/optimizer/qualify_columns.py\", \"sqlglot/parser.py\"],\n  \"test_file\": \"tests/test_lineage.py\",\n  \"why\": \"The issue is related to column resolution in table-valued functions, which is handled in qualify_columns.py and parsing in parser.py, and the test should be added to the lineage test file.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 1176,
+    "completion_tokens": 86,
+    "cost_usd": 0.000105,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788155935.9346573
+}

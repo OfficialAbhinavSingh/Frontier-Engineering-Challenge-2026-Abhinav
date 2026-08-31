@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "```python\nimport pytest\nfrom rich.console import Console\nfrom rich.text import Text\n\ndef test_nerd_font_width() -> None:\n    console = Console()\n    text = Text(\"\\U000f024d\")\n    assert len(text) == 1\n```",
+  "usage": {
+    "prompt_tokens": 4026,
+    "completion_tokens": 61,
+    "cost_usd": 0.000314,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788159374.3320706
+}

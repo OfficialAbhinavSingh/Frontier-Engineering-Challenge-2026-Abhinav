@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "{\"thought\": \"I need to run the test to see if it actually fails as expected. I'll use the run_test tool to execute the test in a sandbox at the buggy commit.\", \"tool\": \"run_test\", \"args\": {\"source\": \"import pytest\\nimport sqlglot\\n\\ndef test_insert_replace_using():\\n    sql = \\\"\\\"\\\"\\n    INSERT INTO TABLE students\\n        REPLACE USING (country)\\n        SELECT * FROM new_students;\\n    \\\"\\\"\\\"\\n    with pytest.raises(sqlglot.errors.ParseError):\\n        sqlglot.parse_one(sql, dialect=\\\"databricks\\\")\\n\"}}",
+  "usage": {
+    "prompt_tokens": 2649,
+    "completion_tokens": 142,
+    "cost_usd": 0.000227,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788155225.4226542
+}

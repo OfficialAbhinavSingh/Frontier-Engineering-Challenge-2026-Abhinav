@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "```python\nimport pytest\nfrom typing import Any\nfrom tomlkit import parse\nfrom tomlkit.exceptions import TOMLKitError\nfrom collections.abc import Callable\n\ndef test_out_of_order_value_vs_table_redefinition(example: Callable[[str], str]) -> None:\n    src = '[a]\\nb = true\\n[zz]\\n[a.b]\\nc = 1\\n'\n    with pytest.raises(TOMLKitError):\n        parse(src)\n```",
+  "usage": {
+    "prompt_tokens": 2958,
+    "completion_tokens": 102,
+    "cost_usd": 0.000242,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788155970.2574065
+}

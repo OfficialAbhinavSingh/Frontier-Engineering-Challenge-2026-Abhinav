@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "```python\nimport pytest\nfrom jinja2.nativetypes import NativeEnvironment\n\ndef test_native_concat_with_loop_index():\n    template = NativeEnvironment().from_string('{% block test %}{% for i in range(1) %}{{ loop.index }}{% endfor %}{% endblock %}{{ self.test() }}')\n    assert template.render() == 1\n```",
+  "usage": {
+    "prompt_tokens": 3273,
+    "completion_tokens": 84,
+    "cost_usd": 0.000262,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788160391.0323703
+}

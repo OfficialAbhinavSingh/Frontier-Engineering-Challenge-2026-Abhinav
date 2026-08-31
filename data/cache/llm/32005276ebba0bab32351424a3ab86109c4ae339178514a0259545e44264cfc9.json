@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "```python\nimport pytest\nfrom rich.console import Console\nfrom rich.text import Text\n\ndef test_nerd_font_width() -> None:\n    console = Console(file=io.StringIO(), width=10, legacy_windows=True)\n    text = Text(\"\\U000f024d\")  # Nerd font character for downloads folder\n    console.print(text)\n    assert console.file.getvalue() == \"\\U000f024d\\n\"\n```",
+  "usage": {
+    "prompt_tokens": 4078,
+    "completion_tokens": 102,
+    "cost_usd": 0.000326,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788155857.7907722
+}

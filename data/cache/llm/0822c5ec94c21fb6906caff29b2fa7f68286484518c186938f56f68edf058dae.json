@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "{\"thought\": \"The schema.py file contains the implementation of the `Schema` abstract base class and the `AbstractMappingSchema` class, which is used to manage table and column mappings. The `MappingSchema` class, which is a subclass of `AbstractMappingSchema`, is used in the issue to add a table schema. I need to create a test that uses the `lineage` function with `validate_qualify_columns=True` and expects it to fail when processing a table-valued function (TVF) like `TABLE(generate_series(...))`.\", \"tool\": \"read_file\", \"args\": {\"path\": \"sqlglot/optimizer/qualify.py\"}}",
+  "usage": {
+    "prompt_tokens": 6179,
+    "completion_tokens": 140,
+    "cost_usd": 0.000491,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788155335.6487644
+}

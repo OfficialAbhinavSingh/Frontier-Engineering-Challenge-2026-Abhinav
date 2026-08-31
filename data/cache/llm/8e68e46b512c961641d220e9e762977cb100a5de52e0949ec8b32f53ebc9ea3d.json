@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "{\"thought\": \"The issue seems to be related to shell completion, so I should look at the shell_completion.py file to understand how the completion data is generated. I need to read the source code to see how the help text is processed and where it might be causing the problem.\", \"tool\": \"read_file\", \"args\": {\"path\": \"src/click/shell_completion.py\"}}",
+  "usage": {
+    "prompt_tokens": 1998,
+    "completion_tokens": 83,
+    "cost_usd": 0.000166,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788154276.0473025
+}

@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "{\"thought\": \"First, I need to understand the issue. The problem is that multi-line help text in Click options causes errors in fish shell completion. The error occurs because the help text is not properly escaped or handled, leading to unexpected arguments being passed to the string split function in the completion script.\", \"tool\": \"list_files\", \"args\": {\"subdir\": \"src/click\"}}",
+  "usage": {
+    "prompt_tokens": 1788,
+    "completion_tokens": 82,
+    "cost_usd": 0.00015,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788154274.489862
+}

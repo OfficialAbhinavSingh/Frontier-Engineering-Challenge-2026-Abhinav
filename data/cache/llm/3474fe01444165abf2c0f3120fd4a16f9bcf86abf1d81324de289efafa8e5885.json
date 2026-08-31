@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "```python\nimport pytest\nimport sys\nimport os\nimport tempfile\nfrom click._utils import UNSET\nimport click\n\ndef test_prompt_backspace_behavior(runner, monkeypatch):\n    # Mock the input to simulate backspace behavior\n    monkeypatch.setattr('sys.stdin', io.StringIO('a\\b\\b'))\n\n    @click.command()\n    def cli():\n        return click.prompt('Enter text')\n\n    result = runner.invoke(cli, [], standalone_mode=False, catch_exceptions=False)\n    assert result.output == 'Enter text: '\n```",
+  "usage": {
+    "prompt_tokens": 3975,
+    "completion_tokens": 124,
+    "cost_usd": 0.000323,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788155632.6824656
+}

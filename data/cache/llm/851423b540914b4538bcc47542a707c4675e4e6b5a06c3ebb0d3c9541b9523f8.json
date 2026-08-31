@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "{\"thought\": \"The runtime.py file contains the runtime functions and state used by compiled templates. The Context class is used to manage the variables and blocks of a template. The test should use a custom filter and trigger the error when async_true is enabled. I need to write a test that reproduces the error described in the issue.\", \"tool\": \"read_file\", \"args\": {\"path\": \"src/jinja2/environment.py\"}}",
+  "usage": {
+    "prompt_tokens": 6752,
+    "completion_tokens": 91,
+    "cost_usd": 0.000525,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788154585.3326948
+}

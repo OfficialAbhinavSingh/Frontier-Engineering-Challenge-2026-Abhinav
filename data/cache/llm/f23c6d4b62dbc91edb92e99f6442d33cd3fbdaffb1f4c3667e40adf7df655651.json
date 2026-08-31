@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "```python\nimport pytest\nimport click\nfrom click.shell_completion import CompletionItem\n\nclass Foo(click.ParamType):\n    def convert(self, value, param, ctx):\n        return value\n\n    def shell_complete(self, ctx, param, incomplete):\n        return [\n            CompletionItem(value=value, help=\"adsf\") for value in\n            [\"baz:quux\", \"spam:eggs\"]\n        ]\n\n@click.command()\n@click.argument(\"foo\", type=Foo())\ndef main(foo):\n    pass\n\ndef test_zsh_completion_with_colon():\n    runner = click.testing.CliRunner()\n    result = runner.invoke(main, ['--help'], env={\n        'FOO_COMPLETE': 'zsh_source',\n        '_FOO_COMPLETE': 'zsh_source'\n    })\n    assert \"baz:quux\" in result.output\n```",
+  "usage": {
+    "prompt_tokens": 2784,
+    "completion_tokens": 187,
+    "cost_usd": 0.000246,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788154157.5562744
+}

@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "```python\nimport pytest\nimport click\nfrom click.testing import CliRunner\n\ndef test_runner_catch_exceptions(runner):\n    @click.command()\n    def test():\n        raise RuntimeError(\"Test error\")\n\n    result = runner.invoke(test, catch_exceptions=False)\n    assert result.exception is not None\n```",
+  "usage": {
+    "prompt_tokens": 2663,
+    "completion_tokens": 68,
+    "cost_usd": 0.000213,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788160310.8703895
+}

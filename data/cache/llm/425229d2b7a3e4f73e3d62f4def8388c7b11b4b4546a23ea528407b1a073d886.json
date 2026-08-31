@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "```python\nimport pytest\nimport click\nfrom click import Context, Parameter\nfrom click.types import FuncParamType\nfrom typing import Any, Callable\n\ndef test_func_param_type_value_error(runner):\n    def func(value: Any) -> str:\n        if value != 'works':\n            raise ValueError(f'input was {value=}, should be works')\n        return value\n\n    class TestParamType(FuncParamType):\n        def __init__(self, func: Callable[[Any], Any]) -> None:\n            super().__init__(func)\n\n    @click.command()\n    @click.argument('input', type=TestParamType(func))\n    def cli(input):\n        pass\n\n    result = runner.invoke(cli, ['not_works'], catch_exceptions=False)\n    assert \"input was 'not_works', should be works\" in result.output\n```",
+  "usage": {
+    "prompt_tokens": 2822,
+    "completion_tokens": 181,
+    "cost_usd": 0.000248,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788160342.5534725
+}

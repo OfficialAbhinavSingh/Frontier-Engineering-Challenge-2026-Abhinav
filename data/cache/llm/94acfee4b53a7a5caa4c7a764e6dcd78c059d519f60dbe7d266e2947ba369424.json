@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "```python\nimport pytest\nimport click\nfrom click._utils import UNSET\nfrom click.core import Command, Option\nfrom click.shell_completion import FishComplete\n\ndef test_multiline_help_text_fish_completion():\n    @click.command()\n    @click.option(\n        \"--at\",\n        \"--attachment-type\",\n        type=(str, str),\n        multiple=True,\n        help=\"\\b\\nAttachment with explicit mimetype,\\n--at image.jpg image/jpeg\",\n    )\n    def cli():\n        pass\n\n    ctx_args = {}\n    prog_name = \"cli\"\n    complete_var = \"COMPLETE\"\n    instruction = \"fish_complete\"\n\n    comp = FishComplete(cli, ctx_args, prog_name, complete_var)\n    completions = comp.complete()\n\n    assert \"Attachment with explicit mimetype,\\n--at image.jpg image/jpeg\" in completions\n```",
+  "usage": {
+    "prompt_tokens": 5130,
+    "completion_tokens": 186,
+    "cost_usd": 0.000422,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788155647.5664127
+}

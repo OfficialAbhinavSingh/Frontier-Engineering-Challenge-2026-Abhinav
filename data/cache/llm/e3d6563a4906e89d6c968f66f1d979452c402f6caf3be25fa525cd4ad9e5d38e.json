@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "{\"thought\": \"I need to create a test that uses the `Console` class to measure a string containing double-width characters in a modal screen context. The test will create a `Console` instance with appropriate options and measure a string containing double-width characters. The test should fail if the measurement is incorrect and pass once the bug is fixed.\", \"tool\": \"read_file\", \"args\": {\"path\": \"rich/console.py\"}}",
+  "usage": {
+    "prompt_tokens": 10264,
+    "completion_tokens": 90,
+    "cost_usd": 0.000788,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788155191.468165
+}

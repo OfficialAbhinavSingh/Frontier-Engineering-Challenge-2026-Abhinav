@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "```json\n[\n  \"Import the Console class from rich.console to use it in the test.\",\n  \"Use the rich.console.Console class to create a console instance for testing.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 569,
+    "completion_tokens": 42,
+    "cost_usd": 5.1e-05,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788155817.6624
+}

@@ -1,0 +1,12 @@
+[
+  {
+    "text": "Use pytest fixtures for test setup and teardown, not unittest.TestCase.",
+    "from_case": "sqlglot__8225",
+    "added_at": 1788160466.7499013
+  },
+  {
+    "text": "Import sqlglot in the test file and use it directly, not through a dialect instance.",
+    "from_case": "sqlglot__8225",
+    "added_at": 1788160466.7499032
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "{\"thought\": \"The INSERT statement is likely defined in the dml.py file. I'll read this file to understand the current implementation.\", \"tool\": \"read_file\", \"args\": {\"path\": \"sqlglot/expressions/dml.py\"}}",
+  "usage": {
+    "prompt_tokens": 839,
+    "completion_tokens": 53,
+    "cost_usd": 7.4e-05,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788155218.2600045
+}

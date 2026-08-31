@@ -1,0 +1,32 @@
+[
+  {
+    "text": "Import `Callable` from `typing` for type annotations in test functions.",
+    "from_case": "tomlkit__523",
+    "added_at": 1788160478.2068594
+  },
+  {
+    "text": "Ensure that the test raises the expected exception by verifying the correct error type.",
+    "from_case": "tomlkit__523",
+    "added_at": 1788160478.2068605
+  },
+  {
+    "text": "Use the correct import paths and names as defined in the repository's __init__.py file, such as 'inline_table' instead of 'InlineTable'.",
+    "from_case": "tomlkit__531",
+    "added_at": 1788160483.1698325
+  },
+  {
+    "text": "Ensure that the test structure and fixture names follow the repository's conventions to avoid import and collection errors.",
+    "from_case": "tomlkit__531",
+    "added_at": 1788160483.1698341
+  },
+  {
+    "text": "Ensure all necessary dependencies are installed in the test environment before running tests, especially for tests that involve external libraries like 'torch'.",
+    "from_case": "tomlkit__562",
+    "added_at": 1788160508.727072
+  },
+  {
+    "text": "Verify that the correct methods and attributes are used when interacting with the library's API, such as checking for the existence of 'loads' method in 'TOMLDocument'.",
+    "from_case": "tomlkit__562",
+    "added_at": 1788160508.7270746
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "```python\nimport pytest\nimport pickle\nfrom jinja2 import utils\n\ndef test_pickle_missing():\n    \"\"\"Test that jinja2.utils.missing can be pickled.\"\"\"\n    assert pickle.dumps(utils.missing) is not None\n```",
+  "usage": {
+    "prompt_tokens": 2821,
+    "completion_tokens": 53,
+    "cost_usd": 0.000222,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788155786.9717302
+}

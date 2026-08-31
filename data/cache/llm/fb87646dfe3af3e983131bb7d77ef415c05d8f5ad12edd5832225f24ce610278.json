@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "```python\nfrom typing import Any\nimport pytest\nfrom tomlkit import parse, aot, table, dumps\n\ndef test_aot_captures_too_many_keys() -> None:\n    doc = parse(\"a.b = 1\\nc.d = 2\\n\")\n    aot_instance = aot()\n    t = table()\n    t[\"x\"] = 9\n    aot_instance.append(t)\n    doc[\"a\"] = aot_instance\n    assert \"c.d\" not in dumps(doc)\n```",
+  "usage": {
+    "prompt_tokens": 4235,
+    "completion_tokens": 112,
+    "cost_usd": 0.00034,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788159485.3259356
+}

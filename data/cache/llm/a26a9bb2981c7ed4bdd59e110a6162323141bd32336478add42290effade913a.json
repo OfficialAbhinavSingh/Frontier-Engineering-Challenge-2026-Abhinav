@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "```json\n{\n  \"source_files\": [\"rich/live.py\", \"rich/console.py\"],\n  \"test_file\": \"tests/test_live.py\",\n  \"why\": \"The issue is related to the Live class and its interaction with the console rendering.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 1885,
+    "completion_tokens": 57,
+    "cost_usd": 0.000153,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788155804.5061426
+}

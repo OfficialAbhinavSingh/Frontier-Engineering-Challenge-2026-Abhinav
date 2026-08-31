@@ -1,0 +1,32 @@
+[
+  {
+    "text": "Use the `catch_exceptions` parameter in the `invoke` method of the `CliRunner` class, not in the constructor.",
+    "from_case": "click__2817",
+    "added_at": 1788160313.6001453
+  },
+  {
+    "text": "Ensure that the test function is properly structured to exercise the desired behavior, and that any exceptions raised are caught and handled appropriately.",
+    "from_case": "click__2817",
+    "added_at": 1788160313.6001506
+  },
+  {
+    "text": "Import the necessary modules (e.g., 'io') at the top of the test file to avoid NameError.",
+    "from_case": "click__2968",
+    "added_at": 1788160324.987442
+  },
+  {
+    "text": "Ensure that the test environment matches the expected behavior, including proper handling of input and output streams.",
+    "from_case": "click__2968",
+    "added_at": 1788160324.9874437
+  },
+  {
+    "text": "Always verify that the test fails at the buggy commit before submitting it.",
+    "from_case": "click__3043",
+    "added_at": 1788160336.7893164
+  },
+  {
+    "text": "Ensure that the test's assertions are specific and cover the expected behavior.",
+    "from_case": "click__3043",
+    "added_at": 1788160336.7893186
+  }
+]

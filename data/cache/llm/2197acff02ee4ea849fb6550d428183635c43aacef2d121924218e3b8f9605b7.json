@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "{\"thought\": \"The main entry points for parsing SQL are the `parse` and `parse_one` functions. The `parse_one` function is used in the issue description. I need to write a test that uses this function to parse a SQL statement with `AUTO_INCREMENT` and fails because of the bug. The test should be added to the `TestMySQL` class in the test file.\", \"tool\": \"read_file\", \"args\": {\"path\": \"tests/dialects/test_mysql.py\", \"start\": 1, \"end\": 100}}",
+  "usage": {
+    "prompt_tokens": 4077,
+    "completion_tokens": 123,
+    "cost_usd": 0.00033,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788155243.7253911
+}

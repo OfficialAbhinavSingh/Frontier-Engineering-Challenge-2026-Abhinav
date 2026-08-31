@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "{\"thought\": \"I need to write a test that uses `FuncParamType` and expects a `ValueError` to be raised. The test should fail because the current implementation does not properly handle the error message. I'll create a test function that demonstrates this.\", \"tool\": \"run_test\", \"args\": {\"source\": \"import pytest\\nfrom click import FuncParamType, Parameter, Context\\n\\ndef test_func_param_type():\\n    def test_func(value):\\n        if value != 'works':\\n            raise ValueError(f'input was {value=}, should be works')\\n        return value\\n\\n    func_type = FuncParamType(test_func)\\n    with pytest.raises(Exception) as excinfo:\\n        func_type.convert('fails', None, None)\\n    assert 'input was' in str(excinfo.value)\\n\\n\"}}",
+  "usage": {
+    "prompt_tokens": 4074,
+    "completion_tokens": 186,
+    "cost_usd": 0.000343,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788154356.4596915
+}

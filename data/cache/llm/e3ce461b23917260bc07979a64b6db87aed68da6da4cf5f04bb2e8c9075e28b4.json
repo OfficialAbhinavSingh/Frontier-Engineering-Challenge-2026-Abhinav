@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "```python\nimport pickle\nimport pytest\nfrom jinja2 import filters\n\ndef test_pickleable_filter():\n    assert pickle.dumps(filters.do_first)\n```",
+  "usage": {
+    "prompt_tokens": 1704,
+    "completion_tokens": 34,
+    "cost_usd": 0.000135,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788159306.7049646
+}

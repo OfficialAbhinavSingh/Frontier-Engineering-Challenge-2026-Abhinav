@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "{\"thought\": \"From the source code, I can see that the `CompletionItem` class is used to represent completion items, and the `ShellComplete` class handles the completion logic for different shells. The issue seems to be related to how colons in completion items are handled in zsh. Let me write a test that reproduces the issue.\", \"final_test\": \"import pytest\\nfrom click.shell_completion import CompletionItem\\nfrom click.testing import CliRunner\\nfrom click import Command, Argument, Context\\n\\nclass Foo:\\n    def shell_complete(self, ctx, param, incomplete):\\n        return [\\n            CompletionItem(value=value, help=\\\"adsf\\\") for value in\\n            [\\\"baz:quux\\\", \\\"spam:eggs\\\"]\\n        ]\\n\\ndef main(foo):\\n    pass\\n\\nmain = Command(main)\\nmain.params.append(Argument([\\\"foo\\\"], type=Foo()))\\n\\ndef test_zsh_completion():\\n    runner = CliRunner()\\n    result = runner.invoke(main, [], env={\\n        \\\"_FOO_COMPLETE\\\": \\\"zsh_source\\\",\\n    })\\n    assert result.exit_code == 0\\n    # Check if the output contains the expected completion items\\n    assert \\\"baz:quux   -- adsf\\\" in result.output\\n    assert \\\"spam:eggs -- adsf\\\" in result.output\\n\\nif __name__ == \\\"__main__\\\":\\n    pytest.main([__file__])\"}",
+  "usage": {
+    "prompt_tokens": 3215,
+    "completion_tokens": 331,
+    "cost_usd": 0.000307,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788154182.3137655
+}

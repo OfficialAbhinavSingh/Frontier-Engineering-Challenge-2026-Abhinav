@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "```python\nfrom tomlkit import parse, InlineTable, Table\nfrom collections.abc import Callable\nfrom typing import Any\nimport pytest\n\ndef test_nesting_table_inside_inline_table() -> None:\n    t = Table()\n    t.append(\"a\", 1)\n\n    it = InlineTable()\n    it.append(\"table\", t)\n\n    d = parse(\"\")\n\n    d.append(\"inline_table\", it)\n\n    # This should raise an error, but currently does not\n    with pytest.raises(ValueError):\n        d.as_string()\n```",
+  "usage": {
+    "prompt_tokens": 3312,
+    "completion_tokens": 120,
+    "cost_usd": 0.000272,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788155981.9719331
+}

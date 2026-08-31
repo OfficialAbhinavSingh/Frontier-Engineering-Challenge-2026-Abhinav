@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "{\"thought\": \"I need to run the test to see if it fails as expected. The test checks if the Nerd Font character is measured as a single-width character. If the test fails, it means the character is being measured as double-width, which is the bug described in the issue.\", \"tool\": \"run_test\", \"args\": {\"source\": \"import pytest\\nfrom rich.console import Console\\nfrom rich.text import Text\\n\\ndef test_nerd_font_width():\\n    \\\"\\\"\\\"Test that Nerd Font characters are measured correctly.\\\"\\\"\\\"\\n    console = Console()\\n    # The Nerd Font character for downloads folder\\n    nerd_font_char = \\\"\\\\U000f024d\\\"\\n    # Create a Text object with the Nerd Font character\\n    text = Text(nerd_font_char)\\n    # Measure the width of the text\\n    measurement = console.measure(text)\\n    # Assert that the width is 1 (single-width character)\\n    assert measurement.minimum == 1, \\\"Nerd Font character should be measured as single-width\\\"\\n    assert measurement.maximum == 1, \\\"Nerd Font character should be measured as single-width\\\"\\n\\nif __name__ == \\\"__main__\\\":\\n    test_nerd_font_width()\"}}",
+  "usage": {
+    "prompt_tokens": 4070,
+    "completion_tokens": 281,
+    "cost_usd": 0.000361,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788155137.9553363
+}

@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "{\"thought\": \"The test file uses a `Validator` class that provides a `validate_identity` method to test SQL parsing and identity transformations. The method takes a SQL string and an optional expected SQL string. If the expected SQL string is not provided, it defaults to the input SQL string. The test will pass if the parsed and unparsed SQL matches the expected SQL.\", \"tool\": \"read_file\", \"args\": {\"path\": \"sqlglot/__init__.py\"}}",
+  "usage": {
+    "prompt_tokens": 2473,
+    "completion_tokens": 100,
+    "cost_usd": 0.000205,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788155239.4463007
+}

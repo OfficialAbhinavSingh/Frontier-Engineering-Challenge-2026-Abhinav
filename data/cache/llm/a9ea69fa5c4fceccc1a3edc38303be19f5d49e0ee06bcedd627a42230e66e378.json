@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "```json\n{\n  \"source_files\": [\"rich/console.py\", \"rich/text.py\"],\n  \"test_file\": \"tests/test_console.py\",\n  \"why\": \"The issue is related to soft wrapping and background color handling in the console output.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 2051,
+    "completion_tokens": 56,
+    "cost_usd": 0.000165,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788155821.598019
+}

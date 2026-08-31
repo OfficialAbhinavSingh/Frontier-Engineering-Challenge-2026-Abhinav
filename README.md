@@ -167,6 +167,38 @@ dataset grew remain comparable.
 
 ---
 
+## Does the advantage survive a change of model?
+
+Every other number here was measured on one model, which leaves the obvious
+objection open: that the structure is incidental and the model is doing the work.
+So both sides were re-run on a second model from a different vendor — the same
+`b1` agent and the same `s5` pipeline — and what is compared is the **gap between
+them on the same model**. Absolute scores across models are not comparable and
+are not presented as if they were.
+
+| Model | Price in/out per M | `b1` same tools | `s5` Ratchat | Gap |
+| --- | --- | ---: | ---: | ---: |
+| `gemini-2.5-flash` | $0.300 / $2.50 | 6.0/27 (range 6-6) | **8.7/27 (range 8-9)** | **+2.7** (+44%) |
+| `mistral-small-3.2-24b` | $0.075 / $0.20 | 2.7/27 (range 2-3) | **6.3/27 (range 5-7)** | **+3.7** (+138%) |
+
+Three runs each, and within each model the ranges do not overlap. The pipeline
+wins on both, and wins by more on the weaker model: a general-purpose agent
+degrades sharply when the model gets worse, while the structured one degrades
+gently. That is the strongest evidence in this repository that the improvement is
+attributable to the architecture rather than to the model.
+
+**The cross-comparison, stated carefully.** `s5` on the cheap model scores
+6.3/27 against `b1` on the expensive model at 6.0/27, for $0.0101 a run against
+$0.2373 — 24x cheaper. Those ranges overlap (5-7 against 6-6), so it **matches**
+rather than beats. A single run scored 7 and looked like a clean win; two more
+runs turned it into a tie, and the tie is what is reported. Structure buys about
+an order of magnitude of model price here, not more than that.
+
+Full detail, generated from the result files: [results/CROSS_MODEL.md](results/CROSS_MODEL.md).
+Re-run with `make cross-model` (needs a key; about $0.05 a pair).
+
+---
+
 ## The two baselines
 
 A single baseline would have made the result easy to dismiss, so there are two.

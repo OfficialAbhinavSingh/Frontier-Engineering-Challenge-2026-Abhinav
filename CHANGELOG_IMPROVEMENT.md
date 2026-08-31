@@ -102,6 +102,35 @@ each other. Fixed by selecting the added tests and **recording that selector in
 the result file**, so `make verify-scores` re-derives the control the same way it
 re-derives everything else rather than special-casing a variant name.
 
+### The cross-model check, and a claim it took away
+
+The whole ladder was measured on `gemini-2.5-flash`, so none of it separated the
+architecture from the model. Both ends were re-run on `mistral-small-3.2-24b`
+from a different vendor, three runs each:
+
+| Model | `b1` same tools | `s5` Ratchat | Gap |
+| --- | ---: | ---: | ---: |
+| `gemini-2.5-flash` | 6.0/27 (6-6) | 8.7/27 (8-9) | +2.7 (+44%) |
+| `mistral-small-3.2-24b` | 2.7/27 (2-3) | 6.3/27 (5-7) | +3.7 (+138%) |
+
+The pipeline wins on both, and wins by more on the weaker model. The
+general-purpose agent falls from 6.0 to 2.7 when the model gets worse; the
+structured one falls from 8.7 to 6.3. Structure is what makes the degradation
+gentle, and this is the strongest evidence here that the ladder measured design
+rather than `gemini-2.5-flash`.
+
+**It also cost me a headline.** The first run of `s5` on the cheap model scored
+7/27 against `b1`'s 6.0/27 on the expensive one, which reads as *a model 12.5x
+cheaper per output token, with structure, beating an expensive one without it*.
+Two more runs made it 6.3/27 with a range of 5-7 against 6-6 — overlapping, so
+it matches rather than beats, at about 24x lower cost. The tie is what is
+reported.
+
+**Learning:** the run that gives you the quotable number is the one to repeat
+first. A single sample is where a claim is most likely to be true and least
+likely to be checked, and n=1 was enough to state the transfer result but not
+enough for the sharper claim sitting next to it.
+
 **Learning:** a validator and a scorer that agree by construction are one code
 path; when they are two, only a control that runs them against each other will
 tell you they have drifted. The ceiling is worth as much as the floors — 27/27

@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "```python\nfrom jinja2 import Environment\nimport pytest\nfrom collections import namedtuple\n\ndef test_groupby_case_sensitivity(env):\n    User = namedtuple('User', ['name'])\n    users = [\n        User(name=\"Alice\"),\n        User(name=\"bob\"),\n        User(name=\"Charlie\"),\n        User(name=\"dave\")\n    ]\n\n    tmpl = env.from_string('''{% for group in users|groupby(\"name\", case_sensitive=False) %}{{ group.grouper }}{% endfor %}''')\n    assert tmpl.render(users=users) == \"AlicebobCharlieDave\"\n```",
+  "usage": {
+    "prompt_tokens": 2921,
+    "completion_tokens": 131,
+    "cost_usd": 0.000245,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788159250.9964602
+}

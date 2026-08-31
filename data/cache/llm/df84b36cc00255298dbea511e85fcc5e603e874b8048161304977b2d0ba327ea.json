@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "```python\nimport pytest\nimport io\nfrom rich.console import Console\nfrom rich.screen import Screen\n\ndef test_double_width_char_in_modal_screen():\n    console = Console(file=io.StringIO(), width=60, height=11)\n    screen = Screen(\"\u9752\u6625\u30b5\u30c4\u30d0\u30c4\u8ad6\", style=\"on blue\")\n    console.print(screen)\n    output = console.file.getvalue()\n    assert \"\u9752\u6625\u30b5\u30c4\u30d0\u30c4\u8ad6\" in output\n```",
+  "usage": {
+    "prompt_tokens": 5074,
+    "completion_tokens": 99,
+    "cost_usd": 0.0004,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788160440.9178286
+}

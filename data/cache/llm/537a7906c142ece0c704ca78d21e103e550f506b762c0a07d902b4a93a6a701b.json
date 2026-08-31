@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "{\"thought\": \"I need to understand the Console class's print method to see how it handles the markup parameter. I'll write a test that creates a Console with markup=False, triggers a validation error in a prompt, and checks if the error message is rendered with markup.\", \"final_test\": \"import pytest\\nfrom rich.console import Console\\nfrom rich.prompt import Prompt, InvalidResponse\\n\\ndef test_prompt_validation_error_without_markup():\\n    # Create a console with markup disabled\\n    console = Console(markup=False)\\n    \\n    # Create a prompt that will always raise a validation error\\n    class TestPrompt(Prompt):\\n        def process_response(self, value: str) -> str:\\n            raise InvalidResponse(\\\"[red]This is an error message[/red]\\\")\\n\\n    # Use the prompt and check the output\\n    with pytest.raises(InvalidResponse):\\n        TestPrompt.ask(console=console)\\n    \\n    # Check if the error message was rendered with markup\\n    # With the current implementation, this should fail because markup is not explicitly enabled\\n    assert \\\"[red]This is an error message[/red]\\\" in console.get()\\n\\n\\nif __name__ == \\\"__main__\\\":\\n    test_prompt_validation_error_without_markup()\\n\"}",
+  "usage": {
+    "prompt_tokens": 4409,
+    "completion_tokens": 292,
+    "cost_usd": 0.000389,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788154779.8591938
+}

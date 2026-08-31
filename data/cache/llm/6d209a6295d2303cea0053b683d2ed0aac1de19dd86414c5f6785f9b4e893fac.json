@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "```json\n{\n  \"source_files\": [\"sqlglot/expressions/dml.py\", \"sqlglot/parser.py\"],\n  \"test_file\": \"tests/test_parser.py\",\n  \"why\": \"The issue is related to the core parser and the dml.py file which contains the Insert class.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 1040,
+    "completion_tokens": 66,
+    "cost_usd": 9.1e-05,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788155899.293491
+}

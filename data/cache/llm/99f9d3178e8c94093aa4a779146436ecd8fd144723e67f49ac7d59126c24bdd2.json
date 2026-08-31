@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "```python\nimport pytest\nfrom tomlkit import loads\nfrom tomlkit.items import Float\n\ndef test_float_array_conversion() -> None:\n    toml_content = \"\"\"\na = [1.0, 2.0, 3.0]\n\"\"\"\n    arr = loads(toml_content)\n    assert not isinstance(arr['a'][0], Float)\n```",
+  "usage": {
+    "prompt_tokens": 4695,
+    "completion_tokens": 78,
+    "cost_usd": 0.000368,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788159501.1595092
+}

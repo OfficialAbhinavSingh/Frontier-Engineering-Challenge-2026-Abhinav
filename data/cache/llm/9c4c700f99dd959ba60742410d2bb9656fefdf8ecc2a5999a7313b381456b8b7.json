@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "```python\nfrom tests.dialects.test_dialect import Validator\nimport unittest\nimport sys\nfrom sqlglot.helper import logger as helper_logger\nfrom sqlglot import UnsupportedError, expressions as exp\nfrom sqlglot.dialects.mysql import MySQL\n\nclass TestMySQL(unittest.TestCase, Validator):\n    def test_create_table_with_auto_increment(self):\n        sql = \"\"\"CREATE TABLE t1(id INT KEY AUTO_INCREMENT);\n        \"\"\"\n        ast = self.dialect.parse_one(sql)\n        assert isinstance(ast, exp.Create)\n```",
+  "usage": {
+    "prompt_tokens": 3834,
+    "completion_tokens": 121,
+    "cost_usd": 0.000312,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788155916.6648033
+}

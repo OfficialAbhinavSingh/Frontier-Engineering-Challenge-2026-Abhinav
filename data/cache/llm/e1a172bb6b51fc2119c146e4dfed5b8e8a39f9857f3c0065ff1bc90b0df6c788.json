@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "```json\n{\n  \"source_files\": [\"src/jinja2/async_utils.py\"],\n  \"test_file\": \"tests/test_async_filters.py\",\n  \"why\": \"The issue is with the @async_variant decorator in async_utils.py, and the test should be in test_async_filters.py as it involves async filters.\"\n}\n```",
+  "usage": {
+    "prompt_tokens": 1109,
+    "completion_tokens": 70,
+    "cost_usd": 9.7e-05,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788159298.0877223
+}

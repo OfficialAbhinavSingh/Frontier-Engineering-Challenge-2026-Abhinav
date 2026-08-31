@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "```python\nimport sys\nimport pytest\nfrom rich.console import Console\nfrom rich.live import Live\n\ndef test_isatty_in_live_context() -> None:\n    console = Console()\n    assert sys.stdout.isatty()  # Ensure we're running in a terminal\n\n    with Live(\"hello\", console=console, redirect_stdout=True):\n        assert sys.stdout.isatty()  # This should be True, but currently returns False\n```",
+  "usage": {
+    "prompt_tokens": 2570,
+    "completion_tokens": 93,
+    "cost_usd": 0.000211,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788159386.4247146
+}

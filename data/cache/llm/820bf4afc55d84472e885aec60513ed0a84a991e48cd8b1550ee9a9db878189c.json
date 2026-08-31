@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "{\"thought\": \"The test failed because the `Foo` class is not a valid Click type. I need to make `Foo` a subclass of `click.ParamType` to properly integrate with Click's type system. Let me fix that and run the test again.\", \"tool\": \"run_test\", \"args\": {\"source\": \"import pytest\\nfrom click.shell_completion import CompletionItem\\nfrom click.testing import CliRunner\\nfrom click import Command, Argument, Context, ParamType\\n\\nclass Foo(ParamType):\\n    def convert(self, value, param, ctx):\\n        return value\\n\\n    def shell_complete(self, ctx, param, incomplete):\\n        return [\\n            CompletionItem(value=value, help=\\\"adsf\\\") for value in\\n            [\\\"baz:quux\\\", \\\"spam:eggs\\\"]\\n        ]\\n\\ndef main(foo):\\n    pass\\n\\nmain = Command(main)\\nmain.params.append(Argument([\\\"foo\\\"], type=Foo()))\\n\\ndef test_zsh_completion():\\n    runner = CliRunner()\\n    result = runner.invoke(main, [], env={\\n        \\\"_FOO_COMPLETE\\\": \\\"zsh_source\\\",\\n    })\\n    assert result.exit_code == 0\\n    # Check if the output contains the expected completion items\\n    assert \\\"baz:quux   -- adsf\\\" in result.output\\n    assert \\\"spam:eggs -- adsf\\\" in result.output\\n\\nif __name__ == \\\"__main__\\\":\\n    pytest.main([__file__])\"}}",
+  "usage": {
+    "prompt_tokens": 4292,
+    "completion_tokens": 350,
+    "cost_usd": 0.000392,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788154194.9125242
+}

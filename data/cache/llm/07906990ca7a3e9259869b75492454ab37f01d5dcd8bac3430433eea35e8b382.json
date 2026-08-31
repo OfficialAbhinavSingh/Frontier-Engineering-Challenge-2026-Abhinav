@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "```json\n[\n  \"Use the project's test helpers for common operations, such as pickling, to ensure compatibility with the project's API.\",\n  \"Ensure that the test exercises the project's code by checking that the traceback includes frames from the project's codebase.\"\n]\n```",
+  "usage": {
+    "prompt_tokens": 851,
+    "completion_tokens": 60,
+    "cost_usd": 7.6e-05,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788155795.2883546
+}

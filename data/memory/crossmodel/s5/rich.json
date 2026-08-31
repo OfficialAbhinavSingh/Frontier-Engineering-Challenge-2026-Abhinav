@@ -1,0 +1,37 @@
+[
+  {
+    "text": "Import the Console class from rich.console to use it in the test.",
+    "from_case": "rich__3796",
+    "added_at": 1788160411.7325528
+  },
+  {
+    "text": "Use the rich.console.Console class to create a console instance for testing.",
+    "from_case": "rich__3796",
+    "added_at": 1788160411.732554
+  },
+  {
+    "text": "Always verify that the test fails at the buggy commit before attempting to fix it.",
+    "from_case": "rich__3838",
+    "added_at": 1788160415.8617046
+  },
+  {
+    "text": "Ensure that the test is specific enough to catch the exact issue being reported, including checking for the correct output in the right context.",
+    "from_case": "rich__3838",
+    "added_at": 1788160415.8617063
+  },
+  {
+    "text": "Ensure that the test is specific to the reported behavior and does not pass trivially.",
+    "from_case": "rich__3943",
+    "added_at": 1788160427.359873
+  },
+  {
+    "text": "Always import necessary modules (e.g., 'io') at the beginning of the test file.",
+    "from_case": "rich__5090",
+    "added_at": 1788160446.9409425
+  },
+  {
+    "text": "Ensure that the test is structured to run at the buggy commit before attempting to reproduce the issue.",
+    "from_case": "rich__5090",
+    "added_at": 1788160446.9409447
+  }
+]

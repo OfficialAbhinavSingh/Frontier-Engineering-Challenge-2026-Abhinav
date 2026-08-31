@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "```python\nimport pytest\nfrom tomlkit.toml_document import TOMLDocument\nfrom collections.abc import Callable\nfrom typing import Any\nimport torch\n\ndef test_float_array_conversion() -> None:\n    toml_content = \"\"\"\na = [1.0, 2.0, 3.0]\n\"\"\"\n    doc = TOMLDocument.loads(toml_content)\n    arr = doc['a']\n    torch.tensor(arr, dtype=torch.float32)\n```",
+  "usage": {
+    "prompt_tokens": 4726,
+    "completion_tokens": 102,
+    "cost_usd": 0.000375,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788160502.2591286
+}

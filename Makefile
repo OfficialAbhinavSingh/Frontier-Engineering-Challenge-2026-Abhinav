@@ -5,7 +5,7 @@ REPOS := tobymao/sqlglot python-poetry/tomlkit pallets/click \
 MODEL ?= google/gemini-2.5-flash
 SPLIT ?= eval
 
-.PHONY: help repos images dataset validate controls demo baseline solution eval report replay replay-check verify-scores test trajectories clean-results
+.PHONY: help repos images dataset validate controls cross-model demo baseline solution eval report replay replay-check verify-scores test trajectories clean-results
 
 help:
 	@echo "Ratchat — turn a bug report into a verified failing test"
@@ -24,6 +24,7 @@ help:
 	@echo "  make images      build the sandbox images (REPO=click for just one)"
 	@echo "  make controls    run the metric's controls (ceiling + two floors),"
 	@echo "                   no API key, \$$0.00"
+	@echo "  make cross-model re-run b1 and s5 on a second model (needs a key)"
 	@echo "  make demo        run one case end to end, printing the trajectory"
 	@echo "                   cached: no API key, \$$0.00, same result every run"
 	@echo "  make test        run the harness unit tests (needs uv)"
@@ -105,6 +106,16 @@ controls:
 		--variant c_gold --variant c_sabotage --variant c_vacuous \
 		--split $(SPLIT) --out-dir results
 	$(MAKE) report
+
+# The same two variants on a second model from a different vendor, which is the
+# only way to tell the architecture apart from the model. Writes outside
+# results/ so it cannot be mixed into the single-model comparison.
+CROSS_MODEL ?= mistralai/mistral-small-3.2-24b-instruct
+cross-model:
+	$(PY) -m ratchat.eval.run --variant b1 --variant s5 --split $(SPLIT) \
+		--model $(CROSS_MODEL) --out-dir results/crossmodel \
+		--traces-dir traces/crossmodel --memory-dir data/memory/crossmodel $(if $(TAG),--tag $(TAG))
+	$(PY) scripts/cross_model_report.py --split $(SPLIT)
 
 demo:
 	$(PY) -m ratchat.demo --model $(MODEL)

@@ -1,0 +1,22 @@
+[
+  {
+    "text": "Use the correct import paths for Jinja2 modules, such as 'from jinja2 import Environment' instead of 'from jinja2 import NativeEnvironment'.",
+    "from_case": "jinja__1510",
+    "added_at": 1788160355.0810375
+  },
+  {
+    "text": "Ensure that test assertions match the expected output format, especially when dealing with native types and template rendering.",
+    "from_case": "jinja__1510",
+    "added_at": 1788160355.08104
+  },
+  {
+    "text": "Use the `jinja2.filters` module to access filters, not the `filters` module from the test file.",
+    "from_case": "jinja__1612",
+    "added_at": 1788160385.448163
+  },
+  {
+    "text": "Ensure that the test is using the correct object to test pickleability, not a local or misreferenced object.",
+    "from_case": "jinja__1612",
+    "added_at": 1788160385.4481652
+  }
+]

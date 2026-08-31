@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "```python\nimport pytest\nfrom jinja2 import Environment, Template\n\nclass TestHashing:\n    def test_template_hash(self, env):\n        template = env.parse(\"hash test\")\n        assert isinstance(hash(template), int)\n```",
+  "usage": {
+    "prompt_tokens": 2996,
+    "completion_tokens": 48,
+    "cost_usd": 0.000234,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788160359.7901936
+}

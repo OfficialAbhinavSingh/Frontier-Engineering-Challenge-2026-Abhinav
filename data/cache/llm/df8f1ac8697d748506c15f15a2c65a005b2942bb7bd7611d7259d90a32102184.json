@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "```python\nfrom jinja2 import Environment\nimport pytest\n\ndef test_custom_filter_with_async_true():\n    env = Environment(enable_async=True)\n    env.filters.update({'add_two': lambda x, y: [i + y for i in x]})\n\n    template = env.from_string(\"{% for item in (a.b|add_two(5))[:1] %}{{ item }}{% endfor %}\")\n    assert template.render(a=dict(b=[1, 2, 3])) == \"6\"\n```",
+  "usage": {
+    "prompt_tokens": 4538,
+    "completion_tokens": 111,
+    "cost_usd": 0.000363,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788160370.3135443
+}

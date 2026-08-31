@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-3.2-24b-instruct",
+  "text": "{\"thought\": \"The `async_variant` decorator is defined in `async_utils.py`. It decorates a function to handle both synchronous and asynchronous contexts. The issue is that the decorated function's `__name__` and `__qualname__` are not preserved correctly, which is why the function is not pickleable. The test should verify that the decorated function has the correct `__name__` and is pickleable.\", \"tool\": \"read_file\", \"args\": {\"path\": \"src/jinja2/filters.py\"}}",
+  "usage": {
+    "prompt_tokens": 1411,
+    "completion_tokens": 109,
+    "cost_usd": 0.000128,
+    "calls": 1,
+    "cached_calls": 0
+  },
+  "recorded_at": 1788154611.4542103
+}
