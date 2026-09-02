@@ -33,9 +33,15 @@ from ratchat.sandbox.run import RunResult
 # "tomlkit/items.py:44: in __len__" -- a frame line in pytest's short traceback.
 FRAME = re.compile(r"^(?P<path>[^\s:]+\.py):(?P<line>\d+): in (?P<func>\S+)", re.M)
 
+# Kept equal to `artifact.VERDICT_MEANING` by a test, because this is that same
+# fact written a second time and it had already drifted from it: `verify` emits
+# `reproduced_signature` and the solver emits `overspecified`, and neither was
+# listed here. Nothing read this tuple, so nothing caught it.
 VERDICTS = (
     "reproduced_exception",
     "reproduced_assertion",
+    "reproduced_signature",
+    "overspecified",
     "shallow_fail",
     "broken_test",
     "no_fail",

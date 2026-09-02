@@ -197,3 +197,32 @@ def test_a_report_states_what_it_has_not_established():
     assert "Not established" in report
     assert "oracle" in report.lower() or "intended behaviour" in report.lower()
     assert "Reviewer's checklist" in report
+
+
+def test_every_verdict_has_a_recorded_meaning():
+    """`VERDICTS` and `VERDICT_MEANING` are the same fact written twice.
+
+    They drifted: `reproduced_signature` is produced by `verify`, and
+    `overspecified` by the solver, yet neither appeared in the tuple that claims
+    to enumerate the verdicts. Nothing read the tuple, so nothing noticed. This
+    is the check that notices.
+    """
+    from ratchat.agents.verifier import VERDICTS
+    from ratchat.artifact import VERDICT_MEANING
+
+    assert set(VERDICTS) == set(VERDICT_MEANING)
+
+
+def test_reproducing_verdicts_are_verdicts():
+    from ratchat.agents.verifier import REPRODUCING, VERDICTS
+
+    assert REPRODUCING <= set(VERDICTS)
+
+
+def test_every_verdict_that_is_not_a_reproduction_has_repair_advice():
+    """A reproduction needs no repair, so the repair table is exactly the
+    complement -- asserted rather than assumed, so a new verdict cannot be added
+    without either advice or a deliberate decision to omit it."""
+    from ratchat.agents.verifier import REPAIR_INSTRUCTIONS, REPRODUCING, VERDICTS
+
+    assert set(REPAIR_INSTRUCTIONS) == set(VERDICTS) - REPRODUCING
