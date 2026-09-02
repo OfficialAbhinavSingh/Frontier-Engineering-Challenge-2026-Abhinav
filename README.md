@@ -92,6 +92,49 @@ Nothing is written without `--approve`. Ratchat proposes; it never commits.
 
 ---
 
+## Using it from a coding agent (MCP)
+
+A coding agent that fixes a bug cannot prove it fixed anything: the same process
+wrote the test and judged the test. Ratchat's verifier is the missing half, and
+it is exposed over MCP so an agent can be held to it.
+
+```bash
+pip install 'ratchat[mcp]'
+ratchat-mcp                 # stdio server, two tools
+```
+
+The agent writes the test. Ratchat runs it at the repository's pinned commit in
+a container with no network, and reports **why** it failed:
+
+```
+prepare_repo(repo_path)                              # once per repository
+verify_reproduction(repo_path, bug_report, test_source)
+```
+
+No model is called and no API key is read, so the same inputs give the same
+answer. Three real runs against `tomlkit`, from the report *"len() on a float
+value raises TypeError: object of type Float has no len()"*:
+
+| The agent's test | `reproduces` | `verdict` | also reported |
+| --- | --- | --- | --- |
+| `len(doc["x"])` on a parsed float | `True` | `reproduced_signature` | `reported_symbol_matched: Float` |
+| calls a method that does not exist | `False` | `broken_test` | never reached project code |
+| right failure, invented expected value | `True` | `reproduced_assertion` | `ungrounded_literals: ['a value the reporter never wrote anywhere']` |
+
+The second row is the one that matters: it failed, with the same exception type,
+and is not a reproduction. The third is the other half — a test can fail for the
+right reason and still assert a value the reporter never wrote, and saying so is
+the point.
+
+Every successful response carries `not_established`. Fail-to-Pass is not in it:
+scoring that needs a run at the fix commit, and when you are actually reporting
+a bug there is no fix commit yet. The tool reports what execution showed and
+names what it did not.
+
+The `mcp` extra is the only third-party dependency anywhere in the project. The
+core, including the offline replay below, still needs nothing but the standard
+library.
+
 ## How it is measured
 
 The primary metric is **Fail-to-Pass (F2P)**, and it needs no judgement:

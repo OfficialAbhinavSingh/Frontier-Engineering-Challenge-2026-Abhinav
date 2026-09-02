@@ -16,6 +16,15 @@ classifiers = [
 ]
 dependencies = []
 
+# The core stays dependency-free: the offline replay that reproduces every
+# reported number must keep needing nothing but the standard library. The MCP
+# server is the one surface that needs a third-party package, so it is an extra.
+[project.optional-dependencies]
+mcp = ["mcp>=2"]
+
+[project.scripts]
+ratchat-mcp = "ratchat.mcp.server:main"
+
 [build-system]
 requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
