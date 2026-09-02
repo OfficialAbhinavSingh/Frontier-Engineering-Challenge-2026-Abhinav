@@ -22,8 +22,8 @@ and it answers the question that matters — are the reported numbers real. Sect
 No API key is required for the replay path.
 
 ```bash
-git clone https://github.com/OfficialAbhinavSingh/Frontier-Engineering-Challenge-2026-Abhinav.git
-cd Frontier-Engineering-Challenge-2026-Abhinav
+git clone https://github.com/OfficialAbhinavSingh/ratchat.git
+cd ratchat
 python3 -c "import sys; print(sys.version)"   # 3.10+
 docker run --rm hello-world                   # docker works
 ```

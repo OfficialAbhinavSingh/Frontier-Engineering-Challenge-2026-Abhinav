@@ -202,7 +202,7 @@ class LLMClient:
                 headers={
                     "Authorization": f"Bearer {api_key}",
                     "Content-Type": "application/json",
-                    "HTTP-Referer": "https://github.com/OfficialAbhinavSingh/Frontier-Engineering-Challenge-2026-Abhinav",
+                    "HTTP-Referer": "https://github.com/OfficialAbhinavSingh/ratchat",
                     "X-Title": "Ratchat",
                 },
                 method="POST",

@@ -2,7 +2,7 @@
 
 **Turns a bug report into a failing test that is proven to reproduce the bug.**
 
-[![checks](https://github.com/OfficialAbhinavSingh/Frontier-Engineering-Challenge-2026-Abhinav/actions/workflows/checks.yml/badge.svg)](https://github.com/OfficialAbhinavSingh/Frontier-Engineering-Challenge-2026-Abhinav/actions/workflows/checks.yml)
+[![checks](https://github.com/OfficialAbhinavSingh/ratchat/actions/workflows/checks.yml/badge.svg)](https://github.com/OfficialAbhinavSingh/ratchat/actions/workflows/checks.yml)
 
 That badge is the metric's controls, not a test suite. On every push a runner
 with no secrets rebuilds the sandbox from the pinned base image and re-checks

@@ -2,11 +2,22 @@
 name = "ratchat"
 version = "1.0.0"
 description = "Turn a natural-language bug report into a verified failing test."
+readme = "README.md"
 requires-python = ">=3.10"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [{ name = "Abhinav Singh" }]
+keywords = ["testing", "reproduction", "llm-agents", "regression-test"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Topic :: Software Development :: Testing",
+]
 dependencies = []
 
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
